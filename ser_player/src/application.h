@@ -20,9 +20,10 @@
 #define APPLICATION_H
 
 #include <QApplication>
-#include <QTranslator>
+
 
 class c_ser_player;
+class QTranslator;
 
 class c_application : public QApplication
 {
@@ -36,8 +37,8 @@ protected:
 
 private:
     c_ser_player *mp_win;
-    QTranslator m_qt_translator;
-    QTranslator m_ser_player_translator;
+    QTranslator *mp_qt_translator;
+    QTranslator *mp_ser_player_translator;
 };
 
 #endif // APPLICATION_H

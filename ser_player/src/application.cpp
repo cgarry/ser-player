@@ -36,27 +36,45 @@ c_application::c_application(int &argc, char **argv)
     setApplicationName(tr("SER Player"));
     c_persistent_data::load();  // Load persistent data
 
-    // Load translation files stored in the QT Resource system
+    // If user has specified a specific locale then use that one
     QString locale = c_persistent_data::m_selected_language;
 
+    // Otherwise use the system locale
     if (locale == QString("auto")) {
         locale = QLocale::system().name();
     }
 
+    //
+    // Load Qt system language translations
+    //
 //    bool ret = m_qt_translator.load("qt_"+locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-    bool ret = m_qt_translator.load("qt_"+locale, ":/res/translations/");
-    ret = installTranslator(&m_qt_translator);
+    mp_qt_translator = new QTranslator;
+    bool ret = mp_qt_translator->load("qt_"+locale, ":/res/translations/");
+    if (ret) {
+        installTranslator(mp_qt_translator);
+    }
+
+
+    //
+    // Load SER Player specific language translations
+    //
 
     // Try to load translations from same directory as executable initially
-    ret = m_ser_player_translator.load("ser_player_" + locale);
+    mp_ser_player_translator = new QTranslator;
+    ret = mp_ser_player_translator->load("ser_player_" + locale);
 
     if (!ret) {
         // Else load from Qt resource system
-        ret = m_ser_player_translator.load("ser_player_" + locale, ":/res/translations/");
+        ret = mp_ser_player_translator->load("ser_player_" + locale, ":/res/translations/");
     }
 
-    ret = installTranslator(&m_ser_player_translator);
+    if (ret) {
+        installTranslator(mp_ser_player_translator);
+    }
 
+    //
+    // Create instance of our main window class
+    //
     mp_win = new c_ser_player;
     mp_win->show();
 }
@@ -65,10 +83,16 @@ c_application::c_application(int &argc, char **argv)
 c_application::~c_application()
 {
     delete mp_win;
+    delete mp_qt_translator;
+    delete mp_ser_player_translator;
     c_persistent_data::save();  // Save persistent data before exiting
 }
 
 
+//
+// Event handler to support starting the SER player by double-clicking on
+// SER files in OS X
+//
 bool c_application::event(QEvent *event)
 {
     switch (event->type()) {
