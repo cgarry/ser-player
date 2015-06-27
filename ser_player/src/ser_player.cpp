@@ -356,30 +356,36 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
     connect(mp_repeat_PushButton, SIGNAL(toggled(bool)), this, SLOT(repeat_button_toggled_slot(bool)));
 
+    m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;
-    mp_framecount_Label->setText("-/----");
+    mp_framecount_Label->setText(m_framecount_label_String.arg("-").arg("----"));
     mp_framecount_Label->setToolTip(tr("Frame number/Total Frames", "Tool tip"));
 
     mp_fps_Label = new QLabel;
-    mp_fps_Label->setText(tr("-- FPS"));
+    m_fps_label_String = tr("%1 FPS", "Framerate label");
+    mp_fps_Label->setText(m_fps_label_String.arg("--"));
     mp_fps_Label->setToolTip(tr("Display Frame rate", "Tool tip"));
 
     mp_colour_id_Label = new QLabel;
     mp_colour_id_Label->setText("----");
     mp_colour_id_Label->setToolTip(tr("Colour ID", "Tool tip"));
 
+    m_zoom_label_String = tr("%1%", "Zoom level label");
     mp_zoom_Label =  new QLabel;
-    mp_zoom_Label->setText(tr("100%", "Zoom level label initial value"));
+    mp_zoom_Label->setText(m_zoom_label_String.arg(100));
     mp_zoom_Label->setToolTip(tr("Display Zoom Level", "Tool tip"));
 
+    m_frame_size_label_String = tr("%1x%2", "Frame size label");
     mp_frame_size_Label = new QLabel;
-    mp_frame_size_Label->setText("---x---");
+    mp_frame_size_Label->setText(m_frame_size_label_String.arg("---").arg("---"));
     mp_frame_size_Label->setToolTip(tr("Frame size", "Tool tip"));
 
+    m_pixel_depth_label_String = tr("%1-Bit", "Pixel depth label");
     mp_pixel_depth_Label = new QLabel;
-    mp_pixel_depth_Label->setText(tr("--Bit"));
+    mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg("-"));
     mp_pixel_depth_Label->setToolTip(tr("Pixel bit depth", "Tool tip"));
 
+    m_timestamp_label_String = tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label");
     mp_timestamp_Label = new QLabel;
     mp_timestamp_Label->setText(tr("No Timestamp", "Timestamp label for no timestamp"));
     mp_timestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
@@ -606,10 +612,10 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         m_current_state = STATE_STOPPED;
         m_framecount = 1;
-        mp_frame_size_Label->setText(tr("%1x%2", "Frame size label")
+        mp_frame_size_Label->setText(m_frame_size_label_String
                                   .arg(mp_ser_file->get_width())
                                   .arg(mp_ser_file->get_height()));
-        mp_pixel_depth_Label->setText(tr("%1-Bit", "Pixel depth label").arg(mp_ser_file->get_pixel_depth()));
+        mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg(mp_ser_file->get_pixel_depth()));
 
         switch (m_colour_id) {
         case COLOURID_MONO:
@@ -664,7 +670,7 @@ void c_ser_player::open_ser_file(const QString &filename)
                 &ts_second,
                 &ts_microsec);
 
-            mp_timestamp_Label->setText(tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label")
+            mp_timestamp_Label->setText(m_timestamp_label_String
                                      .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                                      .arg(ts_month, 2, 10, QLatin1Char( '0' ))
                                      .arg(ts_day, 2, 10, QLatin1Char( '0' ))
@@ -734,7 +740,7 @@ void c_ser_player::frame_slider_changed_slot()
         mp_count_Slider->setValue(1);
     } else {
         m_framecount = mp_count_Slider->value();
-        mp_framecount_Label->setText(tr("%1/%2", "Frame number/Frame count label").arg(m_framecount).arg(m_total_frames));
+        mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
         int32_t frame_size = m_frame_width * m_frame_height * m_bytes_per_sample * 3;
@@ -754,7 +760,7 @@ void c_ser_player::frame_slider_changed_slot()
                 &ts_second,
                 &ts_microsec);
 
-            mp_timestamp_Label->setText(tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label")
+            mp_timestamp_Label->setText(m_timestamp_label_String
                                      .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                                      .arg(ts_month, 2, 10, QLatin1Char( '0' ))
                                      .arg(ts_day, 2, 10, QLatin1Char( '0' ))
@@ -1668,7 +1674,7 @@ void c_ser_player::resizeEvent(QResizeEvent *e)
 void c_ser_player::resize_timer_timeout_slot()
 {
     int zoom_level = mp_frame_image_Widget->get_zoom_level();
-    mp_zoom_Label->setText(tr("%1%", "Zoom level label").arg(zoom_level));
+    mp_zoom_Label->setText(m_zoom_label_String.arg(zoom_level));
 }
 
 
@@ -1698,7 +1704,7 @@ void c_ser_player::calculate_display_framerate()
         fps = (double)m_display_framerate;
     }
 
-    mp_fps_Label->setText(tr("%1 FPS", "Framerate label").arg(fps));
+    mp_fps_Label->setText(m_fps_label_String.arg(fps));
     mp_frame_Timer->setInterval(m_display_frame_time);
 }
 

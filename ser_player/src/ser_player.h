@@ -51,13 +51,19 @@ private:
     QImage *mp_frame_Image;
     QTimer *mp_frame_Timer;
     QSlider *mp_count_Slider;
+    QString m_zoom_label_String;
     QLabel *mp_zoom_Label;
+    QString m_frame_size_label_String;
     QLabel *mp_frame_size_Label;
+    QString m_pixel_depth_label_String;
     QLabel *mp_pixel_depth_Label;
     QLabel *mp_colour_id_Label;
+    QString m_fps_label_String;
     QLabel *mp_fps_Label;
+    QString m_framecount_label_String;
     QLabel *mp_framecount_Label;
     QMutex *mp_ser_file_Mutex;
+    QString m_timestamp_label_String;
     QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
 
