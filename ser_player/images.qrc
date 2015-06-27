@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/res">
+        <file>resources/ser_player_logo.png</file>
+        <file>resources/pause_button.png</file>
+        <file>resources/play_button.png</file>
+        <file>resources/stop_button.png</file>
+        <file>resources/ser_player_logo_150x150.png</file>
+        <file>resources/repeat_button.png</file>
+        <file>resources/back_button.png</file>
+        <file>resources/forward_button.png</file>
+        <file>translations/ser_player_da.qm</file>
+        <file>translations/qt_da.qm</file>
+    </qresource>
+</RCC>

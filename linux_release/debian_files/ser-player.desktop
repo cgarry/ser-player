@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=SER Player
+Name[da]=SER Afspiller
+Comment=A simple video player for SER files
+Comment[da]=En simpelt afspiller for SER Video
+Exec=ser-player %f
+Icon=/usr/share/app-install/icons/ser-player.png
+MimeType=video/ser;
+Terminal=false
+Categories=Video;AudioVideo
