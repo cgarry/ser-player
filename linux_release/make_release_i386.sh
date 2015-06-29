@@ -12,7 +12,8 @@ source $this_dir/ser_player_version.sh
 release_dir=$this_dir/ser-player_${ser_player_version}-${debian_version}_${arch}
 
 # Get Qt path from script generated during build
-source $this_dir/get_qtdir.sh 
+source $this_dir/get_qmakedir.sh
+QTDIR="$QMAKEDIR/../"
 
 # Create emtpy directory structure
 sudo rm -rf $release_dir

@@ -70,5 +70,6 @@ RESOURCES += \
 macx:release:QMAKE_POST_LINK = ../ser_player/os_x/post_compile.sh
 win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 #win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force \"$$DESTDIR/SER_Player.exe\"
-#linux:release:rm ../linux_release/get_qtdir.sh ; echo "QTDIR=$QTDIR"
-linux:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QTDIR=${QTDIR} > ../linux_release/get_qtdir.sh
+
+linux:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QMAKEDIR=$(shell dirname ${QMAKE}) > ../linux_release/get_qmakedir.sh
+
