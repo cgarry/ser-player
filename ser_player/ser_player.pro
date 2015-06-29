@@ -8,6 +8,7 @@ QT += core gui
 QT += network
 CONFIG += c++11
 CONFIG += warn_on
+#QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Internationalisation
 TRANSLATIONS = translations/ser_player_da.ts
@@ -35,9 +36,9 @@ SOURCES += src/main.cpp\
     src/application.cpp \
     src/new_version_checker.cpp
 
-    macx:SOURCES += src/pipp_utf8_osx.cpp
-    linux:SOURCES += src/pipp_utf8_linux.cpp
-    win32:SOURCES += src/pipp_utf8.cpp
+macx:SOURCES += src/pipp_utf8_osx.cpp
+unix:!macx:SOURCES += src/pipp_utf8_linux.cpp
+win32:SOURCES += src/pipp_utf8.cpp
 
 HEADERS  += src/ser_player.h \
     src/pipp_ser.h \
@@ -54,8 +55,7 @@ DESTDIR = ../bin
 MOC_DIR = ../build/moc
 RCC_DIR = ../build/rcc
 UI_DIR = ../build/ui
-unix:OBJECTS_DIR = ../
-linix:OBJECTS_DIR = ../build/o/unix
+unix:!macx:OBJECTS_DIR = ../build/o/unix
 win32:OBJECTS_DIR = ../build/o/win32
 macx:OBJECTS_DIR = ../build/o/mac
 
@@ -71,5 +71,5 @@ macx:release:QMAKE_POST_LINK = ../ser_player/os_x/post_compile.sh
 win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 #win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force \"$$DESTDIR/SER_Player.exe\"
 
-linux:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QMAKEDIR=$(shell dirname ${QMAKE}) > ../linux_release/get_qmakedir.sh
+unix:!macx:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QMAKEDIR=$(shell dirname ${QMAKE}) > ../linux_release/get_qmakedir.sh
 
