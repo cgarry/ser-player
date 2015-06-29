@@ -35,7 +35,7 @@ QString c_persistent_data::m_selected_language = "auto";
 #if QT_VERSION >= 0x050000
 QString c_persistent_data::m_ser_directory = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0];
 #else
-QString c_persistent_data::m_ser_directory = QDesktopServices::StandardLocation(QDesktopServices::DocumentsLocation);
+QString c_persistent_data::m_ser_directory = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
 #endif
 
 QString c_persistent_data::m_new_version = "v1.0.0";
