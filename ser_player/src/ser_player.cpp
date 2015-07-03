@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.2.0"
+#define VERSION_STRING "v1.2.1"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -685,6 +685,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_ser_file_Mutex->unlock();
         frame_slider_changed_slot();
         resize_window_100_percent_slot();
+        play_button_pressed_slot();  // Start playing SER file
     }
 }
 
