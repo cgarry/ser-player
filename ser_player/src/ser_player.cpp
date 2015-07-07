@@ -41,12 +41,15 @@
 #include <cmath>
 
 #include "ser_player.h"
-#include "new_version_checker.h"
 #include "persistent_data.h"
 #include "pipp_ser.h"
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
+
+#ifndef DISABLE_NEW_VERSION_CHECK
+#include "new_version_checker.h"
+#endif
 
 
 const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
@@ -167,11 +170,13 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
+#ifndef DISABLE_NEW_VERSION_CHECK
     QAction *check_for_updates_Act = new QAction(tr("Check For Updates On Startup", "Help menu"), this);
     check_for_updates_Act->setCheckable(true);
     check_for_updates_Act->setChecked(c_persistent_data::m_check_for_updates);
     help_menu->addAction(check_for_updates_Act);
     connect(check_for_updates_Act, SIGNAL(triggered(bool)), this, SLOT(check_for_updates_slot(bool)));
+#endif
 
     QMenu *language_menu = help_menu->addMenu(tr("Language", "Help menu"));
     language_menu->setToolTip(tr("Restart for language change to take effect"));
@@ -493,6 +498,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     QTimer::singleShot(50, this, SLOT(handle_arguments()));
 
     // Update check
+#ifndef DISABLE_NEW_VERSION_CHECK
     c_new_version_checker *new_version_checker;
     if (c_persistent_data::m_check_for_updates) {
         new_version_checker = new c_new_version_checker(this, VERSION_STRING);
@@ -500,6 +506,7 @@ c_ser_player::c_ser_player(QWidget *parent)
         connect(new_version_checker, SIGNAL(new_version_available_signal(QString)),
                 this, SLOT(new_version_available_slot(QString)));
     }
+#endif
 }
 
 
@@ -895,12 +902,14 @@ void c_ser_player::repeat_button_toggled_slot(bool checked) {
 
 void c_ser_player::resize_window_slot()
 {
+    qDebug() << "resize_window_slot(): " << size() << " + " << mp_frame_image_Widget->get_current_error_size() << " = " << size() + mp_frame_image_Widget->get_current_error_size();
     resize(size() + mp_frame_image_Widget->get_current_error_size());
 }
 
 
 void c_ser_player::resize_window_100_percent_slot()
 {
+    qDebug() << "resize_window_100_percent_slot(): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(100) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(100);
     showNormal();  // Ensure window is not maximised
     resize(size() + mp_frame_image_Widget->get_zoom_error_size(100));
 }
@@ -908,6 +917,7 @@ void c_ser_player::resize_window_100_percent_slot()
 
 void c_ser_player::resize_window_with_zoom(int zoom)
 {
+    qDebug() << "resize_window_with_zoom(" << zoom << "): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(zoom) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(zoom);
     showNormal();  // Ensure window is not maximised
     resize(size() + mp_frame_image_Widget->get_zoom_error_size(zoom));
 }
@@ -1606,8 +1616,12 @@ void c_ser_player::create_no_file_open_image()
     painter.setFont(font);
     painter.drawText(QPoint((pic_width - no_ser_text_width) / 2, (pic_height + 0) / 2), no_file_open_string);
 
-    bool is_newer = c_new_version_checker::compare_version_strings(VERSION_STRING, c_persistent_data::m_new_version);
-    if (c_persistent_data::m_check_for_updates && is_newer) {
+    bool is_newer = false;
+#ifndef DISABLE_NEW_VERSION_CHECK
+    is_newer = c_new_version_checker::compare_version_strings(VERSION_STRING, c_persistent_data::m_new_version);
+#endif
+
+    if (is_newer && c_persistent_data::m_check_for_updates) {
         //: New version notification message
         QString new_version_text = tr("New version of SER Player available: %1").arg(c_persistent_data::m_new_version);
         QString download_from_text = QString("https://sites.google.com/site/astropipp/ser-player");

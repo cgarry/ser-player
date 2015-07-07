@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 QT += core gui
-QT += network
+!DISABLE_NEW_VERSION_CHECK: QT += network
+
 CONFIG += c++11
 CONFIG += warn_on
 #QMAKE_CXXFLAGS += -std=gnu++0x
@@ -33,8 +34,9 @@ SOURCES += src/main.cpp\
     src/persistent_data.cpp \
     src/pipp_timestamp.cpp \
     src/image_widget.cpp \
-    src/application.cpp \
-    src/new_version_checker.cpp
+    src/application.cpp
+
+!DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
 macx:SOURCES += src/pipp_utf8_osx.cpp
 unix:!macx:SOURCES += src/pipp_utf8_linux.cpp
@@ -68,8 +70,8 @@ RESOURCES += \
     images.qrc
 
 macx:release:QMAKE_POST_LINK = ../ser_player/os_x/post_compile.sh
-win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
-#win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force \"$$DESTDIR/SER_Player.exe\"
+#win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
+win32:release:QMAKE_POST_LINK = windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 
 unix:!macx:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QMAKEDIR=$(shell dirname ${QMAKE}) > ../linux_release/get_qmakedir.sh
 

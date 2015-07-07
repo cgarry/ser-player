@@ -46,6 +46,7 @@ QSize c_image_Widget::get_current_error_size() const
 
 QSize c_image_Widget::get_zoom_error_size(int zoom) const
 {
+    qDebug() << "get_zoom_error_size(" << zoom << "): m_image_Pixmap.size()=" << m_image_Pixmap.size() << ", m_current_widget_size:" << m_current_widget_size;
     return ((m_image_Pixmap.size() * zoom) / 100) - m_current_widget_size;
 }
 
