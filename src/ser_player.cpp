@@ -902,14 +902,14 @@ void c_ser_player::repeat_button_toggled_slot(bool checked) {
 
 void c_ser_player::resize_window_slot()
 {
-    qDebug() << "resize_window_slot(): " << size() << " + " << mp_frame_image_Widget->get_current_error_size() << " = " << size() + mp_frame_image_Widget->get_current_error_size();
+//    qDebug() << "resize_window_slot(): " << size() << " + " << mp_frame_image_Widget->get_current_error_size() << " = " << size() + mp_frame_image_Widget->get_current_error_size();
     resize(size() + mp_frame_image_Widget->get_current_error_size());
 }
 
 
 void c_ser_player::resize_window_100_percent_slot()
 {
-    qDebug() << "resize_window_100_percent_slot(): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(100) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(100);
+//    qDebug() << "resize_window_100_percent_slot(): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(100) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(100);
     showNormal();  // Ensure window is not maximised
     resize(size() + mp_frame_image_Widget->get_zoom_error_size(100));
 }
@@ -917,7 +917,7 @@ void c_ser_player::resize_window_100_percent_slot()
 
 void c_ser_player::resize_window_with_zoom(int zoom)
 {
-    qDebug() << "resize_window_with_zoom(" << zoom << "): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(zoom) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(zoom);
+//    qDebug() << "resize_window_with_zoom(" << zoom << "): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(zoom) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(zoom);
     showNormal();  // Ensure window is not maximised
     resize(size() + mp_frame_image_Widget->get_zoom_error_size(zoom));
 }
