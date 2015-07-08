@@ -1,4 +1,4 @@
 bin/ser-player usr/bin
-linux_release/debian_files/ser-player.png usr/share/app-install/icons/
-linux_release/debian_files/ser-player.desktop usr/share/applications/
-linux_release/debian_files/ser-player.xml usr/share/mime/packages/
+platform-specific/linux-debian/ser-player.png usr/share/app-install/icons/
+platform-specific/linux-debian/ser-player.desktop usr/share/applications/
+platform-specific/linux-debian/ser-player.xml usr/share/mime/packages/
