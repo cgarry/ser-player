@@ -9,7 +9,7 @@ QT += core gui
 
 CONFIG += c++11
 CONFIG += warn_on
-QMAKE_CXXFLAGS += -std=gnu++0x
+unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Internationalisation
 TRANSLATIONS = translations/ser_player_da.ts
