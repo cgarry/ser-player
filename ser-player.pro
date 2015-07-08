@@ -53,18 +53,18 @@ HEADERS  += src/ser_player.h \
     src/new_version_checker.h
 
 # Build directories
-DESTDIR = bin
-MOC_DIR = build/moc
-RCC_DIR = build/rcc
-UI_DIR = build/ui
-unix:!macx:OBJECTS_DIR = build/o/unix
-win32:OBJECTS_DIR = build/o/win32
-macx:OBJECTS_DIR = build/o/mac
+DESTDIR = $$PWD/bin
+MOC_DIR = $$PWD/build/moc
+RCC_DIR = $$PWD/build/rcc
+UI_DIR = $$PWD/build/ui
+unix:!macx:OBJECTS_DIR = $$PWD/build/o/unix
+win32:OBJECTS_DIR = $$PWD/build/o/win32
+macx:OBJECTS_DIR = $$PWD/build/o/mac
 
 
 # Icons
-macx:ICON = os_x/ser_player_icon.icns
-win32:RC_ICONS = windows/ser_player_icon.ico
+macx:ICON = platform-specific/os-x/ser_player_icon.icns
+win32:RC_ICONS = platform-specific/windows/ser_player_icon.ico
 
 RESOURCES += \
     images.qrc
