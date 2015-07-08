@@ -60,7 +60,7 @@ UI_DIR = $$PWD/build/ui
 unix:!macx:OBJECTS_DIR = $$PWD/build/o/unix
 win32:OBJECTS_DIR = $$PWD/build/o/win32
 macx:OBJECTS_DIR = $$PWD/build/o/mac
-
+macx:PRO_FILE_DIR = $$PWD
 
 # Icons
 macx:ICON = platform-specific/os-x/ser_player_icon.icns
@@ -70,7 +70,7 @@ RESOURCES += \
     images.qrc
 
 # Modify generated OS X package to fix shortcomings
-macx:release:QMAKE_POST_LINK = ../platform-specific/os-x/post_compile.sh
+macx:release:QMAKE_POST_LINK = $$PWD/platform-specific/os-x/post_compile.sh
 
 # Call windeployqt.exe to budle all DLLs and so on required to run
 win32:release:QMAKE_POST_LINK = windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
