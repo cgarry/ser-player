@@ -69,9 +69,10 @@ win32:RC_ICONS = windows/ser_player_icon.ico
 RESOURCES += \
     images.qrc
 
+# Modify generated OS X package to fix shortcomings
 macx:release:QMAKE_POST_LINK = ../platform-specific/os-x/post_compile.sh
-#win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
+
+# Call windeployqt.exe to budle all DLLs and so on required to run
 win32:release:QMAKE_POST_LINK = windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 
-unix:!macx:release:QMAKE_POST_LINK = rm -f ../linux_release/get_qtdir.sh && echo QMAKEDIR=$(shell dirname ${QMAKE}) > ../linux_release/get_qmakedir.sh
 
