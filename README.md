@@ -12,11 +12,11 @@ Some simple goals that hopefully get accross my intentions for this project.
 ##Building SER Player for Windows
 This section has some basic notes on building the application for Windows.  These notes assume a Windows PC is being used to build the application.
 * Install Qt v5.4.1 and Qt Creator
-* Open Qt project file **ser-player\ser_player\ser_player.pro** with Qt Creator
+* Open Qt project file **ser-player\ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
 * Do **Build Menu->Build All** to build the application.
-* The directory **ser_player\bin\** will contain the application executable and many DLL files required for it to run.
+* The directory **ser-player\bin\** will contain the application executable and many DLL files required for it to run.
 
 With the application built we next need to build an installer.  This is done using the [NSIS](http://nsis.sourceforge.net/Download) Windows installer creation program.
 * Download and install NSIS 2.46.
@@ -31,7 +31,7 @@ This installer file can now be distributed to other Windows users.
 ##Building SER Player for OS X
 This section has some basic notes on building the application for OS X.  These notes assume a Mac running OS X is being used to build the application.
 * Install Qt v5.4.1 and Qt Creator
-* Open Qt project file **ser-player\ser_player\ser_player.pro** with Qt Creator
+* Open Qt project file **ser-player\ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
 * Do **Build Menu->Build All** to build the application.
@@ -44,18 +44,10 @@ This disk image file contains the SER-Player application and can be distributed 
 ###Building using the Terminal
 This section has some basic notes on building the application for Debian Linux using the terminal.  These notes assume a PC running a varient of Debian Linux is being used to build the application.  The qtbase5-dev package must be installed.
 
-* Terminal $ **cd ser-player/ser_player**
-* Terminal $ **qmake CONFIG+=release** (Or **qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release**
+* Terminal $ **cd ser-player**
+* Terminal $ **qmake CONFIG+=release** (Or **qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release**)
 * Terminal $ **make**
 * The directory **ser_player/bin/** will contain the application executable only.
-
-The next step to create a Debian binary package that can be shared with other users is a little 'hacky' but it works for now!
-
-* Terminal $ **cd ser-player/linux_release**
-* Terminal $ **./make_release_amd64.sh**  (Or **./make_release_i386.sh** for a 32-bit binary package.)
-* A Debian binary package of the form **ser-player/linux_release/ser-player_X.X.X-1_amd64.deb** will be generated
-
-This Debian binary package can now be distributed to other Debian linux users.
 
 
 ###Building Using Qt Creator
@@ -66,10 +58,3 @@ This section has some basic notes on building the application for Debian Linux u
 * Do **Build Menu->Run qmake** to run qmake.
 * Do **Build Menu->Build All** to build the application.
 * The directory **ser_player/bin/** will contain the application executable only.
-
-The next step to create a Debian binary package that can be shared with other users is a little 'hacky' but it works for now!
-* Open a terminal window and **cd** to **ser-player/linux_release/**
-* Run the **make_release_amd64.sh** script to create a 64-bit binary package ot run the **make_release_i386.sh** script to build the 32-bit binary package.
-* A Debian binary package of the form **ser-player/linux_release/ser-player_X.X.X-1_amd64.deb** will be generated
-
-This Debian binary package can now be distributed to other Debian linux users.
