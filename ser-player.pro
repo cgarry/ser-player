@@ -53,13 +53,13 @@ HEADERS  += src/ser_player.h \
     src/new_version_checker.h
 
 # Build directories
-DESTDIR = ../bin
-MOC_DIR = ../build/moc
-RCC_DIR = ../build/rcc
-UI_DIR = ../build/ui
-unix:!macx:OBJECTS_DIR = ../build/o/unix
-win32:OBJECTS_DIR = ../build/o/win32
-macx:OBJECTS_DIR = ../build/o/mac
+DESTDIR = bin
+MOC_DIR = build/moc
+RCC_DIR = build/rcc
+UI_DIR = build/ui
+unix:!macx:OBJECTS_DIR = build/o/unix
+win32:OBJECTS_DIR = build/o/win32
+macx:OBJECTS_DIR = build/o/mac
 
 
 # Icons
@@ -69,7 +69,7 @@ win32:RC_ICONS = windows/ser_player_icon.ico
 RESOURCES += \
     images.qrc
 
-macx:release:QMAKE_POST_LINK = ../ser_player/os_x/post_compile.sh
+macx:release:QMAKE_POST_LINK = ../platform-specific/os-x/post_compile.sh
 #win32:release:QMAKE_POST_LINK = %QTDIR%\\bin\\windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 win32:release:QMAKE_POST_LINK = windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
 
