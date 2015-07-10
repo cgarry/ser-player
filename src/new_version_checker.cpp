@@ -16,12 +16,14 @@
 // ---------------------------------------------------------------------
 
 
+#include <QDateTime>
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QMessageBox>
 #include <QDebug>
 #include "new_version_checker.h"
+#include "persistent_data.h"
 
 c_new_version_checker::c_new_version_checker(QObject *parent, QString version) :
     QObject(parent),
@@ -34,7 +36,11 @@ c_new_version_checker::c_new_version_checker(QObject *parent, QString version) :
 
 void c_new_version_checker::check()
 {
-    net_access_manager->get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/cgarry/ser-player/master/latest_version.txt")));
+    const uint secs_between_update_checks = 12 * 60 * 60;  // 12 hours minimum between update checks
+    uint current_time = QDateTime::currentDateTime().toTime_t();
+    if (current_time > c_persistent_data::m_last_ver_check_time + secs_between_update_checks) {
+        net_access_manager->get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/cgarry/ser-player/master/latest_version.txt")));
+    }
 }
 
 
@@ -49,6 +55,9 @@ void c_new_version_checker::finished(QNetworkReply *reply)
     }
     else if (http_status == 200)
     {
+        // Grab time of update check
+        c_persistent_data::m_last_ver_check_time = QDateTime::currentDateTime().toTime_t();
+
         // Get the received file in a string
         QString rxd_file(reply->readAll());
         rxd_file.remove("\r");

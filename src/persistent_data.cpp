@@ -30,6 +30,9 @@
 //
 // Default values, used only on first run
 //
+
+uint c_persistent_data::m_last_ver_check_time = 0;
+
 QString c_persistent_data::m_selected_language = "auto";
 
 #if QT_VERSION >= 0x050000
@@ -51,6 +54,10 @@ bool c_persistent_data::m_repeat = false;
 void c_persistent_data::load()
 {
     QSettings settings;
+    if (settings.value("last_ver_check_time") != QVariant::Invalid) {
+        m_last_ver_check_time = settings.value("last_ver_check_time").toUInt();
+    }
+
     if (settings.value("selected_language") != QVariant::Invalid) {
         m_selected_language = settings.value("selected_language").toString();
     }
@@ -83,6 +90,7 @@ void c_persistent_data::load()
 void c_persistent_data::save()
 {
     QSettings settings;
+    settings.setValue("last_ver_check_time", m_last_ver_check_time);
     settings.setValue("selected_language", m_selected_language);
     settings.setValue("ser_directory", m_ser_directory);
     settings.setValue("new_version", m_new_version);

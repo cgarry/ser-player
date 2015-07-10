@@ -28,6 +28,7 @@ public:
     //
     // Persistent data
     //
+    static uint m_last_ver_check_time;
     static QString m_selected_language;
     static QString m_ser_directory;
     static QString m_new_version;
