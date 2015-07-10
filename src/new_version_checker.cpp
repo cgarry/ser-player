@@ -34,7 +34,7 @@ c_new_version_checker::c_new_version_checker(QObject *parent, QString version) :
 
 void c_new_version_checker::check()
 {
-    net_access_manager->get(QNetworkRequest(QUrl("https://dl.dropboxusercontent.com/u/1139742/ser_player/ser_player.txt")));
+    net_access_manager->get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/cgarry/ser-player/master/latest_version.txt")));
 }
 
 
