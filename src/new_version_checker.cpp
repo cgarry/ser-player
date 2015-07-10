@@ -43,7 +43,7 @@ void c_new_version_checker::finished(QNetworkReply *reply)
     int http_status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (http_status == 301 || http_status == 302  || http_status == 302)
     {
-        // Handle Google's redirect
+        // Handle redirect
         net_access_manager->get(QNetworkRequest(QUrl(reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString())));
         return;
     }
