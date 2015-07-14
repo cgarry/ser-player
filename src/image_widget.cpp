@@ -30,30 +30,20 @@ c_image_Widget::c_image_Widget(QWidget *parent) :
     p.setHeightForWidth(true);
     p.setWidthForHeight(true);
     setSizePolicy(p);
+    m_image_size  = QSize(1, 1);
     m_current_Size = QSize(1, 1);
-    m_current_error_Size = QSize(0, 0);
-    m_current_widget_size = QSize(0, 0);
-
-//    connect(this, SIGNAL())
-}
-
-
-QSize c_image_Widget::get_current_error_size() const
-{
-    return m_current_error_Size;
-}
-
-
-QSize c_image_Widget::get_zoom_error_size(int zoom) const
-{
-//    qDebug() << "get_zoom_error_size(" << zoom << "): m_image_Pixmap.size()=" << m_image_Pixmap.size() << ", m_current_widget_size:" << m_current_widget_size;
-    return ((m_image_Pixmap.size() * zoom) / 100) - m_current_widget_size;
 }
 
 
 int c_image_Widget::get_zoom_level()
 {
     return m_zoom_level;
+}
+
+
+QSize c_image_Widget::get_image_size()
+{
+    return m_image_size;
 }
 
 
@@ -76,7 +66,6 @@ void c_image_Widget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     QSize pixSize = m_image_Pixmap.size();
-    m_current_widget_size = event->rect().size();
     pixSize.scale(event->rect().size(), Qt::KeepAspectRatio);
 
     m_zoom_level = (pixSize.width() * 100) / m_image_Pixmap.size().width();
@@ -89,8 +78,6 @@ void c_image_Widget::paintEvent(QPaintEvent *event)
     int x = (event->rect().size().width() - scaled_Pixmap.size().width()) / 2;
     int y = (event->rect().size().height() - scaled_Pixmap.size().height()) / 2;
 
-    // Difference between image and widget sizes
-    m_current_error_Size = scaled_Pixmap.size() - event->rect().size();
     painter.drawPixmap(QPoint(x, y), scaled_Pixmap);
 }
 
@@ -147,9 +134,9 @@ int c_image_Widget::widthForHeight(int height) const
 
 void c_image_Widget::setPixmap (const QPixmap &pixmap){
     m_image_Pixmap = pixmap;
+    m_image_size = pixmap.size();
     m_current_Size = pixmap.size();
     updateGeometry();
-    m_current_widget_size = this->size();
     repaint();
 }
 

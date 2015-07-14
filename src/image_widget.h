@@ -28,9 +28,8 @@ class c_image_Widget : public QWidget
 public:
     explicit c_image_Widget(QWidget *parent = 0);
     const QPixmap* pixmap() const;
-    QSize get_current_error_size() const;
-    QSize get_zoom_error_size(int zoom) const;
     int get_zoom_level();
+    QSize get_image_size();
 
 signals:
     void double_click_signal();
@@ -49,9 +48,8 @@ protected:
 
 private:
     QPixmap m_image_Pixmap;
+    QSize m_image_size;
     QSize m_current_Size;
-    QSize m_current_error_Size;
-    QSize m_current_widget_size;
     int m_zoom_level;
 };
 

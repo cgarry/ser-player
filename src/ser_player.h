@@ -100,7 +100,6 @@ public slots:
     void play_button_pressed_slot();
     void stop_button_pressed_slot();
     void repeat_button_toggled_slot(bool checked);
-    void resize_window_slot();
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
     void debayer_enable_slot(bool enabled);

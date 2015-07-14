@@ -22,6 +22,7 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QImage>
@@ -317,7 +318,6 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
-    mp_frame_image_Widget->setToolTip(tr("Double-click to reset zoom level to 100%", "Tool tip"));
 
     mp_count_Slider = new QSlider;
     mp_count_Slider->setOrientation(Qt::Horizontal);
@@ -900,26 +900,43 @@ void c_ser_player::repeat_button_toggled_slot(bool checked) {
 }
 
 
-void c_ser_player::resize_window_slot()
-{
-//    qDebug() << "resize_window_slot(): " << size() << " + " << mp_frame_image_Widget->get_current_error_size() << " = " << size() + mp_frame_image_Widget->get_current_error_size();
-    resize(size() + mp_frame_image_Widget->get_current_error_size());
-}
-
-
 void c_ser_player::resize_window_100_percent_slot()
 {
-//    qDebug() << "resize_window_100_percent_slot(): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(100) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(100);
-    showNormal();  // Ensure window is not maximised
-    resize(size() + mp_frame_image_Widget->get_zoom_error_size(100));
+    resize_window_with_zoom(100);
 }
 
 
 void c_ser_player::resize_window_with_zoom(int zoom)
 {
-//    qDebug() << "resize_window_with_zoom(" << zoom << "): " << size() << " + " << mp_frame_image_Widget->get_zoom_error_size(zoom) << " = " << size() + mp_frame_image_Widget->get_zoom_error_size(zoom);
+    QSize frame_border_and_title_size = frameSize() - size();
+    QDesktopWidget widget;
+    QSize available_desktop_size = widget.availableGeometry().size() - frame_border_and_title_size;
+    QSize widget_outside_image_size = size() - mp_frame_image_Widget->size();
+
+    // Calculate size of zoomed image
+    QSize zoomed_image_size = (mp_frame_image_Widget->get_image_size() * zoom) / 100;
+
+    // Calculate application size without frame border and title
+    QSize new_widget_size = zoomed_image_size + widget_outside_image_size;
+
+    // Check that the application size is not larger than the available desktop size
+    QSize oversize_error = QSize(0, 0);
+    if (new_widget_size.width() > available_desktop_size.width()) {
+        oversize_error.setWidth(new_widget_size.width() - available_desktop_size.width());
+    }
+
+    if (new_widget_size.height() > available_desktop_size.height()) {
+        oversize_error.setHeight(new_widget_size.height() - available_desktop_size.height());
+    }
+
+    // Recalculate size of zoomed image to fit on available desktop size
+    zoomed_image_size.scale(zoomed_image_size - oversize_error, Qt::KeepAspectRatio);
+
+    // Recalculate application size without frame border and title
+    new_widget_size = zoomed_image_size + widget_outside_image_size;
+
     showNormal();  // Ensure window is not maximised
-    resize(size() + mp_frame_image_Widget->get_zoom_error_size(zoom));
+    resize(new_widget_size);  // Resize the application
 }
 
 
