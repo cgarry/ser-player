@@ -10,5 +10,6 @@
         <file>resources/forward_button.png</file>
         <file>translations/ser_player_da.qm</file>
         <file>translations/qt_da.qm</file>
+        <file>translations/ser_player_fr.qm</file>
     </qresource>
 </RCC>
