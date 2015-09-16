@@ -1,9 +1,8 @@
-v1.2.0
+v1.3.0
 Bug Fixes:
-  * Corrected initial zoom to 100%.
+  * Fixed issues when zooming larger than screen allows.
 
 Enhancements:
-  * Added support for language localisation and a Danish translation.
-  * Added updated version check to allow users to keep up to date with the latest version.
-  * Added support for generating Debian Linux binary packages (.deb).
-  * Slight redesign to the SER Player icons.
+  * Added French language translation.
+  * Limited Update checks to once per 12 hours.
+  * Added auto-playback when loading a SER file.
