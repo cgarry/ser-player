@@ -3,6 +3,8 @@ A simple video player for playing SER files used for solar, lunar and planetary 
 
 SER Player is a C++ application using the Qt cross-platform framework so that it can be built for Windows, OS X and Linux.
 
+SER File Format Specification: [http://www.grischa-hahn.homepage.t-online.de/astro/ser/SER%20Doc%20V3b.pdf](http://www.grischa-hahn.homepage.t-online.de/astro/ser/SER%20Doc%20V3b.pdf)
+
 ###Project Goals
 Some simple goals that hopefully get accross my intentions for this project.
 * Produce a lightweight and intuative video player application for .ser files.
