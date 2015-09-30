@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.0"
+#define VERSION_STRING "v1.3.2"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -52,7 +52,6 @@
 #include "new_version_checker.h"
 #endif
 
-
 const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 
 
@@ -62,6 +61,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     // Menu Items
     m_ser_directory = "";
     m_display_framerate = -1;
+    m_colour_saturation = 1.0;
     QMenu *file_menu = menuBar()->addMenu(tr("File", "Menu title"));
     QAction *fileopen_Act = new QAction(tr("Open SER File", "Menu title"), this);
     file_menu->addAction(fileopen_Act);
@@ -168,6 +168,99 @@ c_ser_player::c_ser_player(QWidget *parent)
     framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
+
+    QMenu *colour_saturation_Menu = playback_menu->addMenu(tr("Colour Saturation"));
+    QActionGroup *colsat_ActGroup = new QActionGroup(colour_saturation_Menu);
+    fps_ActGroup->setExclusive(true);
+    QAction *colsat_action;
+
+    colsat_action = new QAction(tr("0.5", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(0.5);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+
+    colsat_action = new QAction(tr("0.75", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(0.75);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+
+    colsat_action = new QAction(tr("1.0 (OFF)", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setChecked(true);
+    colsat_action->setData(1.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+
+    colsat_action = new QAction(tr("1.5", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(1.5);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+
+    colsat_action = new QAction(tr("2.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(2.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("3.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(3.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("4.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(4.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("5.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(5.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("10.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(10.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("15.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(15.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("20.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(20.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("30.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(30.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+
+    colsat_action = new QAction(tr("50.0", "Colour Saturation menu"), this);
+    colsat_action->setCheckable(true);
+    colsat_action->setData(50.0);
+    colour_saturation_Menu->addAction(colsat_action);
+    colsat_ActGroup->addAction(colsat_action);
+    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
@@ -538,6 +631,15 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+void c_ser_player::colour_saturation_changed_slot(QAction *action)
+{
+    if (action != NULL) {
+        m_colour_saturation = action->data().toDouble();
+        frame_slider_changed_slot();
+    }
+}
+
+
 void c_ser_player::zoom_changed_slot(QAction *action)
 {
     if (action != NULL) {
@@ -609,6 +711,11 @@ void c_ser_player::open_ser_file(const QString &filename)
         bool image_debayered = false;
         if (c_persistent_data::m_enable_debayering) {
             image_debayered = debayer_image_bilinear();
+        }
+
+        // Adjust colour saturation if required
+        if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
+            change_colour_saturation(m_colour_saturation);
         }
 
         conv_data_ready_for_qimage(image_debayered);
@@ -784,6 +891,11 @@ void c_ser_player::frame_slider_changed_slot()
             bool image_debayered = false;
             if (c_persistent_data::m_enable_debayering) {
                 image_debayered = debayer_image_bilinear();
+            }
+
+            // Adjust colour saturation if required
+            if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
+                change_colour_saturation(m_colour_saturation);
             }
 
             conv_data_ready_for_qimage(image_debayered);
@@ -1557,6 +1669,97 @@ bool c_ser_player::debayer_image_bilinear()
     }
 
     return true;
+}
+
+
+void c_ser_player::change_colour_saturation(double change)
+{
+    const double C_Pr = .299;
+    const double C_Pg = .587;
+    const double C_Pb = .114;
+
+    if (change == 1.0) {
+        // Early return
+        return;
+    }
+
+    double mults[3];
+    if (m_colour_id == COLOURID_RGB) {
+        // Data is in RGB format
+        mults[2] = C_Pb;
+        mults[1] = C_Pg;
+        mults[0] = C_Pr;
+    } else {
+        // Data is in BGR format
+        mults[0] = C_Pb;
+        mults[1] = C_Pg;
+        mults[2] = C_Pr;
+    }
+
+    if (m_bytes_per_sample == 1) {
+        // 8-bit data
+        uint8_t *p_frame_data = mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            uint8_t *p_col0 = p_frame_data++;
+            uint8_t *p_col1 = p_frame_data++;
+            uint8_t *p_col2 = p_frame_data++;
+
+            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
+                // This is not a monochrome pixel - apply colour saturation
+                double P = sqrt( (*p_col2) * (*p_col2) * mults[2] +
+                                 (*p_col1) * (*p_col1) * mults[1] +
+                                 (*p_col0) * (*p_col0) * mults[0] );
+
+                double dcol2 = P + ((double)(*p_col2) - P) * change;
+                double dcol1 = P + ((double)(*p_col1) - P) * change;
+                double dcol0 = P + ((double)(*p_col0) - P) * change;
+
+                // Clip values in 0 to 255 range
+                dcol2 = (dcol2 < 0) ? 0 : dcol2;
+                dcol1 = (dcol1 < 0) ? 0 : dcol1;
+                dcol0 = (dcol0 < 0) ? 0 : dcol0;
+                dcol2 = (dcol2 > 255) ? 255 : dcol2;
+                dcol1 = (dcol1 > 255) ? 255 : dcol1;
+                dcol0 = (dcol0 > 255) ? 255 : dcol0;
+
+                *p_col2 = (uint8_t)dcol2;
+                *p_col1 = (uint8_t)dcol1;
+                *p_col0 = (uint8_t)dcol0;
+            }
+        }
+    } else {
+        // 16-bit data
+        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            uint16_t *p_col0 = p_frame_data++;
+            uint16_t *p_col1 = p_frame_data++;
+            uint16_t *p_col2 = p_frame_data++;
+
+            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
+                // This is not a monochrome pixel - apply colour saturation
+                double P = sqrt( mults[2] * (*p_col2) * (*p_col2) +
+                                 mults[1] * (*p_col1) * (*p_col1) +
+                                 mults[0] * (*p_col0) * (*p_col0) );
+
+                double dcol2 = P + ((double)(*p_col2) - P) * change;
+                double dcol1 = P + ((double)(*p_col1) - P) * change;
+                double dcol0 = P + ((double)(*p_col0) - P) * change;
+
+                // Clip values in 0 to 65535 range
+
+                dcol2 = (dcol2 < 0) ? 0 : dcol2;
+                dcol1 = (dcol1 < 0) ? 0 : dcol1;
+                dcol0 = (dcol0 < 0) ? 0 : dcol0;
+                dcol2 = (dcol2 > 65535) ? 65535 : dcol2;
+                dcol1 = (dcol1 > 65535) ? 65535 : dcol1;
+                dcol0 = (dcol0 > 65535) ? 65535 : dcol0;
+
+                *p_col2 = (uint16_t)dcol2;
+                *p_col1 = (uint16_t)dcol1;
+                *p_col0 = (uint16_t)dcol0;
+            }
+        }
+    }
 }
 
 

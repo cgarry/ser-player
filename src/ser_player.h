@@ -74,6 +74,7 @@ private:
     int m_framecount;
     int m_total_frames;
     int m_display_framerate;
+    double m_colour_saturation;
     int m_display_frame_time;
     uint8_t *mp_frame_buffer;
     int32_t m_frame_width;
@@ -88,6 +89,7 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
+    void colour_saturation_changed_slot(QAction *);
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
@@ -118,6 +120,7 @@ private:
     void create_no_file_open_image();
     void conv_data_ready_for_qimage(bool image_debayered);
     bool debayer_image_bilinear();
+    void change_colour_saturation(double change);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 
