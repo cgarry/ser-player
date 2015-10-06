@@ -38,6 +38,8 @@
 #include <QSlider>
 #include <QTimer>
 #include <QUrl>
+#include <QWidgetAction>
+#include <QSpinBox>
 
 #include <cmath>
 
@@ -58,6 +60,9 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent)
 {
+    m_current_state = STATE_NO_FILE;
+    m_framecount = 1;
+
     // Menu Items
     m_ser_directory = "";
     m_display_framerate = -1;
@@ -95,172 +100,95 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
     playback_menu->addSeparator();
 
-    QAction *debayer_Act = new QAction(tr("Enable Debayering"), this);
-    debayer_Act->setCheckable(true);
-    debayer_Act->setChecked(c_persistent_data::m_enable_debayering);
-    playback_menu->addAction(debayer_Act);
-    connect(debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
-
-
-    QMenu *framerate_Menu = playback_menu->addMenu(tr("Display Framerate"));
-    QActionGroup *fps_ActGroup = new QActionGroup(framerate_Menu);
+    mp_framerate_Menu = playback_menu->addMenu(tr("Display Framerate (%1)").arg(("From Timestamps")));
+    mp_framerate_Menu->setEnabled(false);
+    QActionGroup *fps_ActGroup = new QActionGroup(mp_framerate_Menu);
     fps_ActGroup->setExclusive(true);
     QAction *fps_action;
 
-    fps_action = new QAction(tr("Framerate from Timestamps", "Framerate menu"), this);
+    fps_action = new QAction(tr("From Timestamps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setChecked(true);
     fps_action->setData(-1);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("1 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(1);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("5 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(5);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("10 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(10);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("25 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(25);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("50 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(50);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("75 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(75);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("100 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(100);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("150 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(150);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
     fps_action = new QAction(tr("200 fps", "Framerate menu"), this);
     fps_action->setCheckable(true);
     fps_action->setData(200);
-    framerate_Menu->addAction(fps_action);
+    mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
 
-    QMenu *colour_saturation_Menu = playback_menu->addMenu(tr("Colour Saturation"));
-    QActionGroup *colsat_ActGroup = new QActionGroup(colour_saturation_Menu);
-    fps_ActGroup->setExclusive(true);
-    QAction *colsat_action;
 
-    colsat_action = new QAction(tr("0.5", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(0.5);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
+    m_debayer_Act = new QAction(tr("Enable Debayering"), this);
+    m_debayer_Act->setCheckable(true);
+    m_debayer_Act->setChecked(c_persistent_data::m_enable_debayering);
+    playback_menu->addAction(m_debayer_Act);
+    connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
+    m_debayer_Act->setEnabled(false);
 
-    colsat_action = new QAction(tr("0.75", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(0.75);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
 
-    colsat_action = new QAction(tr("1.0 (OFF)", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setChecked(true);
-    colsat_action->setData(1.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
+    mp_colour_saturation_Menu = playback_menu->addMenu(tr("Colour Saturation (%1)").arg(tr("Off", "No colour saturation")));
+    QWidgetAction *debug_widgetaction = new QWidgetAction(mp_colour_saturation_Menu);
+    QDoubleSpinBox* debug_widget = new QDoubleSpinBox;
+    debug_widget->setMinimum(0.0);
+    debug_widget->setMaximum(15.0);
+    debug_widget->setSingleStep(0.25);
+    debug_widget->setValue(1.0);
+    connect(debug_widget, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_changed(double)));
 
-    colsat_action = new QAction(tr("1.5", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(1.5);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-
-    colsat_action = new QAction(tr("2.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(2.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("3.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(3.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("4.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(4.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("5.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(5.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("10.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(10.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("15.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(15.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("20.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(20.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("30.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(30.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
-
-    colsat_action = new QAction(tr("50.0", "Colour Saturation menu"), this);
-    colsat_action->setCheckable(true);
-    colsat_action->setData(50.0);
-    colour_saturation_Menu->addAction(colsat_action);
-    colsat_ActGroup->addAction(colsat_action);
-    connect(colsat_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (colour_saturation_changed_slot(QAction *)));
+    debug_widgetaction->setDefaultWidget(debug_widget);
+    mp_colour_saturation_Menu->addAction(debug_widgetaction);
+    mp_colour_saturation_Menu->setEnabled(false);
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
@@ -405,9 +333,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     create_no_file_open_image();  // Create m_no_file_open_Pixmap
 
     mp_ser_file_Mutex = new QMutex;
-
-    m_framecount = 1;
-    m_current_state = STATE_NO_FILE;
 
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
@@ -626,17 +551,28 @@ void c_ser_player::fps_changed_slot(QAction *action)
 {
     if (action != NULL) {
         m_display_framerate = action->data().toInt();
+        if (m_display_framerate == -1) {
+          mp_framerate_Menu->setTitle(tr("Display Framerate (%1)").arg(tr("From Timestamps")));
+        } else {
+          mp_framerate_Menu->setTitle(tr("Display Framerate (%1)").arg(tr("%1 fps").arg(m_display_framerate)));
+        }
+
         calculate_display_framerate();
     }
 }
 
 
-void c_ser_player::colour_saturation_changed_slot(QAction *action)
+void c_ser_player::colour_saturation_changed(double value)
 {
-    if (action != NULL) {
-        m_colour_saturation = action->data().toDouble();
-        frame_slider_changed_slot();
+    m_colour_saturation = value;
+    if (m_colour_saturation == 1.0) {
+      mp_colour_saturation_Menu->setTitle(tr("Colour Saturation (%1)").arg(tr("Off", "No colour saturation")));
+    } else {
+      mp_colour_saturation_Menu->setTitle(tr("Colour Saturation (%1)").arg(m_colour_saturation));
+                                         //.arg(QString::number(m_colour_saturation, 'g', 2)));
     }
+
+    frame_slider_changed_slot();
 }
 
 
@@ -734,41 +670,66 @@ void c_ser_player::open_ser_file(const QString &filename)
         switch (m_colour_id) {
         case COLOURID_MONO:
             mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_RGGB:
             mp_colour_id_Label->setText(tr("RGGB", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(true);
             break;
         case COLOURID_BAYER_GRBG:
             mp_colour_id_Label->setText(tr("GRBG", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(true);
             break;
         case COLOURID_BAYER_GBRG:
             mp_colour_id_Label->setText(tr("GBRG", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(true);
             break;
         case COLOURID_BAYER_BGGR:
             mp_colour_id_Label->setText(tr("BGGR", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(true);
             break;
         case COLOURID_BAYER_CYYM:
             mp_colour_id_Label->setText(tr("CYYM", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_YCMY:
             mp_colour_id_Label->setText(tr("YCMY", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_YMCY:
             mp_colour_id_Label->setText(tr("YMCY", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_MYYC:
             mp_colour_id_Label->setText(tr("MYYC", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_RGB:
             mp_colour_id_Label->setText(tr("RGB", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BGR:
             mp_colour_id_Label->setText(tr("BGR", "Colour ID label"));
+            mp_colour_saturation_Menu->setEnabled(true);
+            m_debayer_Act->setEnabled(false);
             break;
         default:
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
+            mp_colour_saturation_Menu->setEnabled(false);
+            m_debayer_Act->setEnabled(false);
         }
 
+        mp_framerate_Menu->setEnabled(true);
         calculate_display_framerate();
 
         uint64_t ts = mp_ser_file->get_timestamp();

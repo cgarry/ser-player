@@ -39,6 +39,11 @@ class c_ser_player : public QMainWindow
 
 private:
     static const QString C_WINDOW_TITLE_QSTRING;
+
+    QMenu *mp_framerate_Menu;
+    QAction *m_debayer_Act;
+    QMenu *mp_colour_saturation_Menu;
+
     QPixmap m_no_file_open_Pixmap;
     QPixmap m_play_Pixmap;
     QPixmap m_pause_Pixmap;
@@ -89,7 +94,7 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
-    void colour_saturation_changed_slot(QAction *);
+    void colour_saturation_changed(double);
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
