@@ -76,9 +76,10 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     file_menu->addSeparator();
 
-    QAction *save_frame_Act = new QAction(tr("Save Frame", "Menu title"), this);
-    file_menu->addAction(save_frame_Act);
-    connect(save_frame_Act, SIGNAL(triggered()), this, SLOT(save_frame_slot()));
+    m_save_frame_Act = new QAction(tr("Save Frame", "Menu title"), this);
+    m_save_frame_Act->setEnabled(false);
+    file_menu->addAction(m_save_frame_Act);
+    connect(m_save_frame_Act, SIGNAL(triggered()), this, SLOT(save_frame_slot()));
 
     file_menu->addSeparator();
 
@@ -633,6 +634,7 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         // This is a valid SER file
+        m_save_frame_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
@@ -759,6 +761,13 @@ void c_ser_player::open_ser_file(const QString &filename)
 
 void c_ser_player::save_frame_slot()
 {
+    bool restart_playing = false;
+    if (m_current_state == STATE_PLAYING) {
+        // Pause playing while frame is saved
+        restart_playing = true;
+        play_button_pressed_slot();
+    }
+
     if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
         const QString jpg_ext = QString(tr(".jpg"));
         const QString jpg_filter = QString(tr("Joint Picture Expert Group Image (*.jpg)", "Filetype filter"));
@@ -796,6 +805,11 @@ void c_ser_player::save_frame_slot()
             QPixmap::fromImage(*mp_frame_Image).save(&file, p_format);
             file.close();
         }
+    }
+
+    // Restart playing if it was playing to start with
+    if (restart_playing == true) {
+        play_button_pressed_slot();
     }
 }
 

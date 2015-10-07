@@ -40,10 +40,13 @@ class c_ser_player : public QMainWindow
 private:
     static const QString C_WINDOW_TITLE_QSTRING;
 
+    // Menus
+    QAction *m_save_frame_Act;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
     QMenu *mp_colour_saturation_Menu;
 
+    // Other
     QPixmap m_no_file_open_Pixmap;
     QPixmap m_play_Pixmap;
     QPixmap m_pause_Pixmap;
