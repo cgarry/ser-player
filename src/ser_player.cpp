@@ -181,16 +181,16 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     mp_colour_saturation_Menu = playback_menu->addMenu(tr("Colour Saturation (%1)").arg(tr("Off", "No colour saturation")));
-    QWidgetAction *debug_widgetaction = new QWidgetAction(mp_colour_saturation_Menu);
-    QDoubleSpinBox* debug_widget = new QDoubleSpinBox;
+    QWidgetAction *colsat_Widgetaction = new QWidgetAction(mp_colour_saturation_Menu);
+    QDoubleSpinBox *debug_widget = new QDoubleSpinBox;
     debug_widget->setMinimum(0.0);
     debug_widget->setMaximum(15.0);
     debug_widget->setSingleStep(0.25);
     debug_widget->setValue(1.0);
     connect(debug_widget, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_changed(double)));
 
-    debug_widgetaction->setDefaultWidget(debug_widget);
-    mp_colour_saturation_Menu->addAction(debug_widgetaction);
+    colsat_Widgetaction->setDefaultWidget(debug_widget);
+    mp_colour_saturation_Menu->addAction(colsat_Widgetaction);
     mp_colour_saturation_Menu->setEnabled(false);
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
