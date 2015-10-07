@@ -62,6 +62,8 @@ c_ser_player::c_ser_player(QWidget *parent)
 {
     m_current_state = STATE_NO_FILE;
     m_framecount = 1;
+    m_is_colour = false;
+    m_has_bayer_pattern = false;
 
     // Menu Items
     m_ser_directory = "";
@@ -670,65 +672,55 @@ void c_ser_player::open_ser_file(const QString &filename)
         switch (m_colour_id) {
         case COLOURID_MONO:
             mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_RGGB:
             mp_colour_id_Label->setText(tr("RGGB", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(true);
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_GRBG:
             mp_colour_id_Label->setText(tr("GRBG", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(true);
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_GBRG:
             mp_colour_id_Label->setText(tr("GBRG", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(true);
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_BGGR:
             mp_colour_id_Label->setText(tr("BGGR", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(true);
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_CYYM:
             mp_colour_id_Label->setText(tr("CYYM", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_YCMY:
             mp_colour_id_Label->setText(tr("YCMY", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_YMCY:
             mp_colour_id_Label->setText(tr("YMCY", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_BAYER_MYYC:
             mp_colour_id_Label->setText(tr("MYYC", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
             break;
         case COLOURID_RGB:
             mp_colour_id_Label->setText(tr("RGB", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(false);
+            m_is_colour = true;
             break;
         case COLOURID_BGR:
             mp_colour_id_Label->setText(tr("BGR", "Colour ID label"));
-            mp_colour_saturation_Menu->setEnabled(true);
-            m_debayer_Act->setEnabled(false);
+            m_is_colour = true;
             break;
         default:
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
-            mp_colour_saturation_Menu->setEnabled(false);
-            m_debayer_Act->setEnabled(false);
         }
 
+        if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
+            // This is now a colour image, enable colour saturation menu
+            mp_colour_saturation_Menu->setEnabled(true);
+        } else {
+            mp_colour_saturation_Menu->setEnabled(false);
+        }
+
+        m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_framerate_Menu->setEnabled(true);
         calculate_display_framerate();
 
@@ -1130,6 +1122,13 @@ void c_ser_player::check_for_updates_slot(bool enabled)
 void c_ser_player::debayer_enable_slot(bool enabled)
 {
     c_persistent_data::m_enable_debayering = enabled;
+    if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
+        // This is now a colour image, enable colour saturation menu
+        mp_colour_saturation_Menu->setEnabled(true);
+    } else {
+        mp_colour_saturation_Menu->setEnabled(false);
+    }
+
     frame_slider_changed_slot();
 }
 

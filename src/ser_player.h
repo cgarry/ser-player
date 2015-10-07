@@ -86,6 +86,8 @@ private:
     int32_t m_frame_height;
     int32_t m_bytes_per_sample;
     int32_t m_colour_id;
+    bool m_is_colour;
+    bool m_has_bayer_pattern;
 
 public:
     c_ser_player(QWidget *parent = 0);
