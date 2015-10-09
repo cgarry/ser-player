@@ -256,6 +256,14 @@ class c_pipp_ser {
         int64_t get_utc_to_local_diff() {
             return m_utc_to_local_offset;
         }
+
+
+    private:
+        //
+        // Find pixel depth from specified frame
+        //
+        int32_t find_pixel_depth(
+            uint32_t frame_number);
 };
 
     

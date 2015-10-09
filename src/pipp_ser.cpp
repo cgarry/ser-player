@@ -285,7 +285,69 @@ int32_t c_pipp_ser::open(
         mp_timestamp = NULL;
     }
 
+    // Code to check m_header.pixel_depth since many software packages seem to set this incorrectly
+    if (m_bytes_per_sample == 2 && m_header.frame_count > 0) {
+        const int FRAMES_TO_CHECK_FOR_PIXEL_DEPTH = 10;
+        int32_t pixel_depth[FRAMES_TO_CHECK_FOR_PIXEL_DEPTH];
+        pixel_depth[0] = find_pixel_depth(1);  // First frame
+        for (int x = 1; x < FRAMES_TO_CHECK_FOR_PIXEL_DEPTH-1; x++){  // Middle frames
+            int32_t frame_to_check = (m_header.frame_count * x)/(FRAMES_TO_CHECK_FOR_PIXEL_DEPTH-1);
+            if (frame_to_check == 0) {
+                frame_to_check = 1;
+            }
+
+            pixel_depth[x] = find_pixel_depth(frame_to_check);
+        }
+
+        pixel_depth[FRAMES_TO_CHECK_FOR_PIXEL_DEPTH-1] = find_pixel_depth(m_header.frame_count);    // Last frame
+
+        int32_t max_pixel_depth = pixel_depth[0];
+        for (int x = 1; x < FRAMES_TO_CHECK_FOR_PIXEL_DEPTH; x++) {
+            if (pixel_depth[x] > max_pixel_depth) {
+                max_pixel_depth = pixel_depth[x];
+            }
+        }
+
+        // Use largest pixel depth found instead of the value from the SER header field
+        m_header.pixel_depth = max_pixel_depth;
+    }
+
     return m_header.frame_count;
+}
+
+
+int32_t c_pipp_ser::find_pixel_depth(
+    uint32_t frame_number)
+{
+    int32_t pixel_depth = m_header.pixel_depth;
+    uint8_t *p_temp_buffer = new uint8_t[m_header.image_width * m_header.image_height * 2 * 3];
+    int32_t stored_pixel_depth = m_header.pixel_depth;
+    m_header.pixel_depth = 16;  // Do not shift data this time
+    get_frame(frame_number, p_temp_buffer);  // Get the first frame to analyse
+    m_header.pixel_depth = stored_pixel_depth;  // Restore pixel depth
+
+    uint16_t max_pixel = 0;
+    uint16_t *p_temp_ptr = (uint16_t *)p_temp_buffer;
+    for (int x = 0; x < m_header.image_width * m_header.image_height * 3; x++) {
+        uint16_t pixel = *p_temp_ptr++;
+        if (pixel > max_pixel) {
+            max_pixel = pixel;
+            if (max_pixel >= 0x8000) {
+                // Max pixel value is already 16-bits
+                break;
+            }
+        }
+    }
+
+    for (int x = 15; x >= 8; x--) {
+        if (max_pixel >= (1 << x)) {
+            pixel_depth = x + 1;
+            break;
+        }
+    }
+
+    delete [] p_temp_buffer;
+    return pixel_depth;
 }
 
 
@@ -771,7 +833,6 @@ int32_t c_pipp_ser::get_frame (
     } else {
         m_timestamp = *mp_timestamp++;
     }
-
 
     if (m_header.pixel_depth > 8) {
         // More than 8 bits per pixel
