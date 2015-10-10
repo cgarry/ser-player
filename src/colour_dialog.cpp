@@ -31,14 +31,11 @@
 #include "colour_dialog.h"
 
 c_colour_dialog::c_colour_dialog(QWidget *parent)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
-    //: QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowTitleHint)//| Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
 {
-//    setModal(true);
     setWindowTitle(tr("Colour Settings"));
 
     // Colour saturation label and spinbox
-    QLabel *colsat_Label = new QLabel(tr("Colour Saturation"));
     mp_colsat_DSpinbox = new QDoubleSpinBox;
     mp_colsat_DSpinbox->setMinimum(0.0);
     mp_colsat_DSpinbox->setMaximum(15.0);
@@ -46,14 +43,15 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_colsat_DSpinbox->setValue(1.0);
     connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SIGNAL(colour_saturation_changed(double)));
     QHBoxLayout *colsat_hlayout = new QHBoxLayout;
-    colsat_hlayout->addWidget(colsat_Label);
     colsat_hlayout->addWidget(mp_colsat_DSpinbox);
+    QGroupBox *colout_saturation_GroupBox = new QGroupBox(tr("Colour Saturation"));
+    colout_saturation_GroupBox->setLayout(colsat_hlayout);
 
     // Colour balance
     mp_red_balance_Slider = new QSlider(Qt::Horizontal);
     mp_red_balance_Slider->setRange(-255, +255);
     mp_red_balance_Slider->setValue(0);
-    mp_red_balance_Slider->setFixedWidth(mp_red_balance_Slider->sizeHint().width() * 2);
+    mp_red_balance_Slider->setMinimumWidth(mp_red_balance_Slider->sizeHint().width() * 2);
     connect(mp_red_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(red_balanced_changed_slot(int)));
     int min_label_width = QLabel(QString::number(-255)).sizeHint().width();
     mp_red_balance_Label = new QLabel(QString::number(0));
@@ -94,14 +92,16 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     QPushButton *close_button = new QPushButton(tr("Close"));
     connect(close_button, SIGNAL(clicked()), this, SLOT(hide()));
     QHBoxLayout *buttons_hlayout = new QHBoxLayout;
+    buttons_hlayout->addStretch();
     buttons_hlayout->addWidget(reset_button);
     buttons_hlayout->addWidget(close_button);
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(5);
     dialog_vlayout->setSpacing(15);
-    dialog_vlayout->addLayout(colsat_hlayout);
+    dialog_vlayout->addWidget(colout_saturation_GroupBox);
     dialog_vlayout->addWidget(colour_balance_GroupBox);
+    dialog_vlayout->addStretch();
     dialog_vlayout->addLayout(buttons_hlayout);
 
     setLayout(dialog_vlayout);

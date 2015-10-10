@@ -1910,21 +1910,21 @@ void c_ser_player::change_colour_balance(int red, int green, int blue)
         return;
     }
 
-    int balance[3];
-    if (m_colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        balance[0] = red;
-        balance[1] = green;
-        balance[2] = blue;
-    } else {
-        // Data is in BGR format
-        balance[0] = blue;
-        balance[1] = green;
-        balance[2] = red;
-    }
-
     if (m_bytes_per_sample == 1) {
         // 8-bit data
+        int balance[3];
+        if (m_colour_id == COLOURID_RGB) {
+            // Data is in RGB format
+            balance[0] = red;
+            balance[1] = green;
+            balance[2] = blue;
+        } else {
+            // Data is in BGR format
+            balance[0] = blue;
+            balance[1] = green;
+            balance[2] = red;
+        }
+
         uint8_t *p_frame_data = mp_frame_buffer;
         for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
             int32_t colour0 = *(p_frame_data+0);
@@ -1933,9 +1933,42 @@ void c_ser_player::change_colour_balance(int red, int green, int blue)
             colour0 += balance[0];
             colour1 += balance[1];
             colour2 += balance[2];
-            colour0 = (colour0 > 255) ? 255 : colour0;
-            colour1 = (colour1 > 255) ? 255 : colour1;
-            colour2 = (colour2 > 255) ? 255 : colour2;
+            colour0 = (colour0 > 0xFF) ? 0xFF : colour0;
+            colour1 = (colour1 > 0xFF) ? 0xFF : colour1;
+            colour2 = (colour2 > 0xFF) ? 0xFF : colour2;
+            colour0 = (colour0 < 0) ? 0 : colour0;
+            colour1 = (colour1 < 0) ? 0 : colour1;
+            colour2 = (colour2 < 0) ? 0 : colour2;
+            *p_frame_data++ = colour0;
+            *p_frame_data++ = colour1;
+            *p_frame_data++ = colour2;
+        }
+    } else {
+        // 16-bit data
+        int balance[3];
+        if (m_colour_id == COLOURID_RGB) {
+            // Data is in RGB format
+            balance[0] = (red << 8) + red;
+            balance[1] = (green << 8) + green;
+            balance[2] = (blue << 8) + blue;
+        } else {
+            // Data is in BGR format
+            balance[0] = (blue << 8) + blue;
+            balance[1] = (green << 8) + green;
+            balance[2] = (red << 8) + red;
+        }
+
+        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            int32_t colour0 = *(p_frame_data+0);
+            int32_t colour1 = *(p_frame_data+1);
+            int32_t colour2 = *(p_frame_data+2);
+            colour0 += balance[0];
+            colour1 += balance[1];
+            colour2 += balance[2];
+            colour0 = (colour0 > 0xFFFF) ? 0xFFFF : colour0;
+            colour1 = (colour1 > 0xFFFF) ? 0xFFFF : colour1;
+            colour2 = (colour2 > 0xFFFF) ? 0xFFFF : colour2;
             colour0 = (colour0 < 0) ? 0 : colour0;
             colour1 = (colour1 < 0) ? 0 : colour1;
             colour2 = (colour2 < 0) ? 0 : colour2;
