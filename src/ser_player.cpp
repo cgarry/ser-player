@@ -720,9 +720,6 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
         }
 
-        qDebug() << "m_is_colour: " << m_is_colour;
-        qDebug() << "m_has_bayer_pattern: " << m_has_bayer_pattern;
-        qDebug() << "m_enable_debayering: " << c_persistent_data::m_enable_debayering;
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
             mp_colour_settings_action->setEnabled(true);
