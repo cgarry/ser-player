@@ -49,6 +49,7 @@
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
+#include "colour_dialog.h"
 
 #ifndef DISABLE_NEW_VERSION_CHECK
 #include "new_version_checker.h"
@@ -69,6 +70,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
+    m_red_balance = 0;
+    m_green_balance = 0;
+    m_blue_balance = 0;
     QMenu *file_menu = menuBar()->addMenu(tr("File", "Menu title"));
     QAction *fileopen_Act = new QAction(tr("Open SER File", "Menu title"), this);
     file_menu->addAction(fileopen_Act);
@@ -171,7 +175,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
 
-
+    // Enable Debayer menu action
     m_debayer_Act = new QAction(tr("Enable Debayering"), this);
     m_debayer_Act->setCheckable(true);
     m_debayer_Act->setChecked(c_persistent_data::m_enable_debayering);
@@ -179,19 +183,14 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
     m_debayer_Act->setEnabled(false);
 
-
-    mp_colour_saturation_Menu = playback_menu->addMenu(tr("Colour Saturation (%1)").arg(tr("Off", "No colour saturation")));
-    QWidgetAction *colsat_Widgetaction = new QWidgetAction(mp_colour_saturation_Menu);
-    QDoubleSpinBox *debug_widget = new QDoubleSpinBox;
-    debug_widget->setMinimum(0.0);
-    debug_widget->setMaximum(15.0);
-    debug_widget->setSingleStep(0.25);
-    debug_widget->setValue(1.0);
-    connect(debug_widget, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_changed(double)));
-
-    colsat_Widgetaction->setDefaultWidget(debug_widget);
-    mp_colour_saturation_Menu->addAction(colsat_Widgetaction);
-    mp_colour_saturation_Menu->setEnabled(false);
+    // Colour Setting menu action
+    mp_colour_settings_action = playback_menu->addAction(tr("Colour Settings..."));
+    mp_colour_settings_action->setEnabled(false);
+    connect(mp_colour_settings_action, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
+    mp_colour_settings_Dialog = new c_colour_dialog(this);
+    mp_colour_settings_Dialog->hide();
+    connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed(double)));
+    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(int,int,int)), this, SLOT(colour_balance_changed(int,int,int)));
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
@@ -565,16 +564,26 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+// Colour settings menu QAction has been clicked
+void c_ser_player::colour_settings_slot()
+{
+    mp_colour_settings_Dialog->show();
+}
+
+
 void c_ser_player::colour_saturation_changed(double value)
 {
     m_colour_saturation = value;
-    if (m_colour_saturation == 1.0) {
-      mp_colour_saturation_Menu->setTitle(tr("Colour Saturation (%1)").arg(tr("Off", "No colour saturation")));
-    } else {
-      mp_colour_saturation_Menu->setTitle(tr("Colour Saturation (%1)").arg(m_colour_saturation));
-                                         //.arg(QString::number(m_colour_saturation, 'g', 2)));
-    }
+    frame_slider_changed_slot();
+}
 
+
+void c_ser_player::colour_balance_changed(int red, int green, int blue)
+{
+    qDebug() << "colour_balance_changed(): " << red << " " << green << " " << blue;
+    m_red_balance = red;
+    m_green_balance = green;
+    m_blue_balance = blue;
     frame_slider_changed_slot();
 }
 
@@ -656,6 +665,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Adjust colour saturation if required
         if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
             change_colour_saturation(m_colour_saturation);
+            change_colour_balance(m_red_balance, m_green_balance, m_blue_balance);
         }
 
         conv_data_ready_for_qimage(image_debayered);
@@ -717,9 +727,9 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
-            mp_colour_saturation_Menu->setEnabled(true);
+            mp_colour_settings_action->setEnabled(true);
         } else {
-            mp_colour_saturation_Menu->setEnabled(false);
+            mp_colour_settings_action->setEnabled(false);
         }
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
@@ -860,9 +870,10 @@ void c_ser_player::frame_slider_changed_slot()
                 image_debayered = debayer_image_bilinear();
             }
 
-            // Adjust colour saturation if required
+            // Adjust colour saturation and balance if required
             if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
                 change_colour_saturation(m_colour_saturation);
+                change_colour_balance(m_red_balance, m_green_balance, m_blue_balance);
             }
 
             conv_data_ready_for_qimage(image_debayered);
@@ -1138,9 +1149,9 @@ void c_ser_player::debayer_enable_slot(bool enabled)
     c_persistent_data::m_enable_debayering = enabled;
     if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
         // This is now a colour image, enable colour saturation menu
-        mp_colour_saturation_Menu->setEnabled(true);
+        mp_colour_settings_action->setEnabled(true);
     } else {
-        mp_colour_saturation_Menu->setEnabled(false);
+        mp_colour_settings_action->setEnabled(false);
     }
 
     frame_slider_changed_slot();
@@ -1646,6 +1657,162 @@ bool c_ser_player::debayer_image_bilinear()
 }
 
 
+void c_ser_player::change_colour_saturation2(double change)
+{
+    const double C_Pr = .299;
+    const double C_Pg = .587;
+    const double C_Pb = .114;
+
+    const int offsets[4] = {0, 3, m_frame_width*3, m_frame_width*3 + 3};
+
+    if (change == 1.0) {
+        // Early return
+        return;
+    }
+
+    double mults[3];
+    if (m_colour_id == COLOURID_RGB) {
+        // Data is in RGB format
+        mults[2] = C_Pb;
+        mults[1] = C_Pg;
+        mults[0] = C_Pr;
+    } else {
+        // Data is in BGR format
+        mults[0] = C_Pb;
+        mults[1] = C_Pg;
+        mults[2] = C_Pr;
+    }
+
+    if (m_bytes_per_sample == 1) {
+        // 8-bit data
+
+        // Subsample original data
+        uint8_t *p_subsampled_buffer = new uint8_t[(m_frame_width/2) * (m_frame_height/2) * 3];
+        uint8_t *p_subsampled_ptr = p_subsampled_buffer;
+
+        for (int y = 0; y < (m_frame_height/2) * 2; y += 2) {
+            uint8_t *p_frame_data = mp_frame_buffer + y * m_frame_width * 3;
+            for (int x = 0; x < (m_frame_width/2) * 2; x += 2) {
+                 uint32_t pixel;
+                 pixel = *(p_frame_data + offsets[0]);
+                 pixel += *(p_frame_data + offsets[1]);
+                 pixel += *(p_frame_data + offsets[2]);
+                 pixel += *(p_frame_data + offsets[3]);
+                 p_frame_data++;
+                 pixel /= 4;
+                 *p_subsampled_ptr++ = pixel;
+
+                 pixel = *(p_frame_data + offsets[0]);
+                 pixel += *(p_frame_data + offsets[1]);
+                 pixel += *(p_frame_data + offsets[2]);
+                 pixel += *(p_frame_data + offsets[3]);
+                 p_frame_data++;
+                 pixel /= 4;
+                 *p_subsampled_ptr++ = pixel;
+
+                 pixel = *(p_frame_data + offsets[0]);
+                 pixel += *(p_frame_data + offsets[1]);
+                 pixel += *(p_frame_data + offsets[2]);
+                 pixel += *(p_frame_data + offsets[3]);
+                 p_frame_data++;
+                 pixel /= 4;
+                 p_frame_data += 3;
+                 *p_subsampled_ptr++ = pixel;
+            }
+        }
+
+
+        // Adjust colour saturation of subsampled RGB data
+        p_subsampled_ptr = p_subsampled_buffer;
+        for (int pixel = 0; pixel < (m_frame_width/2) * (m_frame_height/2); pixel++) {
+            uint8_t *p_col0 = p_subsampled_ptr++;
+            uint8_t *p_col1 = p_subsampled_ptr++;
+            uint8_t *p_col2 = p_subsampled_ptr++;
+
+            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
+                // This is not a monochrome pixel - apply colour saturation
+                double P = sqrt( (*p_col2) * (*p_col2) * mults[2] +
+                                 (*p_col1) * (*p_col1) * mults[1] +
+                                 (*p_col0) * (*p_col0) * mults[0] );
+
+                double dcol2 = P + ((double)(*p_col2) - P) * change;
+                double dcol1 = P + ((double)(*p_col1) - P) * change;
+                double dcol0 = P + ((double)(*p_col0) - P) * change;
+
+                // Clip values in 0 to 255 range
+                dcol2 = (dcol2 < 0) ? 0 : dcol2;
+                dcol1 = (dcol1 < 0) ? 0 : dcol1;
+                dcol0 = (dcol0 < 0) ? 0 : dcol0;
+                dcol2 = (dcol2 > 255) ? 255 : dcol2;
+                dcol1 = (dcol1 > 255) ? 255 : dcol1;
+                dcol0 = (dcol0 > 255) ? 255 : dcol0;
+
+                *p_col2 = (uint8_t)dcol2;
+                *p_col1 = (uint8_t)dcol1;
+                *p_col0 = (uint8_t)dcol0;
+            }
+        }
+
+        // Create luminance array for subsampled RGB data
+        double *p_subsampled_lum = new double[(m_frame_width/2) * (m_frame_height/2)];
+        double *p_subsampled_lum_ptr = p_subsampled_lum;
+        p_subsampled_ptr = p_subsampled_buffer;
+        for (int pixel = 0; pixel < (m_frame_width/2) * (m_frame_height/2); pixel++) {
+            double lum = mults[0] * (*p_subsampled_ptr++) +
+                         mults[1] * (*p_subsampled_ptr++) +
+                         mults[2] * (*p_subsampled_ptr++);
+            *p_subsampled_lum_ptr++ = lum;
+        }
+
+        // Calculate new pixels for original data
+        p_subsampled_lum_ptr = p_subsampled_lum;
+        p_subsampled_ptr = p_subsampled_buffer;
+        for (int y = 0; y < (m_frame_height/2) * 2; y++) {
+            uint8_t *p_frame_data = mp_frame_buffer + y * m_frame_width * 3;
+            for (int x = 0; x < (m_frame_width/2) * 2; x++) {
+                int32_t offset = (y/2) * (m_frame_width/2) + (x/2);
+                double scale = mults[0] * (*(p_frame_data + 0)) +
+                               mults[1] * (*(p_frame_data + 1)) +
+                               mults[2] * (*(p_frame_data + 2));
+                if (scale == 0) {
+                    scale = 0;
+                } else {
+                    scale /= *(p_subsampled_lum_ptr + offset);
+                }
+
+                offset *= 3;
+                double p1 = scale * *(p_subsampled_ptr + offset + 0);
+                double p2 = scale * *(p_subsampled_ptr + offset + 1);
+                double p3 = scale * *(p_subsampled_ptr + offset + 2);
+                p1 = (p1 > 255.0) ? 255.0 : p1;
+                p2 = (p2 > 255.0) ? 255.0 : p2;
+                p3 = (p3 > 255.0) ? 255.0 : p3;
+                *p_frame_data++ = (uint8_t)p1;
+                *p_frame_data++ = (uint8_t)p2;
+                *p_frame_data++ = (uint8_t)p3;
+            }
+        }
+
+/*
+        // Debug - copy back over original data
+        for (int y = 0; y < m_frame_height; y++) {
+            for (int x = 0; x < m_frame_width; x++) {
+                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 0) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 0);
+                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 1) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 1);
+                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 2) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 2);
+            }
+        }
+        // Debug
+*/
+        // Free up buffers
+        delete [] p_subsampled_buffer;
+        delete [] p_subsampled_lum;
+    }
+}
+
+
+
+
 void c_ser_player::change_colour_saturation(double change)
 {
     const double C_Pr = .299;
@@ -1732,6 +1899,50 @@ void c_ser_player::change_colour_saturation(double change)
                 *p_col1 = (uint16_t)dcol1;
                 *p_col0 = (uint16_t)dcol0;
             }
+        }
+    }
+}
+
+
+void c_ser_player::change_colour_balance(int red, int green, int blue)
+{
+    if (red == 0 && green == 0 && blue == 0) {
+        // Early return
+        return;
+    }
+
+    int balance[3];
+    if (m_colour_id == COLOURID_RGB) {
+        // Data is in RGB format
+        balance[0] = red;
+        balance[1] = green;
+        balance[2] = blue;
+    } else {
+        // Data is in BGR format
+        balance[0] = blue;
+        balance[1] = green;
+        balance[2] = red;
+    }
+
+    if (m_bytes_per_sample == 1) {
+        // 8-bit data
+        uint8_t *p_frame_data = mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            int32_t colour0 = *(p_frame_data+0);
+            int32_t colour1 = *(p_frame_data+1);
+            int32_t colour2 = *(p_frame_data+2);
+            colour0 += balance[0];
+            colour1 += balance[1];
+            colour2 += balance[2];
+            colour0 = (colour0 > 255) ? 255 : colour0;
+            colour1 = (colour1 > 255) ? 255 : colour1;
+            colour2 = (colour2 > 255) ? 255 : colour2;
+            colour0 = (colour0 < 0) ? 0 : colour0;
+            colour1 = (colour1 < 0) ? 0 : colour1;
+            colour2 = (colour2 < 0) ? 0 : colour2;
+            *p_frame_data++ = colour0;
+            *p_frame_data++ = colour1;
+            *p_frame_data++ = colour2;
         }
     }
 }

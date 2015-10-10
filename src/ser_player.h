@@ -30,6 +30,8 @@ class QSlider;
 class QPushButton;
 class QMutex;
 class QImage;
+
+class c_colour_dialog;
 class c_image_Widget;
 
 
@@ -44,7 +46,10 @@ private:
     QAction *m_save_frame_Act;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
-    QMenu *mp_colour_saturation_Menu;
+    QAction *mp_colour_settings_action;
+
+    // Dialogs
+    c_colour_dialog *mp_colour_settings_Dialog;
 
     // Other
     QPixmap m_no_file_open_Pixmap;
@@ -82,7 +87,6 @@ private:
     int m_framecount;
     int m_total_frames;
     int m_display_framerate;
-    double m_colour_saturation;
     int m_display_frame_time;
     uint8_t *mp_frame_buffer;
     int32_t m_frame_width;
@@ -92,6 +96,11 @@ private:
     bool m_is_colour;
     bool m_has_bayer_pattern;
 
+    double m_colour_saturation;
+    int m_red_balance;
+    int m_green_balance;
+    int m_blue_balance;
+
 public:
     c_ser_player(QWidget *parent = 0);
     ~c_ser_player();
@@ -99,7 +108,9 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
-    void colour_saturation_changed(double);
+    void colour_settings_slot();
+    void colour_saturation_changed(double saturation);
+    void colour_balance_changed(int red, int green, int blue);
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
@@ -130,7 +141,9 @@ private:
     void create_no_file_open_image();
     void conv_data_ready_for_qimage(bool image_debayered);
     bool debayer_image_bilinear();
+    void change_colour_saturation2(double change);
     void change_colour_saturation(double change);
+    void change_colour_balance(int red, int green, int blue);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 
