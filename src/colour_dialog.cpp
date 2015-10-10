@@ -31,7 +31,8 @@
 #include "colour_dialog.h"
 
 c_colour_dialog::c_colour_dialog(QWidget *parent)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
+    //: QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowTitleHint)//| Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 //    setModal(true);
     setWindowTitle(tr("Colour Settings"));
@@ -52,6 +53,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_red_balance_Slider = new QSlider(Qt::Horizontal);
     mp_red_balance_Slider->setRange(-255, +255);
     mp_red_balance_Slider->setValue(0);
+    mp_red_balance_Slider->setFixedWidth(mp_red_balance_Slider->sizeHint().width() * 2);
     connect(mp_red_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(red_balanced_changed_slot(int)));
     int min_label_width = QLabel(QString::number(-255)).sizeHint().width();
     mp_red_balance_Label = new QLabel(QString::number(0));

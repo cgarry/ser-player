@@ -580,7 +580,6 @@ void c_ser_player::colour_saturation_changed(double value)
 
 void c_ser_player::colour_balance_changed(int red, int green, int blue)
 {
-    qDebug() << "colour_balance_changed(): " << red << " " << green << " " << blue;
     m_red_balance = red;
     m_green_balance = green;
     m_blue_balance = blue;
