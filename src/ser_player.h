@@ -141,6 +141,7 @@ private:
     void create_no_file_open_image();
     void conv_data_ready_for_qimage(bool image_debayered);
     bool debayer_image_bilinear();
+    void change_colour_saturation3(double change);
     void change_colour_saturation2(double change);
     void change_colour_saturation(double change);
     void change_colour_balance(int red, int green, int blue);

@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.3"
+#define VERSION_STRING "v1.3.4"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -674,6 +674,7 @@ void c_ser_player::open_ser_file(const QString &filename)
                                   .arg(mp_ser_file->get_width())
                                   .arg(mp_ser_file->get_height()));
         mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg(mp_ser_file->get_pixel_depth()));
+        m_is_colour = false;
 
         switch (m_colour_id) {
         case COLOURID_MONO:
@@ -719,6 +720,9 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
         }
 
+        qDebug() << "m_is_colour: " << m_is_colour;
+        qDebug() << "m_has_bayer_pattern: " << m_has_bayer_pattern;
+        qDebug() << "m_enable_debayering: " << c_persistent_data::m_enable_debayering;
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
             mp_colour_settings_action->setEnabled(true);
@@ -1650,6 +1654,116 @@ bool c_ser_player::debayer_image_bilinear()
     }
 
     return true;
+}
+
+
+void c_ser_player::change_colour_saturation3(double change)
+{
+    if (change == 1.0) {
+        // Early return
+        return;
+    }
+
+    if (m_bytes_per_sample == 1) {
+        if (m_colour_id == COLOURID_RGB) {
+            // To-do - write missing code!
+        } else {
+            uint8_t *p_frame_data;
+            // Convert data to YUV and scale U and V components
+            p_frame_data = mp_frame_buffer;
+            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+                int32_t blue = *(p_frame_data+0);
+                int32_t green = *(p_frame_data+1);
+                int32_t red = *(p_frame_data+2);
+                int32_t y = ((299 * red) + (587 * green) + (114 * blue)) / 1000;
+                y = (y < 0) ? 0 : y;
+                y = (y > 0xFF) ? 0xFF : y;
+
+                int32_t u = (492 * (blue - y)) / 1000;
+                u = (int32_t)(change * u);  // Scale the u value
+                u += 128;
+                u = (u < 0) ? 0 : u;
+                u = (u > 0xFF) ? 0xFF : u;
+
+                int32_t v = (877 * (red - y)) / 1000;
+                v = (int32_t)(change * v);  // Scale the v value
+                v += 128;
+                v = (v < 0) ? 0 : v;
+                v = (v > 0xFF) ? 0xFF : v;
+
+                *p_frame_data++ = (uint8_t)y;
+                *p_frame_data++ = (uint8_t)u;
+                *p_frame_data++ = (uint8_t)v;
+            }
+
+/*
+            // Blur U and V channels
+            const int32_t offsets[] = {
+                -3 * m_frame_width - 3,
+                -3 * m_frame_width,
+                -3 * m_frame_width + 3,
+                -3,
+                3,
+                3 * m_frame_width - 3,
+                3 * m_frame_width,
+                3 * m_frame_width + 3};
+
+            for (int y = 1; y < m_frame_height-1; y++) {
+                int x = 1;
+                p_frame_data = mp_frame_buffer + (y * m_frame_width + x) * 3;
+                for (; x < m_frame_width-1; x++) {
+                    p_frame_data++;  // Skip Y component
+
+                    int32_t u = *p_frame_data * 2;
+                    u += *(p_frame_data + offsets[0]);
+                    u += *(p_frame_data + offsets[1]);
+                    u += *(p_frame_data + offsets[2]);
+                    u += *(p_frame_data + offsets[3]);
+                    u += *(p_frame_data + offsets[4]);
+                    u += *(p_frame_data + offsets[5]);
+                    u += *(p_frame_data + offsets[6]);
+                    u += *(p_frame_data + offsets[7]);
+                    *p_frame_data++ = u/10;
+
+                    int32_t v = *p_frame_data * 2;
+                    v += *(p_frame_data + offsets[0]);
+                    v += *(p_frame_data + offsets[1]);
+                    v += *(p_frame_data + offsets[2]);
+                    v += *(p_frame_data + offsets[3]);
+                    v += *(p_frame_data + offsets[4]);
+                    v += *(p_frame_data + offsets[5]);
+                    v += *(p_frame_data + offsets[6]);
+                    v += *(p_frame_data + offsets[7]);
+                    *p_frame_data++ = v/10;
+                }
+            }
+*/
+
+            // Convert data back to RGB
+            p_frame_data = mp_frame_buffer;
+            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+                int32_t y = *(p_frame_data+0);
+                int32_t u = *(p_frame_data+1) - 128;
+                int32_t v = *(p_frame_data+2) - 128;
+
+                int32_t red = y + (1140 * v) / 1000;
+                red = (red > 255) ? 255 : red;
+                red = (red < 0) ? 0 : red;
+
+                int32_t green = y - (395* u + 581 * v) / 1000;
+                green = (green > 255) ? 255 : green;
+                green = (green < 0) ? 0 : green;
+
+                int32_t blue = y + (2032 * u) / 1000;
+                blue = (blue > 255) ? 255 : blue;
+                blue = (blue < 0) ? 0 : blue;
+
+                *p_frame_data++ = (uint8_t)blue;
+                *p_frame_data++ = (uint8_t)green;
+                *p_frame_data++ = (uint8_t)red;
+            }
+        }
+    }
 }
 
 

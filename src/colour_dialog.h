@@ -22,8 +22,8 @@
 #include <QDialog>
 
 class QDoubleSpinBox;
-class QLabel;
 class QSlider;
+class QSpinBox;
 
 
 class c_colour_dialog : public QDialog
@@ -40,6 +40,8 @@ signals:
     
 private slots:
     void reset_dialog();
+    void colour_saturation_changed_slot(int sat);
+    void colour_saturation_changed_slot(double sat);
     void red_balanced_changed_slot(int balance);
     void green_balanced_changed_slot(int balance);
     void blue_balanced_changed_slot(int balance);
@@ -49,14 +51,14 @@ private:
     void helper_method();
     
     // Widgets
+    QSlider *mp_colsat_Slider;
     QDoubleSpinBox *mp_colsat_DSpinbox;
     QSlider *mp_red_balance_Slider;
     QSlider *mp_green_balance_Slider;
     QSlider *mp_blue_balance_Slider;
-    QLabel *mp_red_balance_Label;
-    QLabel *mp_green_balance_Label;
-    QLabel *mp_blue_balance_Label;
-    
+    QSpinBox *mp_red_balance_SpinBox;
+    QSpinBox *mp_green_balance_SpinBox;
+    QSpinBox *mp_blue_balance_SpinBox;
 };
 
 #endif // COLOUR_DIALOG_H

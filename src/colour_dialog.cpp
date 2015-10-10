@@ -25,6 +25,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 
@@ -36,13 +37,21 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     setWindowTitle(tr("Colour Settings"));
 
     // Colour saturation label and spinbox
+    mp_colsat_Slider = new QSlider(Qt::Horizontal);
+    mp_colsat_Slider->setRange(0, 1500);
+    mp_colsat_Slider->setValue(100);
+    mp_colsat_Slider->setMinimumWidth(mp_colsat_Slider->sizeHint().width() * 2);
+    connect(mp_colsat_Slider, SIGNAL(valueChanged(int)), this, SLOT(colour_saturation_changed_slot(int)));
     mp_colsat_DSpinbox = new QDoubleSpinBox;
     mp_colsat_DSpinbox->setMinimum(0.0);
     mp_colsat_DSpinbox->setMaximum(15.0);
-    mp_colsat_DSpinbox->setSingleStep(0.25);
+    mp_colsat_DSpinbox->setSingleStep(0.01);
     mp_colsat_DSpinbox->setValue(1.0);
     connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SIGNAL(colour_saturation_changed(double)));
+    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_changed_slot(double)));
     QHBoxLayout *colsat_hlayout = new QHBoxLayout;
+    colsat_hlayout->addWidget(new QLabel(tr("Saturation")));
+    colsat_hlayout->addWidget(mp_colsat_Slider);
     colsat_hlayout->addWidget(mp_colsat_DSpinbox);
     QGroupBox *colout_saturation_GroupBox = new QGroupBox(tr("Colour Saturation"));
     colout_saturation_GroupBox->setLayout(colsat_hlayout);
@@ -53,34 +62,42 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_red_balance_Slider->setValue(0);
     mp_red_balance_Slider->setMinimumWidth(mp_red_balance_Slider->sizeHint().width() * 2);
     connect(mp_red_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(red_balanced_changed_slot(int)));
-    int min_label_width = QLabel(QString::number(-255)).sizeHint().width();
-    mp_red_balance_Label = new QLabel(QString::number(0));
-    mp_red_balance_Label->setFixedWidth(min_label_width);
+    mp_red_balance_SpinBox = new QSpinBox;
+    mp_red_balance_SpinBox->setRange(-255, 255);
+    mp_red_balance_SpinBox->setValue(0);
+    connect(mp_red_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(red_balanced_changed_slot(int)));
+
+
     mp_green_balance_Slider = new QSlider(Qt::Horizontal);
     mp_green_balance_Slider->setRange(-255, +255);
     mp_green_balance_Slider->setValue(0);
     connect(mp_green_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(green_balanced_changed_slot(int)));
-    mp_green_balance_Label = new QLabel(QString::number(0));
-    mp_green_balance_Label->setFixedWidth(min_label_width);
+    mp_green_balance_SpinBox = new QSpinBox;
+    mp_green_balance_SpinBox->setRange(-255, 255);
+    mp_green_balance_SpinBox->setValue(0);
+    connect(mp_green_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(green_balanced_changed_slot(int)));
+
     mp_blue_balance_Slider = new QSlider(Qt::Horizontal);
     mp_blue_balance_Slider->setRange(-255, +255);
     mp_blue_balance_Slider->setValue(0);
     connect(mp_blue_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(blue_balanced_changed_slot(int)));
-    mp_blue_balance_Label = new QLabel(QString::number(0));
-    mp_blue_balance_Label->setFixedWidth(min_label_width);
+    mp_blue_balance_SpinBox = new QSpinBox;
+    mp_blue_balance_SpinBox->setRange(-255, 255);
+    mp_blue_balance_SpinBox->setValue(0);
+    connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balanced_changed_slot(int)));
 
     QGridLayout *colour_balance_Layout = new QGridLayout;
     colour_balance_Layout->setVerticalSpacing(5);
     colour_balance_Layout->setHorizontalSpacing(10);
     colour_balance_Layout->addWidget(new QLabel(tr("Red")), 0, 0);
     colour_balance_Layout->addWidget(mp_red_balance_Slider, 0, 1);
-    colour_balance_Layout->addWidget(mp_red_balance_Label, 0, 2);
+    colour_balance_Layout->addWidget(mp_red_balance_SpinBox, 0, 2);
     colour_balance_Layout->addWidget(new QLabel(tr("Green")), 1, 0);
     colour_balance_Layout->addWidget(mp_green_balance_Slider, 1, 1);
-    colour_balance_Layout->addWidget(mp_green_balance_Label, 1, 2);
+    colour_balance_Layout->addWidget(mp_green_balance_SpinBox, 1, 2);
     colour_balance_Layout->addWidget(new QLabel(tr("Blue")), 2, 0);
     colour_balance_Layout->addWidget(mp_blue_balance_Slider, 2, 1);
-    colour_balance_Layout->addWidget(mp_blue_balance_Label, 2, 2);
+    colour_balance_Layout->addWidget(mp_blue_balance_SpinBox, 2, 2);
 
     QGroupBox *colour_balance_GroupBox = new QGroupBox(tr("Colour Balance"));
     colour_balance_GroupBox->setLayout(colour_balance_Layout);
@@ -108,8 +125,19 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
 }
 
 
+void c_colour_dialog::colour_saturation_changed_slot(int sat) {
+    mp_colsat_DSpinbox->setValue(((double)sat/100.0));
+}
+
+
+void c_colour_dialog::colour_saturation_changed_slot(double sat) {
+    mp_colsat_Slider->setValue(100 * sat);
+}
+
+
 void c_colour_dialog::red_balanced_changed_slot(int balance) {
-    mp_red_balance_Label->setText(QString::number(balance));
+    mp_red_balance_SpinBox->setValue(balance);
+    mp_red_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 mp_red_balance_Slider->value(),
                 mp_green_balance_Slider->value(),
@@ -118,7 +146,8 @@ void c_colour_dialog::red_balanced_changed_slot(int balance) {
 
 
 void c_colour_dialog::green_balanced_changed_slot(int balance) {
-    mp_green_balance_Label->setText(QString::number(balance));
+    mp_green_balance_SpinBox->setValue(balance);
+    mp_green_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 mp_red_balance_Slider->value(),
                 mp_green_balance_Slider->value(),
@@ -127,7 +156,8 @@ void c_colour_dialog::green_balanced_changed_slot(int balance) {
 
 
 void c_colour_dialog::blue_balanced_changed_slot(int balance) {
-    mp_blue_balance_Label->setText(QString::number(balance));
+    mp_blue_balance_SpinBox->setValue(balance);
+    mp_blue_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 mp_red_balance_Slider->value(),
                 mp_green_balance_Slider->value(),
