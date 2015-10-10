@@ -107,7 +107,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
     playback_menu->addSeparator();
 
-    mp_framerate_Menu = playback_menu->addMenu(tr("Display Framerate (%1)").arg(("From Timestamps")));
+    mp_framerate_Menu = playback_menu->addMenu(tr("Display Framerate"));
     mp_framerate_Menu->setEnabled(false);
     QActionGroup *fps_ActGroup = new QActionGroup(mp_framerate_Menu);
     fps_ActGroup->setExclusive(true);
@@ -553,12 +553,7 @@ void c_ser_player::fps_changed_slot(QAction *action)
 {
     if (action != NULL) {
         m_display_framerate = action->data().toInt();
-        if (m_display_framerate == -1) {
-          mp_framerate_Menu->setTitle(tr("Display Framerate (%1)").arg(tr("From Timestamps")));
-        } else {
-          mp_framerate_Menu->setTitle(tr("Display Framerate (%1)").arg(tr("%1 fps").arg(m_display_framerate)));
-        }
-
+        mp_framerate_Menu->setTitle(tr("Display Framerate"));
         calculate_display_framerate();
     }
 }
@@ -729,6 +724,7 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_settings_action->setEnabled(true);
         } else {
             mp_colour_settings_action->setEnabled(false);
+            mp_colour_settings_Dialog->hide();
         }
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
@@ -1151,6 +1147,7 @@ void c_ser_player::debayer_enable_slot(bool enabled)
         mp_colour_settings_action->setEnabled(true);
     } else {
         mp_colour_settings_action->setEnabled(false);
+        mp_colour_settings_Dialog->hide();
     }
 
     frame_slider_changed_slot();
