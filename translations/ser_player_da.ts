@@ -67,39 +67,94 @@
     </message>
 </context>
 <context>
+    <name>c_colour_dialog</name>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="37"/>
+        <source>Colour Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="52"/>
+        <source>Saturation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="56"/>
+        <location filename="../src/colour_dialog.cpp" line="110"/>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="65"/>
+        <source>Colour Saturation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="100"/>
+        <source>Red</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="103"/>
+        <source>Green</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="106"/>
+        <source>Blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="112"/>
+        <source>Estimate</source>
+        <comment>Estimate Colour Balance Button</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="127"/>
+        <source>Colour Balance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/colour_dialog.cpp" line="131"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>c_ser_player</name>
     <message>
-        <location filename="../src/ser_player.cpp" line="65"/>
+        <location filename="../src/ser_player.cpp" line="77"/>
         <source>File</source>
         <comment>Menu title</comment>
         <translation>Fil</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="66"/>
+        <location filename="../src/ser_player.cpp" line="78"/>
         <source>Open SER File</source>
         <comment>Menu title</comment>
         <translation>Åben en SER fil</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="72"/>
+        <location filename="../src/ser_player.cpp" line="84"/>
         <source>Save Frame</source>
         <comment>Menu title</comment>
         <translation>Gem billede</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="78"/>
+        <location filename="../src/ser_player.cpp" line="91"/>
         <source>Quit</source>
         <comment>Menu title</comment>
         <translation>Forlad programmet</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="82"/>
+        <location filename="../src/ser_player.cpp" line="95"/>
         <source>Playback</source>
         <comment>Menu title</comment>
         <translation>Afspilning</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="85"/>
+        <location filename="../src/ser_player.cpp" line="98"/>
         <source>Change Zoom</source>
         <comment>Zoom menu</comment>
         <translation>Skift Zoom faktor</translation>
@@ -150,316 +205,327 @@
         <translation type="vanished">300%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="89"/>
+        <location filename="../src/ser_player.cpp" line="102"/>
         <source>%1%</source>
         <comment>Zoom menu</comment>
         <translation>%1%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="98"/>
+        <location filename="../src/ser_player.cpp" line="180"/>
         <source>Enable Debayering</source>
         <translation>Debayering til</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="105"/>
+        <location filename="../src/ser_player.cpp" line="111"/>
+        <location filename="../src/ser_player.cpp" line="559"/>
         <source>Display Framerate</source>
         <translation>Vis billed hastighed</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="110"/>
         <source>Framerate from Timestamps</source>
         <comment>Framerate menu</comment>
-        <translation>Billedhastigheden er taget fra filens tidsangivelse</translation>
+        <translation type="vanished">Billedhastigheden er taget fra filens tidsangivelse</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="117"/>
+        <location filename="../src/ser_player.cpp" line="124"/>
         <source>1 fps</source>
         <comment>Framerate menu</comment>
         <translation>1 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="123"/>
+        <location filename="../src/ser_player.cpp" line="130"/>
         <source>5 fps</source>
         <comment>Framerate menu</comment>
         <translation>5 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="129"/>
+        <location filename="../src/ser_player.cpp" line="136"/>
         <source>10 fps</source>
         <comment>Framerate menu</comment>
         <translation>10 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="135"/>
+        <location filename="../src/ser_player.cpp" line="142"/>
         <source>25 fps</source>
         <comment>Framerate menu</comment>
         <translation>25 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="141"/>
+        <location filename="../src/ser_player.cpp" line="148"/>
         <source>50 fps</source>
         <comment>Framerate menu</comment>
         <translation>50 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="147"/>
+        <location filename="../src/ser_player.cpp" line="154"/>
         <source>75 fps</source>
         <comment>Framerate menu</comment>
         <translation>75 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="153"/>
+        <location filename="../src/ser_player.cpp" line="160"/>
         <source>100 fps</source>
         <comment>Framerate menu</comment>
         <translation>100 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="159"/>
+        <location filename="../src/ser_player.cpp" line="166"/>
         <source>150 fps</source>
         <comment>Framerate menu</comment>
         <translation>150 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="165"/>
+        <location filename="../src/ser_player.cpp" line="172"/>
         <source>200 fps</source>
         <comment>Framerate menu</comment>
         <translation>200 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="175"/>
+        <location filename="../src/ser_player.cpp" line="200"/>
         <source>Check For Updates On Startup</source>
         <comment>Help menu</comment>
         <translation>Kik efter ny version under opstart</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="182"/>
+        <location filename="../src/ser_player.cpp" line="207"/>
         <source>Language</source>
         <comment>Help menu</comment>
         <translation>Sprog</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="189"/>
+        <location filename="../src/ser_player.cpp" line="214"/>
         <source>Auto</source>
         <translation>Automatisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="200"/>
-        <location filename="../src/ser_player.cpp" line="234"/>
+        <location filename="../src/ser_player.cpp" line="225"/>
+        <location filename="../src/ser_player.cpp" line="259"/>
         <source>English</source>
         <extracomment>Language name</extracomment>
         <translation>Engelsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="183"/>
+        <location filename="../src/ser_player.cpp" line="208"/>
         <source>Restart for language change to take effect</source>
         <translation>Ændringen træder først i kraft når programmet har været lukket</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="172"/>
+        <location filename="../src/ser_player.cpp" line="197"/>
         <source>Help</source>
         <comment>Help menu</comment>
         <translation>Hjælp</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="238"/>
+        <location filename="../src/ser_player.cpp" line="263"/>
         <source>French</source>
         <extracomment>Language name</extracomment>
         <translation>Fransk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="220"/>
+        <location filename="../src/ser_player.cpp" line="245"/>
         <source>Arabic</source>
         <extracomment>Language name</extracomment>
         <translation>Arabisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="222"/>
+        <location filename="../src/ser_player.cpp" line="117"/>
+        <source>From Timestamps</source>
+        <comment>Framerate menu</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="188"/>
+        <source>Colour Settings...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="247"/>
         <source>Bulgarian</source>
         <extracomment>Language name</extracomment>
         <translation>Bulgarsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="224"/>
+        <location filename="../src/ser_player.cpp" line="249"/>
         <source>Chinese</source>
         <extracomment>Language name</extracomment>
         <translation>Kinesisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="226"/>
+        <location filename="../src/ser_player.cpp" line="251"/>
         <source>Croatian</source>
         <extracomment>Language name</extracomment>
         <translation>Kroatisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="228"/>
+        <location filename="../src/ser_player.cpp" line="253"/>
         <source>Czech</source>
         <extracomment>Language name</extracomment>
         <translation>Tjekkiet</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="230"/>
+        <location filename="../src/ser_player.cpp" line="255"/>
         <source>Danish</source>
         <extracomment>Language name</extracomment>
         <translation>Dansk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="232"/>
+        <location filename="../src/ser_player.cpp" line="257"/>
         <source>Dutch</source>
         <extracomment>Language name</extracomment>
         <translation>Tysk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="236"/>
+        <location filename="../src/ser_player.cpp" line="261"/>
         <source>Finnish</source>
         <extracomment>Language name</extracomment>
         <translation>Finsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="240"/>
+        <location filename="../src/ser_player.cpp" line="265"/>
         <source>German</source>
         <extracomment>Language name</extracomment>
         <translation>Tysk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="242"/>
+        <location filename="../src/ser_player.cpp" line="267"/>
         <source>Greek</source>
         <extracomment>Language name</extracomment>
         <translation>Græsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="244"/>
+        <location filename="../src/ser_player.cpp" line="269"/>
         <source>Hebrew</source>
         <extracomment>Language name</extracomment>
         <translation>Hebrarisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="246"/>
+        <location filename="../src/ser_player.cpp" line="271"/>
         <source>Hindi</source>
         <extracomment>Language name</extracomment>
         <translation>Hindu</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="248"/>
+        <location filename="../src/ser_player.cpp" line="273"/>
         <source>Indonesian</source>
         <extracomment>Language name</extracomment>
         <translation>Indonesisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="250"/>
+        <location filename="../src/ser_player.cpp" line="275"/>
         <source>Irish</source>
         <extracomment>Language name</extracomment>
         <translation>Irsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="252"/>
+        <location filename="../src/ser_player.cpp" line="277"/>
         <source>Italian</source>
         <extracomment>Language name</extracomment>
         <translation>Italiensk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="254"/>
+        <location filename="../src/ser_player.cpp" line="279"/>
         <source>Japanese</source>
         <extracomment>Language name</extracomment>
         <translation>Japansk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="256"/>
+        <location filename="../src/ser_player.cpp" line="281"/>
         <source>Latvian</source>
         <extracomment>Language name</extracomment>
         <translation>Lettisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="258"/>
+        <location filename="../src/ser_player.cpp" line="283"/>
         <source>Lithuanian</source>
         <extracomment>Language name</extracomment>
         <translation>Litauisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="260"/>
+        <location filename="../src/ser_player.cpp" line="285"/>
         <source>Norwegian</source>
         <extracomment>Language name</extracomment>
         <translation>Norsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="262"/>
+        <location filename="../src/ser_player.cpp" line="287"/>
         <source>Polish</source>
         <extracomment>Language name</extracomment>
         <translation>Polsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="264"/>
+        <location filename="../src/ser_player.cpp" line="289"/>
         <source>Portuguese</source>
         <extracomment>Language name</extracomment>
         <translation>Portugisisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="266"/>
+        <location filename="../src/ser_player.cpp" line="291"/>
         <source>Romanian</source>
         <extracomment>Language name</extracomment>
         <translation>Rumænsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="268"/>
+        <location filename="../src/ser_player.cpp" line="293"/>
         <source>Russian</source>
         <extracomment>Language name</extracomment>
         <translation>Russisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="270"/>
+        <location filename="../src/ser_player.cpp" line="295"/>
         <source>Serbian</source>
         <extracomment>Language name</extracomment>
         <translation>Serbisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="272"/>
+        <location filename="../src/ser_player.cpp" line="297"/>
         <source>Slovenian</source>
         <extracomment>Language name</extracomment>
         <translation>Slovensk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="274"/>
+        <location filename="../src/ser_player.cpp" line="299"/>
         <source>Spanish</source>
         <extracomment>Language name</extracomment>
         <translation>Spansk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="276"/>
+        <location filename="../src/ser_player.cpp" line="301"/>
         <source>Swedish</source>
         <extracomment>Language name</extracomment>
         <translation>Svensk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="278"/>
+        <location filename="../src/ser_player.cpp" line="303"/>
         <source>Thai</source>
         <extracomment>Language name</extracomment>
         <translation>Thailansk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="280"/>
+        <location filename="../src/ser_player.cpp" line="305"/>
         <source>Ukrainian</source>
         <extracomment>Language name</extracomment>
         <translation>Ukrainsk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="282"/>
+        <location filename="../src/ser_player.cpp" line="307"/>
         <source>Urdu</source>
         <extracomment>Language name</extracomment>
         <translation>Urdu</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="284"/>
+        <location filename="../src/ser_player.cpp" line="309"/>
         <source>Vietnamese</source>
         <extracomment>Language name</extracomment>
         <translation>Vietnamesisk</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="304"/>
+        <location filename="../src/ser_player.cpp" line="329"/>
         <source>About SER Player</source>
         <comment>Help menu</comment>
         <translation>Om SER afspilleren</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="307"/>
+        <location filename="../src/ser_player.cpp" line="332"/>
         <source>About Qt</source>
         <comment>Help menu</comment>
         <translation>Om Qt</translation>
@@ -470,37 +536,37 @@
         <translation type="vanished">Dobbeltklikke for at resette zoom til 100%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="335"/>
+        <location filename="../src/ser_player.cpp" line="358"/>
         <source>Advance Frame</source>
         <comment>Button Tool tip</comment>
         <translation>Billed frem</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="342"/>
+        <location filename="../src/ser_player.cpp" line="365"/>
         <source>Back Frame</source>
         <comment>Button Tool tip</comment>
         <translation>Billed tilbage</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="347"/>
+        <location filename="../src/ser_player.cpp" line="370"/>
         <source>Play/Pause</source>
         <comment>Button Tool tip</comment>
         <translation>Afspil/Pause</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="353"/>
+        <location filename="../src/ser_player.cpp" line="376"/>
         <source>Stop</source>
         <comment>Button Tool tip</comment>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="361"/>
+        <location filename="../src/ser_player.cpp" line="384"/>
         <source>Repeat On/Off</source>
         <comment>Button Tool tip</comment>
         <translation>Gentag Til/Fra</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="367"/>
+        <location filename="../src/ser_player.cpp" line="390"/>
         <source>Frame number/Total Frames</source>
         <comment>Tool tip</comment>
         <translation>Billed nummer/Total antal billeder</translation>
@@ -510,13 +576,13 @@
         <translation type="vanished">-- FPS</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="372"/>
+        <location filename="../src/ser_player.cpp" line="395"/>
         <source>Display Frame rate</source>
         <comment>Tool tip</comment>
         <translation>Vis billedhastigheden</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="376"/>
+        <location filename="../src/ser_player.cpp" line="399"/>
         <source>Colour ID</source>
         <comment>Tool tip</comment>
         <translation>Farve ID</translation>
@@ -527,13 +593,13 @@
         <translation type="vanished">100%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="381"/>
+        <location filename="../src/ser_player.cpp" line="404"/>
         <source>Display Zoom Level</source>
         <comment>Tool tip</comment>
         <translation>Vis Zoom procent</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="386"/>
+        <location filename="../src/ser_player.cpp" line="409"/>
         <source>Frame size</source>
         <comment>Tool tip</comment>
         <translation>Billed størrelse</translation>
@@ -543,206 +609,206 @@
         <translation type="vanished">--Bit</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="391"/>
+        <location filename="../src/ser_player.cpp" line="414"/>
         <source>Pixel bit depth</source>
         <comment>Tool tip</comment>
         <translation>Pixel bitdybte</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="395"/>
-        <location filename="../src/ser_player.cpp" line="689"/>
+        <location filename="../src/ser_player.cpp" line="418"/>
+        <location filename="../src/ser_player.cpp" line="766"/>
         <source>No Timestamp</source>
         <comment>Timestamp label for no timestamp</comment>
         <translation>Ingen tidsangivelse</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="396"/>
+        <location filename="../src/ser_player.cpp" line="419"/>
         <source>Frame timestamp</source>
         <comment>Tool tip</comment>
         <translation>Billedets tidsangivelse</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="559"/>
+        <location filename="../src/ser_player.cpp" line="612"/>
         <source>About Qt</source>
         <comment>Message box title</comment>
         <translation>Om Qt</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="566"/>
+        <location filename="../src/ser_player.cpp" line="619"/>
         <source>Open SER File</source>
         <comment>Open file dialog title</comment>
         <translation>Åben SER fil</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="568"/>
+        <location filename="../src/ser_player.cpp" line="621"/>
         <source>SER Files (*.ser)</source>
         <comment>Filetype filter</comment>
         <translation>SER Fil (*.ser)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="588"/>
+        <location filename="../src/ser_player.cpp" line="641"/>
         <source>Invalid SER File</source>
         <comment>Message box title for invalid SER file</comment>
         <translation>SER filen er defekt</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="383"/>
+        <location filename="../src/ser_player.cpp" line="406"/>
         <source>%1x%2</source>
         <comment>Frame size label</comment>
         <translation>%1x%2</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="388"/>
+        <location filename="../src/ser_player.cpp" line="411"/>
         <source>%1-Bit</source>
         <comment>Pixel depth label</comment>
         <translation>%1-Bit</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="629"/>
+        <location filename="../src/ser_player.cpp" line="690"/>
         <source>MONO</source>
         <comment>Colour ID label</comment>
         <translation>MONO</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="632"/>
+        <location filename="../src/ser_player.cpp" line="693"/>
         <source>RGGB</source>
         <comment>Colour ID label</comment>
         <translation>RGGB</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="635"/>
+        <location filename="../src/ser_player.cpp" line="697"/>
         <source>GRBG</source>
         <comment>Colour ID label</comment>
         <translation>GRBG</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="638"/>
+        <location filename="../src/ser_player.cpp" line="701"/>
         <source>GBRG</source>
         <comment>Colour ID label</comment>
         <translation>GBRG</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="641"/>
+        <location filename="../src/ser_player.cpp" line="705"/>
         <source>BGGR</source>
         <comment>Colour ID label</comment>
         <translation>BGGR</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="644"/>
+        <location filename="../src/ser_player.cpp" line="709"/>
         <source>CYYM</source>
         <comment>Colour ID label</comment>
         <translation>CYYM</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="647"/>
+        <location filename="../src/ser_player.cpp" line="712"/>
         <source>YCMY</source>
         <comment>Colour ID label</comment>
         <translation>YCMY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="650"/>
+        <location filename="../src/ser_player.cpp" line="715"/>
         <source>YMCY</source>
         <comment>Colour ID label</comment>
         <translation>YMCY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="653"/>
+        <location filename="../src/ser_player.cpp" line="718"/>
         <source>MYYC</source>
         <comment>Colour ID label</comment>
         <translation>MYYC</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="656"/>
+        <location filename="../src/ser_player.cpp" line="721"/>
         <source>RGB</source>
         <comment>Colour ID label</comment>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="659"/>
+        <location filename="../src/ser_player.cpp" line="725"/>
         <source>BGR</source>
         <comment>Colour ID label</comment>
         <translation>BGR</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="662"/>
+        <location filename="../src/ser_player.cpp" line="729"/>
         <source>????</source>
         <comment>Colour ID label for unknown ID</comment>
         <translation>????</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="393"/>
+        <location filename="../src/ser_player.cpp" line="416"/>
         <source>%3/%2/%1 %4:%5:%6.%7 UT</source>
         <comment>Timestamp label</comment>
         <translation>%3/%2/%1 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="703"/>
+        <location filename="../src/ser_player.cpp" line="787"/>
         <source>.jpg</source>
         <translation>.jpg</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="704"/>
+        <location filename="../src/ser_player.cpp" line="788"/>
         <source>Joint Picture Expert Group Image (*.jpg)</source>
         <comment>Filetype filter</comment>
         <translation>Joint Picture Expert Group Image (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="705"/>
+        <location filename="../src/ser_player.cpp" line="789"/>
         <source>.bmp</source>
         <translation>.bmp</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="706"/>
+        <location filename="../src/ser_player.cpp" line="790"/>
         <source>Windows Bitmap Image (*.bmp)</source>
         <comment>Filetype filter</comment>
         <translation>Windows Bit Image (*.bmp)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="707"/>
+        <location filename="../src/ser_player.cpp" line="791"/>
         <source>.png</source>
         <translation>.png</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="708"/>
+        <location filename="../src/ser_player.cpp" line="792"/>
         <source>Portable Network Graphics Image (*.png)</source>
         <comment>Filetype filter</comment>
         <translation>Portable Network Graphics Image (*.png)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="709"/>
+        <location filename="../src/ser_player.cpp" line="793"/>
         <source>.tif</source>
         <translation>.tif</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="710"/>
+        <location filename="../src/ser_player.cpp" line="794"/>
         <source>Tagged Image File Format (*.tif)</source>
         <comment>Filetype filter</comment>
         <translation>Tagged Image File Format (*.tif)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="712"/>
+        <location filename="../src/ser_player.cpp" line="796"/>
         <source>Save Frame</source>
         <comment>Save frame message box title</comment>
         <translation>Gem Billede</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="364"/>
+        <location filename="../src/ser_player.cpp" line="387"/>
         <source>%1/%2</source>
         <comment>Frame number/Frame count label</comment>
         <translation>%1/%2</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1567"/>
+        <location filename="../src/ser_player.cpp" line="2296"/>
         <source>SER Player</source>
         <translation>SER Afspiller</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1568"/>
+        <location filename="../src/ser_player.cpp" line="2297"/>
         <source>A simple video player for SER files.</source>
         <translation>En simpelt afspiller for SER Video.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1572"/>
+        <location filename="../src/ser_player.cpp" line="2301"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Dansk oversættelse ved Leif Jørgensen</translation>
@@ -762,37 +828,37 @@
         <translation type="vanished">Dette program er distribueret med det håb det vil være brugbart uden nogen som helst garenti. Se GNU General Public License for flere detaljer.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1591"/>
+        <location filename="../src/ser_player.cpp" line="2320"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Du skulle have modtaget en kopi af GNU General Public Licence sammen med programmet.  Hvis ikke, se &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1596"/>
+        <location filename="../src/ser_player.cpp" line="2325"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>Om SER Afspilleren</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1604"/>
+        <location filename="../src/ser_player.cpp" line="2333"/>
         <source>No SER File Open</source>
         <comment>No SER file message on inital image</comment>
         <translation>Ingen SER Fil er Åben</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1643"/>
+        <location filename="../src/ser_player.cpp" line="2372"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>En ny udgave af SER Player er tilgængelig: %1</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="378"/>
+        <location filename="../src/ser_player.cpp" line="401"/>
         <source>%1%</source>
         <comment>Zoom level label</comment>
         <translation>%1%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="370"/>
+        <location filename="../src/ser_player.cpp" line="393"/>
         <source>%1 FPS</source>
         <comment>Framerate label</comment>
         <translation>%1 FPS</translation>

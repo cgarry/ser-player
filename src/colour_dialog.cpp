@@ -28,8 +28,8 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
-
 #include "colour_dialog.h"
+
 
 c_colour_dialog::c_colour_dialog(QWidget *parent)
     : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
@@ -115,7 +115,6 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     QHBoxLayout *colour_balance_HLayout = new QHBoxLayout;
     colour_balance_HLayout->setMargin(0);
     colour_balance_HLayout->setSpacing(5);
-//    colour_balance_HLayout->addStretch();
     colour_balance_HLayout->addWidget(reset_colour_balance_button);
     colour_balance_HLayout->addWidget(estimate_colour_balance_button);
     colour_balance_HLayout->addStretch();

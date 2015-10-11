@@ -192,7 +192,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_colour_settings_Dialog->hide();
     connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed(double)));
     connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed(double,double,double)));
-    connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(auto_detect_colour_balance()));
+    connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
@@ -585,7 +585,7 @@ void c_ser_player::colour_balance_changed(double red, double green, double blue)
 }
 
 
-void c_ser_player::auto_detect_colour_balance()
+void c_ser_player::estimate_colour_balance()
 {
     detect_colour_balance();
 }
@@ -941,6 +941,11 @@ void c_ser_player::detect_colour_balance()
             if (red_max_average > max_max_average) {
                 max_max_average = red_max_average;
             }
+
+            // Prevent divide by zero errors
+            blue_max_average = (blue_max_average == 0) ? max_max_average : blue_max_average;
+            green_max_average = (green_max_average == 0) ? max_max_average : green_max_average;
+            red_max_average = (red_max_average == 0) ? max_max_average : red_max_average;
 
             double blue_gain = (double)max_max_average / blue_max_average;
             double green_gain = (double)max_max_average / green_max_average;
