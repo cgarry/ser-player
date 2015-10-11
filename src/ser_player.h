@@ -75,10 +75,12 @@ private:
     QLabel *mp_fps_Label;
     QString m_framecount_label_String;
     QLabel *mp_framecount_Label;
-    QMutex *mp_ser_file_Mutex;
     QString m_timestamp_label_String;
     QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
+
+    QMutex *mp_ser_file_Mutex;
+    QMutex *mp_frame_slider_changed_Mutex;
 
     c_pipp_ser *mp_ser_file;
     QString m_ser_directory;
@@ -95,11 +97,12 @@ private:
     int32_t m_colour_id;
     bool m_is_colour;
     bool m_has_bayer_pattern;
+    bool m_detect_colour_balance;
 
     double m_colour_saturation;
-    int m_red_balance;
-    int m_green_balance;
-    int m_blue_balance;
+    double m_red_balance;
+    double m_green_balance;
+    double m_blue_balance;
 
 public:
     c_ser_player(QWidget *parent = 0);
@@ -110,7 +113,8 @@ public slots:
     void fps_changed_slot(QAction *);
     void colour_settings_slot();
     void colour_saturation_changed(double saturation);
-    void colour_balance_changed(int red, int green, int blue);
+    void colour_balance_changed(double red, double green, double blue);
+    void auto_detect_colour_balance();
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
@@ -141,10 +145,12 @@ private:
     void create_no_file_open_image();
     void conv_data_ready_for_qimage(bool image_debayered);
     bool debayer_image_bilinear();
+    void detect_colour_balance();
     void change_colour_saturation3(double change);
     void change_colour_saturation2(double change);
     void change_colour_saturation(double change);
     void change_colour_balance(int red, int green, int blue);
+    void change_colour_balance2(double red, double green, double blue);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 

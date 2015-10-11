@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.4"
+#define VERSION_STRING "v1.3.5"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -65,14 +65,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_framecount = 1;
     m_is_colour = false;
     m_has_bayer_pattern = false;
+    m_detect_colour_balance = false;
 
     // Menu Items
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
-    m_red_balance = 0;
-    m_green_balance = 0;
-    m_blue_balance = 0;
+    m_red_balance = 1.0;
+    m_green_balance = 1.0;
+    m_blue_balance = 1.0;
     QMenu *file_menu = menuBar()->addMenu(tr("File", "Menu title"));
     QAction *fileopen_Act = new QAction(tr("Open SER File", "Menu title"), this);
     file_menu->addAction(fileopen_Act);
@@ -190,7 +191,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_colour_settings_Dialog = new c_colour_dialog(this);
     mp_colour_settings_Dialog->hide();
     connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed(double)));
-    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(int,int,int)), this, SLOT(colour_balance_changed(int,int,int)));
+    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed(double,double,double)));
+    connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(auto_detect_colour_balance()));
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
@@ -335,6 +337,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     create_no_file_open_image();  // Create m_no_file_open_Pixmap
 
     mp_ser_file_Mutex = new QMutex;
+    mp_frame_slider_changed_Mutex = new QMutex;
 
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
@@ -573,12 +576,18 @@ void c_ser_player::colour_saturation_changed(double value)
 }
 
 
-void c_ser_player::colour_balance_changed(int red, int green, int blue)
+void c_ser_player::colour_balance_changed(double red, double green, double blue)
 {
     m_red_balance = red;
     m_green_balance = green;
     m_blue_balance = blue;
     frame_slider_changed_slot();
+}
+
+
+void c_ser_player::auto_detect_colour_balance()
+{
+    detect_colour_balance();
 }
 
 
@@ -658,8 +667,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Adjust colour saturation if required
         if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
+            change_colour_balance2(m_red_balance, m_green_balance, m_blue_balance);
             change_colour_saturation(m_colour_saturation);
-            change_colour_balance(m_red_balance, m_green_balance, m_blue_balance);
         }
 
         conv_data_ready_for_qimage(image_debayered);
@@ -820,8 +829,134 @@ void c_ser_player::save_frame_slot()
 }
 
 
+void c_ser_player::detect_colour_balance()
+{
+    if (m_current_state != STATE_NO_FILE) {
+        mp_frame_slider_changed_Mutex->lock();
+
+        // Get frame from SER file
+        mp_ser_file_Mutex->lock();
+        int32_t frame_size = m_frame_width * m_frame_height * m_bytes_per_sample * 3;
+        delete[] mp_frame_buffer;
+        mp_frame_buffer = new uint8_t[frame_size];
+        int32_t ret = mp_ser_file->get_frame(m_framecount, mp_frame_buffer);
+        mp_ser_file_Mutex->unlock();
+
+        if (ret >= 0) {
+            // Debayer frame if required
+            bool image_debayered = false;
+            if (c_persistent_data::m_enable_debayering) {
+                image_debayered = debayer_image_bilinear();
+            }
+
+            if (m_bytes_per_sample == 2) {
+                // Convert data from 16-bit to 8 bit
+                uint16_t *p_read_data = (uint16_t *)mp_frame_buffer;
+                uint8_t *p_write_data = mp_frame_buffer;
+                for (int pixel = 0; pixel < m_frame_width * m_frame_height * 3; pixel++) {
+                    *p_write_data++ = (*p_read_data++) >> 8;
+                }
+            }
+
+            // Stretch histogram for colour image
+            const int PIXEL_COUNT = 25;
+            int32_t blue_table[256];
+            int32_t green_table[256];
+            int32_t red_table[256];
+
+            uint8_t *blue_data_ptr;
+            uint8_t *green_data_ptr;
+            uint8_t *red_data_ptr;
+            if (m_colour_id == COLOURID_RGB) {
+                // Data order RGB
+                blue_data_ptr = mp_frame_buffer + 2;
+                green_data_ptr = mp_frame_buffer + 1;
+                red_data_ptr = mp_frame_buffer;
+            } else {
+                // Data order BGR
+                blue_data_ptr = mp_frame_buffer;
+                green_data_ptr = mp_frame_buffer + 1;
+                red_data_ptr = mp_frame_buffer + 2;
+            }
+
+            mp_frame_slider_changed_Mutex->unlock();
+
+            // Clear histgrams
+            memset(blue_table, 0, 256 * sizeof(int32_t));
+            memset(green_table, 0, 256 * sizeof(int32_t));
+            memset(red_table, 0, 256 * sizeof(int32_t));
+
+            // Create histograms
+            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+                blue_table[*blue_data_ptr]++;
+                green_table[*green_data_ptr]++;
+                red_table[*red_data_ptr]++;
+                blue_data_ptr += 3;
+                green_data_ptr += 3;
+                red_data_ptr += 3;
+            }
+
+            // Get averages for max PIXEL_COUNT pixels
+            uint32_t blue_max_average = 0;
+            uint32_t count = PIXEL_COUNT;
+            for (int x = 255; x > 0; x--) {
+                if (count <= (uint32_t)blue_table[x]) {
+                    blue_max_average += count * x;
+                    break;
+                } else {
+                    blue_max_average += blue_table[x] * x;
+                    count -= blue_table[x];
+                }
+            }
+
+            uint32_t green_max_average = 0;
+            count = PIXEL_COUNT;
+            for (int x = 255; x > 0; x--) {
+                if (count <= (uint32_t)green_table[x]) {
+                    green_max_average += count * x;
+                    break;
+                } else {
+                    green_max_average += green_table[x] * x;
+                    count -= green_table[x];
+                }
+            }
+
+            uint32_t red_max_average = 0;
+            count = PIXEL_COUNT;
+            for (int x = 255; x > 0; x--) {
+                if (count <= (uint32_t)red_table[x]) {
+                    red_max_average += count * x;
+                    break;
+                } else {
+                    red_max_average += red_table[x] * x;
+                    count -= red_table[x];
+                }
+            }
+
+            uint32_t max_max_average = blue_max_average;
+            if (green_max_average > max_max_average) {
+                max_max_average = green_max_average;
+            }
+
+            if (red_max_average > max_max_average) {
+                max_max_average = red_max_average;
+            }
+
+            double blue_gain = (double)max_max_average / blue_max_average;
+            double green_gain = (double)max_max_average / green_max_average;
+            double red_gain = (double)max_max_average / red_max_average;
+
+            mp_colour_settings_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
+        }
+    }
+}
+
+
+
 void c_ser_player::frame_slider_changed_slot()
 {
+    mp_frame_slider_changed_Mutex->lock();
+
     // Update image to new frame
     if (m_current_state == STATE_NO_FILE) {
         m_framecount = 1;
@@ -866,10 +1001,10 @@ void c_ser_player::frame_slider_changed_slot()
                 image_debayered = debayer_image_bilinear();
             }
 
-            // Adjust colour saturation and balance if required
             if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
+                // Adjust colour saturation and balance if required
+                change_colour_balance2(m_red_balance, m_green_balance, m_blue_balance);
                 change_colour_saturation(m_colour_saturation);
-                change_colour_balance(m_red_balance, m_green_balance, m_blue_balance);
             }
 
             conv_data_ready_for_qimage(image_debayered);
@@ -883,6 +1018,8 @@ void c_ser_player::frame_slider_changed_slot()
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
     }
+
+    mp_frame_slider_changed_Mutex->unlock();
 }
 
 
@@ -2088,6 +2225,70 @@ void c_ser_player::change_colour_balance(int red, int green, int blue)
 }
 
 
+void c_ser_player::change_colour_balance2(double red, double green, double blue)
+{
+    if (red == 1.0 && green == 1.0 && blue == 1.0) {
+        // Early return
+        return;
+    }
+
+    double balance[3];
+    if (m_colour_id == COLOURID_RGB) {
+        // Data is in RGB format
+        balance[0] = red;
+        balance[1] = green;
+        balance[2] = blue;
+    } else {
+        // Data is in BGR format
+        balance[0] = blue;
+        balance[1] = green;
+        balance[2] = red;
+    }
+
+    if (m_bytes_per_sample == 1) {
+        // 8-bit data
+        uint8_t *p_frame_data = mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            int32_t colour0 = *(p_frame_data+0);
+            int32_t colour1 = *(p_frame_data+1);
+            int32_t colour2 = *(p_frame_data+2);
+            colour0 = balance[0] * colour0;
+            colour1 = balance[1] * colour1;
+            colour2 = balance[2] * colour2;
+            colour0 = (colour0 > 0xFF) ? 0xFF : colour0;
+            colour1 = (colour1 > 0xFF) ? 0xFF : colour1;
+            colour2 = (colour2 > 0xFF) ? 0xFF : colour2;
+            colour0 = (colour0 < 0) ? 0 : colour0;
+            colour1 = (colour1 < 0) ? 0 : colour1;
+            colour2 = (colour2 < 0) ? 0 : colour2;
+            *p_frame_data++ = colour0;
+            *p_frame_data++ = colour1;
+            *p_frame_data++ = colour2;
+        }
+    } else {
+        // 16-bit data
+        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
+        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
+            int32_t colour0 = *(p_frame_data+0);
+            int32_t colour1 = *(p_frame_data+1);
+            int32_t colour2 = *(p_frame_data+2);
+            colour0 = balance[0] * colour0;
+            colour1 = balance[1] * colour1;
+            colour2 = balance[2] * colour2;
+            colour0 = (colour0 > 0xFFFF) ? 0xFFFF : colour0;
+            colour1 = (colour1 > 0xFFFF) ? 0xFFFF : colour1;
+            colour2 = (colour2 > 0xFFFF) ? 0xFFFF : colour2;
+            colour0 = (colour0 < 0) ? 0 : colour0;
+            colour1 = (colour1 < 0) ? 0 : colour1;
+            colour2 = (colour2 < 0) ? 0 : colour2;
+            *p_frame_data++ = colour0;
+            *p_frame_data++ = colour1;
+            *p_frame_data++ = colour2;
+        }
+    }
+}
+
+
 void c_ser_player::about_ser_player()
 {
     QPixmap ser_player_logoPixmap(":/res/resources/ser_player_logo_150x150.png");
@@ -2267,4 +2468,3 @@ void c_ser_player::calculate_display_framerate()
     mp_fps_Label->setText(m_fps_label_String.arg(fps));
     mp_frame_Timer->setInterval(m_display_frame_time);
 }
-
