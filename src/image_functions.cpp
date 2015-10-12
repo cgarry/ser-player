@@ -553,9 +553,12 @@ void change_colour_balance(
     if (colour_balance_enabled) {
         uint8_t *p_frame_data = image_details.p_buffer;
         for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-            *p_frame_data = colbal_b_lut[*p_frame_data++];
-            *p_frame_data = colbal_g_lut[*p_frame_data++];
-            *p_frame_data = colbal_r_lut[*p_frame_data++];
+            *p_frame_data = colbal_b_lut[*p_frame_data];
+            p_frame_data++;
+            *p_frame_data = colbal_g_lut[*p_frame_data];
+            p_frame_data++;
+            *p_frame_data = colbal_r_lut[*p_frame_data];
+            p_frame_data++;
         }
     }
 }
