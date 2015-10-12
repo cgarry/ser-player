@@ -69,7 +69,6 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     m_frame_details.width = 100;
     m_frame_details.height = 100;
-    m_frame_details.bytes_per_sample = 1;
     m_frame_details.colour_id = COLOURID_MONO;
     m_frame_details.p_buffer = NULL;
 
@@ -598,11 +597,15 @@ void c_ser_player::estimate_colour_balance()
 
         // Get frame from SER file
         mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
         delete[] m_frame_details.p_buffer;
         m_frame_details.p_buffer = new uint8_t[frame_size];
         int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
         mp_ser_file_Mutex->unlock();
+
+        if (mp_ser_file->get_bytes_per_sample() == 2) {
+            image_functions::convert_image_to_8bit(m_frame_details);
+        }
 
         if (ret >= 0) {
             // Debayer frame if required
@@ -687,11 +690,14 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_count_Slider->setMaximum(m_total_frames);
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
-        m_frame_details.bytes_per_sample = mp_ser_file->get_bytes_per_sample();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
-        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
-        m_frame_details.p_buffer = new uint8_t[frame_size];
+//        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        m_frame_details.p_buffer = new uint8_t[m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3];
         mp_ser_file->get_frame(m_frame_details.p_buffer);
+
+        if (mp_ser_file->get_bytes_per_sample() == 2) {
+            image_functions::convert_image_to_8bit(m_frame_details);
+        }
 
         // Debayer frame if required
         bool image_debayered = false;
@@ -886,7 +892,7 @@ void c_ser_player::frame_slider_changed_slot()
         mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
         delete[] m_frame_details.p_buffer;
         m_frame_details.p_buffer = new uint8_t[frame_size];
         int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
@@ -915,6 +921,10 @@ void c_ser_player::frame_slider_changed_slot()
         mp_ser_file_Mutex->unlock();
 
         if (ret >= 0) {
+            if (mp_ser_file->get_bytes_per_sample() == 2) {
+                image_functions::convert_image_to_8bit(m_frame_details);
+            }
+
             // Debayer frame if required
             bool image_debayered = false;
             if (c_persistent_data::m_enable_debayering) {
@@ -941,7 +951,7 @@ void c_ser_player::frame_slider_changed_slot()
             delete mp_frame_Image;
             mp_frame_Image = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
             mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
-//            m_frame_image_label->setMinimumSize(QSize(1, 1));
+            //m_frame_image_label->setMinimumSize(QSize(1, 1));
         } else {
             mp_frame_Timer->stop();
             mp_play_PushButton->setIcon(m_play_Pixmap);

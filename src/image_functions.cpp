@@ -16,6 +16,7 @@
 // ---------------------------------------------------------------------
 
 
+#include <QDebug>
 #include <cmath>
 #include "image_functions.h"
 #include "pipp_ser.h"
@@ -268,6 +269,19 @@ void debayer_pixel_bilinear(
 }
 
 
+void convert_image_to_8bit(
+     struct s_image_details &image_details)
+{
+    uint16_t *p_read_data = (uint16_t *)image_details.p_buffer;
+    uint8_t *p_write_data = image_details.p_buffer;
+    for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
+        *p_write_data++ = (*p_read_data++) >> 8;
+        *p_write_data++ = (*p_read_data++) >> 8;
+        *p_write_data++ = (*p_read_data++) >> 8;
+    }
+}
+
+
 bool debayer_image_bilinear(
     struct s_image_details &image_details)
 {
@@ -290,233 +304,117 @@ bool debayer_image_bilinear(
         return false;
     }
 
-    if (image_details.bytes_per_sample == 1) {
-        int32_t x, y;
-        uint8_t *raw_data_ptr;
-        uint8_t *rgb_data_ptr1;
+    int32_t x, y;
+    uint8_t *raw_data_ptr;
+    uint8_t *rgb_data_ptr1;
 
-        uint32_t bayer_x = bayer_code % 2;
-        uint32_t bayer_y = ((bayer_code/2) % 2) ^ (image_details.height % 2);
+    uint32_t bayer_x = bayer_code % 2;
+    uint32_t bayer_y = ((bayer_code/2) % 2) ^ (image_details.height % 2);
 
-        // Buffer to create RGB image in
-        uint8_t *rgb_data = new uint8_t[3 * image_details.width * image_details.height];
+    // Buffer to create RGB image in
+    uint8_t *rgb_data = new uint8_t[3 * image_details.width * image_details.height];
 
-        // Debayer bottom line
-        y = 0;
-        for (x = 0; x < image_details.width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
-        }
-
-        // Debayer top line
-        y = image_details.height -1;
-        for (x = 0; x < image_details.width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
-        }
-
-        // Debayer left edge
-        x = 0;
-        for (y = 1; y < image_details.height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
-        }
-
-        // Debayer right edge
-        x = image_details.width-1;
-        for (y = 1; y < image_details.height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
-        }
-
-        // Debayer to create blue, green and red data
-        rgb_data_ptr1 = rgb_data + (3 * (image_details.width + 1));
-        raw_data_ptr = image_details.p_buffer + (3 * (image_details.width + 1));
-        for (y = 1; y < (image_details.height-1); y++) {
-            for (x = 1; x < (image_details.width-1); x++) {
-                uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-                // Blue channel
-                switch (bayer) {
-                    case 0:
-                        // Blue - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                             *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
-                        raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-                        break;
-
-                    case 1:
-                        // Blue - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;;
-
-                        // Red - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    case 2:
-                        // Blue - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    default:
-                        // Blue - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                             *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
-                        raw_data_ptr++;
-                        break;
-                }
-            }
-
-            rgb_data_ptr1 += 6;
-            raw_data_ptr += 6;
-        }
-
-        // Make new debayered data the frame buffer data
-        delete[] image_details.p_buffer;
-        image_details.p_buffer = rgb_data;
-
-    } else {  // Bytes per sample == 2
-        int32_t x, y;
-        uint16_t *data_16 = (uint16_t *)image_details.p_buffer;
-        uint16_t *raw_data_ptr;
-        uint16_t *rgb_data_ptr1;
-
-        uint32_t bayer_x = bayer_code % 2;
-        uint32_t bayer_y = ((bayer_code/2) % 2) ^ (image_details.height % 2);
-
-        // Buffer to create RGB image in
-        uint16_t *rgb_data = new uint16_t[3 * image_details.width * image_details.height];
-
-        // Debayer bottom line
-        y = 0;
-        for (x = 0; x < image_details.width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data, image_details);
-        }
-
-        // Debayer top line
-        y = image_details.height -1;
-        for (x = 0; x < image_details.width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data, image_details);
-        }
-
-        // Debayer left edge
-        x = 0;
-        for (y = 1; y < image_details.height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data, image_details);
-        }
-
-        // Debayer right edge
-        x = image_details.width-1;
-        for (y = 1; y < image_details.height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data, image_details);
-        }
-
-        // Debayer main image to create blue, green and red data
-        rgb_data_ptr1 = rgb_data + (3 * (image_details.width + 1));
-        raw_data_ptr = data_16 + (3 * (image_details.width + 1));
-        for (y = 1; y < (image_details.height-1); y++) {
-            for (x = 1; x < (image_details.width-1); x++) {
-                uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-                // Blue channel
-                switch (bayer) {
-                    case 0:
-                        // Blue - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                             *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
-                        raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-                        break;
-
-                    case 1:
-                        // Blue - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    case 2:
-                        // Blue - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    default:
-                        // Blue - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                             *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
-                        raw_data_ptr++;
-                        break;
-                }
-            }
-
-            rgb_data_ptr1 += 6;
-            raw_data_ptr += 6;
-        }
-
-        // Make new debayered data the frame buffer data
-        delete[] image_details.p_buffer;
-        image_details.p_buffer = (uint8_t *)rgb_data;
+    // Debayer bottom line
+    y = 0;
+    for (x = 0; x < image_details.width; x++) {
+        uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
+        debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
     }
+
+    // Debayer top line
+    y = image_details.height -1;
+    for (x = 0; x < image_details.width; x++) {
+        uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
+        debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
+    }
+
+    // Debayer left edge
+    x = 0;
+    for (y = 1; y < image_details.height-1; y++) {
+        uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
+        debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
+    }
+
+    // Debayer right edge
+    x = image_details.width-1;
+    for (y = 1; y < image_details.height-1; y++) {
+        uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
+        debayer_pixel_bilinear <uint8_t> (bayer, x, y, image_details.p_buffer, rgb_data, image_details);
+    }
+
+    // Debayer to create blue, green and red data
+    rgb_data_ptr1 = rgb_data + (3 * (image_details.width + 1));
+    raw_data_ptr = image_details.p_buffer + (3 * (image_details.width + 1));
+    for (y = 1; y < (image_details.height-1); y++) {
+        for (x = 1; x < (image_details.width-1); x++) {
+            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
+            // Blue channel
+            switch (bayer) {
+                case 0:
+                    // Blue - Average of 4 corners;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
+                                         *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
+                    raw_data_ptr++;
+
+                    // Green - Return average of 4 nearest neighbours
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
+                                         *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
+                    raw_data_ptr++;
+
+                    // Red - Simple case just return data at this position
+                    *rgb_data_ptr1++ = *raw_data_ptr++;
+                    break;
+
+                case 1:
+                    // Blue - Average of above and below pixels
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
+                    raw_data_ptr++;
+
+                    // Green - just this position
+                    *rgb_data_ptr1++ = *raw_data_ptr++;;
+
+                    // Red - Average of left and right pixels
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
+                    raw_data_ptr++;
+                    break;
+
+                case 2:
+                    // Blue - Average of left and right pixels
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
+                    raw_data_ptr++;
+
+                    // Green - just this position
+                    *rgb_data_ptr1++ = *raw_data_ptr++;
+
+                    // Red - Average of above and below pixels
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
+                    raw_data_ptr++;
+                    break;
+
+                default:
+                    // Blue - Simple case just return data at this position
+                    *rgb_data_ptr1++ = *raw_data_ptr++;
+
+                    // Green - Return average of 4 nearest neighbours
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
+                                         *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
+                    raw_data_ptr++;
+
+                    // Red - Average of 4 corners;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
+                                         *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
+                    raw_data_ptr++;
+                    break;
+            }
+        }
+
+        rgb_data_ptr1 += 6;
+        raw_data_ptr += 6;
+    }
+
+    // Make new debayered data the frame buffer data
+    delete[] image_details.p_buffer;
+    image_details.p_buffer = rgb_data;
 
     return true;
 }
@@ -528,15 +426,6 @@ void estimate_colour_balance(
     double &blue_gain,
     const struct s_image_details &image_details)
 {
-    if (image_details.bytes_per_sample == 2) {
-        // Convert data from 16-bit to 8 bit
-        uint16_t *p_read_data = (uint16_t *)image_details.p_buffer;
-        uint8_t *p_write_data = image_details.p_buffer;
-        for (int pixel = 0; pixel < image_details.width * image_details.height * 3; pixel++) {
-            *p_write_data++ = (*p_read_data++) >> 8;
-        }
-    }
-
     const int PIXEL_COUNT = 25;
     int32_t blue_table[256];
     int32_t green_table[256];
@@ -545,17 +434,11 @@ void estimate_colour_balance(
     uint8_t *blue_data_ptr;
     uint8_t *green_data_ptr;
     uint8_t *red_data_ptr;
-    if (image_details.colour_id == COLOURID_RGB) {
-        // Data order RGB
-        blue_data_ptr = image_details.p_buffer + 2;
-        green_data_ptr = image_details.p_buffer + 1;
-        red_data_ptr = image_details.p_buffer;
-    } else {
-        // Data order BGR
-        blue_data_ptr = image_details.p_buffer;
-        green_data_ptr = image_details.p_buffer + 1;
-        red_data_ptr = image_details.p_buffer + 2;
-    }
+
+    // Data order is always BGR
+    blue_data_ptr = image_details.p_buffer;
+    green_data_ptr = image_details.p_buffer + 1;
+    red_data_ptr = image_details.p_buffer + 2;
 
     // Clear histgrams
     memset(blue_table, 0, 256 * sizeof(int32_t));
@@ -631,69 +514,41 @@ void estimate_colour_balance(
 
 
 void change_colour_balance(
-    double red,
-    double green,
-    double blue,
+    double red_gain,
+    double green_gain,
+    double blue_gain,
     const struct s_image_details &image_details)
 {
-    if (red == 1.0 && green == 1.0 && blue == 1.0) {
+    if (red_gain == 1.0 && green_gain == 1.0 && blue_gain == 1.0) {
         // Early return
         return;
     }
 
-    double balance[3];
-    if (image_details.colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        balance[0] = red;
-        balance[1] = green;
-        balance[2] = blue;
-    } else {
-        // Data is in BGR format
-        balance[0] = blue;
-        balance[1] = green;
-        balance[2] = red;
-    }
+    // 8-bit data
+    uint8_t *p_frame_data = image_details.p_buffer;
+    for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
+        // Get current pixel from buffer
+        int32_t blue = *(p_frame_data+0);
+        int32_t green = *(p_frame_data+1);
+        int32_t red = *(p_frame_data+2);
 
-    if (image_details.bytes_per_sample == 1) {
-        // 8-bit data
-        uint8_t *p_frame_data = image_details.p_buffer;
-        for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 = (int32_t)(balance[0] * colour0);
-            colour1 = (int32_t)(balance[1] * colour1);
-            colour2 = (int32_t)(balance[2] * colour2);
-            colour0 = (colour0 > 0xFF) ? 0xFF : colour0;
-            colour1 = (colour1 > 0xFF) ? 0xFF : colour1;
-            colour2 = (colour2 > 0xFF) ? 0xFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
-    } else {
-        // 16-bit data
-        uint16_t *p_frame_data = (uint16_t *)image_details.p_buffer;
-        for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 = (int32_t)(balance[0] * colour0);
-            colour1 = (int32_t)(balance[1] * colour1);
-            colour2 = (int32_t)(balance[2] * colour2);
-            colour0 = (colour0 > 0xFFFF) ? 0xFFFF : colour0;
-            colour1 = (colour1 > 0xFFFF) ? 0xFFFF : colour1;
-            colour2 = (colour2 > 0xFFFF) ? 0xFFFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
+        // Apply individual gains
+        blue = (int32_t)(blue_gain * blue);
+        green = (int32_t)(green_gain * green);
+        red = (int32_t)(red_gain * red);
+
+        // Clamp to valid range
+        blue = (blue > 0xFF) ? 0xFF : blue;
+        green = (green > 0xFF) ? 0xFF : green;
+        red = (red > 0xFF) ? 0xFF : red;
+        blue = (blue < 0) ? 0 : blue;
+        green = (green < 0) ? 0 : green;
+        red = (red < 0) ? 0 : red;
+
+        // Write updated pixel back to the buffer
+        *p_frame_data++ = blue;
+        *p_frame_data++ = green;
+        *p_frame_data++ = red;
     }
 }
 
@@ -711,81 +566,34 @@ void change_colour_saturation(
         return;
     }
 
-    double mults[3];
-    if (image_details.colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        mults[2] = C_Pb;
-        mults[1] = C_Pg;
-        mults[0] = C_Pr;
-    } else {
-        // Data is in BGR format
-        mults[0] = C_Pb;
-        mults[1] = C_Pg;
-        mults[2] = C_Pr;
-    }
+    // 8-bit data always
+    uint8_t *p_frame_data = image_details.p_buffer;
+    for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
+        uint8_t *p_blue = p_frame_data++;
+        uint8_t *p_green = p_frame_data++;
+        uint8_t *p_red = p_frame_data++;
 
-    if (image_details.bytes_per_sample == 1) {
-        // 8-bit data
-        uint8_t *p_frame_data = image_details.p_buffer;
-        for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-            uint8_t *p_col0 = p_frame_data++;
-            uint8_t *p_col1 = p_frame_data++;
-            uint8_t *p_col2 = p_frame_data++;
+        if (*p_blue != *p_green || *p_blue != *p_red) {
+            // This is not a monochrome pixel - apply colour saturation
+            double P = sqrt( (*p_red) * (*p_red) * C_Pr +
+                             (*p_green) * (*p_green) * C_Pg +
+                             (*p_blue) * (*p_blue) * C_Pb );
 
-            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
-                // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( (*p_col2) * (*p_col2) * mults[2] +
-                                 (*p_col1) * (*p_col1) * mults[1] +
-                                 (*p_col0) * (*p_col0) * mults[0] );
+            double dred = P + ((double)(*p_red) - P) * saturation;
+            double dgreen = P + ((double)(*p_green) - P) * saturation;
+            double dblue = P + ((double)(*p_blue) - P) * saturation;
 
-                double dcol2 = P + ((double)(*p_col2) - P) * saturation;
-                double dcol1 = P + ((double)(*p_col1) - P) * saturation;
-                double dcol0 = P + ((double)(*p_col0) - P) * saturation;
+            // Clip values in 0 to 255 range
+            dred = (dred < 0) ? 0 : dred;
+            dgreen = (dgreen < 0) ? 0 : dgreen;
+            dblue = (dblue < 0) ? 0 : dblue;
+            dred = (dred > 255) ? 255 : dred;
+            dgreen = (dgreen > 255) ? 255 : dgreen;
+            dblue = (dblue > 255) ? 255 : dblue;
 
-                // Clip values in 0 to 255 range
-                dcol2 = (dcol2 < 0) ? 0 : dcol2;
-                dcol1 = (dcol1 < 0) ? 0 : dcol1;
-                dcol0 = (dcol0 < 0) ? 0 : dcol0;
-                dcol2 = (dcol2 > 255) ? 255 : dcol2;
-                dcol1 = (dcol1 > 255) ? 255 : dcol1;
-                dcol0 = (dcol0 > 255) ? 255 : dcol0;
-
-                *p_col2 = (uint8_t)dcol2;
-                *p_col1 = (uint8_t)dcol1;
-                *p_col0 = (uint8_t)dcol0;
-            }
-        }
-    } else {
-        // 16-bit data
-        uint16_t *p_frame_data = (uint16_t *)image_details.p_buffer;
-        for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-            uint16_t *p_col0 = p_frame_data++;
-            uint16_t *p_col1 = p_frame_data++;
-            uint16_t *p_col2 = p_frame_data++;
-
-            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
-                // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( mults[2] * (*p_col2) * (*p_col2) +
-                                 mults[1] * (*p_col1) * (*p_col1) +
-                                 mults[0] * (*p_col0) * (*p_col0) );
-
-                double dcol2 = P + ((double)(*p_col2) - P) * saturation;
-                double dcol1 = P + ((double)(*p_col1) - P) * saturation;
-                double dcol0 = P + ((double)(*p_col0) - P) * saturation;
-
-                // Clip values in 0 to 65535 range
-
-                dcol2 = (dcol2 < 0) ? 0 : dcol2;
-                dcol1 = (dcol1 < 0) ? 0 : dcol1;
-                dcol0 = (dcol0 < 0) ? 0 : dcol0;
-                dcol2 = (dcol2 > 65535) ? 65535 : dcol2;
-                dcol1 = (dcol1 > 65535) ? 65535 : dcol1;
-                dcol0 = (dcol0 > 65535) ? 65535 : dcol0;
-
-                *p_col2 = (uint16_t)dcol2;
-                *p_col1 = (uint16_t)dcol1;
-                *p_col0 = (uint16_t)dcol0;
-            }
+            *p_red = (uint8_t)dred;
+            *p_green = (uint8_t)dgreen;
+            *p_blue = (uint8_t)dblue;
         }
     }
 }
@@ -804,81 +612,43 @@ void conv_data_ready_for_qimage(
     int32_t buffer_size = (image_details.width + line_pad) * image_details.height * 3;
     uint8_t *p_output_buffer = new uint8_t [buffer_size];
 
-    if (image_details.bytes_per_sample == 1) {
-        // 1 byte per sample
-        if (image_debayered || image_details.colour_id == COLOURID_BGR) {
-            // Data needs to be in RGB format and flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = image_details.height - 1; y >= 0; y--) {
-                uint8_t *p_read_data = image_details.p_buffer + y * image_details.width * 3;
-                for (int32_t x = 0; x < image_details.width; x++) {
-                    uint8_t b_pixel = *p_read_data++;
-                    uint8_t g_pixel = *p_read_data++;
-                    uint8_t r_pixel = *p_read_data++;
-                    *p_write_data++ = r_pixel;
-                    *p_write_data++ = g_pixel;
-                    *p_write_data++ = b_pixel;
-                }
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
+    // 1 byte per sample
+    if (image_debayered || image_details.colour_id == COLOURID_RGB || image_details.colour_id == COLOURID_BGR) {
+        // Data needs to be changed from BGR to RGB format and flipped vertically
+        uint8_t *p_write_data = p_output_buffer;
+        for (int32_t y = image_details.height - 1; y >= 0; y--) {
+            uint8_t *p_read_data = image_details.p_buffer + y * image_details.width * 3;
+            for (int32_t x = 0; x < image_details.width; x++) {
+                uint8_t b_pixel = *p_read_data++;
+                uint8_t g_pixel = *p_read_data++;
+                uint8_t r_pixel = *p_read_data++;
+                *p_write_data++ = r_pixel;
+                *p_write_data++ = g_pixel;
+                *p_write_data++ = b_pixel;
             }
-        } else {
-            // Data just needs to be flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = image_details.height - 1; y >= 0; y--) {
-                uint8_t *p_read_data = image_details.p_buffer + y * image_details.width * 3;
-                memcpy(p_write_data, p_read_data, image_details.width * 3);
-                p_write_data += image_details.width * 3;
 
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
+            for (int32_t x = 0; x < line_pad; x++) {
+                *p_write_data++ = 0;
             }
         }
     } else {
-        // 2 bytes per sample
-        if (image_debayered || image_details.colour_id == COLOURID_BGR) {
-            // Data needs to be in RGB format and flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = image_details.height - 1; y >= 0; y--) {
-                uint16_t *p_read_data = (uint16_t *)(image_details.p_buffer + y * image_details.width * 3 * 2);
-                for (int32_t x = 0; x < image_details.width; x++) {
-                    uint8_t b_pixel = *p_read_data++ >> 8;
-                    uint8_t g_pixel = *p_read_data++ >> 8;
-                    uint8_t r_pixel = *p_read_data++ >> 8;
-                    *p_write_data++ = r_pixel;
-                    *p_write_data++ = g_pixel;
-                    *p_write_data++ = b_pixel;
-                }
+        // Monochrome data just needs to be flipped vertically
+        uint8_t *p_write_data = p_output_buffer;
+        for (int32_t y = image_details.height - 1; y >= 0; y--) {
+            uint8_t *p_read_data = image_details.p_buffer + y * image_details.width * 3;
+            memcpy(p_write_data, p_read_data, image_details.width * 3);
+            p_write_data += image_details.width * 3;
 
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
-            }
-        } else {
-            // Data just needs to be flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = image_details.height - 1; y >= 0; y--) {
-                uint16_t *p_read_data = (uint16_t *)(image_details.p_buffer + y * image_details.width * 3 * 2);
-                for (int32_t x = 0; x < image_details.width; x++) {
-                    *p_write_data++ = *p_read_data++ >> 8;
-                    *p_write_data++ = *p_read_data++ >> 8;
-                    *p_write_data++ = *p_read_data++ >> 8;
-                }
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
+            for (int32_t x = 0; x < line_pad; x++) {
+                *p_write_data++ = 0;
             }
         }
     }
 
-
     delete[] image_details.p_buffer;  // Free input buffer
     image_details.p_buffer = p_output_buffer;  // Update pointer to output buffer
 }
+
 
 }  // namespace image_functions
     

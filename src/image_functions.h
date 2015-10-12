@@ -25,11 +25,14 @@ namespace image_functions {
     struct s_image_details {
         int32_t width;
         int32_t height;
-        int32_t bytes_per_sample;
+//        int32_t bytes_per_sample;
         int32_t colour_id;
         uint8_t *p_buffer;
     };
 
+
+    void convert_image_to_8bit(
+         struct s_image_details &image_details);
 
     bool debayer_image_bilinear(
         struct s_image_details &image_details);
