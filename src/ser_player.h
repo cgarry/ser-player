@@ -22,6 +22,7 @@
 #include <QMainWindow>
 #include <QFile>
 #include <cstdint>
+#include "image_functions.h"
 
 class QAction;
 class QLabel;
@@ -90,14 +91,9 @@ private:
     int m_total_frames;
     int m_display_framerate;
     int m_display_frame_time;
-    uint8_t *mp_frame_buffer;
-    int32_t m_frame_width;
-    int32_t m_frame_height;
-    int32_t m_bytes_per_sample;
-    int32_t m_colour_id;
+    struct image_functions::s_image_details m_frame_details;
     bool m_is_colour;
     bool m_has_bayer_pattern;
-    bool m_detect_colour_balance;
 
     double m_colour_saturation;
     double m_red_balance;
@@ -143,20 +139,8 @@ protected:
 
 private:
     void create_no_file_open_image();
-    void conv_data_ready_for_qimage(bool image_debayered);
-    bool debayer_image_bilinear();
-    void detect_colour_balance();
-    void change_colour_saturation3(double change);
-    void change_colour_saturation2(double change);
-    void change_colour_saturation(double change);
-    void change_colour_balance(int red, int green, int blue);
-    void change_colour_balance2(double red, double green, double blue);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
-
-    template <typename T>
-    void debayer_pixel_bilinear(uint32_t bayer, int32_t x, int32_t y, T *raw_data, T *rgb_data);
-
 };
 
 #endif // SER_PLAYER_H

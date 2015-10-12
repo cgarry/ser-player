@@ -798,17 +798,17 @@
         <translation>%1/%2</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2296"/>
+        <location filename="../src/ser_player.cpp" line="2301"/>
         <source>SER Player</source>
         <translation>SER Afspiller</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2297"/>
+        <location filename="../src/ser_player.cpp" line="2302"/>
         <source>A simple video player for SER files.</source>
         <translation>En simpelt afspiller for SER Video.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2301"/>
+        <location filename="../src/ser_player.cpp" line="2306"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Dansk oversættelse ved Leif Jørgensen</translation>
@@ -828,25 +828,25 @@
         <translation type="vanished">Dette program er distribueret med det håb det vil være brugbart uden nogen som helst garenti. Se GNU General Public License for flere detaljer.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2320"/>
+        <location filename="../src/ser_player.cpp" line="2325"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Du skulle have modtaget en kopi af GNU General Public Licence sammen med programmet.  Hvis ikke, se &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2325"/>
+        <location filename="../src/ser_player.cpp" line="2330"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>Om SER Afspilleren</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2333"/>
+        <location filename="../src/ser_player.cpp" line="2338"/>
         <source>No SER File Open</source>
         <comment>No SER file message on inital image</comment>
         <translation>Ingen SER Fil er Åben</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2372"/>
+        <location filename="../src/ser_player.cpp" line="2377"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>En ny udgave af SER Player er tilgængelig: %1</translation>

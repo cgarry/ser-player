@@ -146,17 +146,20 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
 }
 
 
-void c_colour_dialog::colour_saturation_changed_slot(int sat) {
+void c_colour_dialog::colour_saturation_changed_slot(int sat)
+{
     mp_colsat_DSpinbox->setValue(((double)sat/100.0));
 }
 
 
-void c_colour_dialog::colour_saturation_changed_slot(double sat) {
+void c_colour_dialog::colour_saturation_changed_slot(double sat)
+{
     mp_colsat_Slider->setValue(100 * sat);
 }
 
 
-void c_colour_dialog::red_balance_changed_slot(int balance) {
+void c_colour_dialog::red_balance_changed_slot(int balance)
+{
     mp_red_balance_SpinBox->setValue(balance);
     mp_red_balance_Slider->setValue(balance);
     emit colour_balance_changed(
@@ -166,7 +169,8 @@ void c_colour_dialog::red_balance_changed_slot(int balance) {
 }
 
 
-void c_colour_dialog::green_balance_changed_slot(int balance) {
+void c_colour_dialog::green_balance_changed_slot(int balance)
+{
     mp_green_balance_SpinBox->setValue(balance);
     mp_green_balance_Slider->setValue(balance);
     emit colour_balance_changed(
@@ -176,7 +180,8 @@ void c_colour_dialog::green_balance_changed_slot(int balance) {
 }
 
 
-void c_colour_dialog::blue_balance_changed_slot(int balance) {
+void c_colour_dialog::blue_balance_changed_slot(int balance)
+{
     mp_blue_balance_SpinBox->setValue(balance);
     mp_blue_balance_Slider->setValue(balance);
     emit colour_balance_changed(
@@ -185,19 +190,22 @@ void c_colour_dialog::blue_balance_changed_slot(int balance) {
                 1.0 + (double)mp_blue_balance_SpinBox->value() / 300);
 }
 
-void c_colour_dialog::reset_colour_saturation() {
+void c_colour_dialog::reset_colour_saturation()
+{
     mp_colsat_DSpinbox->setValue(1.0);
 }
 
 
-void c_colour_dialog::reset_colour_balance() {
+void c_colour_dialog::reset_colour_balance()
+{
     mp_red_balance_SpinBox->setValue(0);
     mp_green_balance_SpinBox->setValue(0);
     mp_blue_balance_SpinBox->setValue(0);
 }
 
 
-void c_colour_dialog::set_colour_balance(double red, double green, double blue) {
+void c_colour_dialog::set_colour_balance(double red, double green, double blue)
+{
     int red_int = (red - 1.0) * 300;
     int green_int = (green - 1.0) * 300;
     int blue_int = (blue - 1.0) * 300;

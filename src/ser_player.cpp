@@ -45,6 +45,7 @@
 
 #include "ser_player.h"
 #include "persistent_data.h"
+#include "image_functions.h"
 #include "pipp_ser.h"
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
@@ -65,7 +66,12 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_framecount = 1;
     m_is_colour = false;
     m_has_bayer_pattern = false;
-    m_detect_colour_balance = false;
+
+    m_frame_details.width = 100;
+    m_frame_details.height = 100;
+    m_frame_details.bytes_per_sample = 1;
+    m_frame_details.colour_id = COLOURID_MONO;
+    m_frame_details.p_buffer = NULL;
 
     // Menu Items
     m_ser_directory = "";
@@ -587,7 +593,35 @@ void c_ser_player::colour_balance_changed(double red, double green, double blue)
 
 void c_ser_player::estimate_colour_balance()
 {
-    detect_colour_balance();
+    if (m_current_state != STATE_NO_FILE) {
+        mp_frame_slider_changed_Mutex->lock();
+
+        // Get frame from SER file
+        mp_ser_file_Mutex->lock();
+        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        delete[] m_frame_details.p_buffer;
+        m_frame_details.p_buffer = new uint8_t[frame_size];
+        int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
+        mp_ser_file_Mutex->unlock();
+
+        if (ret >= 0) {
+            // Debayer frame if required
+            bool image_debayered = false;
+            if (c_persistent_data::m_enable_debayering) {
+                image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+            }
+        }
+
+        mp_frame_slider_changed_Mutex->unlock();
+
+        if (ret >= 0) {
+            double red_gain = 1.0;
+            double green_gain = 1.0;
+            double blue_gain = 1.0;
+            image_functions::estimate_colour_balance(red_gain, green_gain, blue_gain, m_frame_details);
+            mp_colour_settings_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
+        }
+    }
 }
 
 
@@ -651,41 +685,51 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
         mp_count_Slider->setMaximum(m_total_frames);
-        m_frame_width = mp_ser_file->get_width();
-        m_frame_height = mp_ser_file->get_height();
-        m_bytes_per_sample = mp_ser_file->get_bytes_per_sample();
-        m_colour_id = mp_ser_file->get_colour_id();
-        int32_t frame_size = m_frame_width * m_frame_height * m_bytes_per_sample * 3;
-        mp_frame_buffer = new uint8_t[frame_size];
-        mp_ser_file->get_frame(mp_frame_buffer);
+        m_frame_details.width = mp_ser_file->get_width();
+        m_frame_details.height = mp_ser_file->get_height();
+        m_frame_details.bytes_per_sample = mp_ser_file->get_bytes_per_sample();
+        m_frame_details.colour_id = mp_ser_file->get_colour_id();
+        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        m_frame_details.p_buffer = new uint8_t[frame_size];
+        mp_ser_file->get_frame(m_frame_details.p_buffer);
 
         // Debayer frame if required
         bool image_debayered = false;
         if (c_persistent_data::m_enable_debayering) {
-            image_debayered = debayer_image_bilinear();
+            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
         }
 
         // Adjust colour saturation if required
-        if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
-            change_colour_balance2(m_red_balance, m_green_balance, m_blue_balance);
-            change_colour_saturation(m_colour_saturation);
+        if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
+            image_functions::change_colour_balance(
+                m_red_balance,  // double red,
+                m_green_balance,  // double green
+                m_blue_balance,  // double blue
+                m_frame_details); // struct s_image_details &image_details
+
+
+            image_functions::change_colour_saturation(
+                m_colour_saturation,  // double saturation
+                m_frame_details); // struct s_image_details &image_details
         }
 
-        conv_data_ready_for_qimage(image_debayered);
+        image_functions::conv_data_ready_for_qimage(
+            image_debayered,  // bool image_debayered
+            m_frame_details); // struct s_image_details &image_details
 
         delete mp_frame_Image;
-        mp_frame_Image = new QImage(mp_frame_buffer, m_frame_width, m_frame_height, QImage::Format_RGB888);
+        mp_frame_Image = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
         mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
 
         m_current_state = STATE_STOPPED;
         m_framecount = 1;
         mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(mp_ser_file->get_width())
-                                  .arg(mp_ser_file->get_height()));
+                                  .arg(m_frame_details.width)
+                                  .arg(m_frame_details.height));
         mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg(mp_ser_file->get_pixel_depth()));
         m_is_colour = false;
 
-        switch (m_colour_id) {
+        switch (m_frame_details.colour_id) {
         case COLOURID_MONO:
             mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
             break;
@@ -829,135 +873,6 @@ void c_ser_player::save_frame_slot()
 }
 
 
-void c_ser_player::detect_colour_balance()
-{
-    if (m_current_state != STATE_NO_FILE) {
-        mp_frame_slider_changed_Mutex->lock();
-
-        // Get frame from SER file
-        mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_width * m_frame_height * m_bytes_per_sample * 3;
-        delete[] mp_frame_buffer;
-        mp_frame_buffer = new uint8_t[frame_size];
-        int32_t ret = mp_ser_file->get_frame(m_framecount, mp_frame_buffer);
-        mp_ser_file_Mutex->unlock();
-
-        if (ret >= 0) {
-            // Debayer frame if required
-            bool image_debayered = false;
-            if (c_persistent_data::m_enable_debayering) {
-                image_debayered = debayer_image_bilinear();
-            }
-
-            if (m_bytes_per_sample == 2) {
-                // Convert data from 16-bit to 8 bit
-                uint16_t *p_read_data = (uint16_t *)mp_frame_buffer;
-                uint8_t *p_write_data = mp_frame_buffer;
-                for (int pixel = 0; pixel < m_frame_width * m_frame_height * 3; pixel++) {
-                    *p_write_data++ = (*p_read_data++) >> 8;
-                }
-            }
-
-            // Stretch histogram for colour image
-            const int PIXEL_COUNT = 25;
-            int32_t blue_table[256];
-            int32_t green_table[256];
-            int32_t red_table[256];
-
-            uint8_t *blue_data_ptr;
-            uint8_t *green_data_ptr;
-            uint8_t *red_data_ptr;
-            if (m_colour_id == COLOURID_RGB) {
-                // Data order RGB
-                blue_data_ptr = mp_frame_buffer + 2;
-                green_data_ptr = mp_frame_buffer + 1;
-                red_data_ptr = mp_frame_buffer;
-            } else {
-                // Data order BGR
-                blue_data_ptr = mp_frame_buffer;
-                green_data_ptr = mp_frame_buffer + 1;
-                red_data_ptr = mp_frame_buffer + 2;
-            }
-
-            mp_frame_slider_changed_Mutex->unlock();
-
-            // Clear histgrams
-            memset(blue_table, 0, 256 * sizeof(int32_t));
-            memset(green_table, 0, 256 * sizeof(int32_t));
-            memset(red_table, 0, 256 * sizeof(int32_t));
-
-            // Create histograms
-            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-                blue_table[*blue_data_ptr]++;
-                green_table[*green_data_ptr]++;
-                red_table[*red_data_ptr]++;
-                blue_data_ptr += 3;
-                green_data_ptr += 3;
-                red_data_ptr += 3;
-            }
-
-            // Get averages for max PIXEL_COUNT pixels
-            uint32_t blue_max_average = 0;
-            uint32_t count = PIXEL_COUNT;
-            for (int x = 255; x > 0; x--) {
-                if (count <= (uint32_t)blue_table[x]) {
-                    blue_max_average += count * x;
-                    break;
-                } else {
-                    blue_max_average += blue_table[x] * x;
-                    count -= blue_table[x];
-                }
-            }
-
-            uint32_t green_max_average = 0;
-            count = PIXEL_COUNT;
-            for (int x = 255; x > 0; x--) {
-                if (count <= (uint32_t)green_table[x]) {
-                    green_max_average += count * x;
-                    break;
-                } else {
-                    green_max_average += green_table[x] * x;
-                    count -= green_table[x];
-                }
-            }
-
-            uint32_t red_max_average = 0;
-            count = PIXEL_COUNT;
-            for (int x = 255; x > 0; x--) {
-                if (count <= (uint32_t)red_table[x]) {
-                    red_max_average += count * x;
-                    break;
-                } else {
-                    red_max_average += red_table[x] * x;
-                    count -= red_table[x];
-                }
-            }
-
-            uint32_t max_max_average = blue_max_average;
-            if (green_max_average > max_max_average) {
-                max_max_average = green_max_average;
-            }
-
-            if (red_max_average > max_max_average) {
-                max_max_average = red_max_average;
-            }
-
-            // Prevent divide by zero errors
-            blue_max_average = (blue_max_average == 0) ? max_max_average : blue_max_average;
-            green_max_average = (green_max_average == 0) ? max_max_average : green_max_average;
-            red_max_average = (red_max_average == 0) ? max_max_average : red_max_average;
-
-            double blue_gain = (double)max_max_average / blue_max_average;
-            double green_gain = (double)max_max_average / green_max_average;
-            double red_gain = (double)max_max_average / red_max_average;
-
-            mp_colour_settings_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
-        }
-    }
-}
-
-
-
 void c_ser_player::frame_slider_changed_slot()
 {
     mp_frame_slider_changed_Mutex->lock();
@@ -971,10 +886,10 @@ void c_ser_player::frame_slider_changed_slot()
         mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_width * m_frame_height * m_bytes_per_sample * 3;
-        delete[] mp_frame_buffer;
-        mp_frame_buffer = new uint8_t[frame_size];
-        int32_t ret = mp_ser_file->get_frame(m_framecount, mp_frame_buffer);
+        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
+        delete[] m_frame_details.p_buffer;
+        m_frame_details.p_buffer = new uint8_t[frame_size];
+        int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
         uint64_t ts = mp_ser_file->get_timestamp();
         if (ts > 0) {
             int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
@@ -1003,19 +918,28 @@ void c_ser_player::frame_slider_changed_slot()
             // Debayer frame if required
             bool image_debayered = false;
             if (c_persistent_data::m_enable_debayering) {
-                image_debayered = debayer_image_bilinear();
+                image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
             }
 
-            if (image_debayered || m_colour_id == COLOURID_BGR || m_colour_id == COLOURID_BGR) {
+            if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
                 // Adjust colour saturation and balance if required
-                change_colour_balance2(m_red_balance, m_green_balance, m_blue_balance);
-                change_colour_saturation(m_colour_saturation);
+                image_functions::change_colour_balance(
+                    m_red_balance,  // double red,
+                    m_green_balance,  // double green
+                    m_blue_balance,  // double blue
+                    m_frame_details); // struct s_image_details &image_details
+
+                image_functions::change_colour_saturation(
+                    m_colour_saturation,  // double saturation
+                    m_frame_details); // struct s_image_details &image_details
             }
 
-            conv_data_ready_for_qimage(image_debayered);
+            image_functions::conv_data_ready_for_qimage(
+                image_debayered,  // bool image_debayered
+                m_frame_details); // struct s_image_details &image_details
 
             delete mp_frame_Image;
-            mp_frame_Image = new QImage(mp_frame_buffer, m_frame_width, m_frame_height, QImage::Format_RGB888);
+            mp_frame_Image = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
             mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
 //            m_frame_image_label->setMinimumSize(QSize(1, 1));
         } else {
@@ -1188,94 +1112,6 @@ void c_ser_player::dropEvent(QDropEvent *e)
 }
 
 
-void c_ser_player::conv_data_ready_for_qimage(bool image_debayered)
-{
-    // Create buffer for converted data
-    int line_pad = (m_frame_width * 3) % 4;
-    if (line_pad != 0) {
-        line_pad = 4 - line_pad;
-    }
-
-    int32_t buffer_size = (m_frame_width + line_pad) * m_frame_height * 3;
-    uint8_t *p_output_buffer = new uint8_t [buffer_size];
-
-    if (m_bytes_per_sample == 1) {
-        // 1 byte per sample
-        if (image_debayered || m_colour_id == COLOURID_BGR) {
-            // Data needs to be in RGB format and flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = m_frame_height - 1; y >= 0; y--) {
-                uint8_t *p_read_data = mp_frame_buffer + y * m_frame_width * 3;
-                for (int32_t x = 0; x < m_frame_width; x++) {
-                    uint8_t b_pixel = *p_read_data++;
-                    uint8_t g_pixel = *p_read_data++;
-                    uint8_t r_pixel = *p_read_data++;
-                    *p_write_data++ = r_pixel;
-                    *p_write_data++ = g_pixel;
-                    *p_write_data++ = b_pixel;
-                }
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
-            }
-        } else {
-            // Data just needs to be flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = m_frame_height - 1; y >= 0; y--) {
-                uint8_t *p_read_data = mp_frame_buffer + y * m_frame_width * 3;
-                memcpy(p_write_data, p_read_data, m_frame_width * 3);
-                p_write_data += m_frame_width * 3;
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
-            }
-        }
-    } else {
-        // 2 bytes per sample
-        if (image_debayered || m_colour_id == COLOURID_BGR) {
-            // Data needs to be in RGB format and flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = m_frame_height - 1; y >= 0; y--) {
-                uint16_t *p_read_data = (uint16_t *)(mp_frame_buffer + y * m_frame_width * 3 * 2);
-                for (int32_t x = 0; x < m_frame_width; x++) {
-                    uint8_t b_pixel = *p_read_data++ >> 8;
-                    uint8_t g_pixel = *p_read_data++ >> 8;
-                    uint8_t r_pixel = *p_read_data++ >> 8;
-                    *p_write_data++ = r_pixel;
-                    *p_write_data++ = g_pixel;
-                    *p_write_data++ = b_pixel;
-                }
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
-            }
-        } else {
-            // Data just needs to be flipped vertically
-            uint8_t *p_write_data = p_output_buffer;
-            for (int32_t y = m_frame_height - 1; y >= 0; y--) {
-                uint16_t *p_read_data = (uint16_t *)(mp_frame_buffer + y * m_frame_width * 3 * 2);
-                for (int32_t x = 0; x < m_frame_width; x++) {
-                    *p_write_data++ = *p_read_data++ >> 8;
-                    *p_write_data++ = *p_read_data++ >> 8;
-                    *p_write_data++ = *p_read_data++ >> 8;
-                }
-
-                for (int32_t x = 0; x < line_pad; x++) {
-                    *p_write_data++ = 0;
-                }
-            }
-        }
-    }
-
-
-    delete[] mp_frame_buffer;  // Free input buffer
-    mp_frame_buffer = p_output_buffer;  // Update pointer to output buffer
-}
-
-
 void c_ser_player::check_for_updates_slot(bool enabled)
 {
     c_persistent_data::m_check_for_updates = enabled;
@@ -1300,997 +1136,6 @@ void c_ser_player::debayer_enable_slot(bool enabled)
 void c_ser_player::new_version_available_slot(QString version)
 {
     c_persistent_data::m_new_version = version;
-}
-
-
-template <typename T>
-void c_ser_player::debayer_pixel_bilinear(uint32_t bayer, int32_t x, int32_t y, T *raw_data, T *rgb_data) {
-    T *raw_data_ptr = ((T *)raw_data) + ((y * m_frame_width + x) * 3);
-    T *rgb_data_ptr = ((T *)rgb_data) + ((y * m_frame_width + x) * 3);
-
-    uint32_t count;
-    uint32_t total;
-
-    // Blue channel
-    switch (bayer) {
-        case 0:
-            // Blue - Average of 4 corners;
-            count = 0;
-            total = 0;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width-3);
-                count++;
-            }
-
-            if (y > 0 && x < m_frame_width-1) {
-                total += *(raw_data_ptr-3*m_frame_width+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x > 0) {
-                total += *(raw_data_ptr+3*m_frame_width-3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x < m_frame_width-1) {
-                total += *(raw_data_ptr+3*m_frame_width+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 nearest neighbours
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-3);
-                count++;
-            }
-
-            if (x < m_frame_width-1) {
-                total += *(raw_data_ptr+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1) {
-                total += *(raw_data_ptr+3*m_frame_width);
-                count++;
-            }
-
-            if (y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Simple case just return data at this position
-            *rgb_data_ptr = *raw_data_ptr;
-            break;
-
-        case 1:
-            // Blue - Average of above and below pixels
-            count = 0;
-            total = 0;
-            if (y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width);
-                count++;
-            }
-
-            if (y < m_frame_height-1) {
-                total += *(raw_data_ptr+3*m_frame_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 corners and this position
-            count = 1;
-            total = *raw_data_ptr;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width-3);
-                count++;
-            }
-
-            if (y > 0 && x < m_frame_width-1) {
-                total += *(raw_data_ptr-3*m_frame_width+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x > 0) {
-                total += *(raw_data_ptr+3*m_frame_width-3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x < m_frame_width-1) {
-                total += *(raw_data_ptr+3*m_frame_width+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of left and right pixels
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-3);
-                count++;
-            }
-
-            if (x < m_frame_width-1) {
-                total += *(raw_data_ptr+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-
-        case 2:
-            // Blue - Average of left and right pixels
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-3);
-                count++;
-            }
-
-            if (x < m_frame_width-1) {
-                total += *(raw_data_ptr+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 corners and this position
-            count = 1;
-            total = *raw_data_ptr;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width-3);
-                count++;
-            }
-
-            if (y > 0 && x < m_frame_width-1) {
-                total += *(raw_data_ptr-3*m_frame_width+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x > 0) {
-                total += *(raw_data_ptr+3*m_frame_width-3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x < m_frame_width-1) {
-                total += *(raw_data_ptr+3*m_frame_width+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of above and below pixels
-            count = 0;
-            total = 0;
-            if (y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width);
-                count++;
-            }
-
-            if (y < m_frame_height-1) {
-                total += *(raw_data_ptr+3*m_frame_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-
-        default:
-            // Blue - Simple case just return data at this position
-            *rgb_data_ptr++ = *raw_data_ptr;
-
-            // Green - Return average of 4 nearest neighbours
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-3);
-                count++;
-            }
-
-            if (x < m_frame_width-1) {
-                total += *(raw_data_ptr+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1) {
-                total += *(raw_data_ptr+3*m_frame_width);
-                count++;
-            }
-
-            if (y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of 4 corners;
-            count = 0;
-            total = 0;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*m_frame_width-3);
-                count++;
-            }
-
-            if (y > 0 && x < m_frame_width-1) {
-                total += *(raw_data_ptr-3*m_frame_width+3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x > 0) {
-                total += *(raw_data_ptr+3*m_frame_width-3);
-                count++;
-            }
-
-            if (y < m_frame_height-1 && x < m_frame_width-1) {
-                total += *(raw_data_ptr+3*m_frame_width+3);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-    }
-}
-
-
-// ------------------------------------------
-// Method to debayer image (Bi-linear version)
-// ------------------------------------------
-bool c_ser_player::debayer_image_bilinear()
-{
-    uint32_t bayer_code;
-    switch (m_colour_id) {
-    case COLOURID_BAYER_RGGB:
-        bayer_code = 2;
-        break;
-    case COLOURID_BAYER_GRBG:
-        bayer_code = 3;
-        break;
-    case COLOURID_BAYER_GBRG:
-        bayer_code = 0;
-        break;
-    case COLOURID_BAYER_BGGR:
-        bayer_code = 1;
-        break;
-    default:
-        // We only debayer these types
-        return false;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        int32_t x, y;
-        uint8_t *raw_data_ptr;
-        uint8_t *rgb_data_ptr1;
-
-        uint32_t bayer_x = bayer_code % 2;
-        uint32_t bayer_y = ((bayer_code/2) % 2) ^ (m_frame_height % 2);
-
-        // Buffer to create RGB image in
-        uint8_t *rgb_data = new uint8_t[3 * m_frame_width * m_frame_height];
-
-        // Debayer bottom line
-        y = 0;
-        for (x = 0; x < m_frame_width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_frame_buffer, rgb_data);
-        }
-
-        // Debayer top line
-        y = m_frame_height -1;
-        for (x = 0; x < m_frame_width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_frame_buffer, rgb_data);
-        }
-
-        // Debayer left edge
-        x = 0;
-        for (y = 1; y < m_frame_height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_frame_buffer, rgb_data);
-        }
-
-        // Debayer right edge
-        x = m_frame_width-1;
-        for (y = 1; y < m_frame_height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_frame_buffer, rgb_data);
-        }
-
-        // Debayer to create blue, green and red data
-        rgb_data_ptr1 = rgb_data + (3 * (m_frame_width + 1));
-        raw_data_ptr = mp_frame_buffer + (3 * (m_frame_width + 1));
-        for (y = 1; y < (m_frame_height-1); y++) {
-            for (x = 1; x < (m_frame_width-1); x++) {
-                uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-                // Blue channel
-                switch (bayer) {
-                    case 0:
-                        // Blue - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width-3) + *(raw_data_ptr-3*m_frame_width+3) +
-                                             *(raw_data_ptr+3*m_frame_width-3) + *(raw_data_ptr+3*m_frame_width+3) ) / 4;
-                        raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*m_frame_width) + *(raw_data_ptr-3*m_frame_width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-                        break;
-
-                    case 1:
-                        // Blue - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width) + *(raw_data_ptr+3*m_frame_width) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;;
-
-                        // Red - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    case 2:
-                        // Blue - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width) + *(raw_data_ptr+3*m_frame_width) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    default:
-                        // Blue - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*m_frame_width) + *(raw_data_ptr-3*m_frame_width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width-3) + *(raw_data_ptr-3*m_frame_width+3) +
-                                             *(raw_data_ptr+3*m_frame_width-3) + *(raw_data_ptr+3*m_frame_width+3) ) / 4;
-                        raw_data_ptr++;
-                        break;
-                }
-            }
-
-            rgb_data_ptr1 += 6;
-            raw_data_ptr += 6;
-        }
-
-        // Make new debayered data the frame buffer data
-        delete[] mp_frame_buffer;
-        mp_frame_buffer = rgb_data;
-
-    } else {  // Bytes per sample == 2
-        int32_t x, y;
-        uint16_t *data_16 = (uint16_t *)mp_frame_buffer;
-        uint16_t *raw_data_ptr;
-        uint16_t *rgb_data_ptr1;
-
-        uint32_t bayer_x = bayer_code % 2;
-        uint32_t bayer_y = ((bayer_code/2) % 2) ^ (m_frame_height % 2);
-
-        // Buffer to create RGB image in
-        uint16_t *rgb_data = new uint16_t[3 * m_frame_width * m_frame_height];
-
-        // Debayer bottom line
-        y = 0;
-        for (x = 0; x < m_frame_width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data);
-        }
-
-        // Debayer top line
-        y = m_frame_height -1;
-        for (x = 0; x < m_frame_width; x++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data);
-        }
-
-        // Debayer left edge
-        x = 0;
-        for (y = 1; y < m_frame_height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data);
-        }
-
-        // Debayer right edge
-        x = m_frame_width-1;
-        for (y = 1; y < m_frame_height-1; y++) {
-            uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-            debayer_pixel_bilinear <uint16_t> (bayer, x, y, data_16, (uint16_t *)rgb_data);
-        }
-
-        // Debayer main image to create blue, green and red data
-        rgb_data_ptr1 = rgb_data + (3 * (m_frame_width + 1));
-        raw_data_ptr = data_16 + (3 * (m_frame_width + 1));
-        for (y = 1; y < (m_frame_height-1); y++) {
-            for (x = 1; x < (m_frame_width-1); x++) {
-                uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-                // Blue channel
-                switch (bayer) {
-                    case 0:
-                        // Blue - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width-3) + *(raw_data_ptr-3*m_frame_width+3) +
-                                             *(raw_data_ptr+3*m_frame_width-3) + *(raw_data_ptr+3*m_frame_width+3) ) / 4;
-                        raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*m_frame_width) + *(raw_data_ptr-3*m_frame_width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-                        break;
-
-                    case 1:
-                        // Blue - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width) + *(raw_data_ptr+3*m_frame_width) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    case 2:
-                        // Blue - Average of left and right pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                        raw_data_ptr++;
-
-                        // Green - just this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Red - Average of above and below pixels
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width) + *(raw_data_ptr+3*m_frame_width) ) / 2;
-                        raw_data_ptr++;
-                        break;
-
-                    default:
-                        // Blue - Simple case just return data at this position
-                        *rgb_data_ptr1++ = *raw_data_ptr++;
-
-                        // Green - Return average of 4 nearest neighbours
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                             *(raw_data_ptr+3*m_frame_width) + *(raw_data_ptr-3*m_frame_width) ) /4;
-                        raw_data_ptr++;
-
-                        // Red - Average of 4 corners;
-                        *rgb_data_ptr1++ = ( *(raw_data_ptr-3*m_frame_width-3) + *(raw_data_ptr-3*m_frame_width+3) +
-                                             *(raw_data_ptr+3*m_frame_width-3) + *(raw_data_ptr+3*m_frame_width+3) ) / 4;
-                        raw_data_ptr++;
-                        break;
-                }
-            }
-
-            rgb_data_ptr1 += 6;
-            raw_data_ptr += 6;
-        }
-
-        // Make new debayered data the frame buffer data
-        delete[] mp_frame_buffer;
-        mp_frame_buffer = (uint8_t *)rgb_data;
-    }
-
-    return true;
-}
-
-
-void c_ser_player::change_colour_saturation3(double change)
-{
-    if (change == 1.0) {
-        // Early return
-        return;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        if (m_colour_id == COLOURID_RGB) {
-            // To-do - write missing code!
-        } else {
-            uint8_t *p_frame_data;
-            // Convert data to YUV and scale U and V components
-            p_frame_data = mp_frame_buffer;
-            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-                int32_t blue = *(p_frame_data+0);
-                int32_t green = *(p_frame_data+1);
-                int32_t red = *(p_frame_data+2);
-                int32_t y = ((299 * red) + (587 * green) + (114 * blue)) / 1000;
-                y = (y < 0) ? 0 : y;
-                y = (y > 0xFF) ? 0xFF : y;
-
-                int32_t u = (492 * (blue - y)) / 1000;
-                u = (int32_t)(change * u);  // Scale the u value
-                u += 128;
-                u = (u < 0) ? 0 : u;
-                u = (u > 0xFF) ? 0xFF : u;
-
-                int32_t v = (877 * (red - y)) / 1000;
-                v = (int32_t)(change * v);  // Scale the v value
-                v += 128;
-                v = (v < 0) ? 0 : v;
-                v = (v > 0xFF) ? 0xFF : v;
-
-                *p_frame_data++ = (uint8_t)y;
-                *p_frame_data++ = (uint8_t)u;
-                *p_frame_data++ = (uint8_t)v;
-            }
-
-/*
-            // Blur U and V channels
-            const int32_t offsets[] = {
-                -3 * m_frame_width - 3,
-                -3 * m_frame_width,
-                -3 * m_frame_width + 3,
-                -3,
-                3,
-                3 * m_frame_width - 3,
-                3 * m_frame_width,
-                3 * m_frame_width + 3};
-
-            for (int y = 1; y < m_frame_height-1; y++) {
-                int x = 1;
-                p_frame_data = mp_frame_buffer + (y * m_frame_width + x) * 3;
-                for (; x < m_frame_width-1; x++) {
-                    p_frame_data++;  // Skip Y component
-
-                    int32_t u = *p_frame_data * 2;
-                    u += *(p_frame_data + offsets[0]);
-                    u += *(p_frame_data + offsets[1]);
-                    u += *(p_frame_data + offsets[2]);
-                    u += *(p_frame_data + offsets[3]);
-                    u += *(p_frame_data + offsets[4]);
-                    u += *(p_frame_data + offsets[5]);
-                    u += *(p_frame_data + offsets[6]);
-                    u += *(p_frame_data + offsets[7]);
-                    *p_frame_data++ = u/10;
-
-                    int32_t v = *p_frame_data * 2;
-                    v += *(p_frame_data + offsets[0]);
-                    v += *(p_frame_data + offsets[1]);
-                    v += *(p_frame_data + offsets[2]);
-                    v += *(p_frame_data + offsets[3]);
-                    v += *(p_frame_data + offsets[4]);
-                    v += *(p_frame_data + offsets[5]);
-                    v += *(p_frame_data + offsets[6]);
-                    v += *(p_frame_data + offsets[7]);
-                    *p_frame_data++ = v/10;
-                }
-            }
-*/
-
-            // Convert data back to RGB
-            p_frame_data = mp_frame_buffer;
-            for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-                int32_t y = *(p_frame_data+0);
-                int32_t u = *(p_frame_data+1) - 128;
-                int32_t v = *(p_frame_data+2) - 128;
-
-                int32_t red = y + (1140 * v) / 1000;
-                red = (red > 255) ? 255 : red;
-                red = (red < 0) ? 0 : red;
-
-                int32_t green = y - (395* u + 581 * v) / 1000;
-                green = (green > 255) ? 255 : green;
-                green = (green < 0) ? 0 : green;
-
-                int32_t blue = y + (2032 * u) / 1000;
-                blue = (blue > 255) ? 255 : blue;
-                blue = (blue < 0) ? 0 : blue;
-
-                *p_frame_data++ = (uint8_t)blue;
-                *p_frame_data++ = (uint8_t)green;
-                *p_frame_data++ = (uint8_t)red;
-            }
-        }
-    }
-}
-
-
-void c_ser_player::change_colour_saturation2(double change)
-{
-    const double C_Pr = .299;
-    const double C_Pg = .587;
-    const double C_Pb = .114;
-
-    const int offsets[4] = {0, 3, m_frame_width*3, m_frame_width*3 + 3};
-
-    if (change == 1.0) {
-        // Early return
-        return;
-    }
-
-    double mults[3];
-    if (m_colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        mults[2] = C_Pb;
-        mults[1] = C_Pg;
-        mults[0] = C_Pr;
-    } else {
-        // Data is in BGR format
-        mults[0] = C_Pb;
-        mults[1] = C_Pg;
-        mults[2] = C_Pr;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        // 8-bit data
-
-        // Subsample original data
-        uint8_t *p_subsampled_buffer = new uint8_t[(m_frame_width/2) * (m_frame_height/2) * 3];
-        uint8_t *p_subsampled_ptr = p_subsampled_buffer;
-
-        for (int y = 0; y < (m_frame_height/2) * 2; y += 2) {
-            uint8_t *p_frame_data = mp_frame_buffer + y * m_frame_width * 3;
-            for (int x = 0; x < (m_frame_width/2) * 2; x += 2) {
-                 uint32_t pixel;
-                 pixel = *(p_frame_data + offsets[0]);
-                 pixel += *(p_frame_data + offsets[1]);
-                 pixel += *(p_frame_data + offsets[2]);
-                 pixel += *(p_frame_data + offsets[3]);
-                 p_frame_data++;
-                 pixel /= 4;
-                 *p_subsampled_ptr++ = pixel;
-
-                 pixel = *(p_frame_data + offsets[0]);
-                 pixel += *(p_frame_data + offsets[1]);
-                 pixel += *(p_frame_data + offsets[2]);
-                 pixel += *(p_frame_data + offsets[3]);
-                 p_frame_data++;
-                 pixel /= 4;
-                 *p_subsampled_ptr++ = pixel;
-
-                 pixel = *(p_frame_data + offsets[0]);
-                 pixel += *(p_frame_data + offsets[1]);
-                 pixel += *(p_frame_data + offsets[2]);
-                 pixel += *(p_frame_data + offsets[3]);
-                 p_frame_data++;
-                 pixel /= 4;
-                 p_frame_data += 3;
-                 *p_subsampled_ptr++ = pixel;
-            }
-        }
-
-
-        // Adjust colour saturation of subsampled RGB data
-        p_subsampled_ptr = p_subsampled_buffer;
-        for (int pixel = 0; pixel < (m_frame_width/2) * (m_frame_height/2); pixel++) {
-            uint8_t *p_col0 = p_subsampled_ptr++;
-            uint8_t *p_col1 = p_subsampled_ptr++;
-            uint8_t *p_col2 = p_subsampled_ptr++;
-
-            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
-                // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( (*p_col2) * (*p_col2) * mults[2] +
-                                 (*p_col1) * (*p_col1) * mults[1] +
-                                 (*p_col0) * (*p_col0) * mults[0] );
-
-                double dcol2 = P + ((double)(*p_col2) - P) * change;
-                double dcol1 = P + ((double)(*p_col1) - P) * change;
-                double dcol0 = P + ((double)(*p_col0) - P) * change;
-
-                // Clip values in 0 to 255 range
-                dcol2 = (dcol2 < 0) ? 0 : dcol2;
-                dcol1 = (dcol1 < 0) ? 0 : dcol1;
-                dcol0 = (dcol0 < 0) ? 0 : dcol0;
-                dcol2 = (dcol2 > 255) ? 255 : dcol2;
-                dcol1 = (dcol1 > 255) ? 255 : dcol1;
-                dcol0 = (dcol0 > 255) ? 255 : dcol0;
-
-                *p_col2 = (uint8_t)dcol2;
-                *p_col1 = (uint8_t)dcol1;
-                *p_col0 = (uint8_t)dcol0;
-            }
-        }
-
-        // Create luminance array for subsampled RGB data
-        double *p_subsampled_lum = new double[(m_frame_width/2) * (m_frame_height/2)];
-        double *p_subsampled_lum_ptr = p_subsampled_lum;
-        p_subsampled_ptr = p_subsampled_buffer;
-        for (int pixel = 0; pixel < (m_frame_width/2) * (m_frame_height/2); pixel++) {
-            double lum = mults[0] * (*p_subsampled_ptr++) +
-                         mults[1] * (*p_subsampled_ptr++) +
-                         mults[2] * (*p_subsampled_ptr++);
-            *p_subsampled_lum_ptr++ = lum;
-        }
-
-        // Calculate new pixels for original data
-        p_subsampled_lum_ptr = p_subsampled_lum;
-        p_subsampled_ptr = p_subsampled_buffer;
-        for (int y = 0; y < (m_frame_height/2) * 2; y++) {
-            uint8_t *p_frame_data = mp_frame_buffer + y * m_frame_width * 3;
-            for (int x = 0; x < (m_frame_width/2) * 2; x++) {
-                int32_t offset = (y/2) * (m_frame_width/2) + (x/2);
-                double scale = mults[0] * (*(p_frame_data + 0)) +
-                               mults[1] * (*(p_frame_data + 1)) +
-                               mults[2] * (*(p_frame_data + 2));
-                if (scale == 0) {
-                    scale = 0;
-                } else {
-                    scale /= *(p_subsampled_lum_ptr + offset);
-                }
-
-                offset *= 3;
-                double p1 = scale * *(p_subsampled_ptr + offset + 0);
-                double p2 = scale * *(p_subsampled_ptr + offset + 1);
-                double p3 = scale * *(p_subsampled_ptr + offset + 2);
-                p1 = (p1 > 255.0) ? 255.0 : p1;
-                p2 = (p2 > 255.0) ? 255.0 : p2;
-                p3 = (p3 > 255.0) ? 255.0 : p3;
-                *p_frame_data++ = (uint8_t)p1;
-                *p_frame_data++ = (uint8_t)p2;
-                *p_frame_data++ = (uint8_t)p3;
-            }
-        }
-
-/*
-        // Debug - copy back over original data
-        for (int y = 0; y < m_frame_height; y++) {
-            for (int x = 0; x < m_frame_width; x++) {
-                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 0) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 0);
-                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 1) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 1);
-                *(mp_frame_buffer + y * m_frame_width * 3 + x * 3 + 2) = *(p_subsampled_buffer + (y/2) * (m_frame_width/2) * 3 + (x/2) * 3 + 2);
-            }
-        }
-        // Debug
-*/
-        // Free up buffers
-        delete [] p_subsampled_buffer;
-        delete [] p_subsampled_lum;
-    }
-}
-
-
-
-
-void c_ser_player::change_colour_saturation(double change)
-{
-    const double C_Pr = .299;
-    const double C_Pg = .587;
-    const double C_Pb = .114;
-
-    if (change == 1.0) {
-        // Early return
-        return;
-    }
-
-    double mults[3];
-    if (m_colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        mults[2] = C_Pb;
-        mults[1] = C_Pg;
-        mults[0] = C_Pr;
-    } else {
-        // Data is in BGR format
-        mults[0] = C_Pb;
-        mults[1] = C_Pg;
-        mults[2] = C_Pr;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        // 8-bit data
-        uint8_t *p_frame_data = mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            uint8_t *p_col0 = p_frame_data++;
-            uint8_t *p_col1 = p_frame_data++;
-            uint8_t *p_col2 = p_frame_data++;
-
-            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
-                // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( (*p_col2) * (*p_col2) * mults[2] +
-                                 (*p_col1) * (*p_col1) * mults[1] +
-                                 (*p_col0) * (*p_col0) * mults[0] );
-
-                double dcol2 = P + ((double)(*p_col2) - P) * change;
-                double dcol1 = P + ((double)(*p_col1) - P) * change;
-                double dcol0 = P + ((double)(*p_col0) - P) * change;
-
-                // Clip values in 0 to 255 range
-                dcol2 = (dcol2 < 0) ? 0 : dcol2;
-                dcol1 = (dcol1 < 0) ? 0 : dcol1;
-                dcol0 = (dcol0 < 0) ? 0 : dcol0;
-                dcol2 = (dcol2 > 255) ? 255 : dcol2;
-                dcol1 = (dcol1 > 255) ? 255 : dcol1;
-                dcol0 = (dcol0 > 255) ? 255 : dcol0;
-
-                *p_col2 = (uint8_t)dcol2;
-                *p_col1 = (uint8_t)dcol1;
-                *p_col0 = (uint8_t)dcol0;
-            }
-        }
-    } else {
-        // 16-bit data
-        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            uint16_t *p_col0 = p_frame_data++;
-            uint16_t *p_col1 = p_frame_data++;
-            uint16_t *p_col2 = p_frame_data++;
-
-            if (*p_col0 != *p_col1 || *p_col0 != *p_col2) {
-                // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( mults[2] * (*p_col2) * (*p_col2) +
-                                 mults[1] * (*p_col1) * (*p_col1) +
-                                 mults[0] * (*p_col0) * (*p_col0) );
-
-                double dcol2 = P + ((double)(*p_col2) - P) * change;
-                double dcol1 = P + ((double)(*p_col1) - P) * change;
-                double dcol0 = P + ((double)(*p_col0) - P) * change;
-
-                // Clip values in 0 to 65535 range
-
-                dcol2 = (dcol2 < 0) ? 0 : dcol2;
-                dcol1 = (dcol1 < 0) ? 0 : dcol1;
-                dcol0 = (dcol0 < 0) ? 0 : dcol0;
-                dcol2 = (dcol2 > 65535) ? 65535 : dcol2;
-                dcol1 = (dcol1 > 65535) ? 65535 : dcol1;
-                dcol0 = (dcol0 > 65535) ? 65535 : dcol0;
-
-                *p_col2 = (uint16_t)dcol2;
-                *p_col1 = (uint16_t)dcol1;
-                *p_col0 = (uint16_t)dcol0;
-            }
-        }
-    }
-}
-
-
-void c_ser_player::change_colour_balance(int red, int green, int blue)
-{
-    if (red == 0 && green == 0 && blue == 0) {
-        // Early return
-        return;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        // 8-bit data
-        int balance[3];
-        if (m_colour_id == COLOURID_RGB) {
-            // Data is in RGB format
-            balance[0] = red;
-            balance[1] = green;
-            balance[2] = blue;
-        } else {
-            // Data is in BGR format
-            balance[0] = blue;
-            balance[1] = green;
-            balance[2] = red;
-        }
-
-        uint8_t *p_frame_data = mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 += balance[0];
-            colour1 += balance[1];
-            colour2 += balance[2];
-            colour0 = (colour0 > 0xFF) ? 0xFF : colour0;
-            colour1 = (colour1 > 0xFF) ? 0xFF : colour1;
-            colour2 = (colour2 > 0xFF) ? 0xFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
-    } else {
-        // 16-bit data
-        int balance[3];
-        if (m_colour_id == COLOURID_RGB) {
-            // Data is in RGB format
-            balance[0] = (red << 8) + red;
-            balance[1] = (green << 8) + green;
-            balance[2] = (blue << 8) + blue;
-        } else {
-            // Data is in BGR format
-            balance[0] = (blue << 8) + blue;
-            balance[1] = (green << 8) + green;
-            balance[2] = (red << 8) + red;
-        }
-
-        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 += balance[0];
-            colour1 += balance[1];
-            colour2 += balance[2];
-            colour0 = (colour0 > 0xFFFF) ? 0xFFFF : colour0;
-            colour1 = (colour1 > 0xFFFF) ? 0xFFFF : colour1;
-            colour2 = (colour2 > 0xFFFF) ? 0xFFFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
-    }
-}
-
-
-void c_ser_player::change_colour_balance2(double red, double green, double blue)
-{
-    if (red == 1.0 && green == 1.0 && blue == 1.0) {
-        // Early return
-        return;
-    }
-
-    double balance[3];
-    if (m_colour_id == COLOURID_RGB) {
-        // Data is in RGB format
-        balance[0] = red;
-        balance[1] = green;
-        balance[2] = blue;
-    } else {
-        // Data is in BGR format
-        balance[0] = blue;
-        balance[1] = green;
-        balance[2] = red;
-    }
-
-    if (m_bytes_per_sample == 1) {
-        // 8-bit data
-        uint8_t *p_frame_data = mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 = balance[0] * colour0;
-            colour1 = balance[1] * colour1;
-            colour2 = balance[2] * colour2;
-            colour0 = (colour0 > 0xFF) ? 0xFF : colour0;
-            colour1 = (colour1 > 0xFF) ? 0xFF : colour1;
-            colour2 = (colour2 > 0xFF) ? 0xFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
-    } else {
-        // 16-bit data
-        uint16_t *p_frame_data = (uint16_t *)mp_frame_buffer;
-        for (int pixel = 0; pixel < m_frame_width * m_frame_height; pixel++) {
-            int32_t colour0 = *(p_frame_data+0);
-            int32_t colour1 = *(p_frame_data+1);
-            int32_t colour2 = *(p_frame_data+2);
-            colour0 = balance[0] * colour0;
-            colour1 = balance[1] * colour1;
-            colour2 = balance[2] * colour2;
-            colour0 = (colour0 > 0xFFFF) ? 0xFFFF : colour0;
-            colour1 = (colour1 > 0xFFFF) ? 0xFFFF : colour1;
-            colour2 = (colour2 > 0xFFFF) ? 0xFFFF : colour2;
-            colour0 = (colour0 < 0) ? 0 : colour0;
-            colour1 = (colour1 < 0) ? 0 : colour1;
-            colour2 = (colour2 < 0) ? 0 : colour2;
-            *p_frame_data++ = colour0;
-            *p_frame_data++ = colour1;
-            *p_frame_data++ = colour2;
-        }
-    }
 }
 
 

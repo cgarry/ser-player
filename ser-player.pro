@@ -36,7 +36,8 @@ SOURCES += src/main.cpp\
     src/pipp_timestamp.cpp \
     src/image_widget.cpp \
     src/application.cpp \
-    src/colour_dialog.cpp
+    src/colour_dialog.cpp \
+    src/image_functions.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -53,7 +54,8 @@ HEADERS  += src/ser_player.h \
     src/image_widget.h \
     src/application.h \
     src/new_version_checker.h \
-    src/colour_dialog.h
+    src/colour_dialog.h \
+    src/image_functions.h
 
 # Build directories
 DESTDIR = $$PWD/bin
