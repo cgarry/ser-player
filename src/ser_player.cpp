@@ -583,6 +583,7 @@ void c_ser_player::colour_saturation_changed(double value)
 
 void c_ser_player::colour_balance_changed(double red, double green, double blue)
 {
+    image_functions::set_colour_balance_luts(red, green, blue);
     m_red_balance = red;
     m_green_balance = green;
     m_blue_balance = blue;
@@ -707,10 +708,12 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Adjust colour saturation if required
         if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
+//            image_functions::change_colour_balance(
+//                m_red_balance,  // double red,
+//                m_green_balance,  // double green
+//                m_blue_balance,  // double blue
+//                m_frame_details); // struct s_image_details &image_details
             image_functions::change_colour_balance(
-                m_red_balance,  // double red,
-                m_green_balance,  // double green
-                m_blue_balance,  // double blue
                 m_frame_details); // struct s_image_details &image_details
 
 
@@ -933,10 +936,12 @@ void c_ser_player::frame_slider_changed_slot()
 
             if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
                 // Adjust colour saturation and balance if required
+//                image_functions::change_colour_balance(
+//                    m_red_balance,  // double red,
+//                    m_green_balance,  // double green
+//                    m_blue_balance,  // double blue
+//                    m_frame_details); // struct s_image_details &image_details
                 image_functions::change_colour_balance(
-                    m_red_balance,  // double red,
-                    m_green_balance,  // double green
-                    m_blue_balance,  // double blue
                     m_frame_details); // struct s_image_details &image_details
 
                 image_functions::change_colour_saturation(

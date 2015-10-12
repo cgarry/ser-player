@@ -43,6 +43,15 @@ namespace image_functions {
         double &blue_gain,
         const struct s_image_details &image_details);
 
+    void set_colour_balance_luts(
+        double red_gain,
+        double green_gain,
+        double blue_gain);
+
+
+    void change_colour_balance(
+        const struct s_image_details &image_details);
+
     void change_colour_balance(
         double red,
         double green,

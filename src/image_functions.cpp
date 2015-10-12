@@ -513,6 +513,54 @@ void estimate_colour_balance(
 }
 
 
+uint8_t colbal_r_lut[256];
+uint8_t colbal_g_lut[256];
+uint8_t colbal_b_lut[256];
+bool colour_balance_enabled = false;
+void set_colour_balance_luts(
+    double red_gain,
+    double green_gain,
+    double blue_gain)
+{
+    if (red_gain == 1.0 && green_gain == 1.0 && blue_gain == 1.0) {
+        colour_balance_enabled = false;
+    } else {
+        for (int x = 0; x < 256; x++) {
+            // Calculate individual gains
+            double temp_r, temp_g, temp_b;
+            temp_r = red_gain * x;
+            temp_g = green_gain * x;
+            temp_b = blue_gain * x;
+
+            // Clamp values
+            temp_r = (temp_r > 255) ? 255 : temp_r;
+            temp_g = (temp_g > 255) ? 255 : temp_g;
+            temp_b = (temp_b > 255) ? 255 : temp_b;
+
+            // Write to LUTs
+            colbal_r_lut[x] = (uint8_t)temp_r;
+            colbal_g_lut[x] = (uint8_t)temp_g;
+            colbal_b_lut[x] = (uint8_t)temp_b;
+        }
+        colour_balance_enabled = true;
+    }
+}
+
+
+void change_colour_balance(
+    const struct s_image_details &image_details)
+{
+    if (colour_balance_enabled) {
+        uint8_t *p_frame_data = image_details.p_buffer;
+        for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
+            *p_frame_data = colbal_b_lut[*p_frame_data++];
+            *p_frame_data = colbal_g_lut[*p_frame_data++];
+            *p_frame_data = colbal_r_lut[*p_frame_data++];
+        }
+    }
+}
+
+
 void change_colour_balance(
     double red_gain,
     double green_gain,
