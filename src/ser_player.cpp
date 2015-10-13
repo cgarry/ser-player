@@ -352,6 +352,11 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_count_Slider->setOrientation(Qt::Horizontal);
     mp_count_Slider->setMinimum(1);
     mp_count_Slider->setMaximum(100);
+    // Test code
+    mp_count_Slider->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(mp_count_Slider, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(ShowContextMenu(const QPoint&)));
+    // Test code End
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
     m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
@@ -1331,4 +1336,28 @@ void c_ser_player::calculate_display_framerate()
 
     mp_fps_Label->setText(m_fps_label_String.arg(fps));
     mp_frame_Timer->setInterval(m_display_frame_time);
+}
+
+
+void c_ser_player::ShowContextMenu(const QPoint& pos) // this is a slot
+{
+    // for most widgets
+    QPoint globalPos = mp_count_Slider->mapToGlobal(pos);
+    // for QAbstractScrollArea and derived classes you would use:
+    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+
+    QMenu myMenu;
+    QAction *act1 = myMenu.addAction(tr("Set Start Marker"));
+    QAction *act2 = myMenu.addAction(tr("Set End Marker"));
+    // ...
+
+    QAction* selectedItem = myMenu.exec(globalPos);
+    if (selectedItem == act1) {
+        qDebug() << "Start Marker chosen";
+    } else if (selectedItem == act2) {
+        qDebug() << "End Marker chosen";
+    }
+    else {
+        // nothing was chosen
+    }
 }
