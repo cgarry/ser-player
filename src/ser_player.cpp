@@ -373,7 +373,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_play_PushButton = new QPushButton;
     mp_play_PushButton->setIcon(m_play_Pixmap);
     mp_play_PushButton->setIconSize(m_play_Pixmap.size());
-    mp_play_PushButton->setFixedWidth(mp_play_PushButton->sizeHint().height());  // Square button
+ //   mp_play_PushButton->setFixedWidth(mp_play_PushButton->sizeHint().height());  // Square button
+    mp_play_PushButton->setFixedSize(m_play_Pixmap.size() + QSize(10, 10));
 
     mp_play_PushButton->setToolTip(tr("Play/Pause", "Button Tool tip"));
 
@@ -381,14 +382,16 @@ c_ser_player::c_ser_player(QWidget *parent)
     QPixmap stop_Pixmap = QPixmap(":/res/resources/stop_button.png");
     mp_stop_PushButton->setIcon(stop_Pixmap);
     mp_stop_PushButton->setIconSize(stop_Pixmap.size());
-    mp_stop_PushButton->setFixedWidth(mp_stop_PushButton->sizeHint().height());  // Square button
+    //mp_stop_PushButton->setFixedWidth(mp_stop_PushButton->sizeHint().height());  // Square button
+    mp_stop_PushButton->setFixedSize(stop_Pixmap.size() + QSize(10, 10));
     mp_stop_PushButton->setToolTip(tr("Stop", "Button Tool tip"));
 
     mp_repeat_PushButton = new QPushButton;
     QPixmap repeat_Pixmap = QPixmap(":/res/resources/repeat_button.png");
     mp_repeat_PushButton->setIcon(repeat_Pixmap);
     mp_repeat_PushButton->setIconSize(repeat_Pixmap.size());
-    mp_repeat_PushButton->setFixedWidth(mp_repeat_PushButton->sizeHint().height());  // Square button
+    //mp_repeat_PushButton->setFixedWidth(mp_repeat_PushButton->sizeHint().height());  // Square button
+    mp_repeat_PushButton->setFixedSize(repeat_Pixmap.size() + QSize(10, 10));
     mp_repeat_PushButton->setCheckable(true);
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
@@ -470,11 +473,26 @@ c_ser_player::c_ser_player(QWidget *parent)
     controls_v_layout1->addLayout(controls_h_layout2);
 
     QHBoxLayout *controls_h_layout = new QHBoxLayout;
-    controls_h_layout->setSpacing(4);
+    controls_h_layout->setSpacing(0);
     controls_h_layout->setMargin(0);
     controls_h_layout->addWidget(mp_play_PushButton);
+#ifdef __APPLE__
+    controls_h_layout->addSpacing(20);
+#else
+    controls_h_layout->addSpacing(4);
+#endif
     controls_h_layout->addWidget(mp_stop_PushButton);
+#ifdef __APPLE__
+    controls_h_layout->addSpacing(20);
+#else
+    controls_h_layout->addSpacing(4);
+#endif
     controls_h_layout->addWidget(mp_repeat_PushButton);
+#ifdef __APPLE__
+    controls_h_layout->addSpacing(20);
+#else
+    controls_h_layout->addSpacing(4);
+#endif
     controls_h_layout->addStretch();
     controls_h_layout->addLayout(controls_v_layout1);
 
