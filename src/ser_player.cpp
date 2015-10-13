@@ -52,6 +52,7 @@
 #include "image_widget.h"
 #include "colour_dialog.h"
 
+
 #ifndef DISABLE_NEW_VERSION_CHECK
 #include "new_version_checker.h"
 #endif
@@ -698,7 +699,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
-//        int32_t frame_size = m_frame_details.width * m_frame_details.height * m_frame_details.bytes_per_sample * 3;
         m_frame_details.p_buffer = new uint8_t[m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3];
         mp_ser_file->get_frame(m_frame_details.p_buffer);
 
@@ -714,14 +714,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Adjust colour saturation if required
         if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
-//            image_functions::change_colour_balance(
-//                m_red_balance,  // double red,
-//                m_green_balance,  // double green
-//                m_blue_balance,  // double blue
-//                m_frame_details); // struct s_image_details &image_details
             image_functions::change_colour_balance(
                 m_frame_details); // struct s_image_details &image_details
-
 
             image_functions::change_colour_saturation(
                 m_colour_saturation,  // double saturation
@@ -890,13 +884,12 @@ void c_ser_player::save_frame_slot()
 
 void c_ser_player::frame_slider_changed_slot()
 {
-    mp_frame_slider_changed_Mutex->lock();
-
     // Update image to new frame
     if (m_current_state == STATE_NO_FILE) {
         m_framecount = 1;
         mp_count_Slider->setValue(1);
     } else {
+        mp_frame_slider_changed_Mutex->lock();
         m_framecount = mp_count_Slider->value();
         mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
 
@@ -967,9 +960,9 @@ void c_ser_player::frame_slider_changed_slot()
             mp_frame_Timer->stop();
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
-    }
 
-    mp_frame_slider_changed_Mutex->unlock();
+        mp_frame_slider_changed_Mutex->unlock();
+    }
 }
 
 
