@@ -359,8 +359,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     QPixmap forward_Pixmap = QPixmap(":/res/resources/forward_button.png");
     mp_forward_PushButton->setIcon(forward_Pixmap);
     mp_forward_PushButton->setIconSize(forward_Pixmap.size());
-    mp_forward_PushButton->setFixedSize(forward_Pixmap.size() + QSize(10, 10));
-    mp_forward_PushButton->setToolTip(tr("Advance Frame", "Button Tool tip"));
+    mp_forward_PushButton->setFixedSize(forward_Pixmap.size() + QSize(10, 10));  // Nice and small
+    mp_forward_PushButton->setToolTip(tr("Advance Frame", "Button Tool tip"));  // Nice and small
 
     mp_back_PushButton = new QPushButton;
     QPixmap back_Pixmap = QPixmap(":/res/resources/back_button.png");
@@ -372,22 +372,25 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_play_PushButton = new QPushButton;
     mp_play_PushButton->setIcon(m_play_Pixmap);
     mp_play_PushButton->setIconSize(m_play_Pixmap.size());
+    mp_play_PushButton->setFixedWidth(mp_play_PushButton->sizeHint().height());  // Square button
+
     mp_play_PushButton->setToolTip(tr("Play/Pause", "Button Tool tip"));
 
     mp_stop_PushButton = new QPushButton;
     QPixmap stop_Pixmap = QPixmap(":/res/resources/stop_button.png");
     mp_stop_PushButton->setIcon(stop_Pixmap);
     mp_stop_PushButton->setIconSize(stop_Pixmap.size());
+    mp_stop_PushButton->setFixedWidth(mp_stop_PushButton->sizeHint().height());  // Square button
     mp_stop_PushButton->setToolTip(tr("Stop", "Button Tool tip"));
 
     mp_repeat_PushButton = new QPushButton;
     QPixmap repeat_Pixmap = QPixmap(":/res/resources/repeat_button.png");
     mp_repeat_PushButton->setIcon(repeat_Pixmap);
     mp_repeat_PushButton->setIconSize(repeat_Pixmap.size());
+    mp_repeat_PushButton->setFixedWidth(mp_repeat_PushButton->sizeHint().height());  // Square button
     mp_repeat_PushButton->setCheckable(true);
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
-    connect(mp_repeat_PushButton, SIGNAL(toggled(bool)), this, SLOT(repeat_button_toggled_slot(bool)));
 
     m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;
@@ -513,6 +516,9 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     connect(mp_stop_PushButton, SIGNAL(pressed()),
             this, SLOT(stop_button_pressed_slot()));
+
+    connect(mp_repeat_PushButton, SIGNAL(toggled(bool)),
+            this, SLOT(repeat_button_toggled_slot(bool)));
 
     connect(mp_count_Slider, SIGNAL(valueChanged(int)),
             this, SLOT(frame_slider_changed_slot()));
