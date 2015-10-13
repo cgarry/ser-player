@@ -41,20 +41,20 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_colsat_Slider->setRange(0, 1500);
     mp_colsat_Slider->setValue(100);
     mp_colsat_Slider->setMinimumWidth(mp_colsat_Slider->sizeHint().width() * 2);
-    connect(mp_colsat_Slider, SIGNAL(valueChanged(int)), this, SLOT(colour_saturation_changed_slot(int)));
+    connect(mp_colsat_Slider, SIGNAL(sliderMoved(int)), this, SLOT(colour_saturation_slider_changed_slot(int)));
     mp_colsat_DSpinbox = new QDoubleSpinBox;
     mp_colsat_DSpinbox->setRange(0.0, 15.0);
     mp_colsat_DSpinbox->setSingleStep(0.01);
     mp_colsat_DSpinbox->setValue(1.0);
-    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SIGNAL(colour_saturation_changed(double)));
-    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_changed_slot(double)));
+
+    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_spinbox_changed_slot(double)));
     QHBoxLayout *colsat_hlayout1 = new QHBoxLayout;
     colsat_hlayout1->addWidget(new QLabel(tr("Saturation")));
     colsat_hlayout1->addWidget(mp_colsat_Slider);
     colsat_hlayout1->addWidget(mp_colsat_DSpinbox);
 
     QPushButton *reset_colour_saturation_button = new QPushButton(tr("Reset"));
-    connect(reset_colour_saturation_button, SIGNAL(clicked()), this, SLOT(reset_colour_saturation()));
+    connect(reset_colour_saturation_button, SIGNAL(clicked()), this, SLOT(reset_colour_saturation_slot()));
     QHBoxLayout *colsat_hlayout2 = new QHBoxLayout;
     colsat_hlayout2->addWidget(reset_colour_saturation_button);
     colsat_hlayout2->addStretch();
@@ -70,29 +70,29 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_red_balance_Slider->setRange(-100, 100);
     mp_red_balance_Slider->setValue(0);
     mp_red_balance_Slider->setMinimumWidth(mp_red_balance_Slider->sizeHint().width() * 2);
-    connect(mp_red_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(red_balance_changed_slot(int)));
+    connect(mp_red_balance_Slider, SIGNAL(sliderMoved(int)), this, SLOT(red_balance_slider_changed_slot(int)));
     mp_red_balance_SpinBox = new QSpinBox;
     mp_red_balance_SpinBox->setRange(-100, 100);
     mp_red_balance_SpinBox->setValue(0);
-    connect(mp_red_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(red_balance_changed_slot(int)));
+    connect(mp_red_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(red_balance_spinbox_changed_slot(int)));
 
     mp_green_balance_Slider = new QSlider(Qt::Horizontal);
     mp_green_balance_Slider->setRange(-100, 100);
     mp_green_balance_Slider->setValue(0);
-    connect(mp_green_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(green_balance_changed_slot(int)));
+    connect(mp_green_balance_Slider, SIGNAL(sliderMoved(int)), this, SLOT(green_balance_slider_changed_slot(int)));
     mp_green_balance_SpinBox = new QSpinBox;
     mp_green_balance_SpinBox->setRange(-100, 100);
     mp_green_balance_SpinBox->setValue(0);
-    connect(mp_green_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(green_balance_changed_slot(int)));
+    connect(mp_green_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(green_balance_spinbox_changed_slot(int)));
 
     mp_blue_balance_Slider = new QSlider(Qt::Horizontal);
     mp_blue_balance_Slider->setRange(-100, 100);
     mp_blue_balance_Slider->setValue(0);
-    connect(mp_blue_balance_Slider, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_changed_slot(int)));
+    connect(mp_blue_balance_Slider, SIGNAL(sliderMoved(int)), this, SLOT(blue_balance_slider_changed_slot(int)));
     mp_blue_balance_SpinBox = new QSpinBox;
     mp_blue_balance_SpinBox->setRange(-100, 100);
     mp_blue_balance_SpinBox->setValue(0);
-    connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_changed_slot(int)));
+    connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_spinbox_changed_slot(int)));
 
     QGridLayout *colour_balance_GLayout = new QGridLayout;
     colour_balance_GLayout->setVerticalSpacing(5);
@@ -108,7 +108,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colour_balance_GLayout->addWidget(mp_blue_balance_SpinBox, 2, 2);
 
     QPushButton *reset_colour_balance_button = new QPushButton(tr("Reset"));
-    connect(reset_colour_balance_button, SIGNAL(clicked()), this, SLOT(reset_colour_balance()));
+    connect(reset_colour_balance_button, SIGNAL(clicked()), this, SLOT(reset_colour_balance_slot()));
     QPushButton *estimate_colour_balance_button = new QPushButton(tr("Estimate", "Estimate Colour Balance Button"));
     connect(estimate_colour_balance_button, SIGNAL(clicked()), this, SIGNAL(estimate_colour_balance()));
 
@@ -146,21 +146,26 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
 }
 
 
-void c_colour_dialog::colour_saturation_changed_slot(int sat)
+void c_colour_dialog::colour_saturation_slider_changed_slot(int sat)
 {
     mp_colsat_DSpinbox->setValue(((double)sat/100.0));
 }
 
 
-void c_colour_dialog::colour_saturation_changed_slot(double sat)
+void c_colour_dialog::colour_saturation_spinbox_changed_slot(double sat)
 {
     mp_colsat_Slider->setValue(100 * sat);
+    emit colour_saturation_changed(sat);
 }
 
 
-void c_colour_dialog::red_balance_changed_slot(int balance)
+void c_colour_dialog::red_balance_slider_changed_slot(int balance)
 {
     mp_red_balance_SpinBox->setValue(balance);
+}
+
+void c_colour_dialog::red_balance_spinbox_changed_slot(int balance)
+{
     mp_red_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 1.0 + (double)mp_red_balance_SpinBox->value() / 300,
@@ -169,9 +174,14 @@ void c_colour_dialog::red_balance_changed_slot(int balance)
 }
 
 
-void c_colour_dialog::green_balance_changed_slot(int balance)
+void c_colour_dialog::green_balance_slider_changed_slot(int balance)
 {
     mp_green_balance_SpinBox->setValue(balance);
+}
+
+
+void c_colour_dialog::green_balance_spinbox_changed_slot(int balance)
+{
     mp_green_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 1.0 + (double)mp_red_balance_SpinBox->value() / 300,
@@ -180,9 +190,13 @@ void c_colour_dialog::green_balance_changed_slot(int balance)
 }
 
 
-void c_colour_dialog::blue_balance_changed_slot(int balance)
+void c_colour_dialog::blue_balance_slider_changed_slot(int balance)
 {
     mp_blue_balance_SpinBox->setValue(balance);
+}
+
+void c_colour_dialog::blue_balance_spinbox_changed_slot(int balance)
+{
     mp_blue_balance_Slider->setValue(balance);
     emit colour_balance_changed(
                 1.0 + (double)mp_red_balance_SpinBox->value() / 300,
@@ -190,13 +204,14 @@ void c_colour_dialog::blue_balance_changed_slot(int balance)
                 1.0 + (double)mp_blue_balance_SpinBox->value() / 300);
 }
 
-void c_colour_dialog::reset_colour_saturation()
+
+void c_colour_dialog::reset_colour_saturation_slot()
 {
     mp_colsat_DSpinbox->setValue(1.0);
 }
 
 
-void c_colour_dialog::reset_colour_balance()
+void c_colour_dialog::reset_colour_balance_slot()
 {
     mp_red_balance_SpinBox->setValue(0);
     mp_green_balance_SpinBox->setValue(0);

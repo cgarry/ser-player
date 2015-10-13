@@ -195,8 +195,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_action, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
     mp_colour_settings_Dialog = new c_colour_dialog(this);
     mp_colour_settings_Dialog->hide();
-    connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed(double)));
-    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed(double,double,double)));
+    connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
+    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
@@ -574,14 +574,14 @@ void c_ser_player::colour_settings_slot()
 }
 
 
-void c_ser_player::colour_saturation_changed(double value)
+void c_ser_player::colour_saturation_changed_slot(double value)
 {
     m_colour_saturation = value;
     frame_slider_changed_slot();
 }
 
 
-void c_ser_player::colour_balance_changed(double red, double green, double blue)
+void c_ser_player::colour_balance_changed_slot(double red, double green, double blue)
 {
     image_functions::set_colour_balance_luts(red, green, blue);
     m_red_balance = red;

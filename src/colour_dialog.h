@@ -42,13 +42,16 @@ signals:
 
     
 private slots:
-    void reset_colour_saturation();
-    void reset_colour_balance();
-    void colour_saturation_changed_slot(int sat);
-    void colour_saturation_changed_slot(double sat);
-    void red_balance_changed_slot(int balance);
-    void green_balance_changed_slot(int balance);
-    void blue_balance_changed_slot(int balance);
+    void reset_colour_saturation_slot();
+    void reset_colour_balance_slot();
+    void colour_saturation_slider_changed_slot(int sat);
+    void colour_saturation_spinbox_changed_slot(double sat);
+    void red_balance_slider_changed_slot(int balance);
+    void green_balance_slider_changed_slot(int balance);
+    void blue_balance_slider_changed_slot(int balance);
+    void red_balance_spinbox_changed_slot(int balance);
+    void green_balance_spinbox_changed_slot(int balance);
+    void blue_balance_spinbox_changed_slot(int balance);
 
     
 private:

@@ -108,8 +108,8 @@ public:
 public slots:
     void fps_changed_slot(QAction *);
     void colour_settings_slot();
-    void colour_saturation_changed(double saturation);
-    void colour_balance_changed(double red, double green, double blue);
+    void colour_saturation_changed_slot(double saturation);
+    void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
