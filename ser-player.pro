@@ -37,7 +37,8 @@ SOURCES += src/main.cpp\
     src/image_widget.cpp \
     src/application.cpp \
     src/colour_dialog.cpp \
-    src/image_functions.cpp
+    src/image_functions.cpp \
+    src/frame_slider.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -55,7 +56,8 @@ HEADERS  += src/ser_player.h \
     src/application.h \
     src/new_version_checker.h \
     src/colour_dialog.h \
-    src/image_functions.h
+    src/image_functions.h \
+    src/frame_slider.h
 
 # Build directories
 DESTDIR = $$PWD/bin

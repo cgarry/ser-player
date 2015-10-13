@@ -27,7 +27,8 @@
 class QAction;
 class QLabel;
 class c_pipp_ser;
-class QSlider;
+//class QSlider;
+class c_frame_slider;
 class QPushButton;
 class QMutex;
 class QImage;
@@ -64,7 +65,7 @@ private:
     c_image_Widget *mp_frame_image_Widget;
     QImage *mp_frame_Image;
     QTimer *mp_frame_Timer;
-    QSlider *mp_count_Slider;
+    c_frame_slider *mp_frame_Slider;
     QString m_zoom_label_String;
     QLabel *mp_zoom_Label;
     QString m_frame_size_label_String;
@@ -132,6 +133,7 @@ public slots:
     void dropEvent(QDropEvent *e);
     void handle_arguments();
     void about_ser_player();
+    void ShowContextMenu(const QPoint& pos);
 
 
 protected:

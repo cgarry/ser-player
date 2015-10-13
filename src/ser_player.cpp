@@ -35,7 +35,6 @@
 #include <QMutex>
 #include <QPainter>
 #include <QPushButton>
-#include <QSlider>
 #include <QTimer>
 #include <QUrl>
 #include <QWidgetAction>
@@ -43,6 +42,7 @@
 
 #include <cmath>
 
+#include "frame_slider.h"
 #include "ser_player.h"
 #include "persistent_data.h"
 #include "image_functions.h"
@@ -348,13 +348,13 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
 
-    mp_count_Slider = new QSlider;
-    mp_count_Slider->setOrientation(Qt::Horizontal);
-    mp_count_Slider->setMinimum(1);
-    mp_count_Slider->setMaximum(100);
+    mp_frame_Slider = new c_frame_slider(this);
+    mp_frame_Slider->setOrientation(Qt::Horizontal);
+    mp_frame_Slider->setMinimum(1);
+    mp_frame_Slider->setMaximum(100);
     // Test code
-    mp_count_Slider->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(mp_count_Slider, SIGNAL(customContextMenuRequested(const QPoint&)),
+    mp_frame_Slider->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(mp_frame_Slider, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(ShowContextMenu(const QPoint&)));
     // Test code End
 
@@ -450,7 +450,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 #else
     slider_h_layout->addSpacing(4);
 #endif
-    slider_h_layout->addWidget(mp_count_Slider);
+    slider_h_layout->addWidget(mp_frame_Slider);
 
     QHBoxLayout *controls_h_layout1 = new QHBoxLayout;
     controls_h_layout1->setSpacing(8);
@@ -544,7 +544,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_repeat_PushButton, SIGNAL(toggled(bool)),
             this, SLOT(repeat_button_toggled_slot(bool)));
 
-    connect(mp_count_Slider, SIGNAL(valueChanged(int)),
+    connect(mp_frame_Slider, SIGNAL(valueChanged(int)),
             this, SLOT(frame_slider_changed_slot()));
 
     connect(mp_frame_image_Widget, SIGNAL(double_click_signal()),
@@ -718,7 +718,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
-        mp_count_Slider->setMaximum(m_total_frames);
+        mp_frame_Slider->setMaximum(m_total_frames);
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
@@ -910,10 +910,10 @@ void c_ser_player::frame_slider_changed_slot()
     // Update image to new frame
     if (m_current_state == STATE_NO_FILE) {
         m_framecount = 1;
-        mp_count_Slider->setValue(1);
+        mp_frame_Slider->setValue(1);
     } else {
         mp_frame_slider_changed_Mutex->lock();
-        m_framecount = mp_count_Slider->value();
+        m_framecount = mp_frame_Slider->value();
         mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
@@ -1002,13 +1002,13 @@ void c_ser_player::frame_timer_timeout_slot()
 
         if (m_framecount < m_total_frames) {
             m_framecount++;
-            mp_count_Slider->setValue(m_framecount);
+            mp_frame_Slider->setValue(m_framecount);
         } else {
             // End of file reached
             if (mp_repeat_PushButton->isChecked()) {
                 // Repeat is on, go to start of video
                 m_framecount = 1;
-                mp_count_Slider->setValue(m_framecount);
+                mp_frame_Slider->setValue(m_framecount);
             } else {
                 // Repeat is off
                 m_current_state = STATE_FINISHED;
@@ -1021,12 +1021,12 @@ void c_ser_player::frame_timer_timeout_slot()
 void c_ser_player::forward_button_pressed_slot()
 {
     if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-        int value = mp_count_Slider->value();
-        if (value < mp_count_Slider->maximum()) {
+        int value = mp_frame_Slider->value();
+        if (value < mp_frame_Slider->maximum()) {
             value++;
         }
 
-        mp_count_Slider->setValue(value);
+        mp_frame_Slider->setValue(value);
     }
 }
 
@@ -1035,12 +1035,12 @@ void c_ser_player::back_button_pressed_slot()
 {
     if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
         if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-            int value = mp_count_Slider->value();
-            if (value > mp_count_Slider->minimum()) {
+            int value = mp_frame_Slider->value();
+            if (value > mp_frame_Slider->minimum()) {
                 value--;
             }
 
-            mp_count_Slider->setValue(value);
+            mp_frame_Slider->setValue(value);
         }
     }
 }
@@ -1061,7 +1061,7 @@ void c_ser_player::play_button_pressed_slot()
             mp_play_PushButton->setIcon(m_pause_Pixmap);
             mp_frame_Timer->start(m_display_frame_time);
             m_framecount = 1;
-            mp_count_Slider->setValue(m_framecount);
+            mp_frame_Slider->setValue(m_framecount);
         } else {
             // Start playing from current position
             m_current_state = STATE_PLAYING;
@@ -1079,7 +1079,7 @@ void c_ser_player::stop_button_pressed_slot()
         mp_play_PushButton->setIcon(m_play_Pixmap);
         mp_frame_Timer->stop();
         m_framecount = 1;
-        mp_count_Slider->setValue(m_framecount);
+        mp_frame_Slider->setValue(m_framecount);
     }
 }
 
@@ -1360,7 +1360,7 @@ void c_ser_player::calculate_display_framerate()
 void c_ser_player::ShowContextMenu(const QPoint& pos) // this is a slot
 {
     // for most widgets
-    QPoint globalPos = mp_count_Slider->mapToGlobal(pos);
+    QPoint globalPos = mp_frame_Slider->mapToGlobal(pos);
     // for QAbstractScrollArea and derived classes you would use:
     // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
 
