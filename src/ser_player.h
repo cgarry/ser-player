@@ -58,11 +58,13 @@ private:
     QPixmap m_no_file_open_Pixmap;
     QPixmap m_play_Pixmap;
     QPixmap m_pause_Pixmap;
+    QPushButton *mp_forward_PushButton;
+    QPushButton *mp_back_PushButton;
     QPushButton *mp_play_PushButton;
     QPushButton *mp_stop_PushButton;
     QPushButton *mp_repeat_PushButton;
-    QPushButton *mp_forward_PushButton;
-    QPushButton *mp_back_PushButton;
+    QPushButton *mp_start_marker_PushButton;
+    QPushButton *mp_end_marker_PushButton;
     c_image_Widget *mp_frame_image_Widget;
     QImage *mp_frame_Image;
     QTimer *mp_frame_Timer;
@@ -125,6 +127,8 @@ public slots:
     void play_button_pressed_slot();
     void stop_button_pressed_slot();
     void repeat_button_toggled_slot(bool checked);
+    void start_marker_toggled_slot(bool checked);
+    void end_marker_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
     void debayer_enable_slot(bool enabled);

@@ -422,6 +422,22 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
 
+    mp_start_marker_PushButton = new QPushButton;
+    QPixmap start_marker_Pixmap = QPixmap(":/res/resources/start_marker_button.png");
+    mp_start_marker_PushButton->setIcon(start_marker_Pixmap);
+    mp_start_marker_PushButton->setIconSize(start_marker_Pixmap.size());
+    mp_start_marker_PushButton->setFixedSize(start_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
+    mp_start_marker_PushButton->setCheckable(true);
+    mp_start_marker_PushButton->setToolTip(tr("Start Marker Button", "Button Tool tip"));  // Nice and small
+
+    mp_end_marker_PushButton = new QPushButton;
+    QPixmap end_marker_Pixmap = QPixmap(":/res/resources/end_marker_button.png");
+    mp_end_marker_PushButton->setIcon(end_marker_Pixmap);
+    mp_end_marker_PushButton->setIconSize(end_marker_Pixmap.size());
+    mp_end_marker_PushButton->setFixedSize(end_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
+    mp_end_marker_PushButton->setCheckable(true);
+    mp_end_marker_PushButton->setToolTip(tr("End Marker Button", "Button Tool tip"));  // Nice and small
+
     m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;
     mp_framecount_Label->setText(m_framecount_label_String.arg("-").arg("----"));
@@ -519,6 +535,18 @@ c_ser_player::c_ser_player(QWidget *parent)
 #else
     controls_h_layout->addSpacing(4);
 #endif
+    controls_h_layout->addWidget(mp_start_marker_PushButton, 0, Qt::AlignTop);
+#ifdef __APPLE__
+    controls_h_layout->addSpacing(20);
+#else
+    controls_h_layout->addSpacing(4);
+#endif
+    controls_h_layout->addWidget(mp_end_marker_PushButton, 0, Qt::AlignTop);
+#ifdef __APPLE__
+    controls_h_layout->addSpacing(20);
+#else
+    controls_h_layout->addSpacing(4);
+#endif
     controls_h_layout->addStretch();
     controls_h_layout->addLayout(controls_v_layout1);
 
@@ -564,6 +592,12 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     connect(mp_repeat_PushButton, SIGNAL(toggled(bool)),
             this, SLOT(repeat_button_toggled_slot(bool)));
+
+    connect(mp_start_marker_PushButton, SIGNAL(toggled(bool)),
+            this, SLOT(start_marker_toggled_slot(bool)));
+
+    connect(mp_end_marker_PushButton, SIGNAL(toggled(bool)),
+            this, SLOT(end_marker_toggled_slot(bool)));
 
     connect(mp_frame_Slider, SIGNAL(valueChanged(int)),
             this, SLOT(frame_slider_changed_slot()));
@@ -1100,6 +1134,32 @@ void c_ser_player::stop_button_pressed_slot()
 void c_ser_player::repeat_button_toggled_slot(bool checked) {
     c_persistent_data::m_repeat = checked;
     mp_frame_Slider->set_repeat(checked);
+}
+
+
+void c_ser_player::start_marker_toggled_slot(bool checked) {
+    if (checked) {
+        bool marker_set = mp_frame_Slider->set_start_marker(mp_frame_Slider->value());
+        if (!marker_set) {
+            // Marker was not set, uncheck button
+            mp_start_marker_PushButton->setChecked(false);
+        }
+    } else {
+        mp_frame_Slider->set_start_marker(-1);
+    }
+}
+
+
+void c_ser_player::end_marker_toggled_slot(bool checked) {
+    if (checked) {
+        bool marker_set = mp_frame_Slider->set_end_marker(mp_frame_Slider->value());
+        if (!marker_set) {
+            // Marker was not set, uncheck button
+            mp_end_marker_PushButton->setChecked(false);
+        }
+    } else {
+        mp_frame_Slider->set_end_marker(-1);
+    }
 }
 
 

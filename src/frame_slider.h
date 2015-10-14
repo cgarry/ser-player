@@ -33,8 +33,8 @@ public:
     void goto_first_frame();
     bool goto_next_frame();
 
-    void set_start_marker(int frame);
-    void set_end_marker(int frame);
+    bool set_start_marker(int frame);
+    bool set_end_marker(int frame);
     void delete_all_markers();
 
     int get_start_frame();

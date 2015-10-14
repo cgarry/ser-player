@@ -170,27 +170,41 @@ int c_frame_slider::get_end_frame()
 }
 
 
-void c_frame_slider::set_start_marker(int frame)
+bool c_frame_slider::set_start_marker(int frame)
 {
-    if (frame <= minimum()) {
+    bool ret = true;
+    if (frame <= minimum() ||
+        frame > maximum() ||
+        (m_end_marker != -1 && frame > m_end_marker)) {
+        // Start marker could not be set
         m_start_marker = -1;
-    } else if (frame <= m_end_marker) {
+        ret = false;
+    } else {
+        // Set start marker
         m_start_marker = frame;
     }
 
     update();
+    return ret;
 }
 
 
-void c_frame_slider::set_end_marker(int frame)
+bool c_frame_slider::set_end_marker(int frame)
 {
-    if (frame >= maximum()) {
+    bool ret = true;
+    if (frame <= minimum() ||
+        frame >= maximum() ||
+        frame < m_start_marker) {
+        // End marker could not be set
         m_end_marker = -1;
+        ret = false;
     } else if (frame >= m_start_marker) {
+        // Set end marker
         m_end_marker = frame;
     }
 
     update();
+    return ret;
 }
 
 
