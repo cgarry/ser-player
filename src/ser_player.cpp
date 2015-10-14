@@ -761,6 +761,8 @@ void c_ser_player::open_ser_file_slot()
 void c_ser_player::open_ser_file(const QString &filename)
 {
     mp_frame_Slider->delete_all_markers();
+    mp_start_marker_PushButton->setChecked(false);
+    mp_end_marker_PushButton->setChecked(false);
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
     mp_ser_file_Mutex->lock();
     mp_ser_file->close();
