@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.5"
+#define VERSION_STRING "v1.3.6"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -352,11 +352,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->setOrientation(Qt::Horizontal);
     mp_frame_Slider->setMinimum(1);
     mp_frame_Slider->setMaximum(100);
-    // Test code
-    mp_frame_Slider->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(mp_frame_Slider, SIGNAL(customContextMenuRequested(const QPoint&)),
-        this, SLOT(ShowContextMenu(const QPoint&)));
-    // Test code End
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
     m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
@@ -697,6 +692,7 @@ void c_ser_player::open_ser_file_slot()
 
 void c_ser_player::open_ser_file(const QString &filename)
 {
+    mp_frame_Slider->delete_all_markers();
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
     mp_ser_file_Mutex->lock();
     mp_ser_file->close();
@@ -1000,14 +996,14 @@ void c_ser_player::frame_timer_timeout_slot()
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
 
-        if (m_framecount < m_total_frames) {
+        if (m_framecount < mp_frame_Slider->get_end_frame()) {
             m_framecount++;
             mp_frame_Slider->setValue(m_framecount);
         } else {
             // End of file reached
             if (mp_repeat_PushButton->isChecked()) {
                 // Repeat is on, go to start of video
-                m_framecount = 1;
+                m_framecount = mp_frame_Slider->get_start_frame();
                 mp_frame_Slider->setValue(m_framecount);
             } else {
                 // Repeat is off
@@ -1060,10 +1056,14 @@ void c_ser_player::play_button_pressed_slot()
             m_current_state = STATE_PLAYING;
             mp_play_PushButton->setIcon(m_pause_Pixmap);
             mp_frame_Timer->start(m_display_frame_time);
-            m_framecount = 1;
+            m_framecount = mp_frame_Slider->get_start_frame();
             mp_frame_Slider->setValue(m_framecount);
         } else {
-            // Start playing from current position
+            // Start playing from current position if not before start marker
+            if (m_framecount < mp_frame_Slider->get_start_frame()) {
+                m_framecount = mp_frame_Slider->get_start_frame();
+            }
+
             m_current_state = STATE_PLAYING;
             mp_play_PushButton->setIcon(m_pause_Pixmap);
             mp_frame_Timer->start(m_display_frame_time);
@@ -1078,7 +1078,7 @@ void c_ser_player::stop_button_pressed_slot()
         m_current_state = STATE_STOPPED;
         mp_play_PushButton->setIcon(m_play_Pixmap);
         mp_frame_Timer->stop();
-        m_framecount = 1;
+        m_framecount = mp_frame_Slider->get_start_frame();
         mp_frame_Slider->setValue(m_framecount);
     }
 }
@@ -1356,26 +1356,3 @@ void c_ser_player::calculate_display_framerate()
     mp_frame_Timer->setInterval(m_display_frame_time);
 }
 
-
-void c_ser_player::ShowContextMenu(const QPoint& pos) // this is a slot
-{
-    // for most widgets
-    QPoint globalPos = mp_frame_Slider->mapToGlobal(pos);
-    // for QAbstractScrollArea and derived classes you would use:
-    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
-
-    QMenu myMenu;
-    QAction *act1 = myMenu.addAction(tr("Set Start Marker"));
-    QAction *act2 = myMenu.addAction(tr("Set End Marker"));
-    // ...
-
-    QAction* selectedItem = myMenu.exec(globalPos);
-    if (selectedItem == act1) {
-        qDebug() << "Start Marker chosen";
-    } else if (selectedItem == act2) {
-        qDebug() << "End Marker chosen";
-    }
-    else {
-        // nothing was chosen
-    }
-}

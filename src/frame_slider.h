@@ -28,12 +28,24 @@ class c_frame_slider : public QSlider
 
 public:
     c_frame_slider(QWidget *parent = 0);
+    int get_start_frame();
+    int get_end_frame();
+    void set_start_marker(int frame);
+    void set_end_marker(int frame);
+    void delete_all_markers();
+
+
+private slots:
+    void ShowContextMenu(const QPoint& pos);
 
 protected:
     void paintEvent(QPaintEvent *event);
 
 private:
-    int c_frame_slider::positionForValue(int val) const;
+    int positionForValue(int val) const;
+
+    int m_start_marker;
+    int m_end_marker;
 
 };
 

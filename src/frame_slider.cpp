@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QMenu>
 #include <QPainter>
 #include <QSlider>
 #include <QStyleOptionSlider>
@@ -27,9 +28,62 @@
 
 
 c_frame_slider::c_frame_slider(QWidget *parent)
-    : QSlider(parent)
+    : QSlider(parent),
+      m_start_marker(-1),
+      m_end_marker(-1)
 {
-    qDebug() << "c_frame_slider::c_frame_slider()";
+    // Test code
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+        this, SLOT(ShowContextMenu(const QPoint&)));
+    // Test code End
+}
+
+
+int c_frame_slider::get_start_frame()
+{
+    if (m_start_marker == -1) {
+      return minimum();
+    } else {
+        return m_start_marker;
+    }
+}
+
+
+int c_frame_slider::get_end_frame()
+{
+    if (m_end_marker == -1) {
+      return maximum();
+    } else {
+        return m_end_marker;
+    }
+}
+
+
+void c_frame_slider::set_start_marker(int frame)
+{
+    if (frame <= minimum()) {
+        m_start_marker = -1;
+    } else if (frame <= m_end_marker) {
+        m_start_marker = frame;
+    }
+}
+
+
+void c_frame_slider::set_end_marker(int frame)
+{
+    if (frame >= maximum()) {
+        m_end_marker = -1;
+    } else if (frame >= m_start_marker) {
+        m_end_marker = frame;
+    }
+}
+
+
+void c_frame_slider::delete_all_markers()
+{
+    m_start_marker = -1;
+    m_end_marker = -1;
 }
 
 
@@ -43,6 +97,59 @@ int c_frame_slider::positionForValue(int val) const
 }
 
 
+void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
+{
+    // for most widgets
+    QPoint globalPos = mapToGlobal(pos);
+    // for QAbstractScrollArea and derived classes you would use:
+    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+
+    QMenu markers_Menu;
+    QAction *set_start_marker_Act = NULL;
+    QAction *clear_start_marker_Act = NULL;
+    QAction *set_end_marker_Act = NULL;
+    QAction *clear_end_marker_Act = NULL;
+    if (m_end_marker == -1 || value() <= m_end_marker) {
+        set_start_marker_Act = markers_Menu.addAction(tr("Set Start Marker"));
+    }
+
+    if (m_start_marker != -1) {
+        clear_start_marker_Act = markers_Menu.addAction(tr("Delete Start Marker"));
+    }
+
+    if (value() >= m_start_marker) {
+        set_end_marker_Act = markers_Menu.addAction(tr("Set End Marker"));
+    }
+
+    if (m_end_marker != -1) {
+        clear_end_marker_Act = markers_Menu.addAction(tr("Delete End Marker"));
+    }
+
+    QAction* selectedItem = markers_Menu.exec(globalPos);
+    if (selectedItem != NULL) {
+        if (selectedItem == set_start_marker_Act) {
+            if (value() == minimum()) {
+                m_start_marker = -1;
+            } else {
+                m_start_marker = value();
+            }
+        } else if (selectedItem == clear_start_marker_Act) {
+            m_start_marker = -1;
+        } else if (selectedItem == set_end_marker_Act) {
+            if (value() == maximum()) {
+
+            }
+            m_end_marker = value();
+        } else if (selectedItem == clear_end_marker_Act) {
+            m_end_marker = -1;
+        }
+        else {
+            // nothing was chosen
+        }
+    }
+}
+
+
 void c_frame_slider::paintEvent(QPaintEvent *ev) {
     QSlider::paintEvent(ev);
     QStyleOptionSlider opt;
@@ -53,35 +160,56 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
       opt.subControls |= QStyle::SC_SliderTickmarks;
     }
 
+    // Get details of slider layout
     QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
 
-    qDebug() << "groove_rect: " << groove_rect;
-    qDebug() << "handle_rect: " << handle_rect;
-    QRect rect(groove_rect.left() + groove_rect.width() / 10,
-               groove_rect.top(),
-               8 * groove_rect.width() / 10,
-               groove_rect.height());
 
+//    qDebug() << "groove_rect: " << groove_rect;
+//    qDebug() << "handle_rect: " << handle_rect;
     QPainter painter(this);
 
-    QBrush brush = QBrush(Qt::green);
-    brush.setStyle(Qt::Dense5Pattern);
-    //brush.setStyle(Qt::LinearGradientPattern);
+    // Draw frames excluded from start rectangle
+    if (m_start_marker > minimum()) {
+        int start_pos = positionForValue(minimum());
+        int end_pos = positionForValue(m_start_marker) - 1;
+        QRect rect(start_pos,
+                   groove_rect.top(),
+                   end_pos - start_pos,
+                   groove_rect.height());
+        painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
+    }
 
-    painter.fillRect(rect, brush);
+    // Draw frames excluded from end rectangle
+    if (m_end_marker > m_start_marker && m_end_marker < maximum()) {
+        int start_pos = positionForValue(m_end_marker) + handle_rect.width();
+        int end_pos = positionForValue(maximum()) + handle_rect.width() - 1;
+        QRect rect(start_pos,
+                   groove_rect.top(),
+                   end_pos - start_pos,
+                   groove_rect.height());
+        painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
+    }
 
-    for (int x = this->minimum(); x <= this->maximum(); x++) {
-        int slider_pos = positionForValue(x) + handle_rect.width() / 2;
-                //QStyle::sliderPositionFromValue(this->minimum(), this->maximum(), x, groove_rect.width());
-        qDebug() << "slider_pos: " << x << " = " << slider_pos;
+    // Draw start marker
+    if (m_start_marker >= 0) {
+        // Draw start marker
+        int slider_pos = positionForValue(m_start_marker) - 1;
         painter.drawLine(groove_rect.left() + slider_pos,
                          groove_rect.top(),
                          groove_rect.left() + slider_pos,
                          groove_rect.bottom());
     }
 
+    // Draw end marker
+    if (m_end_marker >= 0) {
+        // Draw start marker
+        int slider_pos = positionForValue(m_end_marker) + handle_rect.width();
+        painter.drawLine(groove_rect.left() + slider_pos,
+                         groove_rect.top(),
+                         groove_rect.left() + slider_pos,
+                         groove_rect.bottom());
+    }
 
-    QSlider::paintEvent(ev);
-
+    //QSlider::paintEvent(ev);
 }

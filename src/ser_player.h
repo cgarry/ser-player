@@ -133,7 +133,6 @@ public slots:
     void dropEvent(QDropEvent *e);
     void handle_arguments();
     void about_ser_player();
-    void ShowContextMenu(const QPoint& pos);
 
 
 protected:
