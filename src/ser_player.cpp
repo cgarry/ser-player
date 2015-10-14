@@ -515,38 +515,17 @@ c_ser_player::c_ser_player(QWidget *parent)
     controls_v_layout1->addLayout(controls_h_layout2);
 
     QHBoxLayout *controls_h_layout = new QHBoxLayout;
-    controls_h_layout->setSpacing(0);
+#ifdef __APPLE__
+    controls_h_layout->setSpacing(20);
+#else
+    controls_h_layout->setSpacing(4);
+#endif
     controls_h_layout->setMargin(0);
-    controls_h_layout->addWidget(mp_play_PushButton);
-#ifdef __APPLE__
-    controls_h_layout->addSpacing(20);
-#else
-    controls_h_layout->addSpacing(4);
-#endif
-    controls_h_layout->addWidget(mp_stop_PushButton);
-#ifdef __APPLE__
-    controls_h_layout->addSpacing(20);
-#else
-    controls_h_layout->addSpacing(4);
-#endif
-    controls_h_layout->addWidget(mp_repeat_PushButton);
-#ifdef __APPLE__
-    controls_h_layout->addSpacing(20);
-#else
-    controls_h_layout->addSpacing(4);
-#endif
+    controls_h_layout->addWidget(mp_play_PushButton, 0, Qt::AlignTop);
+    controls_h_layout->addWidget(mp_stop_PushButton, 0, Qt::AlignTop);
+    controls_h_layout->addWidget(mp_repeat_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addWidget(mp_start_marker_PushButton, 0, Qt::AlignTop);
-#ifdef __APPLE__
-    controls_h_layout->addSpacing(20);
-#else
-    controls_h_layout->addSpacing(4);
-#endif
     controls_h_layout->addWidget(mp_end_marker_PushButton, 0, Qt::AlignTop);
-#ifdef __APPLE__
-    controls_h_layout->addSpacing(20);
-#else
-    controls_h_layout->addSpacing(4);
-#endif
     controls_h_layout->addStretch();
     controls_h_layout->addLayout(controls_v_layout1);
 
