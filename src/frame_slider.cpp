@@ -30,13 +30,122 @@
 c_frame_slider::c_frame_slider(QWidget *parent)
     : QSlider(parent),
       m_start_marker(-1),
-      m_end_marker(-1)
+      m_end_marker(-1),
+      m_repeat(false),
+      m_direction(0),
+      m_current_direction(0)
 {
-    // Test code
+    // Set up context menu
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(ShowContextMenu(const QPoint&)));
-    // Test code End
+
+}
+
+
+void c_frame_slider::set_repeat(bool repeat)
+{
+    m_repeat = repeat;
+}
+
+
+void c_frame_slider::set_direction(int dir)
+{
+    m_direction = dir;
+}
+
+
+void c_frame_slider::goto_first_frame()
+{
+    if (m_direction == 0) {
+        int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
+        setValue(start_frame);
+    } else if (m_direction == 1) {
+        int end_frame = (m_end_marker == -1) ? maximum() : m_end_marker;
+        setValue(end_frame);
+    } else if (m_direction == 2) {
+        // Forward + Reverse play
+        int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
+        setValue(start_frame);
+    } else {
+        qDebug() << "Unsupported direction!";
+        exit(-1);
+    }
+}
+
+
+bool c_frame_slider::goto_next_frame()
+{
+    bool ret = true;  // Default return value
+    int current_value = value();
+    int end_frame = (m_end_marker == -1) ? maximum() : m_end_marker;
+    int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
+
+    if (m_direction == 0) {
+        // Forward play
+        if (current_value < end_frame) {
+            // Not at end of forward playback
+            setValue(current_value + 1);
+        } else {
+            // At end of forward playback
+            if (m_repeat) {
+                // Repeat is on, go back to start
+                setValue(start_frame);
+            } else {
+                // Signal that playback has completed
+                ret = false;
+            }
+        }
+    } else if (m_direction == 1) {
+        // Reverse play
+        if (current_value > start_frame) {
+            // Not at end of reverse playback
+            setValue(current_value - 1);
+        } else {
+            // At end of reverse playback
+            if (m_repeat) {
+                // Repeat is on, go back to start
+                setValue(end_frame);
+            } else {
+                // Signal that playback has completed
+                ret = false;
+            }
+        }
+    } else if (m_direction == 2) {
+        // Forward + Reverse play
+        if (m_current_direction == 0) {
+            // Currently playing forward
+            if (current_value < end_frame) {
+                // Not at end of forward playback
+                setValue(current_value + 1);
+            } else {
+                // At end of forward playback - play backwards
+                m_current_direction = 1;
+                setValue(current_value);
+            }
+        } else {
+            // Currently playing reverse
+            if (current_value > start_frame) {
+                // Not at end of reverse playback
+                setValue(current_value - 1);
+            } else {
+                // At end of reverse playback
+                if (m_repeat) {
+                    // Repeat is on, start playback again
+                    m_current_direction = 0;
+                    setValue(current_value);
+                } else {
+                    // Signal that playback has completed
+                    ret = false;
+                }
+            }
+        }
+    } else {
+        qDebug() << "Unsupported direction!";
+        exit(-1);
+    }
+
+    return ret;
 }
 
 

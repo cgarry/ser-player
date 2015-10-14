@@ -64,7 +64,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent)
 {
     m_current_state = STATE_NO_FILE;
-    m_framecount = 1;
     m_is_colour = false;
     m_has_bayer_pattern = false;
 
@@ -181,6 +180,35 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
+
+
+
+    mp_direction_Menu = playback_menu->addMenu(tr("Playback Direction"));
+    mp_direction_Menu->setEnabled(false);
+    QActionGroup *direction_ActGroup = new QActionGroup(mp_direction_Menu);
+    direction_ActGroup->setExclusive(true);
+    QAction *direction_Action;
+
+    direction_Action = new QAction(tr("Forward", "Playback direction menu"), this);
+    direction_Action->setCheckable(true);
+    direction_Action->setChecked(true);
+    direction_Action->setData(0);
+    mp_direction_Menu->addAction(direction_Action);
+    direction_ActGroup->addAction(direction_Action);
+
+    direction_Action = new QAction(tr("Reverse", "Playback direction menu"), this);
+    direction_Action->setCheckable(true);
+    direction_Action->setData(1);
+    mp_direction_Menu->addAction(direction_Action);
+    direction_ActGroup->addAction(direction_Action);
+
+    direction_Action = new QAction(tr("Forward + Reverse","Playback direction menu"), this);
+    direction_Action->setCheckable(true);
+    direction_Action->setData(2);
+    mp_direction_Menu->addAction(direction_Action);
+    direction_ActGroup->addAction(direction_Action);
+    connect(direction_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT (direction_changed_slot(QAction *)));
+
 
     // Enable Debayer menu action
     m_debayer_Act = new QAction(tr("Enable Debayering"), this);
@@ -352,6 +380,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->setOrientation(Qt::Horizontal);
     mp_frame_Slider->setMinimum(1);
     mp_frame_Slider->setMaximum(100);
+    mp_frame_Slider->set_direction(0);
+    mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
     m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
@@ -373,16 +403,13 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_play_PushButton = new QPushButton;
     mp_play_PushButton->setIcon(m_play_Pixmap);
     mp_play_PushButton->setIconSize(m_play_Pixmap.size());
- //   mp_play_PushButton->setFixedWidth(mp_play_PushButton->sizeHint().height());  // Square button
     mp_play_PushButton->setFixedSize(m_play_Pixmap.size() + QSize(10, 10));
-
     mp_play_PushButton->setToolTip(tr("Play/Pause", "Button Tool tip"));
 
     mp_stop_PushButton = new QPushButton;
     QPixmap stop_Pixmap = QPixmap(":/res/resources/stop_button.png");
     mp_stop_PushButton->setIcon(stop_Pixmap);
     mp_stop_PushButton->setIconSize(stop_Pixmap.size());
-    //mp_stop_PushButton->setFixedWidth(mp_stop_PushButton->sizeHint().height());  // Square button
     mp_stop_PushButton->setFixedSize(stop_Pixmap.size() + QSize(10, 10));
     mp_stop_PushButton->setToolTip(tr("Stop", "Button Tool tip"));
 
@@ -390,7 +417,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     QPixmap repeat_Pixmap = QPixmap(":/res/resources/repeat_button.png");
     mp_repeat_PushButton->setIcon(repeat_Pixmap);
     mp_repeat_PushButton->setIconSize(repeat_Pixmap.size());
-    //mp_repeat_PushButton->setFixedWidth(mp_repeat_PushButton->sizeHint().height());  // Square button
     mp_repeat_PushButton->setFixedSize(repeat_Pixmap.size() + QSize(10, 10));
     mp_repeat_PushButton->setCheckable(true);
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
@@ -592,6 +618,14 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+void c_ser_player::direction_changed_slot(QAction *action)
+{
+    if (action != NULL) {
+        mp_frame_Slider->set_direction(action->data().toInt());
+    }
+}
+
+
 // Colour settings menu QAction has been clicked
 void c_ser_player::colour_settings_slot()
 {
@@ -626,7 +660,7 @@ void c_ser_player::estimate_colour_balance()
         int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
         delete[] m_frame_details.p_buffer;
         m_frame_details.p_buffer = new uint8_t[frame_size];
-        int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
+        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), m_frame_details.p_buffer);
         mp_ser_file_Mutex->unlock();
 
         if (mp_ser_file->get_bytes_per_sample() == 2) {
@@ -750,7 +784,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
 
         m_current_state = STATE_STOPPED;
-        m_framecount = 1;
+        mp_frame_Slider->goto_first_frame();
         mp_frame_size_Label->setText(m_frame_size_label_String
                                   .arg(m_frame_details.width)
                                   .arg(m_frame_details.height));
@@ -811,6 +845,7 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_framerate_Menu->setEnabled(true);
+        mp_direction_Menu->setEnabled(true);
         calculate_display_framerate();
 
         uint64_t ts = mp_ser_file->get_timestamp();
@@ -905,18 +940,16 @@ void c_ser_player::frame_slider_changed_slot()
 {
     // Update image to new frame
     if (m_current_state == STATE_NO_FILE) {
-        m_framecount = 1;
         mp_frame_Slider->setValue(1);
     } else {
         mp_frame_slider_changed_Mutex->lock();
-        m_framecount = mp_frame_Slider->value();
-        mp_framecount_Label->setText(m_framecount_label_String.arg(m_framecount).arg(m_total_frames));
+        mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
         int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
         delete[] m_frame_details.p_buffer;
         m_frame_details.p_buffer = new uint8_t[frame_size];
-        int32_t ret = mp_ser_file->get_frame(m_framecount, m_frame_details.p_buffer);
+        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), m_frame_details.p_buffer);
         uint64_t ts = mp_ser_file->get_timestamp();
         if (ts > 0) {
             int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
@@ -996,19 +1029,9 @@ void c_ser_player::frame_timer_timeout_slot()
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
 
-        if (m_framecount < mp_frame_Slider->get_end_frame()) {
-            m_framecount++;
-            mp_frame_Slider->setValue(m_framecount);
-        } else {
-            // End of file reached
-            if (mp_repeat_PushButton->isChecked()) {
-                // Repeat is on, go to start of video
-                m_framecount = mp_frame_Slider->get_start_frame();
-                mp_frame_Slider->setValue(m_framecount);
-            } else {
-                // Repeat is off
-                m_current_state = STATE_FINISHED;
-            }
+        if (!mp_frame_Slider->goto_next_frame()) {
+            // End of playback
+            m_current_state = STATE_FINISHED;
         }
     }
 }
@@ -1056,16 +1079,12 @@ void c_ser_player::play_button_pressed_slot()
             m_current_state = STATE_PLAYING;
             mp_play_PushButton->setIcon(m_pause_Pixmap);
             mp_frame_Timer->start(m_display_frame_time);
-            m_framecount = mp_frame_Slider->get_start_frame();
-            mp_frame_Slider->setValue(m_framecount);
+            mp_frame_Slider->goto_first_frame();
         } else {
             // Start playing from current position if not before start marker
-            if (m_framecount < mp_frame_Slider->get_start_frame()) {
-                m_framecount = mp_frame_Slider->get_start_frame();
-            }
-
             m_current_state = STATE_PLAYING;
             mp_play_PushButton->setIcon(m_pause_Pixmap);
+            mp_frame_Slider->goto_next_frame();
             mp_frame_Timer->start(m_display_frame_time);
         }
     }
@@ -1078,14 +1097,14 @@ void c_ser_player::stop_button_pressed_slot()
         m_current_state = STATE_STOPPED;
         mp_play_PushButton->setIcon(m_play_Pixmap);
         mp_frame_Timer->stop();
-        m_framecount = mp_frame_Slider->get_start_frame();
-        mp_frame_Slider->setValue(m_framecount);
+        mp_frame_Slider->goto_first_frame();
     }
 }
 
 
 void c_ser_player::repeat_button_toggled_slot(bool checked) {
     c_persistent_data::m_repeat = checked;
+    mp_frame_Slider->set_repeat(checked);
 }
 
 

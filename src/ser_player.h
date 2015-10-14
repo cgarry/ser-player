@@ -47,6 +47,7 @@ private:
     // Menus
     QAction *m_save_frame_Act;
     QMenu *mp_framerate_Menu;
+    QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
     QAction *mp_colour_settings_action;
 
@@ -88,7 +89,6 @@ private:
     QString m_ser_directory;
     enum e_state {STATE_NO_FILE, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_FINISHED};
     enum e_state m_current_state;
-    int m_framecount;
     int m_total_frames;
     int m_display_framerate;
     int m_display_frame_time;
@@ -108,6 +108,7 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
+    void direction_changed_slot(QAction *);
     void colour_settings_slot();
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
