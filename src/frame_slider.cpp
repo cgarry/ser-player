@@ -65,6 +65,7 @@ void c_frame_slider::goto_first_frame()
         setValue(end_frame);
     } else if (m_direction == 2) {
         // Forward + Reverse play
+        m_current_direction = 0;
         int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
         setValue(start_frame);
     } else {
@@ -176,6 +177,8 @@ void c_frame_slider::set_start_marker(int frame)
     } else if (frame <= m_end_marker) {
         m_start_marker = frame;
     }
+
+    update();
 }
 
 
@@ -186,6 +189,8 @@ void c_frame_slider::set_end_marker(int frame)
     } else if (frame >= m_start_marker) {
         m_end_marker = frame;
     }
+
+    update();
 }
 
 
@@ -246,15 +251,18 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
             m_start_marker = -1;
         } else if (selectedItem == set_end_marker_Act) {
             if (value() == maximum()) {
-
+               m_end_marker = -1;
+            } else {
+                m_end_marker = value();
             }
-            m_end_marker = value();
         } else if (selectedItem == clear_end_marker_Act) {
             m_end_marker = -1;
-        }
-        else {
+            update();
+        } else {
             // nothing was chosen
         }
+
+        update();
     }
 }
 
@@ -273,7 +281,6 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
 
-
 //    qDebug() << "groove_rect: " << groove_rect;
 //    qDebug() << "handle_rect: " << handle_rect;
     QPainter painter(this);
@@ -282,7 +289,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     if (m_start_marker > minimum()) {
         int start_pos = positionForValue(minimum());
         int end_pos = positionForValue(m_start_marker) - 1;
-        QRect rect(start_pos,
+        QRect rect(groove_rect.left() + start_pos,
                    groove_rect.top(),
                    end_pos - start_pos,
                    groove_rect.height());
@@ -290,10 +297,10 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     }
 
     // Draw frames excluded from end rectangle
-    if (m_end_marker > m_start_marker && m_end_marker < maximum()) {
+    if (m_end_marker != -1 && m_end_marker < maximum()) {
         int start_pos = positionForValue(m_end_marker) + handle_rect.width();
         int end_pos = positionForValue(maximum()) + handle_rect.width() - 1;
-        QRect rect(start_pos,
+        QRect rect(groove_rect.left() + start_pos,
                    groove_rect.top(),
                    end_pos - start_pos,
                    groove_rect.height());
@@ -301,7 +308,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     }
 
     // Draw start marker
-    if (m_start_marker >= 0) {
+    if (m_start_marker > minimum()) {
         // Draw start marker
         int slider_pos = positionForValue(m_start_marker) - 1;
         painter.drawLine(groove_rect.left() + slider_pos,
@@ -311,7 +318,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     }
 
     // Draw end marker
-    if (m_end_marker >= 0) {
+    if (m_end_marker != -1 && m_end_marker < maximum()) {
         // Draw start marker
         int slider_pos = positionForValue(m_end_marker) + handle_rect.width();
         painter.drawLine(groove_rect.left() + slider_pos,

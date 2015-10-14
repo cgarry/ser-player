@@ -987,11 +987,6 @@ void c_ser_player::frame_slider_changed_slot()
 
             if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
                 // Adjust colour saturation and balance if required
-//                image_functions::change_colour_balance(
-//                    m_red_balance,  // double red,
-//                    m_green_balance,  // double green
-//                    m_blue_balance,  // double blue
-//                    m_frame_details); // struct s_image_details &image_details
                 image_functions::change_colour_balance(
                     m_frame_details); // struct s_image_details &image_details
 
@@ -1024,14 +1019,14 @@ void c_ser_player::frame_timer_timeout_slot()
         mp_frame_Timer->stop();
         mp_play_PushButton->setIcon(m_play_Pixmap);
     } else {
-        if (m_current_state != STATE_PLAYING) {
-            mp_frame_Timer->stop();
-            mp_play_PushButton->setIcon(m_play_Pixmap);
-        }
-
         if (!mp_frame_Slider->goto_next_frame()) {
             // End of playback
             m_current_state = STATE_FINISHED;
+        }
+
+        if (m_current_state != STATE_PLAYING) {
+            mp_frame_Timer->stop();
+            mp_play_PushButton->setIcon(m_play_Pixmap);
         }
     }
 }
