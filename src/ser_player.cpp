@@ -428,7 +428,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_start_marker_PushButton->setIconSize(start_marker_Pixmap.size());
     mp_start_marker_PushButton->setFixedSize(start_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
     mp_start_marker_PushButton->setCheckable(true);
-    mp_start_marker_PushButton->setToolTip(tr("Start Marker Button", "Button Tool tip"));  // Nice and small
+    mp_start_marker_PushButton->setToolTip(tr("Enable/Disable Start Marker", "Button Tool tip"));  // Nice and small
 
     mp_end_marker_PushButton = new QPushButton;
     QPixmap end_marker_Pixmap = QPixmap(":/res/resources/end_marker_button.png");
@@ -436,7 +436,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_end_marker_PushButton->setIconSize(end_marker_Pixmap.size());
     mp_end_marker_PushButton->setFixedSize(end_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
     mp_end_marker_PushButton->setCheckable(true);
-    mp_end_marker_PushButton->setToolTip(tr("End Marker Button", "Button Tool tip"));  // Nice and small
+    mp_end_marker_PushButton->setToolTip(tr("Enable/Disable End Marker", "Button Tool tip"));  // Nice and small
 
     m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;

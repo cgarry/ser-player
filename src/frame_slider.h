@@ -48,7 +48,8 @@ protected:
     void paintEvent(QPaintEvent *event);
 
 private:
-    int positionForValue(int val) const;
+    int position_for_value(int val) const;
+    int value_for_position(int position) const;
 
     int m_start_marker;
     int m_end_marker;
