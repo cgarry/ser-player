@@ -721,17 +721,13 @@ void c_ser_player::save_frames_slot()
 
                 // Setup progress bar
                 QString progress_title = tr("Saving %1 frames").arg(max_frame - min_frame + 1);
-                QProgressDialog progress_dialog(
-                            progress_title,
-                            tr("Abort"),
-                            min_frame,
-                            max_frame,
-                            this);
-
-                progress_dialog.setWindowTitle(tr("Save Frames As Images"));
+                QProgressDialog progress_dialog;
+                progress_dialog.setWindowTitle(tr("Save Frames"));
+                progress_dialog.setLabelText(progress_title);
+                progress_dialog.setRange(min_frame, max_frame);
                 progress_dialog.setWindowModality(Qt::WindowModal);
                 progress_dialog.setAutoClose(false);
-                progress_dialog.show();
+                progress_dialog.setMinimumDuration(0);
 
                 int required_digits_for_number = (int)ceil(log10((double)max_frame));
 
@@ -767,9 +763,8 @@ void c_ser_player::save_frames_slot()
                     }
                 }
 
-//                // Processing has completed
-//                progress_dialog.setCancelButton(new QPushButton(tr("Ok")));
-//                QThread::msleep(1000 * 5);
+                // Processing has completed
+
             }
         }
     }
