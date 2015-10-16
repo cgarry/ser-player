@@ -37,7 +37,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
       m_start_frame(1),
       m_end_frame(total_frames)
 {
-    setWindowTitle(tr("Save Frames"));
+    setWindowTitle(tr("Save Frames As Images"));
     QDialog::setModal(true);
 
     QLabel *save_frames_Label = new QLabel(tr("Select which frames to save:"));

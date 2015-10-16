@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.6"
+#define VERSION_STRING "v1.3.7"
 
 #include <Qt>
 #include <QCoreApplication>
@@ -36,10 +36,11 @@
 #include <QPainter>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QSpinBox>
+#include <QThread>
 #include <QTimer>
 #include <QUrl>
 #include <QWidgetAction>
-#include <QSpinBox>
 
 #include <cmath>
 
@@ -677,7 +678,7 @@ void c_ser_player::save_frames_slot()
         const QString tif_ext = QString(tr(".tif"));
         const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
         QString selected_filter;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frame", "Save frame message box title"),
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Images"),
                                    m_ser_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
                                    &selected_filter);
@@ -727,18 +728,24 @@ void c_ser_player::save_frames_slot()
                             max_frame,
                             this);
 
+                progress_dialog.setWindowTitle(tr("Save Frames As Images"));
                 progress_dialog.setWindowModality(Qt::WindowModal);
+                progress_dialog.setAutoClose(false);
+                progress_dialog.show();
+
+                int required_digits_for_number = (int)ceil(log10((double)max_frame));
 
                 for (int frame = min_frame; frame <= max_frame; frame++) {
                     // Update progress bar
                     progress_dialog.setValue(frame);
 
                     // Insert frame number into filename
+                    QString frame_number_string = QString("%1").arg(frame, required_digits_for_number, 10, QChar('0'));
                     QString new_filename = filepath +
                                            QDir::separator() +
                                            filename_without_extension +
                                            QString("_") +
-                                           QString::number(frame) +
+                                           frame_number_string +
                                            "." +
                                            filename_extension;
 
@@ -759,6 +766,10 @@ void c_ser_player::save_frames_slot()
                         break;
                     }
                 }
+
+//                // Processing has completed
+//                progress_dialog.setCancelButton(new QPushButton(tr("Ok")));
+//                QThread::msleep(1000 * 5);
             }
         }
     }
