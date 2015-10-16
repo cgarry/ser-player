@@ -45,7 +45,7 @@ private:
     static const QString C_WINDOW_TITLE_QSTRING;
 
     // Menus
-    QAction *m_save_frame_Act;
+    QAction *m_save_frames_Act;
     QMenu *mp_framerate_Menu;
     QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
@@ -118,7 +118,7 @@ public slots:
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
-    void save_frame_slot();
+    void save_frames_slot();
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
@@ -145,6 +145,7 @@ protected:
 
 private:
     void create_no_file_open_image();
+    QImage *get_frame_as_qimage(int frame_number);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 };

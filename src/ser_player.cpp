@@ -34,6 +34,7 @@
 #include <QMimeData>
 #include <QMutex>
 #include <QPainter>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QTimer>
 #include <QUrl>
@@ -51,6 +52,7 @@
 #include "pipp_utf8.h"
 #include "image_widget.h"
 #include "colour_dialog.h"
+#include "save_frames_dialog.h"
 
 
 #ifndef DISABLE_NEW_VERSION_CHECK
@@ -86,10 +88,10 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     file_menu->addSeparator();
 
-    m_save_frame_Act = new QAction(tr("Save Frame", "Menu title"), this);
-    m_save_frame_Act->setEnabled(false);
-    file_menu->addAction(m_save_frame_Act);
-    connect(m_save_frame_Act, SIGNAL(triggered()), this, SLOT(save_frame_slot()));
+    m_save_frames_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
+    m_save_frames_Act->setEnabled(false);
+    file_menu->addAction(m_save_frames_Act);
+    connect(m_save_frames_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot()));
 
     file_menu->addSeparator();
 
@@ -646,6 +648,128 @@ void c_ser_player::colour_settings_slot()
 }
 
 
+// Colour settings menu QAction has been clicked
+void c_ser_player::save_frames_slot()
+{
+    // Pause playback if currently playing
+    bool restart_playing = false;
+    if (m_current_state == STATE_PLAYING) {
+        // Pause playing while frame is saved
+        restart_playing = true;
+        play_button_pressed_slot();
+    }
+
+    // Use save_frames dialog to get range of frames to be saved
+    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this, m_total_frames, mp_frame_Slider->get_start_frame(), mp_frame_Slider->get_end_frame());
+    int ret = save_frames_Dialog->exec();
+
+    if (ret != QDialog::Rejected &&
+        m_current_state != STATE_NO_FILE &&
+        m_current_state != STATE_PLAYING) {
+
+        // Get image filename and type to use
+        const QString jpg_ext = QString(tr(".jpg"));
+        const QString jpg_filter = QString(tr("Joint Picture Expert Group Image (*.jpg)", "Filetype filter"));
+        const QString bmp_ext = QString(tr(".bmp"));
+        const QString bmp_filter = QString(tr("Windows Bitmap Image (*.bmp)", "Filetype filter"));
+        const QString png_ext = QString(tr(".png"));
+        const QString png_filter = QString(tr("Portable Network Graphics Image (*.png)", "Filetype filter"));
+        const QString tif_ext = QString(tr(".tif"));
+        const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
+        QString selected_filter;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frame", "Save frame message box title"),
+                                   m_ser_directory,
+                                   jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
+                                   &selected_filter);
+        const char *p_format = NULL;
+        if (!filename.isEmpty() && !selected_filter.isEmpty()) {
+            if (selected_filter == jpg_filter) {
+                p_format = "JPG";
+            }
+
+            if (selected_filter == bmp_filter) {
+                p_format = "BMP";
+            }
+
+            if (selected_filter == png_filter) {
+                p_format = "PNG";
+            }
+
+            if (selected_filter == tif_filter) {
+                p_format = "TIFF";
+            }
+
+            int min_frame = save_frames_Dialog->get_start_frame();
+            int max_frame = save_frames_Dialog->get_end_frame();
+
+            if (min_frame == -1) {
+                // Save current frame only
+                QFile file(filename);
+                file.open(QIODevice::WriteOnly);
+
+                // Get frame from ser file
+                QImage *frame_as_qimage = get_frame_as_qimage(mp_frame_Slider->value());
+                QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
+                file.close();
+                delete frame_as_qimage;
+            } else {
+                // Save the range of frames specified by min_frame and max_frame
+                QString filepath = QFileInfo(filename).absolutePath();
+                QString filename_without_extension = QFileInfo(filename).completeBaseName();
+                QString filename_extension = QFileInfo(filename).suffix();
+
+                // Setup progress bar
+                QString progress_title = tr("Saving %1 frames").arg(max_frame - min_frame + 1);
+                QProgressDialog progress_dialog(
+                            progress_title,
+                            tr("Abort"),
+                            min_frame,
+                            max_frame,
+                            this);
+
+                progress_dialog.setWindowModality(Qt::WindowModal);
+
+                for (int frame = min_frame; frame <= max_frame; frame++) {
+                    // Update progress bar
+                    progress_dialog.setValue(frame);
+
+                    // Insert frame number into filename
+                    QString new_filename = filepath +
+                                           QDir::separator() +
+                                           filename_without_extension +
+                                           QString("_") +
+                                           QString::number(frame) +
+                                           "." +
+                                           filename_extension;
+
+                    // Open file for writing
+                    QFile file(new_filename);
+                    file.open(QIODevice::WriteOnly);
+
+                    // Get frame from ser file
+                    QImage *frame_as_qimage = get_frame_as_qimage(frame);
+
+                    // Save the frame and close image file
+                    QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
+                    file.close();
+                    delete frame_as_qimage;
+
+                    if (progress_dialog.wasCanceled()) {
+                        // Abort frame saving
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Restart playing if it was playing to start with
+    if (restart_playing == true) {
+        play_button_pressed_slot();
+    }
+}
+
+
 void c_ser_player::colour_saturation_changed_slot(double value)
 {
     m_colour_saturation = value;
@@ -759,7 +883,7 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         // This is a valid SER file
-        m_save_frame_Act->setEnabled(true);
+        m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
@@ -892,61 +1016,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         frame_slider_changed_slot();
         resize_window_100_percent_slot();
         play_button_pressed_slot();  // Start playing SER file
-    }
-}
-
-
-void c_ser_player::save_frame_slot()
-{
-    bool restart_playing = false;
-    if (m_current_state == STATE_PLAYING) {
-        // Pause playing while frame is saved
-        restart_playing = true;
-        play_button_pressed_slot();
-    }
-
-    if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-        const QString jpg_ext = QString(tr(".jpg"));
-        const QString jpg_filter = QString(tr("Joint Picture Expert Group Image (*.jpg)", "Filetype filter"));
-        const QString bmp_ext = QString(tr(".bmp"));
-        const QString bmp_filter = QString(tr("Windows Bitmap Image (*.bmp)", "Filetype filter"));
-        const QString png_ext = QString(tr(".png"));
-        const QString png_filter = QString(tr("Portable Network Graphics Image (*.png)", "Filetype filter"));
-        const QString tif_ext = QString(tr(".tif"));
-        const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
-        QString selected_filter;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frame", "Save frame message box title"),
-                                   m_ser_directory,
-                                   jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
-                                   &selected_filter);
-        const char *p_format = NULL;
-        if (!filename.isEmpty() && !selected_filter.isEmpty()) {
-            if (selected_filter == jpg_filter) {
-                p_format = "JPG";
-            }
-
-            if (selected_filter == bmp_filter) {
-                p_format = "BMP";
-            }
-
-            if (selected_filter == png_filter) {
-                p_format = "PNG";
-            }
-
-            if (selected_filter == tif_filter) {
-                p_format = "TIFF";
-            }
-
-            QFile file(filename);
-            file.open(QIODevice::WriteOnly);
-            QPixmap::fromImage(*mp_frame_Image).save(&file, p_format);
-            file.close();
-        }
-    }
-
-    // Restart playing if it was playing to start with
-    if (restart_playing == true) {
-        play_button_pressed_slot();
     }
 }
 
@@ -1411,3 +1480,44 @@ void c_ser_player::calculate_display_framerate()
     mp_frame_Timer->setInterval(m_display_frame_time);
 }
 
+
+QImage *c_ser_player::get_frame_as_qimage(int frame_number)
+{
+    mp_ser_file_Mutex->lock();
+    delete[] m_frame_details.p_buffer;
+    m_frame_details.p_buffer = new uint8_t[m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3];
+    int32_t ret = mp_ser_file->get_frame(frame_number, m_frame_details.p_buffer);
+    mp_ser_file_Mutex->unlock();
+
+    QImage *p_frame_as_qimage = NULL;
+    if (ret >= 0) {
+        if (mp_ser_file->get_bytes_per_sample() == 2) {
+            image_functions::convert_image_to_8bit(m_frame_details);
+        }
+
+        // Debayer frame if required
+        bool image_debayered = false;
+        if (c_persistent_data::m_enable_debayering) {
+            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+        }
+
+        if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
+            // Adjust colour saturation and balance if required
+            image_functions::change_colour_balance(
+                m_frame_details); // struct s_image_details &image_details
+
+            image_functions::change_colour_saturation(
+                m_colour_saturation,  // double saturation
+                m_frame_details); // struct s_image_details &image_details
+        }
+
+        image_functions::conv_data_ready_for_qimage(
+            image_debayered,  // bool image_debayered
+            m_frame_details); // struct s_image_details &image_details
+
+
+        p_frame_as_qimage = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
+    }
+
+    return p_frame_as_qimage;
+}
