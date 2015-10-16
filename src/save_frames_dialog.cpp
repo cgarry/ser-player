@@ -60,10 +60,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     mp_start_Spinbox->setMinimum(1);
     mp_start_Spinbox->setMaximum(total_frames);
     mp_start_Spinbox->setValue(1);
+    connect(mp_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(start_Spinbox_changed_slot(int)));
     mp_end_Spinbox = new QSpinBox;
     mp_end_Spinbox->setMinimum(1);
     mp_end_Spinbox->setMaximum(total_frames);
     mp_end_Spinbox->setValue(total_frames);
+    connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(end_Spinbox_changed_slot(int)));
 
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
@@ -101,6 +103,22 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     dialog_VLayout->addLayout(buttons_HLayout);
     
     setLayout(dialog_VLayout);
+}
+
+
+void c_save_frames_dialog::start_Spinbox_changed_slot(int value)
+{
+    if (value > mp_end_Spinbox->value()) {
+        mp_end_Spinbox->setValue(value);
+    }
+}
+
+
+void c_save_frames_dialog::end_Spinbox_changed_slot(int value)
+{
+    if (value < mp_start_Spinbox->value()) {
+        mp_start_Spinbox->setValue(value);
+    }
 }
 
 

@@ -53,6 +53,8 @@ signals:
 
     
 private slots:
+    void start_Spinbox_changed_slot(int value);
+    void end_Spinbox_changed_slot(int value);
     void next_button_clicked_slot();
 
     
