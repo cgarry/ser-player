@@ -76,7 +76,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
     custom_range_HLayout->setSpacing(0);
-    custom_range_HLayout->addWidget(mp_save_frame_range_RButton);
+    custom_range_HLayout->addWidget(mp_save_frame_range_RButton, 0, Qt::AlignLeft);
     custom_range_HLayout->addWidget(mp_start_Spinbox);
     custom_range_HLayout->addWidget(new QLabel(tr(" to ")));
     custom_range_HLayout->addWidget(mp_end_Spinbox);

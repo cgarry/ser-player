@@ -350,9 +350,11 @@ void c_frame_slider:: mouseMoveEvent(
     bool pass_event_on = true;
     if ((ev->buttons() & Qt::LeftButton) && m_moving_start_marker) {
         m_start_marker_current_pos = ev->pos();
+        update();
         pass_event_on = false;
     } else if ((ev->buttons() & Qt::LeftButton) && m_moving_end_marker) {
         m_end_marker_current_pos = ev->pos();
+        update();
         pass_event_on = false;
     }
 
