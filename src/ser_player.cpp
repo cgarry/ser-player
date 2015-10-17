@@ -54,6 +54,7 @@
 #include "image_widget.h"
 #include "colour_dialog.h"
 #include "save_frames_dialog.h"
+#include "save_frames_progress_dialog.h"
 
 
 #ifndef DISABLE_NEW_VERSION_CHECK
@@ -719,21 +720,15 @@ void c_ser_player::save_frames_slot()
                 QString filename_without_extension = QFileInfo(filename).completeBaseName();
                 QString filename_extension = QFileInfo(filename).suffix();
 
-                // Setup progress bar
+                // Setup progress dialog
+                c_save_frames_progress_dialog my_progress_dialog(this, min_frame, max_frame);
+                my_progress_dialog.show();
                 QString progress_title = tr("Saving %1 frames").arg(max_frame - min_frame + 1);
-                QProgressDialog progress_dialog;
-                progress_dialog.setWindowTitle(tr("Save Frames"));
-                progress_dialog.setLabelText(progress_title);
-                progress_dialog.setRange(min_frame, max_frame);
-                progress_dialog.setWindowModality(Qt::WindowModal);
-                progress_dialog.setAutoClose(false);
-                progress_dialog.setMinimumDuration(0);
-
                 int required_digits_for_number = (int)ceil(log10((double)max_frame));
 
                 for (int frame = min_frame; frame <= max_frame; frame++) {
                     // Update progress bar
-                    progress_dialog.setValue(frame);
+                    my_progress_dialog.set_value(frame);
 
                     // Insert frame number into filename
                     QString frame_number_string = QString("%1").arg(frame, required_digits_for_number, 10, QChar('0'));
@@ -757,13 +752,17 @@ void c_ser_player::save_frames_slot()
                     file.close();
                     delete frame_as_qimage;
 
-                    if (progress_dialog.wasCanceled()) {
+                    if (my_progress_dialog.was_cancelled()) {
                         // Abort frame saving
                         break;
                     }
                 }
 
                 // Processing has completed
+                my_progress_dialog.set_complete();
+                while (!my_progress_dialog.was_cancelled()) {
+                      // Wait
+                }
 
             }
         }

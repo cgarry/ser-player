@@ -30,7 +30,8 @@
 
 
 c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, int marker_start_frame, int marker_end_frame)
-    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
+    : QDialog(parent),
+//    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
       m_total_frames(total_frames),
       m_marker_start_frame(marker_start_frame),
       m_marker_end_frame(marker_end_frame),
@@ -39,8 +40,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
 {
     setWindowTitle(tr("Save Frames As Images"));
     QDialog::setModal(true);
-
-    QLabel *save_frames_Label = new QLabel(tr("Select which frames to save:"));
     
     mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only"));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
@@ -77,13 +76,16 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     custom_range_HLayout->addStretch();
     
     QVBoxLayout *save_options_VLayout = new QVBoxLayout;
-    save_options_VLayout->addWidget(mp_save_current_frame_RButton);
-    save_options_VLayout->addWidget(mp_save_marked_frames_RButton);
+    save_options_VLayout->setMargin(15);
+    save_options_VLayout->setSpacing(10);
+    save_options_VLayout->addWidget(mp_save_current_frame_RButton, 0, Qt::AlignLeft);
+    save_options_VLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
     save_options_VLayout->addLayout(custom_range_HLayout);
-    save_options_VLayout->addWidget(mp_save_all_frames_RButton);
+    save_options_VLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
     
-    QGroupBox *save_optionsGBox = new QGroupBox;
+    QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save"));
     save_optionsGBox->setLayout(save_options_VLayout);
+    save_optionsGBox->setMinimumWidth((save_optionsGBox->minimumSizeHint().width() * 4) / 3);
     
     QPushButton *cancel_PButton = new QPushButton(tr("Cancel"));
     QPushButton *next_PButton = new QPushButton(tr("Next"));
@@ -97,12 +99,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     buttons_HLayout->addWidget(next_PButton);
     
     QVBoxLayout *dialog_VLayout = new QVBoxLayout;
-    dialog_VLayout->addWidget(save_frames_Label);
+    dialog_VLayout->setMargin(10);
+    dialog_VLayout->setSpacing(15);
     dialog_VLayout->addWidget(save_optionsGBox);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
     
     setLayout(dialog_VLayout);
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
 
