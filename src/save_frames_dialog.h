@@ -24,6 +24,7 @@
 
 class QRadioButton;
 class QSpinBox;
+class QLabel;
 
 
 class c_save_frames_dialog : public QDialog
@@ -55,6 +56,7 @@ signals:
 private slots:
     void start_Spinbox_changed_slot(int value);
     void end_Spinbox_changed_slot(int value);
+    void update_num_frames_slot();
     void next_button_clicked_slot();
 
     
@@ -69,6 +71,7 @@ private:
     QRadioButton *mp_save_frame_range_RButton;
     QSpinBox *mp_start_Spinbox;
     QSpinBox *mp_end_Spinbox;
+    QLabel *mp_num_frames_Label;
 
     int m_total_frames;
     int m_marker_start_frame;

@@ -42,7 +42,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     QDialog::setModal(true);
     
     mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only"));
+    mp_save_current_frame_RButton->setChecked(true);
+    connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
+    connect(mp_save_all_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     if (marker_start_frame == 1 && marker_end_frame == total_frames) {
         // No markers enabled
         mp_save_marked_frames_RButton = new QRadioButton(tr("No Frames Selected By Start/End Markers"));
@@ -50,11 +53,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     } else {
         mp_save_marked_frames_RButton = new QRadioButton(tr("Save Frames Selected By Start/End Markers (%1 to %2)")
                                                          .arg(marker_start_frame).arg(marker_end_frame));
+        connect(mp_save_marked_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
         // Markers are selected
     }
 
     mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: "));
-    mp_save_current_frame_RButton->setChecked(true);
+    connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+
     mp_start_Spinbox = new QSpinBox;
     mp_start_Spinbox->setMinimum(1);
     mp_start_Spinbox->setMaximum(total_frames);
@@ -65,6 +70,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     mp_end_Spinbox->setMaximum(total_frames);
     mp_end_Spinbox->setValue(total_frames);
     connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(end_Spinbox_changed_slot(int)));
+
+    mp_num_frames_Label = new QLabel(tr("1 frame will be saved"));
 
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
@@ -82,6 +89,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     save_options_VLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
     save_options_VLayout->addLayout(custom_range_HLayout);
     save_options_VLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
+    save_options_VLayout->addWidget(mp_num_frames_Label, 0, Qt::AlignHCenter);
     
     QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save"));
     save_optionsGBox->setLayout(save_options_VLayout);
@@ -95,13 +103,18 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
 
     QHBoxLayout *buttons_HLayout = new QHBoxLayout;
     buttons_HLayout->addStretch();
+    buttons_HLayout->setSpacing(0);
     buttons_HLayout->addWidget(cancel_PButton);
+    buttons_HLayout->addSpacing(10);
     buttons_HLayout->addWidget(next_PButton);
     
     QVBoxLayout *dialog_VLayout = new QVBoxLayout;
     dialog_VLayout->setMargin(10);
-    dialog_VLayout->setSpacing(15);
+    dialog_VLayout->setSpacing(0);
     dialog_VLayout->addWidget(save_optionsGBox);
+//    dialog_VLayout->addSpacing(10);
+//    dialog_VLayout->addWidget(mp_num_frames_Label, 0, Qt::AlignHCenter);
+    dialog_VLayout->addSpacing(15);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
     
@@ -115,6 +128,8 @@ void c_save_frames_dialog::start_Spinbox_changed_slot(int value)
     if (value > mp_end_Spinbox->value()) {
         mp_end_Spinbox->setValue(value);
     }
+
+    update_num_frames_slot();
 }
 
 
@@ -122,6 +137,27 @@ void c_save_frames_dialog::end_Spinbox_changed_slot(int value)
 {
     if (value < mp_start_Spinbox->value()) {
         mp_start_Spinbox->setValue(value);
+    }
+
+    update_num_frames_slot();
+}
+
+
+void c_save_frames_dialog::update_num_frames_slot()
+{
+    int frames_to_be_saved;
+    if (mp_save_current_frame_RButton->isChecked()) {
+        frames_to_be_saved = 1;
+        mp_num_frames_Label->setText(tr("1 frame will be saved"));
+    } else if (mp_save_all_frames_RButton->isChecked()) {
+        frames_to_be_saved = m_total_frames;
+        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(m_total_frames));
+    } else if (mp_save_marked_frames_RButton->isChecked()) {
+        frames_to_be_saved = m_marker_end_frame - m_marker_start_frame + 1;
+        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(m_marker_end_frame - m_marker_start_frame + 1));
+    } else { // mp_save_frame_range_RButton
+        frames_to_be_saved = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
+        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1));
     }
 }
 
