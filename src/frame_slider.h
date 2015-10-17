@@ -46,16 +46,32 @@ private slots:
 
 protected:
     void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent * ev);
+    void mouseMoveEvent(QMouseEvent * ev);
+    void mouseReleaseEvent(QMouseEvent *event);
 
 private:
     int position_for_value(int val) const;
     int value_for_position(int position) const;
+    void draw_start_marker(int x_pos);
+    void draw_end_marker(int x_pos);
 
     int m_start_marker;
     int m_end_marker;
     bool m_repeat;
     int m_direction;
     int m_current_direction;
+    int m_handle_width;
+
+    QRect m_start_marker_rect;
+    bool m_moving_start_marker;
+    QPoint m_start_marker_initial_pos;
+    QPoint m_start_marker_current_pos;
+
+    QRect m_end_marker_rect;
+    bool m_moving_end_marker;
+    QPoint m_end_marker_initial_pos;
+    QPoint m_end_marker_current_pos;
 
 };
 

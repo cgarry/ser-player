@@ -19,6 +19,7 @@
 
 #include <Qt>
 #include <QMenu>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QSlider>
 #include <QStyleOptionSlider>
@@ -33,13 +34,18 @@ c_frame_slider::c_frame_slider(QWidget *parent)
       m_end_marker(-1),
       m_repeat(false),
       m_direction(0),
-      m_current_direction(0)
+      m_current_direction(0),
+      m_moving_start_marker(false),
+      m_moving_end_marker(false)
 {
     // Set up context menu
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(ShowContextMenu(const QPoint&)));
 
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
+    QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
 }
 
 
@@ -185,12 +191,12 @@ int c_frame_slider::get_end_frame()
 bool c_frame_slider::set_start_marker(int frame)
 {
     bool ret = true;
-    if (frame <= minimum() ||
-        frame > maximum() ||
-        (m_end_marker != -1 && frame > m_end_marker)) {
+    if (frame <= minimum() || frame > maximum()) {
         // Start marker could not be set
         m_start_marker = -1;
         ret = false;
+    } else if (m_end_marker != -1 && frame > m_end_marker) {
+        m_start_marker = m_end_marker;
     } else {
         // Set start marker
         m_start_marker = frame;
@@ -204,13 +210,13 @@ bool c_frame_slider::set_start_marker(int frame)
 bool c_frame_slider::set_end_marker(int frame)
 {
     bool ret = true;
-    if (frame <= minimum() ||
-        frame >= maximum() ||
-        frame < m_start_marker) {
+    if (frame < minimum() || frame >= maximum()) {
         // End marker could not be set
         m_end_marker = -1;
         ret = false;
-    } else if (frame >= m_start_marker) {
+    } else if (frame < m_start_marker) {
+        frame = m_start_marker;
+    } else {
         // Set end marker
         m_end_marker = frame;
     }
@@ -307,7 +313,145 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
 }
 
 
-void c_frame_slider::paintEvent(QPaintEvent *ev) {
+void c_frame_slider::mousePressEvent(
+        QMouseEvent * ev)
+{
+    bool pass_event_on = true;
+    if (ev->button() == Qt::LeftButton &&
+        m_start_marker != -1 &&
+        m_start_marker_rect.contains(ev->pos()))
+    {
+        // Start dragging the start marker
+        m_moving_start_marker = true;
+        m_start_marker_initial_pos = ev->pos();
+        m_start_marker_current_pos = m_start_marker_initial_pos;
+        pass_event_on = false;
+    } else if (ev->button() == Qt::LeftButton &&
+               m_end_marker != -1 &&
+               m_end_marker_rect.contains(ev->pos()))
+    {
+        // Start dragging the end marker
+        m_moving_end_marker = true;
+        m_end_marker_initial_pos = ev->pos();
+        m_end_marker_current_pos = m_end_marker_initial_pos;
+        pass_event_on = false;
+    }
+
+    // Pass event on
+    if (pass_event_on) {
+        QSlider::mousePressEvent(ev);
+    }
+}
+
+
+void c_frame_slider:: mouseMoveEvent(
+        QMouseEvent * ev)
+{
+    bool pass_event_on = true;
+    if ((ev->buttons() & Qt::LeftButton) && m_moving_start_marker) {
+        m_start_marker_current_pos = ev->pos();
+        pass_event_on = false;
+    } else if ((ev->buttons() & Qt::LeftButton) && m_moving_end_marker) {
+        m_end_marker_current_pos = ev->pos();
+        pass_event_on = false;
+    }
+
+    // Pass event on
+    if (pass_event_on) {
+        QSlider::mouseMoveEvent(ev);
+    }
+}
+
+
+void c_frame_slider::mouseReleaseEvent(
+        QMouseEvent *ev)
+{
+    bool pass_event_on = true;
+    if (ev->button() == Qt::LeftButton && m_moving_start_marker) {
+        m_moving_start_marker = false;
+        set_start_marker(value_for_position(ev->pos().x()));
+        pass_event_on = false;
+    } else if (ev->button() == Qt::LeftButton && m_moving_end_marker) {
+        m_moving_end_marker = false;
+        set_end_marker(value_for_position(ev->pos().x() - m_handle_width));
+        pass_event_on = false;
+    }
+
+    // Pass event on
+    if (pass_event_on) {
+        QSlider::mouseReleaseEvent(ev);
+    }
+}
+
+
+void c_frame_slider::draw_start_marker(int x_pos)
+{
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
+    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+    QPainter painter(this);
+
+    painter.drawLine(x_pos,
+                     groove_rect.top(),
+                     x_pos,
+                     groove_rect.bottom());
+
+    // Draw start marker triangle
+    QPolygon start_triangle;
+    start_triangle << QPoint(x_pos, groove_rect.bottom())
+                   << QPoint(x_pos - 6, groove_rect.bottom())
+                   << QPoint(x_pos, groove_rect.bottom() - 6);
+
+    // Brush
+    QBrush brush;
+    brush.setColor(Qt::black);
+    brush.setStyle(Qt::SolidPattern);
+
+    // Draw triangle
+    painter.drawPolygon(start_triangle);
+
+    // Fill triangle
+    QPainterPath path;
+    path.addPolygon(start_triangle);
+    painter.fillPath(path, brush);
+}
+
+
+void c_frame_slider::draw_end_marker(int x_pos)
+{
+    QStyleOptionSlider opt;
+    initStyleOption(&opt);
+    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+    QPainter painter(this);
+
+    painter.drawLine(x_pos,
+                     groove_rect.top(),
+                     x_pos,
+                     groove_rect.bottom());
+
+    // Draw start marker triangle
+    QPolygon end_triangle;
+    end_triangle << QPoint(x_pos, groove_rect.bottom())
+                 << QPoint(x_pos + 6, groove_rect.bottom())
+                 << QPoint(x_pos, groove_rect.bottom() - 6);
+
+    // Brush
+    QBrush brush;
+    brush.setColor(Qt::black);
+    brush.setStyle(Qt::SolidPattern);
+
+    // Draw triangle
+    painter.drawPolygon(end_triangle);
+
+    // Fill triangle
+    QPainterPath path;
+    path.addPolygon(end_triangle);
+    painter.fillPath(path, brush);
+}
+
+
+void c_frame_slider::paintEvent(QPaintEvent *ev)
+{
     QSlider::paintEvent(ev);
     QStyleOptionSlider opt;
     initStyleOption(&opt);
@@ -320,9 +464,8 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
     // Get details of slider layout
     QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+    m_handle_width = handle_rect.width();
 
-//    qDebug() << "groove_rect: " << groove_rect;
-//    qDebug() << "handle_rect: " << handle_rect;
     QPainter painter(this);
 
     // Draw frames excluded from start rectangle
@@ -347,61 +490,32 @@ void c_frame_slider::paintEvent(QPaintEvent *ev) {
         painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
     }
 
-    // Draw start marker
-    int slider_pos = position_for_value(m_start_marker) - 1;
-    if (m_start_marker > minimum()) {
-        painter.drawLine(slider_pos,
-                         groove_rect.top(),
-                         slider_pos,
-                         groove_rect.bottom());
-
-        // Draw start marker triangle
-        QPolygon start_triangle;
-        start_triangle << QPoint(slider_pos, groove_rect.bottom())
-                       << QPoint(slider_pos - 6, groove_rect.bottom())
-                       << QPoint(slider_pos, groove_rect.bottom() - 6);
-
-        // Brush
-        QBrush brush;
-        brush.setColor(Qt::black);
-        brush.setStyle(Qt::SolidPattern);
-
-        // Fill triangle
-        QPainterPath path;
-        path.addPolygon(start_triangle);
-
-        // Draw triangle
-        painter.fillPath(path, brush);
+    // Draw start marker when dragging
+    if (m_moving_start_marker) {
+        int x_pos = m_start_marker_current_pos.x();
+        draw_start_marker(x_pos);
     }
 
+    // Draw start marker
+    if (m_start_marker > minimum()) {
+        int slider_pos = position_for_value(m_start_marker) - 1;
+        draw_start_marker(slider_pos);
+        m_start_marker_rect = QRect(slider_pos - 6, groove_rect.top(), 6, groove_rect.height());
+    }
+
+    // Draw start marker when moving
+    if (m_moving_end_marker) {
+        int x_pos = m_end_marker_current_pos.x();
+        draw_end_marker(x_pos);
+    }
 
     // Draw end marker
     if (m_end_marker != -1 && m_end_marker < maximum()) {
         // Draw start marker
         int slider_pos = position_for_value(m_end_marker) + handle_rect.width();
-        painter.drawLine(slider_pos,
-                         groove_rect.top(),
-                         slider_pos,
-                         groove_rect.bottom());
-
-        // Draw start marker triangle
-        QPolygon end_triangle;
-        end_triangle << QPoint(slider_pos, groove_rect.bottom())
-                     << QPoint(slider_pos + 6, groove_rect.bottom())
-                     << QPoint(slider_pos, groove_rect.bottom() - 6);
-
-        // Brush
-        QBrush brush;
-        brush.setColor(Qt::black);
-        brush.setStyle(Qt::SolidPattern);
-
-        // Fill triangle
-        QPainterPath path;
-        path.addPolygon(end_triangle);
-
-        // Draw triangle
-        painter.fillPath(path, brush);
+        draw_end_marker(slider_pos);
+        m_end_marker_rect = QRect(slider_pos, groove_rect.top(), 6, groove_rect.height());
     }
 
-    //QSlider::paintEvent(ev);
+
 }
