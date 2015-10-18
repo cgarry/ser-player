@@ -373,11 +373,11 @@ void c_frame_slider::mouseReleaseEvent(
     bool pass_event_on = true;
     if (ev->button() == Qt::LeftButton && m_moving_start_marker) {
         m_moving_start_marker = false;
-        set_start_marker_slot(value_for_position(ev->pos().x()));
+        set_start_marker_slot(value_for_position(ev->pos().x() - m_handle_width/2 + 1));
         pass_event_on = false;
     } else if (ev->button() == Qt::LeftButton && m_moving_end_marker) {
         m_moving_end_marker = false;
-        set_end_marker_slot(value_for_position(ev->pos().x() - m_handle_width));
+        set_end_marker_slot(value_for_position(ev->pos().x() - m_handle_width/2));
         pass_event_on = false;
     }
 
@@ -496,7 +496,15 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
 
     // Draw start marker when dragging
     if (m_moving_start_marker) {
+        int min_position = position_for_value(minimum()) + handle_rect.width()/2 - 1;
+        int max_position = position_for_value(maximum()) + handle_rect.width()/2 - 1;
         int x_pos = m_start_marker_current_pos.x();
+        if (x_pos < min_position) {
+            x_pos = min_position;
+        } else if (x_pos > max_position) {
+            x_pos = max_position;
+        }
+
         draw_start_marker(x_pos);
     }
 
@@ -510,6 +518,14 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     // Draw start marker when moving
     if (m_moving_end_marker) {
         int x_pos = m_end_marker_current_pos.x();
+        int min_position = position_for_value(minimum()) + handle_rect.width()/2;
+        int max_position = position_for_value(maximum()) + handle_rect.width()/2;
+        if (x_pos < min_position) {
+            x_pos = min_position;
+        } else if (x_pos > max_position) {
+            x_pos = max_position;
+        }
+
         draw_end_marker(x_pos);
     }
 

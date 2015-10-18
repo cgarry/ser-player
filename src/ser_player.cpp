@@ -1216,6 +1216,9 @@ void c_ser_player::start_marker_toggled_slot(bool checked) {
         if (!marker_set) {
             // Marker was not set, uncheck button
             mp_start_marker_PushButton->setChecked(false);
+        } else {
+            // Marker was set - show markers dialog
+            mp_markers_Dialog->show();
         }
     } else {
         mp_frame_Slider->set_start_marker_slot(-1);
@@ -1229,6 +1232,9 @@ void c_ser_player::end_marker_toggled_slot(bool checked) {
         if (!marker_set) {
             // Marker was not set, uncheck button
             mp_end_marker_PushButton->setChecked(false);
+        } else {
+            // Marker was set - show markers dialog
+            mp_markers_Dialog->show();
         }
     } else {
         mp_frame_Slider->set_end_marker_slot(-1);
