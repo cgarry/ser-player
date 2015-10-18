@@ -215,7 +215,7 @@ bool c_frame_slider::set_end_marker(int frame)
         m_end_marker = -1;
         ret = false;
     } else if (frame < m_start_marker) {
-        frame = m_start_marker;
+        m_end_marker = m_start_marker;
     } else {
         // Set end marker
         m_end_marker = frame;
