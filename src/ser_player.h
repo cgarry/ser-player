@@ -34,6 +34,7 @@ class QMutex;
 class QImage;
 
 class c_colour_dialog;
+class c_markers_dialog;
 class c_image_Widget;
 
 
@@ -50,9 +51,11 @@ private:
     QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
     QAction *mp_colour_settings_action;
+    QAction *mp_markers_dialog_action;
 
     // Dialogs
     c_colour_dialog *mp_colour_settings_Dialog;
+    c_markers_dialog *mp_markers_Dialog;
 
     // Other
     QPixmap m_no_file_open_Pixmap;

@@ -53,6 +53,7 @@
 #include "pipp_utf8.h"
 #include "image_widget.h"
 #include "colour_dialog.h"
+#include "markers_dialog.h"
 #include "save_frames_dialog.h"
 #include "save_frames_progress_dialog.h"
 
@@ -232,6 +233,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
+    // Markers Dialog action
+    mp_markers_dialog_action = playback_menu->addAction(tr("Show Markers Settings..."));
+    mp_markers_dialog_action->setEnabled(true);
+
+    mp_markers_Dialog = new c_markers_dialog(this);
+    mp_markers_Dialog->hide();
+    connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_markers_Dialog, SLOT(show()));
+
+
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
 #ifndef DISABLE_NEW_VERSION_CHECK
@@ -386,6 +396,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->setMaximum(100);
     mp_frame_Slider->set_direction(0);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
+    connect(mp_frame_Slider, SIGNAL(start_marker_changed(int)), mp_markers_Dialog, SLOT(set_start_marker_slot(int)));
+    connect(mp_frame_Slider, SIGNAL(end_marker_changed(int)), mp_markers_Dialog, SLOT(set_end_marker_slot(int)));
+    connect(mp_markers_Dialog, SIGNAL(start_marker_changed(int)), mp_frame_Slider, SLOT(set_start_marker_slot(int)));
+    connect(mp_markers_Dialog, SIGNAL(end_marker_changed(int)), mp_frame_Slider, SLOT(set_end_marker_slot(int)));
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
     m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
@@ -539,15 +553,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     controls_v_layout->addLayout(slider_h_layout);
     controls_v_layout->addLayout(controls_h_layout);
 
-    QVBoxLayout *v_layout = new QVBoxLayout;
-    v_layout->setSpacing(0);
-    v_layout->setMargin(0);
-    v_layout->addWidget(mp_frame_image_Widget, 2);
-    v_layout->addLayout(controls_v_layout);
+    QVBoxLayout *main_vlayout = new QVBoxLayout;
+    main_vlayout->setSpacing(0);
+    main_vlayout->setMargin(0);
+    main_vlayout->addWidget(mp_frame_image_Widget, 2);
+    main_vlayout->addLayout(controls_v_layout);
 
     // Set layout in QWidget
     QWidget *main_widget = new QWidget;
-    main_widget->setLayout(v_layout);
+    main_widget->setLayout(main_vlayout);
 
     setCentralWidget(main_widget);
     setWindowTitle(C_WINDOW_TITLE_QSTRING);
@@ -868,7 +882,7 @@ void c_ser_player::open_ser_file_slot()
 
 void c_ser_player::open_ser_file(const QString &filename)
 {
-    mp_frame_Slider->delete_all_markers();
+    mp_frame_Slider->delete_all_markers_slot();
     mp_start_marker_PushButton->setChecked(false);
     mp_end_marker_PushButton->setChecked(false);
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
@@ -887,6 +901,10 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_ser_file_Mutex->unlock();
 
     } else {
+        mp_markers_Dialog->set_maximum_frame(m_total_frames);
+        mp_markers_Dialog->set_start_marker_slot(1);
+        mp_markers_Dialog->set_end_marker_slot(m_total_frames);
+
         // This is a valid SER file
         m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
@@ -1194,26 +1212,26 @@ void c_ser_player::repeat_button_toggled_slot(bool checked) {
 
 void c_ser_player::start_marker_toggled_slot(bool checked) {
     if (checked) {
-        bool marker_set = mp_frame_Slider->set_start_marker(mp_frame_Slider->value());
+        bool marker_set = mp_frame_Slider->set_start_marker_slot(mp_frame_Slider->value());
         if (!marker_set) {
             // Marker was not set, uncheck button
             mp_start_marker_PushButton->setChecked(false);
         }
     } else {
-        mp_frame_Slider->set_start_marker(-1);
+        mp_frame_Slider->set_start_marker_slot(-1);
     }
 }
 
 
 void c_ser_player::end_marker_toggled_slot(bool checked) {
     if (checked) {
-        bool marker_set = mp_frame_Slider->set_end_marker(mp_frame_Slider->value());
+        bool marker_set = mp_frame_Slider->set_end_marker_slot(mp_frame_Slider->value());
         if (!marker_set) {
             // Marker was not set, uncheck button
             mp_end_marker_PushButton->setChecked(false);
         }
     } else {
-        mp_frame_Slider->set_end_marker(-1);
+        mp_frame_Slider->set_end_marker_slot(-1);
     }
 }
 

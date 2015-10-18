@@ -188,7 +188,7 @@ int c_frame_slider::get_end_frame()
 }
 
 
-bool c_frame_slider::set_start_marker(int frame)
+bool c_frame_slider::set_start_marker_slot(int frame)
 {
     bool ret = true;
     if (frame <= minimum() || frame > maximum()) {
@@ -202,12 +202,13 @@ bool c_frame_slider::set_start_marker(int frame)
         m_start_marker = frame;
     }
 
+    emit start_marker_changed(m_start_marker);
     update();
     return ret;
 }
 
 
-bool c_frame_slider::set_end_marker(int frame)
+bool c_frame_slider::set_end_marker_slot(int frame)
 {
     bool ret = true;
     if (frame < minimum() || frame >= maximum()) {
@@ -221,12 +222,13 @@ bool c_frame_slider::set_end_marker(int frame)
         m_end_marker = frame;
     }
 
+    emit end_marker_changed(m_end_marker);
     update();
     return ret;
 }
 
 
-void c_frame_slider::delete_all_markers()
+void c_frame_slider::delete_all_markers_slot()
 {
     m_start_marker = -1;
     m_end_marker = -1;
@@ -302,9 +304,9 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
         QAction* selectedItem = markers_Menu.exec(globalPos);
         if (selectedItem != NULL) {
             if (selectedItem == move_start_marker_Act) {
-                set_start_marker(start_frame_at_mouse_pos);
+                set_start_marker_slot(start_frame_at_mouse_pos);
             } else if (selectedItem == move_end_marker_Act) {
-                set_end_marker(end_frame_at_mouse_pos);
+                set_end_marker_slot(end_frame_at_mouse_pos);
             }
 
             update();
@@ -371,11 +373,11 @@ void c_frame_slider::mouseReleaseEvent(
     bool pass_event_on = true;
     if (ev->button() == Qt::LeftButton && m_moving_start_marker) {
         m_moving_start_marker = false;
-        set_start_marker(value_for_position(ev->pos().x()));
+        set_start_marker_slot(value_for_position(ev->pos().x()));
         pass_event_on = false;
     } else if (ev->button() == Qt::LeftButton && m_moving_end_marker) {
         m_moving_end_marker = false;
-        set_end_marker(value_for_position(ev->pos().x() - m_handle_width));
+        set_end_marker_slot(value_for_position(ev->pos().x() - m_handle_width));
         pass_event_on = false;
     }
 

@@ -33,13 +33,17 @@ public:
     void goto_first_frame();
     bool goto_next_frame();
 
-    bool set_start_marker(int frame);
-    bool set_end_marker(int frame);
-    void delete_all_markers();
-
     int get_start_frame();
     int get_end_frame();
 
+signals:
+    void start_marker_changed(int frame);
+    void end_marker_changed(int frame);
+
+public slots:
+    bool set_start_marker_slot(int frame);
+    bool set_end_marker_slot(int frame);
+    void delete_all_markers_slot();
 
 private slots:
     void ShowContextMenu(const QPoint& pos);
