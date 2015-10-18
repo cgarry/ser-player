@@ -41,19 +41,19 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_start_marker_SpinBox = new QSpinBox;
     mp_start_marker_SpinBox->setRange(1, 1);
     mp_start_marker_SpinBox->setEnabled(false);
-    connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SIGNAL(start_marker_changed(int)));
+    connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(start_marker_changed_slot(int)));
 
     mp_end_market_Label = new QLabel(tr("End Marker:"));
     mp_end_market_Label->setEnabled(false);
     mp_end_marker_SpinBox = new QSpinBox;
     mp_end_marker_SpinBox->setRange(1, 1);
     mp_end_marker_SpinBox->setEnabled(false);
-    connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SIGNAL(end_marker_changed(int)));
+    connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(end_marker_changed_slot(int)));
 
     mp_selected_count_Label = new QLabel("1");
 
     QFormLayout *markers_FLayout = new QFormLayout;
-    markers_FLayout->setMargin(0);
+    markers_FLayout->setSpacing(15);
     markers_FLayout->addRow(mp_start_market_Label, mp_start_marker_SpinBox);
     markers_FLayout->addRow(mp_end_market_Label, mp_end_marker_SpinBox);
     markers_FLayout->addRow(tr("Marked Frames:"), mp_selected_count_Label);
@@ -70,7 +70,8 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     buttons_HLayout->addWidget(close_Button);
 
     QVBoxLayout *main_VLayout = new QVBoxLayout;
-    main_VLayout->setMargin(10);
+    main_VLayout->setMargin(5);
+    main_VLayout->setSpacing(15);
     main_VLayout->addWidget(markers_GroupBox);
     main_VLayout->addStretch();
     main_VLayout->addLayout(buttons_HLayout);
@@ -86,15 +87,25 @@ void c_markers_dialog::set_maximum_frame(int value)
 }
 
 
-void c_markers_dialog::button_clicked()
+void c_markers_dialog::start_marker_changed_slot(int value)
 {
-    qDebug() << "Close button clicked";
+    if (m_start_marker_enabled) {
+        emit start_marker_changed(value);
+    }
+}
+
+
+void c_markers_dialog::end_marker_changed_slot(int value)
+{
+    if (m_end_marker_enabled) {
+        emit end_marker_changed(value);
+    }
 }
 
 
 void c_markers_dialog::set_start_marker_slot(int value)
 {
-    if (value == -1 || value == 1) {
+    if (value == -1) {
         m_start_marker_enabled = false;
         mp_start_marker_SpinBox->setValue(1);
         mp_start_marker_SpinBox->setEnabled(false);
@@ -113,7 +124,7 @@ void c_markers_dialog::set_start_marker_slot(int value)
 
 void c_markers_dialog::set_end_marker_slot(int value)
 {
-    if (value == -1 || value == mp_end_marker_SpinBox->maximum()) {
+    if (value == -1) {
         m_end_marker_enabled = false;
         mp_end_marker_SpinBox->setValue(mp_end_marker_SpinBox->maximum());
         mp_end_marker_SpinBox->setEnabled(false);

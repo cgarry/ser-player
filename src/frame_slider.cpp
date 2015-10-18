@@ -191,7 +191,7 @@ int c_frame_slider::get_end_frame()
 bool c_frame_slider::set_start_marker_slot(int frame)
 {
     bool ret = true;
-    if (frame <= minimum() || frame > maximum()) {
+    if (frame < minimum() || frame > maximum()) {
         // Start marker could not be set
         m_start_marker = -1;
         ret = false;
@@ -211,7 +211,7 @@ bool c_frame_slider::set_start_marker_slot(int frame)
 bool c_frame_slider::set_end_marker_slot(int frame)
 {
     bool ret = true;
-    if (frame < minimum() || frame >= maximum()) {
+    if (frame < minimum() || frame > maximum()) {
         // End marker could not be set
         m_end_marker = -1;
         ret = false;
@@ -473,9 +473,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     QPainter painter(this);
 
     // Draw frames excluded from start rectangle
-    if (m_start_marker > minimum()) {
+    if (m_start_marker >= minimum()) {
         int start_pos = position_for_value(minimum());
-        int end_pos = position_for_value(m_start_marker) - 1;
+        int end_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
         QRect rect(start_pos,
                    groove_rect.top(),
                    end_pos - start_pos,
@@ -484,8 +484,8 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     }
 
     // Draw frames excluded from end rectangle
-    if (m_end_marker != -1 && m_end_marker < maximum()) {
-        int start_pos = position_for_value(m_end_marker) + handle_rect.width();
+    if (m_end_marker != -1 && m_end_marker <= maximum()) {
+        int start_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
         int end_pos = position_for_value(maximum()) + handle_rect.width() - 1;
         QRect rect(start_pos,
                    groove_rect.top(),
@@ -501,8 +501,8 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     }
 
     // Draw start marker
-    if (m_start_marker > minimum()) {
-        int slider_pos = position_for_value(m_start_marker) - 1;
+    if (m_start_marker >= minimum()) {
+        int slider_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
         draw_start_marker(slider_pos);
         m_start_marker_rect = QRect(slider_pos - 6, groove_rect.top(), 6, groove_rect.height());
     }
@@ -514,9 +514,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     }
 
     // Draw end marker
-    if (m_end_marker != -1 && m_end_marker < maximum()) {
+    if (m_end_marker != -1 && m_end_marker <= maximum()) {
         // Draw start marker
-        int slider_pos = position_for_value(m_end_marker) + handle_rect.width();
+        int slider_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
         draw_end_marker(slider_pos);
         m_end_marker_rect = QRect(slider_pos, groove_rect.top(), 6, groove_rect.height());
     }

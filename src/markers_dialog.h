@@ -46,7 +46,8 @@ public slots:
 
 
 private slots:
-    void button_clicked();
+    void start_marker_changed_slot(int value);
+    void end_marker_changed_slot(int value);
 
     
 private:

@@ -902,8 +902,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         mp_markers_Dialog->set_maximum_frame(m_total_frames);
-        mp_markers_Dialog->set_start_marker_slot(1);
-        mp_markers_Dialog->set_end_marker_slot(m_total_frames);
+        mp_markers_Dialog->set_start_marker_slot(-1);
+        mp_markers_Dialog->set_end_marker_slot(-1);
 
         // This is a valid SER file
         m_save_frames_Act->setEnabled(true);
