@@ -29,7 +29,11 @@
 #include "save_frames_dialog.h"
 
 
-c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, int marker_start_frame, int marker_end_frame)
+c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
+                                           int total_frames,
+                                           int marker_start_frame,
+                                           int marker_end_frame,
+                                           bool markers_enabled)
     : QDialog(parent),
 //    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
       m_total_frames(total_frames),
@@ -46,9 +50,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent, int total_frames, in
     connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
     connect(mp_save_all_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
-    if (marker_start_frame == 1 && marker_end_frame == total_frames) {
+    if (!markers_enabled) {
         // No markers enabled
-        mp_save_marked_frames_RButton = new QRadioButton(tr("No Frames Selected By Start/End Markers"));
+        mp_save_marked_frames_RButton = new QRadioButton(tr("Start/End Markers Disabled"));
         mp_save_marked_frames_RButton->setEnabled(false);
     } else {
         mp_save_marked_frames_RButton = new QRadioButton(tr("Save Frames Selected By Start/End Markers (%1 to %2)")

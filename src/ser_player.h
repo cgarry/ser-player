@@ -50,7 +50,7 @@ private:
     QMenu *mp_framerate_Menu;
     QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
-    QAction *m_hide_markers_Act;
+    QAction *m_enable_markers_Act;
     QAction *mp_colour_settings_action;
     QAction *mp_markers_dialog_action;
 
@@ -103,9 +103,6 @@ private:
     bool m_has_bayer_pattern;
 
     double m_colour_saturation;
-    double m_red_balance;
-    double m_green_balance;
-    double m_blue_balance;
 
 public:
     c_ser_player(QWidget *parent = 0);
@@ -116,6 +113,7 @@ public slots:
     void fps_changed_slot(QAction *);
     void direction_changed_slot(QAction *);
     void colour_settings_slot();
+    void markers_dialog_slot();
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
@@ -131,12 +129,10 @@ public slots:
     void play_button_pressed_slot();
     void stop_button_pressed_slot();
     void repeat_button_toggled_slot(bool checked);
-//    void start_marker_toggled_slot(bool checked);
-//    void end_marker_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
     void debayer_enable_slot(bool enabled);
-    void hide_markers_slot(bool hide);
+    void enable_markers_slot(bool enabled);
     void new_version_available_slot(QString version);
     void about_qt();
     void dragEnterEvent(QDragEnterEvent *e);

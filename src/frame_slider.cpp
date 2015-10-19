@@ -57,6 +57,12 @@ void c_frame_slider::set_markers_active(bool active)
 }
 
 
+bool c_frame_slider::get_markers_active()
+{
+    return m_markers_active;
+}
+
+
 void c_frame_slider::set_repeat(bool repeat)
 {
     m_repeat = repeat;

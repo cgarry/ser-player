@@ -29,6 +29,7 @@ class c_frame_slider : public QSlider
 public:
     c_frame_slider(QWidget *parent = 0);
     void set_markers_active(bool active);
+    bool get_markers_active();
     void set_repeat(bool repeat);
     void set_direction(int dir);
     void goto_first_frame();

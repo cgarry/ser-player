@@ -82,9 +82,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
-    m_red_balance = 1.0;
-    m_green_balance = 1.0;
-    m_blue_balance = 1.0;
 
 
     //
@@ -232,13 +229,13 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
     m_debayer_Act->setEnabled(false);
 
-    // Hide Markers menu action
-    m_hide_markers_Act = new QAction(tr("Hide Markers"), this);
-    m_hide_markers_Act->setCheckable(true);
-    m_hide_markers_Act->setChecked(c_persistent_data::m_hide_markers);
-    playback_menu->addAction(m_hide_markers_Act);
-    connect(m_hide_markers_Act, SIGNAL(triggered(bool)), this, SLOT(hide_markers_slot(bool)));
-    m_hide_markers_Act->setEnabled(false);
+    // Enable Markers menu action
+    m_enable_markers_Act = new QAction(tr("Enable Markers"), this);
+    m_enable_markers_Act->setCheckable(true);
+    m_enable_markers_Act->setChecked(c_persistent_data::m_enable_markers);
+    playback_menu->addAction(m_enable_markers_Act);
+    connect(m_enable_markers_Act, SIGNAL(triggered(bool)), this, SLOT(enable_markers_slot(bool)));
+    m_enable_markers_Act->setEnabled(false);
 
 
     //
@@ -262,7 +259,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_markers_Dialog = new c_markers_dialog(this);
     mp_markers_Dialog->hide();
-    connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_markers_Dialog, SLOT(show()));
+    connect(mp_markers_dialog_action, SIGNAL(triggered()), this, SLOT(markers_dialog_slot()));
 
 
     //
@@ -309,9 +306,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     QStringList lang_files = QDir(":/res/translations/").entryList(QStringList("ser_player_*.qm"));
     for (int x = 0; x < lang_files.size(); x++) {
         // get locale extracted by filename
-        QString locale = lang_files[x]; // "ser_player_de.qm"
-        locale.truncate(locale.lastIndexOf('.')); // "ser_player_de"
-        locale.replace("ser_player_", "");
+        QString locale = lang_files[x]; // Example: "ser_player_de.qm"
+        locale.truncate(locale.lastIndexOf('.')); // Example: "ser_player_de"
+        locale.replace("ser_player_", ""); // Example: "de"
 
         QString lang;
         switch (QLocale(locale).language()) {
@@ -419,7 +416,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider = new c_frame_slider(this);
     mp_frame_Slider->setOrientation(Qt::Horizontal);
     mp_frame_Slider->setMinimum(1);
-    mp_frame_Slider->setMaximum(100);
+    mp_frame_Slider->setMaximum(99);
     mp_frame_Slider->set_direction(0);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
     connect(mp_frame_Slider, SIGNAL(start_marker_changed(int)), mp_markers_Dialog, SLOT(set_start_marker_slot(int)));
@@ -666,6 +663,14 @@ void c_ser_player::colour_settings_slot()
 }
 
 
+// mp_markers_dialog_action has been clicked
+void c_ser_player::markers_dialog_slot()
+{
+    enable_markers_slot(true);  // Ensure markers are enabled
+    mp_markers_Dialog->show();  // Show the markers control dialog
+}
+
+
 // Colour settings menu QAction has been clicked
 void c_ser_player::save_frames_slot()
 {
@@ -678,7 +683,11 @@ void c_ser_player::save_frames_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
-    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this, m_total_frames, mp_frame_Slider->get_start_frame(), mp_frame_Slider->get_end_frame());
+    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this,
+                                                                        m_total_frames,
+                                                                        mp_frame_Slider->get_start_frame(),
+                                                                        mp_frame_Slider->get_end_frame(),
+                                                                        mp_frame_Slider->get_markers_active());
     int ret = save_frames_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
@@ -801,9 +810,6 @@ void c_ser_player::colour_saturation_changed_slot(double value)
 void c_ser_player::colour_balance_changed_slot(double red, double green, double blue)
 {
     image_functions::set_colour_balance_luts(red, green, blue);
-    m_red_balance = red;
-    m_green_balance = green;
-    m_blue_balance = blue;
     frame_slider_changed_slot();
 }
 
@@ -900,19 +906,19 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_ser_file_Mutex->unlock();
 
     } else {
+        // This is a valid SER file
+        mp_frame_Slider->setMaximum(m_total_frames);
+        mp_frame_Slider->reset_all_markers_slot();
+        mp_frame_Slider->set_markers_active(c_persistent_data::m_enable_markers);
         mp_markers_Dialog->set_maximum_frame(m_total_frames);
         mp_markers_Dialog->set_start_marker_slot(1);
         mp_markers_Dialog->set_end_marker_slot(m_total_frames);
-        mp_frame_Slider->set_markers_active(!c_persistent_data::m_hide_markers);
-
-        // This is a valid SER file
 
         m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
-        mp_frame_Slider->setMaximum(m_total_frames);
-        mp_frame_Slider->reset_all_markers_slot();
+
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
@@ -1008,7 +1014,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
-        m_hide_markers_Act->setEnabled(true);
+        m_enable_markers_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_direction_Menu->setEnabled(true);
         calculate_display_framerate();
@@ -1309,11 +1315,15 @@ void c_ser_player::debayer_enable_slot(bool enabled)
 }
 
 
-void c_ser_player::hide_markers_slot(bool hide)
+void c_ser_player::enable_markers_slot(bool enabled)
 {
-    c_persistent_data::m_hide_markers = hide;
-    mp_frame_Slider->set_markers_active(!hide);
-    mp_frame_Slider->reset_all_markers_slot();
+    c_persistent_data::m_enable_markers = enabled;
+    mp_frame_Slider->set_markers_active(enabled);
+    if (!enabled) {
+        // Reset markers on disable so that they are not interfering with playback
+        mp_frame_Slider->reset_all_markers_slot();
+        mp_markers_Dialog->hide();
+    }
 }
 
 

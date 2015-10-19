@@ -35,7 +35,8 @@ public:
     c_save_frames_dialog(QWidget *parent,
                          int total_frames,
                          int marker_start_frame,
-                         int marker_end_frame);
+                         int marker_end_frame,
+                         bool markers_enabled);
 
 
     int get_start_frame()

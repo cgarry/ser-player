@@ -34,7 +34,7 @@ public:
     static QString m_new_version;
     static bool m_check_for_updates;
     static bool m_enable_debayering;
-    static bool m_hide_markers;
+    static bool m_enable_markers;
     static bool m_repeat;
 
 
