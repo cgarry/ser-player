@@ -30,36 +30,51 @@
 
 
 c_markers_dialog::c_markers_dialog(QWidget *parent)
-    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
-      m_start_marker_enabled(false),
-      m_end_marker_enabled(false)
+    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
 {
     setWindowTitle(tr("Start/End Markers"));
 
     mp_start_market_Label = new QLabel(tr("Start Marker:"));
-    mp_start_market_Label->setEnabled(false);
     mp_start_marker_SpinBox = new QSpinBox;
     mp_start_marker_SpinBox->setRange(1, 1);
-    mp_start_marker_SpinBox->setEnabled(false);
+    mp_red_text_Palette = new QPalette();
+    mp_red_text_Palette->setColor(QPalette::Text,Qt::red);
+    mp_black_text_Palette = new QPalette();
+    mp_black_text_Palette->setColor(QPalette::Text,Qt::black);
+    mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
     connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(start_marker_changed_slot(int)));
 
     mp_end_market_Label = new QLabel(tr("End Marker:"));
-    mp_end_market_Label->setEnabled(false);
     mp_end_marker_SpinBox = new QSpinBox;
     mp_end_marker_SpinBox->setRange(1, 1);
-    mp_end_marker_SpinBox->setEnabled(false);
     connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(end_marker_changed_slot(int)));
 
     mp_selected_count_Label = new QLabel("1");
 
     QFormLayout *markers_FLayout = new QFormLayout;
-    markers_FLayout->setSpacing(15);
+    markers_FLayout->setMargin(0);
+    markers_FLayout->setSpacing(10);
     markers_FLayout->addRow(mp_start_market_Label, mp_start_marker_SpinBox);
     markers_FLayout->addRow(mp_end_market_Label, mp_end_marker_SpinBox);
     markers_FLayout->addRow(tr("Marked Frames:"), mp_selected_count_Label);
 
+    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
+    connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
+
+    QHBoxLayout *markers_reset_button_HLayout = new QHBoxLayout;
+    markers_reset_button_HLayout->setMargin(0);
+    markers_reset_button_HLayout->setSpacing(0);
+    markers_reset_button_HLayout->addWidget(reset_markers_Button);
+    markers_reset_button_HLayout->addStretch();
+
+    QVBoxLayout *markers_VLayout = new QVBoxLayout;
+    markers_FLayout->setMargin(15);
+    markers_FLayout->setSpacing(10);
+    markers_VLayout->addLayout(markers_FLayout);
+    markers_VLayout->addLayout(markers_reset_button_HLayout);
+
     QGroupBox *markers_GroupBox = new QGroupBox(tr("Markers"));
-    markers_GroupBox->setLayout(markers_FLayout);
+    markers_GroupBox->setLayout(markers_VLayout);
 
     QPushButton *close_Button = new QPushButton(tr("Close"));
     connect(close_Button, SIGNAL(clicked()), this, SLOT(hide()));
@@ -77,6 +92,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     main_VLayout->addLayout(buttons_HLayout);
 
     setLayout(main_VLayout);
+    layout()->setSizeConstraint(QLayout::SetFixedSize);  // No resizing please
 }
 
 
@@ -89,34 +105,45 @@ void c_markers_dialog::set_maximum_frame(int value)
 
 void c_markers_dialog::start_marker_changed_slot(int value)
 {
-    if (m_start_marker_enabled) {
+    // Update spinbox handling to allow non-valid combinations to exist while entering
+    if (mp_start_marker_SpinBox->value() > mp_end_marker_SpinBox->value()) {
+        // Value is not currently valid
+        mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
+        mp_end_marker_SpinBox->setPalette(*mp_red_text_Palette);
+    } else {
+        mp_start_marker_SpinBox->setPalette(*mp_black_text_Palette);
+        mp_end_marker_SpinBox->setPalette(*mp_black_text_Palette);
         emit start_marker_changed(value);
+        emit end_marker_changed(mp_end_marker_SpinBox->value());
     }
 }
 
 
 void c_markers_dialog::end_marker_changed_slot(int value)
 {
-    if (m_end_marker_enabled) {
+    if (mp_start_marker_SpinBox->value() > mp_end_marker_SpinBox->value()) {
+        // value is not currently valid
+        mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
+        mp_end_marker_SpinBox->setPalette(*mp_red_text_Palette);
+    } else {
+        mp_start_marker_SpinBox->setPalette(*mp_black_text_Palette);
+        mp_end_marker_SpinBox->setPalette(*mp_black_text_Palette);
         emit end_marker_changed(value);
+        emit start_marker_changed(mp_start_marker_SpinBox->value());
     }
+}
+
+
+void c_markers_dialog::reset_markers_slot()
+{
+    mp_start_marker_SpinBox->setValue(mp_start_marker_SpinBox->minimum());
+    mp_end_marker_SpinBox->setValue(mp_end_marker_SpinBox->maximum());
 }
 
 
 void c_markers_dialog::set_start_marker_slot(int value)
 {
-    if (value == -1) {
-        m_start_marker_enabled = false;
-        mp_start_marker_SpinBox->setValue(1);
-        mp_start_marker_SpinBox->setEnabled(false);
-        mp_start_market_Label->setEnabled(false);
-    } else {
-        m_start_marker_enabled = true;
-        mp_start_marker_SpinBox->setValue(value);
-        mp_start_marker_SpinBox->setEnabled(true);
-        mp_start_market_Label->setEnabled(true);
-    }
-
+    mp_start_marker_SpinBox->setValue(value);
     int marked_frames = mp_end_marker_SpinBox->value() - mp_start_marker_SpinBox->value() + 1;
     mp_selected_count_Label->setText(QString::number(marked_frames));
 }
@@ -124,18 +151,7 @@ void c_markers_dialog::set_start_marker_slot(int value)
 
 void c_markers_dialog::set_end_marker_slot(int value)
 {
-    if (value == -1) {
-        m_end_marker_enabled = false;
-        mp_end_marker_SpinBox->setValue(mp_end_marker_SpinBox->maximum());
-        mp_end_marker_SpinBox->setEnabled(false);
-        mp_end_market_Label->setEnabled(false);
-    } else {
-        m_end_marker_enabled = true;
-        mp_end_marker_SpinBox->setValue(value);
-        mp_end_marker_SpinBox->setEnabled(true);
-        mp_end_market_Label->setEnabled(true);
-    }
-
+    mp_end_marker_SpinBox->setValue(value);
     int marked_frames = mp_end_marker_SpinBox->value() - mp_start_marker_SpinBox->value() + 1;
     mp_selected_count_Label->setText(QString::number(marked_frames));
 }

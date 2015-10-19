@@ -11,7 +11,5 @@
         <file>translations/ser_player_da.qm</file>
         <file>translations/qt_da.qm</file>
         <file>translations/ser_player_fr.qm</file>
-        <file>resources/end_marker_button.png</file>
-        <file>resources/start_marker_button.png</file>
     </qresource>
 </RCC>

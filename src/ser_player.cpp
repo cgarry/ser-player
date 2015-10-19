@@ -19,6 +19,7 @@
 #define VERSION_STRING "v1.3.7"
 
 #include <Qt>
+#include <QApplication>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDebug>
@@ -84,6 +85,11 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_red_balance = 1.0;
     m_green_balance = 1.0;
     m_blue_balance = 1.0;
+
+
+    //
+    // File menu
+    //
     QMenu *file_menu = menuBar()->addMenu(tr("File", "Menu title"));
     QAction *fileopen_Act = new QAction(tr("Open SER File", "Menu title"), this);
     file_menu->addAction(fileopen_Act);
@@ -102,6 +108,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     file_menu->addAction(quit_Act);
     connect(quit_Act, SIGNAL(triggered()), this, SLOT(close()));
 
+
+    //
+    // Playback menu
+    //
     QMenu *playback_menu = menuBar()->addMenu(tr("Playback", "Menu title"));
 
     const int zoom_levels[] = {25, 50, 75, 100, 125, 150, 200, 250, 300};
@@ -187,7 +197,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
 
 
-
     mp_direction_Menu = playback_menu->addMenu(tr("Playback Direction"));
     mp_direction_Menu->setEnabled(false);
     QActionGroup *direction_ActGroup = new QActionGroup(mp_direction_Menu);
@@ -223,8 +232,22 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
     m_debayer_Act->setEnabled(false);
 
+    // Hide Markers menu action
+    m_hide_markers_Act = new QAction(tr("Hide Markers"), this);
+    m_hide_markers_Act->setCheckable(true);
+    m_hide_markers_Act->setChecked(c_persistent_data::m_hide_markers);
+    playback_menu->addAction(m_hide_markers_Act);
+    connect(m_hide_markers_Act, SIGNAL(triggered(bool)), this, SLOT(hide_markers_slot(bool)));
+    m_hide_markers_Act->setEnabled(false);
+
+
+    //
+    // Windows menu
+    //
+    QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
+
     // Colour Setting menu action
-    mp_colour_settings_action = playback_menu->addAction(tr("Colour Settings..."));
+    mp_colour_settings_action = window_menu->addAction(tr("Colour Settings"));
     mp_colour_settings_action->setEnabled(false);
     connect(mp_colour_settings_action, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
     mp_colour_settings_Dialog = new c_colour_dialog(this);
@@ -234,7 +257,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
     // Markers Dialog action
-    mp_markers_dialog_action = playback_menu->addAction(tr("Show Markers Settings..."));
+    mp_markers_dialog_action = window_menu->addAction(tr("Marker Controls"));
     mp_markers_dialog_action->setEnabled(true);
 
     mp_markers_Dialog = new c_markers_dialog(this);
@@ -242,6 +265,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_markers_Dialog, SLOT(show()));
 
 
+    //
+    // Help menu
+    //
     QMenu *help_menu = menuBar()->addMenu(tr("Help", "Help menu"));
 
 #ifndef DISABLE_NEW_VERSION_CHECK
@@ -409,14 +435,14 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_forward_PushButton->setIcon(forward_Pixmap);
     mp_forward_PushButton->setIconSize(forward_Pixmap.size());
     mp_forward_PushButton->setFixedSize(forward_Pixmap.size() + QSize(10, 10));  // Nice and small
-    mp_forward_PushButton->setToolTip(tr("Advance Frame", "Button Tool tip"));  // Nice and small
+    mp_forward_PushButton->setToolTip(tr("Click to advance 1 frame\nShift-Click to advance multiple frames", "Button Tool tip"));  // Nice and small
 
     mp_back_PushButton = new QPushButton;
     QPixmap back_Pixmap = QPixmap(":/res/resources/back_button.png");
     mp_back_PushButton->setIcon(back_Pixmap);
     mp_back_PushButton->setIconSize(back_Pixmap.size());
     mp_back_PushButton->setFixedSize(back_Pixmap.size() + QSize(10, 10));
-    mp_back_PushButton->setToolTip(tr("Back Frame", "Button Tool tip"));
+    mp_back_PushButton->setToolTip(tr("Click to go back 1 frame\nShift-Click to go back multiple frames", "Button Tool tip"));
 
     mp_play_PushButton = new QPushButton;
     mp_play_PushButton->setIcon(m_play_Pixmap);
@@ -439,22 +465,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_repeat_PushButton->setCheckable(true);
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
-
-    mp_start_marker_PushButton = new QPushButton;
-    QPixmap start_marker_Pixmap = QPixmap(":/res/resources/start_marker_button.png");
-    mp_start_marker_PushButton->setIcon(start_marker_Pixmap);
-    mp_start_marker_PushButton->setIconSize(start_marker_Pixmap.size());
-    mp_start_marker_PushButton->setFixedSize(start_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
-    mp_start_marker_PushButton->setCheckable(true);
-    mp_start_marker_PushButton->setToolTip(tr("Enable/Disable Start Marker", "Button Tool tip"));  // Nice and small
-
-    mp_end_marker_PushButton = new QPushButton;
-    QPixmap end_marker_Pixmap = QPixmap(":/res/resources/end_marker_button.png");
-    mp_end_marker_PushButton->setIcon(end_marker_Pixmap);
-    mp_end_marker_PushButton->setIconSize(end_marker_Pixmap.size());
-    mp_end_marker_PushButton->setFixedSize(end_marker_Pixmap.size() + QSize(10, 10));  // Nice and small
-    mp_end_marker_PushButton->setCheckable(true);
-    mp_end_marker_PushButton->setToolTip(tr("Enable/Disable End Marker", "Button Tool tip"));  // Nice and small
 
     m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;
@@ -542,8 +552,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     controls_h_layout->addWidget(mp_play_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addWidget(mp_stop_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addWidget(mp_repeat_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addWidget(mp_start_marker_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addWidget(mp_end_marker_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addStretch();
     controls_h_layout->addLayout(controls_v_layout1);
 
@@ -589,12 +597,6 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     connect(mp_repeat_PushButton, SIGNAL(toggled(bool)),
             this, SLOT(repeat_button_toggled_slot(bool)));
-
-    connect(mp_start_marker_PushButton, SIGNAL(toggled(bool)),
-            this, SLOT(start_marker_toggled_slot(bool)));
-
-    connect(mp_end_marker_PushButton, SIGNAL(toggled(bool)),
-            this, SLOT(end_marker_toggled_slot(bool)));
 
     connect(mp_frame_Slider, SIGNAL(valueChanged(int)),
             this, SLOT(frame_slider_changed_slot()));
@@ -882,9 +884,6 @@ void c_ser_player::open_ser_file_slot()
 
 void c_ser_player::open_ser_file(const QString &filename)
 {
-    mp_frame_Slider->delete_all_markers_slot();
-    mp_start_marker_PushButton->setChecked(false);
-    mp_end_marker_PushButton->setChecked(false);
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
     mp_ser_file_Mutex->lock();
     mp_ser_file->close();
@@ -902,15 +901,18 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         mp_markers_Dialog->set_maximum_frame(m_total_frames);
-        mp_markers_Dialog->set_start_marker_slot(-1);
-        mp_markers_Dialog->set_end_marker_slot(-1);
+        mp_markers_Dialog->set_start_marker_slot(1);
+        mp_markers_Dialog->set_end_marker_slot(m_total_frames);
+        mp_frame_Slider->set_markers_active(!c_persistent_data::m_hide_markers);
 
         // This is a valid SER file
+
         m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
         mp_frame_Slider->setMaximum(m_total_frames);
+        mp_frame_Slider->reset_all_markers_slot();
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
@@ -1006,6 +1008,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
+        m_hide_markers_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_direction_Menu->setEnabled(true);
         calculate_display_framerate();
@@ -1142,9 +1145,17 @@ void c_ser_player::frame_timer_timeout_slot()
 void c_ser_player::forward_button_pressed_slot()
 {
     if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
+        bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
         int value = mp_frame_Slider->value();
-        if (value < mp_frame_Slider->maximum()) {
+
+        if (shift_key) {
+            value += 50;
+        } else {
             value++;
+        }
+
+        if (value > mp_frame_Slider->maximum()) {
+            value = mp_frame_Slider->maximum();
         }
 
         mp_frame_Slider->setValue(value);
@@ -1155,14 +1166,20 @@ void c_ser_player::forward_button_pressed_slot()
 void c_ser_player::back_button_pressed_slot()
 {
     if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-        if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-            int value = mp_frame_Slider->value();
-            if (value > mp_frame_Slider->minimum()) {
-                value--;
-            }
+        bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
+        int value = mp_frame_Slider->value();
 
-            mp_frame_Slider->setValue(value);
+        if (shift_key) {
+            value -= 50;
+        } else {
+            value--;
         }
+
+        if (value < mp_frame_Slider->minimum()) {
+            value = mp_frame_Slider->minimum();
+        }
+
+        mp_frame_Slider->setValue(value);
     }
 }
 
@@ -1209,37 +1226,6 @@ void c_ser_player::repeat_button_toggled_slot(bool checked) {
     mp_frame_Slider->set_repeat(checked);
 }
 
-
-void c_ser_player::start_marker_toggled_slot(bool checked) {
-    if (checked) {
-        bool marker_set = mp_frame_Slider->set_start_marker_slot(mp_frame_Slider->value());
-        if (!marker_set) {
-            // Marker was not set, uncheck button
-            mp_start_marker_PushButton->setChecked(false);
-        } else {
-            // Marker was set - show markers dialog
-            mp_markers_Dialog->show();
-        }
-    } else {
-        mp_frame_Slider->set_start_marker_slot(-1);
-    }
-}
-
-
-void c_ser_player::end_marker_toggled_slot(bool checked) {
-    if (checked) {
-        bool marker_set = mp_frame_Slider->set_end_marker_slot(mp_frame_Slider->value());
-        if (!marker_set) {
-            // Marker was not set, uncheck button
-            mp_end_marker_PushButton->setChecked(false);
-        } else {
-            // Marker was set - show markers dialog
-            mp_markers_Dialog->show();
-        }
-    } else {
-        mp_frame_Slider->set_end_marker_slot(-1);
-    }
-}
 
 
 void c_ser_player::resize_window_100_percent_slot()
@@ -1320,6 +1306,14 @@ void c_ser_player::debayer_enable_slot(bool enabled)
     }
 
     frame_slider_changed_slot();
+}
+
+
+void c_ser_player::hide_markers_slot(bool hide)
+{
+    c_persistent_data::m_hide_markers = hide;
+    mp_frame_Slider->set_markers_active(!hide);
+    mp_frame_Slider->reset_all_markers_slot();
 }
 
 

@@ -45,6 +45,7 @@ QString c_persistent_data::m_new_version = "v1.0.0";
 
 bool c_persistent_data::m_check_for_updates = true;
 bool c_persistent_data::m_enable_debayering = true;
+bool c_persistent_data::m_hide_markers = false;
 bool c_persistent_data::m_repeat = false;
 
 
@@ -78,6 +79,10 @@ void c_persistent_data::load()
         m_enable_debayering = settings.value("enable_debayering").toBool();
     }
 
+    if (settings.value("hide_markers") != QVariant::Invalid) {
+        m_hide_markers = settings.value("hide_markers").toBool();
+    }
+
     if (settings.value("playback_repeat") != QVariant::Invalid) {
         m_repeat = settings.value("playback_repeat").toBool();
     }
@@ -96,5 +101,6 @@ void c_persistent_data::save()
     settings.setValue("new_version", m_new_version);
     settings.setValue("check_for_updates", m_check_for_updates);
     settings.setValue("enable_debayering", m_enable_debayering);
+    settings.setValue("hide_markers", m_hide_markers);
     settings.setValue("playback_repeat", m_repeat);
 }

@@ -28,11 +28,11 @@ class c_frame_slider : public QSlider
 
 public:
     c_frame_slider(QWidget *parent = 0);
+    void set_markers_active(bool active);
     void set_repeat(bool repeat);
     void set_direction(int dir);
     void goto_first_frame();
     bool goto_next_frame();
-
     int get_start_frame();
     int get_end_frame();
 
@@ -41,9 +41,9 @@ signals:
     void end_marker_changed(int frame);
 
 public slots:
-    bool set_start_marker_slot(int frame);
-    bool set_end_marker_slot(int frame);
-    void delete_all_markers_slot();
+    void set_start_marker_slot(int frame);
+    void set_end_marker_slot(int frame);
+    void reset_all_markers_slot();
 
 private slots:
     void ShowContextMenu(const QPoint& pos);
@@ -60,6 +60,7 @@ private:
     void draw_start_marker(int x_pos);
     void draw_end_marker(int x_pos);
 
+    bool m_markers_active;
     int m_start_marker;
     int m_end_marker;
     bool m_repeat;

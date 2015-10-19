@@ -41,6 +41,7 @@ signals:
 
 
 public slots:
+    void reset_markers_slot();
     void set_start_marker_slot(int value);
     void set_end_marker_slot(int value);
 
@@ -57,13 +58,11 @@ private:
     // Widgets
     QLabel *mp_start_market_Label;
     QSpinBox *mp_start_marker_SpinBox;
+    QPalette *mp_red_text_Palette;
+    QPalette *mp_black_text_Palette;
     QLabel *mp_end_market_Label;
     QSpinBox *mp_end_marker_SpinBox;
     QLabel *mp_selected_count_Label;
-
-    // Other private variables
-    bool m_start_marker_enabled;
-    bool m_end_marker_enabled;
 };
 
 #endif // MARKERS_DIALOG_H

@@ -30,8 +30,9 @@
 
 c_frame_slider::c_frame_slider(QWidget *parent)
     : QSlider(parent),
-      m_start_marker(-1),
-      m_end_marker(-1),
+      m_markers_active(false),
+      m_start_marker(1),
+      m_end_marker(1),
       m_repeat(false),
       m_direction(0),
       m_current_direction(0),
@@ -46,6 +47,13 @@ c_frame_slider::c_frame_slider(QWidget *parent)
     QStyleOptionSlider opt;
     initStyleOption(&opt);
     QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+}
+
+
+void c_frame_slider::set_markers_active(bool active)
+{
+    m_markers_active = active;
+    update();
 }
 
 
@@ -64,16 +72,13 @@ void c_frame_slider::set_direction(int dir)
 void c_frame_slider::goto_first_frame()
 {
     if (m_direction == 0) {
-        int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
-        setValue(start_frame);
+        setValue(m_start_marker);
     } else if (m_direction == 1) {
-        int end_frame = (m_end_marker == -1) ? maximum() : m_end_marker;
-        setValue(end_frame);
+        setValue(m_end_marker);
     } else if (m_direction == 2) {
         // Forward + Reverse play
         m_current_direction = 0;
-        int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
-        setValue(start_frame);
+        setValue(m_start_marker);
     } else {
         qDebug() << "Unsupported direction!";
         exit(-1);
@@ -85,22 +90,20 @@ bool c_frame_slider::goto_next_frame()
 {
     bool ret = true;  // Default return value
     int current_value = value();
-    int end_frame = (m_end_marker == -1) ? maximum() : m_end_marker;
-    int start_frame = (m_start_marker == -1) ? minimum() : m_start_marker;
 
     if (m_direction == 0) {
         // Forward play
-        if (current_value < start_frame) {
+        if (current_value < m_start_marker) {
             // Move to start frame
-            setValue(start_frame);
-        } else if (current_value < end_frame) {
+            setValue(m_start_marker);
+        } else if (current_value < m_end_marker) {
             // Not at end of forward playback
             setValue(current_value + 1);
         } else {
             // At end of forward playback
             if (m_repeat) {
                 // Repeat is on, go back to start
-                setValue(start_frame);
+                setValue(m_start_marker);
             } else {
                 // Signal that playback has completed
                 ret = false;
@@ -108,17 +111,17 @@ bool c_frame_slider::goto_next_frame()
         }
     } else if (m_direction == 1) {
         // Reverse play
-        if (current_value > end_frame) {
+        if (current_value > m_end_marker) {
             // Move to end frame which is the start position in reverse playback
-            setValue(end_frame);
-        } else if (current_value > start_frame) {
+            setValue(m_end_marker);
+        } else if (current_value > m_start_marker) {
             // Not at end of reverse playback
             setValue(current_value - 1);
         } else {
             // At end of reverse playback
             if (m_repeat) {
                 // Repeat is on, go back to start
-                setValue(end_frame);
+                setValue(m_end_marker);
             } else {
                 // Signal that playback has completed
                 ret = false;
@@ -128,10 +131,10 @@ bool c_frame_slider::goto_next_frame()
         // Forward + Reverse play
         if (m_current_direction == 0) {
             // Currently playing forward
-            if (current_value < start_frame) {
+            if (current_value < m_start_marker) {
                 // Move to start frame
-                setValue(start_frame);
-            } else if (current_value < end_frame) {
+                setValue(m_start_marker);
+            } else if (current_value < m_end_marker) {
                 // Not at end of forward playback
                 setValue(current_value + 1);
             } else {
@@ -141,10 +144,10 @@ bool c_frame_slider::goto_next_frame()
             }
         } else {
             // Currently playing reverse
-            if (current_value > end_frame) {
+            if (current_value > m_end_marker) {
                 // Move to end frame which is the start position in reverse playback
-                setValue(end_frame);
-            } else if (current_value > start_frame) {
+                setValue(m_end_marker);
+            } else if (current_value > m_start_marker) {
                 // Not at end of reverse playback
                 setValue(current_value - 1);
             } else {
@@ -170,68 +173,52 @@ bool c_frame_slider::goto_next_frame()
 
 int c_frame_slider::get_start_frame()
 {
-    if (m_start_marker == -1) {
-      return minimum();
-    } else {
-        return m_start_marker;
-    }
+    return m_start_marker;
 }
 
 
 int c_frame_slider::get_end_frame()
 {
-    if (m_end_marker == -1) {
-      return maximum();
-    } else {
-        return m_end_marker;
-    }
+    return m_end_marker;
 }
 
 
-bool c_frame_slider::set_start_marker_slot(int frame)
+void c_frame_slider::set_start_marker_slot(int new_start_marker)
 {
-    bool ret = true;
-    if (frame < minimum() || frame > maximum()) {
-        // Start marker could not be set
-        m_start_marker = -1;
-        ret = false;
-    } else if (m_end_marker != -1 && frame > m_end_marker) {
+    if (new_start_marker < minimum()) {
+        m_start_marker = minimum();
+    } else if (new_start_marker > m_end_marker) {
         m_start_marker = m_end_marker;
     } else {
         // Set start marker
-        m_start_marker = frame;
+        m_start_marker = new_start_marker;
     }
 
     emit start_marker_changed(m_start_marker);
     update();
-    return ret;
 }
 
 
-bool c_frame_slider::set_end_marker_slot(int frame)
+void c_frame_slider::set_end_marker_slot(int new_end_marker)
 {
-    bool ret = true;
-    if (frame < minimum() || frame > maximum()) {
-        // End marker could not be set
-        m_end_marker = -1;
-        ret = false;
-    } else if (frame < m_start_marker) {
+    if (new_end_marker > maximum()) {
+        m_end_marker =  maximum();
+    } else if (new_end_marker < m_start_marker) {
         m_end_marker = m_start_marker;
     } else {
         // Set end marker
-        m_end_marker = frame;
+        m_end_marker = new_end_marker;
     }
 
     emit end_marker_changed(m_end_marker);
     update();
-    return ret;
 }
 
 
-void c_frame_slider::delete_all_markers_slot()
+void c_frame_slider::reset_all_markers_slot()
 {
-    m_start_marker = -1;
-    m_end_marker = -1;
+    m_start_marker = minimum();
+    m_end_marker = maximum();
 }
 
 
@@ -259,57 +246,45 @@ int c_frame_slider::value_for_position(int position) const
 
 void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
 {
-    // for most widgets
-    QPoint globalPos = mapToGlobal(pos);
-    // for QAbstractScrollArea and derived classes you would use:
-    // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
-    bool inside_start_marker_area = false;
-    bool inside_end_marker_area = false;
-    int start_frame_at_mouse_pos = value_for_position(pos.x());
-    QStyleOptionSlider opt;
-    initStyleOption(&opt);
-    QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
-    int end_frame_at_mouse_pos = value_for_position(pos.x() - handle_rect.width());
+    if (m_markers_active) {
+        // for most widgets
+        QPoint globalPos = mapToGlobal(pos);
+        // for QAbstractScrollArea and derived classes you would use:
+        // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+        bool inside_start_marker = m_start_marker_rect.contains(pos);
+        bool inside_end_marker = m_end_marker_rect.contains(pos);
 
-    if (m_start_marker > 0) {
-        int start_marker_pos = position_for_value(m_start_marker);
-        if (pos.x() <= start_marker_pos) {
-            inside_start_marker_area = true;
+
+        QMenu markers_Menu;
+        QAction *move_start_marker_to_current_Act = NULL;
+        QAction *move_start_marker_to_start_Act = NULL;
+        QAction *move_end_marker_to_current_Act = NULL;
+        QAction *move_end_marker_to_end_Act = NULL;
+        if (inside_start_marker) {
+            move_start_marker_to_current_Act = markers_Menu.addAction(tr("Move Start Market to current frame"));
+            move_start_marker_to_start_Act = markers_Menu.addAction(tr("Move Start Market to first frame"));
         }
-    }
 
-    if (m_end_marker > 0) {
-        int end_marker_pos = position_for_value(m_end_marker);
-        if (pos.x() >= end_marker_pos) {
-            inside_end_marker_area = true;
+        if (inside_end_marker) {
+            move_end_marker_to_current_Act = markers_Menu.addAction(tr("Move End Market to current frame"));
+            move_end_marker_to_end_Act  = markers_Menu.addAction(tr("Move End Market to last frame"));
         }
-    }
 
-    QMenu markers_Menu;
-    QAction *move_start_marker_Act = NULL;
-    QAction *move_end_marker_Act = NULL;
-    if (inside_start_marker_area || (m_start_marker != -1 && !inside_end_marker_area)) {
-        if (start_frame_at_mouse_pos != minimum()) {
-            move_start_marker_Act = markers_Menu.addAction(tr("Move Start Marker To Here (Frame %1)").arg(start_frame_at_mouse_pos));
-        }
-    }
+        if (inside_start_marker || inside_end_marker) {
+            QAction* selectedItem = markers_Menu.exec(globalPos);
+            if (selectedItem != NULL) {
+                if (selectedItem == move_start_marker_to_current_Act) {
+                    set_start_marker_slot(value());
+                } else if (selectedItem == move_start_marker_to_start_Act) {
+                    set_start_marker_slot(1);
+                } else if (selectedItem == move_end_marker_to_current_Act) {
+                    set_end_marker_slot(value());
+                } else if (selectedItem == move_end_marker_to_end_Act) {
+                    set_end_marker_slot(maximum());
+                }
 
-    if (inside_end_marker_area || (m_end_marker != -1 && !inside_start_marker_area)) {
-        if (end_frame_at_mouse_pos != maximum()) {
-            move_end_marker_Act = markers_Menu.addAction(tr("Move End Marker To Here (Frame %1)").arg(end_frame_at_mouse_pos));
-        }
-    }
-
-    if (move_start_marker_Act != NULL || move_end_marker_Act != NULL) {
-        QAction* selectedItem = markers_Menu.exec(globalPos);
-        if (selectedItem != NULL) {
-            if (selectedItem == move_start_marker_Act) {
-                set_start_marker_slot(start_frame_at_mouse_pos);
-            } else if (selectedItem == move_end_marker_Act) {
-                set_end_marker_slot(end_frame_at_mouse_pos);
+                update();
             }
-
-            update();
         }
     }
 }
@@ -472,70 +447,70 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
 
     QPainter painter(this);
 
-    // Draw frames excluded from start rectangle
-    if (m_start_marker >= minimum()) {
-        int start_pos = position_for_value(minimum());
-        int end_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
-        QRect rect(start_pos,
-                   groove_rect.top(),
-                   end_pos - start_pos,
-                   groove_rect.height());
-        painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
-    }
-
-    // Draw frames excluded from end rectangle
-    if (m_end_marker != -1 && m_end_marker <= maximum()) {
-        int start_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
-        int end_pos = position_for_value(maximum()) + handle_rect.width() - 1;
-        QRect rect(start_pos,
-                   groove_rect.top(),
-                   end_pos - start_pos,
-                   groove_rect.height());
-        painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
-    }
-
-    // Draw start marker when dragging
-    if (m_moving_start_marker) {
-        int min_position = position_for_value(minimum()) + handle_rect.width()/2 - 1;
-        int max_position = position_for_value(maximum()) + handle_rect.width()/2 - 1;
-        int x_pos = m_start_marker_current_pos.x();
-        if (x_pos < min_position) {
-            x_pos = min_position;
-        } else if (x_pos > max_position) {
-            x_pos = max_position;
+    if (m_markers_active) {
+        // Draw rectangle for frames excluded by start marker
+        if (m_start_marker >= minimum()) {
+            int start_pos = position_for_value(minimum());
+            int end_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
+            QRect rect(start_pos,
+                       groove_rect.top(),
+                       end_pos - start_pos,
+                       groove_rect.height());
+            painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
-        draw_start_marker(x_pos);
-    }
-
-    // Draw start marker
-    if (m_start_marker >= minimum()) {
-        int slider_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
-        draw_start_marker(slider_pos);
-        m_start_marker_rect = QRect(slider_pos - 6, groove_rect.top(), 6, groove_rect.height());
-    }
-
-    // Draw start marker when moving
-    if (m_moving_end_marker) {
-        int x_pos = m_end_marker_current_pos.x();
-        int min_position = position_for_value(minimum()) + handle_rect.width()/2;
-        int max_position = position_for_value(maximum()) + handle_rect.width()/2;
-        if (x_pos < min_position) {
-            x_pos = min_position;
-        } else if (x_pos > max_position) {
-            x_pos = max_position;
+        // Draw rectangle for frames excluded by end marker
+        if (m_end_marker != -1 && m_end_marker <= maximum()) {
+            int start_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
+            int end_pos = position_for_value(maximum()) + handle_rect.width() - 1;
+            QRect rect(start_pos,
+                       groove_rect.top(),
+                       end_pos - start_pos,
+                       groove_rect.height());
+            painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
-        draw_end_marker(x_pos);
-    }
+        // Draw start marker when dragging
+        if (m_moving_start_marker) {
+            int min_position = position_for_value(minimum()) + handle_rect.width()/2 - 1;
+            int max_position = position_for_value(m_end_marker) + handle_rect.width()/2 - 1;
+            int x_pos = m_start_marker_current_pos.x();
+            if (x_pos < min_position) {
+                x_pos = min_position;
+            } else if (x_pos > max_position) {
+                x_pos = max_position;
+            }
 
-    // Draw end marker
-    if (m_end_marker != -1 && m_end_marker <= maximum()) {
+            draw_start_marker(x_pos);
+        }
+
         // Draw start marker
-        int slider_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
-        draw_end_marker(slider_pos);
-        m_end_marker_rect = QRect(slider_pos, groove_rect.top(), 6, groove_rect.height());
+        if (m_start_marker >= minimum()) {
+            int slider_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
+            draw_start_marker(slider_pos);
+            m_start_marker_rect = QRect(slider_pos - 10, groove_rect.top(), 10, groove_rect.height());
+        }
+
+        // Draw end marker when dragging
+        if (m_moving_end_marker) {
+            int x_pos = m_end_marker_current_pos.x();
+            int min_position = position_for_value(m_start_marker) + handle_rect.width()/2;
+            int max_position = position_for_value(maximum()) + handle_rect.width()/2;
+            if (x_pos < min_position) {
+                x_pos = min_position;
+            } else if (x_pos > max_position) {
+                x_pos = max_position;
+            }
+
+            draw_end_marker(x_pos);
+        }
+
+        // Draw end marker
+        if (m_end_marker != -1 && m_end_marker <= maximum()) {
+            // Draw start marker
+            int slider_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
+            draw_end_marker(slider_pos);
+            m_end_marker_rect = QRect(slider_pos, groove_rect.top(), 10, groove_rect.height());
+        }
     }
-
-
 }
