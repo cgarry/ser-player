@@ -47,7 +47,6 @@ private:
     // Menus
     QAction *m_save_frames_Act;
     QMenu *mp_framerate_Menu;
-    QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
     QAction *mp_colour_settings_action;
     QAction *mp_markers_dialog_action;
@@ -59,11 +58,15 @@ private:
     QPixmap m_no_file_open_Pixmap;
     QPixmap m_play_Pixmap;
     QPixmap m_pause_Pixmap;
+    QPixmap m_forward_play_Pixmap;
+    QPixmap m_reverse_play_Pixmap;
+    QPixmap m_forward_and_reverse_play_Pixmap;
     QPushButton *mp_forward_PushButton;
     QPushButton *mp_back_PushButton;
     QPushButton *mp_play_PushButton;
     QPushButton *mp_stop_PushButton;
     QPushButton *mp_repeat_PushButton;
+    QPushButton *mp_play_direction_PushButton;
 //    QPushButton *mp_start_marker_PushButton;
 //    QPushButton *mp_end_marker_PushButton;
     c_image_Widget *mp_frame_image_Widget;
@@ -100,6 +103,7 @@ private:
     struct image_functions::s_image_details m_frame_details;
     bool m_is_colour;
     bool m_has_bayer_pattern;
+    int m_play_direction;
 
     double m_colour_saturation;
 
@@ -110,7 +114,6 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
-    void direction_changed_slot(QAction *);
     void colour_settings_slot();
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
@@ -129,6 +132,7 @@ public slots:
     void back_button_held_slot();
     void play_button_pressed_slot();
     void stop_button_pressed_slot();
+    void play_direction_button_pressed_slot();
     void repeat_button_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);

@@ -11,5 +11,8 @@
         <file>translations/ser_player_da.qm</file>
         <file>translations/qt_da.qm</file>
         <file>translations/ser_player_fr.qm</file>
+        <file>resources/play_forward.png</file>
+        <file>resources/play_forward_and_reverse.png</file>
+        <file>resources/play_reverse.png</file>
     </qresource>
 </RCC>

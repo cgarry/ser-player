@@ -82,6 +82,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
+    m_play_direction = 0;
 
 
     //
@@ -192,33 +193,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
-
-
-    mp_direction_Menu = playback_menu->addMenu(tr("Playback Direction"));
-    mp_direction_Menu->setEnabled(false);
-    QActionGroup *direction_ActGroup = new QActionGroup(mp_direction_Menu);
-    direction_ActGroup->setExclusive(true);
-    QAction *direction_Action;
-
-    direction_Action = new QAction(tr("Forward", "Playback direction menu"), this);
-    direction_Action->setCheckable(true);
-    direction_Action->setChecked(true);
-    direction_Action->setData(0);
-    mp_direction_Menu->addAction(direction_Action);
-    direction_ActGroup->addAction(direction_Action);
-
-    direction_Action = new QAction(tr("Reverse", "Playback direction menu"), this);
-    direction_Action->setCheckable(true);
-    direction_Action->setData(1);
-    mp_direction_Menu->addAction(direction_Action);
-    direction_ActGroup->addAction(direction_Action);
-
-    direction_Action = new QAction(tr("Forward + Reverse","Playback direction menu"), this);
-    direction_Action->setCheckable(true);
-    direction_Action->setData(2);
-    mp_direction_Menu->addAction(direction_Action);
-    direction_ActGroup->addAction(direction_Action);
-    connect(direction_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT (direction_changed_slot(QAction *)));
 
 
     // Enable Debayer menu action
@@ -447,6 +421,16 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
 
+    m_forward_play_Pixmap = QPixmap(":/res/resources/play_forward.png");
+    m_reverse_play_Pixmap = QPixmap(":/res/resources/play_reverse.png");
+    m_forward_and_reverse_play_Pixmap = QPixmap(":/res/resources/play_forward_and_reverse.png");
+    mp_play_direction_PushButton = new QPushButton;
+    mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
+    mp_play_direction_PushButton->setIconSize(m_forward_play_Pixmap.size());
+    mp_play_direction_PushButton->setFixedSize(m_forward_play_Pixmap.size() + QSize(10, 10));
+    mp_play_direction_PushButton->setToolTip(tr("Play Direction", "Button Tool tip"));
+    connect(mp_play_direction_PushButton, SIGNAL(clicked()), this, SLOT(play_direction_button_pressed_slot()));
+
     m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
     mp_framecount_Label = new QLabel;
     mp_framecount_Label->setText(m_framecount_label_String.arg("-").arg("----"));
@@ -533,6 +517,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     controls_h_layout->addWidget(mp_play_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addWidget(mp_stop_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addWidget(mp_repeat_PushButton, 0, Qt::AlignTop);
+    controls_h_layout->addWidget(mp_play_direction_PushButton, 0, Qt::AlignTop);
     controls_h_layout->addStretch();
     controls_h_layout->addLayout(controls_v_layout1);
 
@@ -634,14 +619,6 @@ void c_ser_player::fps_changed_slot(QAction *action)
         m_display_framerate = action->data().toInt();
         mp_framerate_Menu->setTitle(tr("Display Framerate"));
         calculate_display_framerate();
-    }
-}
-
-
-void c_ser_player::direction_changed_slot(QAction *action)
-{
-    if (action != NULL) {
-        mp_frame_Slider->set_direction(action->data().toInt());
     }
 }
 
@@ -993,7 +970,6 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_framerate_Menu->setEnabled(true);
-        mp_direction_Menu->setEnabled(true);
         calculate_display_framerate();
 
         uint64_t ts = mp_ser_file->get_timestamp();
@@ -1283,9 +1259,30 @@ void c_ser_player::stop_button_pressed_slot()
 }
 
 
-void c_ser_player::repeat_button_toggled_slot(bool checked) {
+void c_ser_player::repeat_button_toggled_slot(bool checked)
+{
     c_persistent_data::m_repeat = checked;
     mp_frame_Slider->set_repeat(checked);
+}
+
+
+void c_ser_player::play_direction_button_pressed_slot()
+{
+    switch (m_play_direction) {
+    case 0:
+        m_play_direction = 1;
+        mp_play_direction_PushButton->setIcon(m_reverse_play_Pixmap);
+        break;
+    case 1:
+        m_play_direction = 2;
+        mp_play_direction_PushButton->setIcon(m_forward_and_reverse_play_Pixmap);
+        break;
+    default:
+        m_play_direction = 0;
+        mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
+    }
+
+    mp_frame_Slider->set_direction(m_play_direction);
 }
 
 
