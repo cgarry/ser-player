@@ -307,8 +307,8 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
             QMenu markers_Menu;
             QAction *move_start_marker_to_current_Act = NULL;
             QAction *move_end_marker_to_current_Act = NULL;
-            move_start_marker_to_current_Act = markers_Menu.addAction(tr("Move Start Market to current frame"));
-            move_end_marker_to_current_Act = markers_Menu.addAction(tr("Move End Market to current frame"));
+            move_start_marker_to_current_Act = markers_Menu.addAction(tr("Move Start Marker to current frame"));
+            move_end_marker_to_current_Act = markers_Menu.addAction(tr("Move End Marker to current frame"));
 
             QAction* selectedItem = markers_Menu.exec(globalPos);
             if (selectedItem != NULL) {
