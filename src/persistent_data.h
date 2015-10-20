@@ -35,6 +35,7 @@ public:
     static bool m_check_for_updates;
     static bool m_enable_debayering;
     static bool m_repeat;
+    static int m_play_direction;
 
 
     //

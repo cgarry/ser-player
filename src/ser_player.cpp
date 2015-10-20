@@ -82,7 +82,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
-    m_play_direction = 0;
+    m_play_direction = c_persistent_data::m_play_direction;
 
 
     //
@@ -377,7 +377,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_frame_Slider = new c_frame_slider(this);
     mp_frame_Slider->set_maximum_frame(99);
-    mp_frame_Slider->set_direction(0);
+    mp_frame_Slider->set_direction(m_play_direction);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
     connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_frame_Slider, SLOT(show_markers_dialog()));
 
@@ -421,11 +421,20 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
     mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
 
+    mp_play_direction_PushButton = new QPushButton;
     m_forward_play_Pixmap = QPixmap(":/res/resources/play_forward.png");
     m_reverse_play_Pixmap = QPixmap(":/res/resources/play_reverse.png");
     m_forward_and_reverse_play_Pixmap = QPixmap(":/res/resources/play_forward_and_reverse.png");
-    mp_play_direction_PushButton = new QPushButton;
-    mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
+    switch (m_play_direction) {
+    case 0:
+        mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
+        break;
+    case 1:
+        mp_play_direction_PushButton->setIcon(m_reverse_play_Pixmap);
+        break;
+    default:
+        mp_play_direction_PushButton->setIcon(m_forward_and_reverse_play_Pixmap);
+    }
     mp_play_direction_PushButton->setIconSize(m_forward_play_Pixmap.size());
     mp_play_direction_PushButton->setFixedSize(m_forward_play_Pixmap.size() + QSize(10, 10));
     mp_play_direction_PushButton->setToolTip(tr("Play Direction", "Button Tool tip"));
@@ -1282,6 +1291,8 @@ void c_ser_player::play_direction_button_pressed_slot()
         mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
     }
 
+
+    c_persistent_data::m_play_direction = m_play_direction;
     mp_frame_Slider->set_direction(m_play_direction);
 }
 

@@ -46,7 +46,7 @@ QString c_persistent_data::m_new_version = "v1.0.0";
 bool c_persistent_data::m_check_for_updates = true;
 bool c_persistent_data::m_enable_debayering = true;
 bool c_persistent_data::m_repeat = false;
-
+int c_persistent_data::m_play_direction = 0;
 
 //
 // Load persistent data
@@ -81,6 +81,10 @@ void c_persistent_data::load()
     if (settings.value("playback_repeat") != QVariant::Invalid) {
         m_repeat = settings.value("playback_repeat").toBool();
     }
+
+    if (settings.value("play_direction") != QVariant::Invalid) {
+        m_play_direction = settings.value("play_direction").toInt();
+    }
 }
 	
 	
@@ -97,4 +101,5 @@ void c_persistent_data::save()
     settings.setValue("check_for_updates", m_check_for_updates);
     settings.setValue("enable_debayering", m_enable_debayering);
     settings.setValue("playback_repeat", m_repeat);
+    settings.setValue("play_direction", m_play_direction);
 }
