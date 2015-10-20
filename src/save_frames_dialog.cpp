@@ -46,7 +46,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QDialog::setModal(true);
     
     mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only"));
-    mp_save_current_frame_RButton->setChecked(true);
     connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
     connect(mp_save_all_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
@@ -64,6 +63,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: "));
     connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
+    // Select the default frame selection option depending on whether of not the markers are enabled
+    if (markers_enabled) {
+        mp_save_marked_frames_RButton->setChecked(true);
+    } else {
+        mp_save_current_frame_RButton->setChecked(true);
+    }
+
     mp_start_Spinbox = new QSpinBox;
     mp_start_Spinbox->setMinimum(1);
     mp_start_Spinbox->setMaximum(total_frames);
@@ -75,7 +81,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_end_Spinbox->setValue(total_frames);
     connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(end_Spinbox_changed_slot(int)));
 
-    mp_num_frames_Label = new QLabel(tr("1 frame will be saved"));
+    mp_num_frames_Label = new QLabel;
 
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
@@ -116,14 +122,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     dialog_VLayout->setMargin(10);
     dialog_VLayout->setSpacing(0);
     dialog_VLayout->addWidget(save_optionsGBox);
-//    dialog_VLayout->addSpacing(10);
-//    dialog_VLayout->addWidget(mp_num_frames_Label, 0, Qt::AlignHCenter);
     dialog_VLayout->addSpacing(15);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
     
     setLayout(dialog_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+    mp_save_marked_frames_RButton->clicked(true);  // Ensure mp_num_frames_Label is set
 }
 
 

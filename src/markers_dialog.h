@@ -21,6 +21,8 @@
 
 #include <QDialog>
 
+
+class QGroupBox;
 class QSpinBox;
 class QLabel;
 
@@ -32,13 +34,14 @@ class c_markers_dialog : public QDialog
 public:
     c_markers_dialog(QWidget *parent = 0);
     void set_maximum_frame(int value);
+    bool get_markers_enabled();
 //    ~c_markers_dialog();
 
 
 signals:
     void start_marker_changed(int value);
     void end_marker_changed(int value);
-
+    void markers_enabled_changed(bool enabled);
 
 public slots:
     void reset_markers_slot();
@@ -56,6 +59,7 @@ private:
     void helper_method();
     
     // Widgets
+    QGroupBox *mp_markers_GroupBox;
     QLabel *mp_start_market_Label;
     QSpinBox *mp_start_marker_SpinBox;
     QPalette *mp_red_text_Palette;

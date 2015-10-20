@@ -27,14 +27,13 @@
 class QAction;
 class QLabel;
 class c_pipp_ser;
-//class QSlider;
 class c_frame_slider;
 class QPushButton;
 class QMutex;
 class QImage;
+class QTimer;
 
 class c_colour_dialog;
-class c_markers_dialog;
 class c_image_Widget;
 
 
@@ -50,13 +49,11 @@ private:
     QMenu *mp_framerate_Menu;
     QMenu *mp_direction_Menu;
     QAction *m_debayer_Act;
-    QAction *m_enable_markers_Act;
     QAction *mp_colour_settings_action;
     QAction *mp_markers_dialog_action;
 
     // Dialogs
     c_colour_dialog *mp_colour_settings_Dialog;
-    c_markers_dialog *mp_markers_Dialog;
 
     // Other
     QPixmap m_no_file_open_Pixmap;
@@ -90,6 +87,8 @@ private:
 
     QMutex *mp_ser_file_Mutex;
     QMutex *mp_frame_slider_changed_Mutex;
+    bool m_forward_button_held;
+    bool m_back_button_held;
 
     c_pipp_ser *mp_ser_file;
     QString m_ser_directory;
@@ -113,7 +112,6 @@ public slots:
     void fps_changed_slot(QAction *);
     void direction_changed_slot(QAction *);
     void colour_settings_slot();
-    void markers_dialog_slot();
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
@@ -125,20 +123,23 @@ public slots:
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
     void forward_button_pressed_slot();
+    void forward_button_released_slot();
     void back_button_pressed_slot();
+    void back_button_released_slot();
+    void back_button_held_slot();
     void play_button_pressed_slot();
     void stop_button_pressed_slot();
     void repeat_button_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
     void debayer_enable_slot(bool enabled);
-    void enable_markers_slot(bool enabled);
     void new_version_available_slot(QString version);
     void about_qt();
     void dragEnterEvent(QDragEnterEvent *e);
     void dropEvent(QDropEvent *e);
     void handle_arguments();
     void about_ser_player();
+    void forward_button_held_slot();
 
 
 protected:

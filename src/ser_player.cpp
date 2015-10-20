@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.7"
+#define VERSION_STRING "v1.3.9"
 
 #include <Qt>
 #include <QApplication>
@@ -229,14 +229,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
     m_debayer_Act->setEnabled(false);
 
-    // Enable Markers menu action
-    m_enable_markers_Act = new QAction(tr("Enable Markers"), this);
-    m_enable_markers_Act->setCheckable(true);
-    m_enable_markers_Act->setChecked(c_persistent_data::m_enable_markers);
-    playback_menu->addAction(m_enable_markers_Act);
-    connect(m_enable_markers_Act, SIGNAL(triggered(bool)), this, SLOT(enable_markers_slot(bool)));
-    m_enable_markers_Act->setEnabled(false);
-
 
     //
     // Windows menu
@@ -254,12 +246,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
     // Markers Dialog action
-    mp_markers_dialog_action = window_menu->addAction(tr("Marker Controls"));
+    mp_markers_dialog_action = window_menu->addAction(tr("Start/End Markers"));
     mp_markers_dialog_action->setEnabled(true);
-
-    mp_markers_Dialog = new c_markers_dialog(this);
-    mp_markers_Dialog->hide();
-    connect(mp_markers_dialog_action, SIGNAL(triggered()), this, SLOT(markers_dialog_slot()));
 
 
     //
@@ -414,15 +402,11 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
 
     mp_frame_Slider = new c_frame_slider(this);
-    mp_frame_Slider->setOrientation(Qt::Horizontal);
-    mp_frame_Slider->setMinimum(1);
-    mp_frame_Slider->setMaximum(99);
+    mp_frame_Slider->set_maximum_frame(99);
     mp_frame_Slider->set_direction(0);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
-    connect(mp_frame_Slider, SIGNAL(start_marker_changed(int)), mp_markers_Dialog, SLOT(set_start_marker_slot(int)));
-    connect(mp_frame_Slider, SIGNAL(end_marker_changed(int)), mp_markers_Dialog, SLOT(set_end_marker_slot(int)));
-    connect(mp_markers_Dialog, SIGNAL(start_marker_changed(int)), mp_frame_Slider, SLOT(set_start_marker_slot(int)));
-    connect(mp_markers_Dialog, SIGNAL(end_marker_changed(int)), mp_frame_Slider, SLOT(set_end_marker_slot(int)));
+    connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_frame_Slider, SLOT(show_markers_dialog()));
+
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
     m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
@@ -583,8 +567,14 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_forward_PushButton, SIGNAL(pressed()),
             this, SLOT(forward_button_pressed_slot()));
 
+    connect(mp_forward_PushButton, SIGNAL(released()),
+            this, SLOT(forward_button_released_slot()));
+
     connect(mp_back_PushButton, SIGNAL(pressed()),
             this, SLOT(back_button_pressed_slot()));
+
+    connect(mp_back_PushButton, SIGNAL(released()),
+            this, SLOT(back_button_released_slot()));
 
     connect(mp_play_PushButton, SIGNAL(pressed()),
             this, SLOT(play_button_pressed_slot()));
@@ -660,14 +650,6 @@ void c_ser_player::direction_changed_slot(QAction *action)
 void c_ser_player::colour_settings_slot()
 {
     mp_colour_settings_Dialog->show();
-}
-
-
-// mp_markers_dialog_action has been clicked
-void c_ser_player::markers_dialog_slot()
-{
-    enable_markers_slot(true);  // Ensure markers are enabled
-    mp_markers_Dialog->show();  // Show the markers control dialog
 }
 
 
@@ -907,12 +889,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         // This is a valid SER file
-        mp_frame_Slider->setMaximum(m_total_frames);
+        mp_frame_Slider->set_maximum_frame(m_total_frames);
         mp_frame_Slider->reset_all_markers_slot();
-        mp_frame_Slider->set_markers_active(c_persistent_data::m_enable_markers);
-        mp_markers_Dialog->set_maximum_frame(m_total_frames);
-        mp_markers_Dialog->set_start_marker_slot(1);
-        mp_markers_Dialog->set_end_marker_slot(m_total_frames);
 
         m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
@@ -1014,7 +992,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
-        m_enable_markers_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_direction_Menu->setEnabled(true);
         calculate_display_framerate();
@@ -1165,6 +1142,45 @@ void c_ser_player::forward_button_pressed_slot()
         }
 
         mp_frame_Slider->setValue(value);
+
+        // Start repeat timer
+        m_forward_button_held = true;
+        QTimer::singleShot(500, this, SLOT(forward_button_held_slot()));
+    }
+}
+
+
+void c_ser_player::forward_button_released_slot()
+{
+    m_forward_button_held = false;
+}
+
+
+void c_ser_player::forward_button_held_slot()
+{
+    if (m_forward_button_held &&
+        mp_forward_PushButton->rect().contains(mp_forward_PushButton->mapFromGlobal(QCursor::pos())) &&
+        QApplication::mouseButtons() & Qt::LeftButton) {
+        // Forward button is still being held
+        if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
+            bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
+            int value = mp_frame_Slider->value();
+
+            if (shift_key) {
+                value += 50;
+            } else {
+                value++;
+            }
+
+            if (value > mp_frame_Slider->maximum()) {
+                value = mp_frame_Slider->maximum();
+            }
+
+            mp_frame_Slider->setValue(value);
+        }
+
+        // Re-set repeat timer
+        QTimer::singleShot(100, this, SLOT(forward_button_held_slot()));
     }
 }
 
@@ -1186,6 +1202,46 @@ void c_ser_player::back_button_pressed_slot()
         }
 
         mp_frame_Slider->setValue(value);
+
+        // Start repeat timer
+        m_back_button_held = true;
+        QTimer::singleShot(500, this, SLOT(back_button_held_slot()));
+    }
+}
+
+
+void c_ser_player::back_button_released_slot()
+{
+    m_back_button_held = false;
+}
+
+
+
+void c_ser_player::back_button_held_slot()
+{
+    if (m_back_button_held &&
+        mp_back_PushButton->rect().contains(mp_back_PushButton->mapFromGlobal(QCursor::pos())) &&
+        QApplication::mouseButtons() & Qt::LeftButton) {
+        // Forward button is still being held
+        if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
+            bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
+            int value = mp_frame_Slider->value();
+
+            if (shift_key) {
+                value -= 50;
+            } else {
+                value--;
+            }
+
+            if (value < mp_frame_Slider->minimum()) {
+                value = mp_frame_Slider->minimum();
+            }
+
+            mp_frame_Slider->setValue(value);
+        }
+
+        // Re-set repeat timer
+        QTimer::singleShot(100, this, SLOT(back_button_held_slot()));
     }
 }
 
@@ -1315,22 +1371,11 @@ void c_ser_player::debayer_enable_slot(bool enabled)
 }
 
 
-void c_ser_player::enable_markers_slot(bool enabled)
-{
-    c_persistent_data::m_enable_markers = enabled;
-    mp_frame_Slider->set_markers_active(enabled);
-    if (!enabled) {
-        // Reset markers on disable so that they are not interfering with playback
-        mp_frame_Slider->reset_all_markers_slot();
-        mp_markers_Dialog->hide();
-    }
-}
-
-
 void c_ser_player::new_version_available_slot(QString version)
 {
     c_persistent_data::m_new_version = version;
 }
+
 
 
 void c_ser_player::about_ser_player()

@@ -52,7 +52,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_selected_count_Label = new QLabel("1");
 
     QFormLayout *markers_FLayout = new QFormLayout;
-    markers_FLayout->setMargin(0);
+    markers_FLayout->setMargin(00);
     markers_FLayout->setSpacing(10);
     markers_FLayout->addRow(mp_start_market_Label, mp_start_marker_SpinBox);
     markers_FLayout->addRow(mp_end_market_Label, mp_end_marker_SpinBox);
@@ -64,17 +64,21 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     QHBoxLayout *markers_reset_button_HLayout = new QHBoxLayout;
     markers_reset_button_HLayout->setMargin(0);
     markers_reset_button_HLayout->setSpacing(0);
-    markers_reset_button_HLayout->addWidget(reset_markers_Button);
+    markers_reset_button_HLayout->addWidget(reset_markers_Button, 0, Qt::AlignBottom);
     markers_reset_button_HLayout->addStretch();
 
-    QVBoxLayout *markers_VLayout = new QVBoxLayout;
-    markers_FLayout->setMargin(15);
-    markers_FLayout->setSpacing(10);
-    markers_VLayout->addLayout(markers_FLayout);
-    markers_VLayout->addLayout(markers_reset_button_HLayout);
+    QHBoxLayout *markers_HLayout = new QHBoxLayout;
+    markers_HLayout->setMargin(10);
+    markers_HLayout->setSpacing(10);
+    markers_HLayout->addLayout(markers_FLayout);
+    markers_HLayout->addSpacing(20);
+    markers_HLayout->addLayout(markers_reset_button_HLayout);
 
-    QGroupBox *markers_GroupBox = new QGroupBox(tr("Markers"));
-    markers_GroupBox->setLayout(markers_VLayout);
+    mp_markers_GroupBox = new QGroupBox(tr("Enable Markers"));
+    mp_markers_GroupBox->setLayout(markers_HLayout);
+    mp_markers_GroupBox->setCheckable(true);
+    mp_markers_GroupBox->setChecked(false);
+    connect(mp_markers_GroupBox, SIGNAL(clicked(bool)), this, SIGNAL(markers_enabled_changed(bool)));
 
     QPushButton *close_Button = new QPushButton(tr("Close"));
     connect(close_Button, SIGNAL(clicked()), this, SLOT(hide()));
@@ -87,12 +91,12 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     QVBoxLayout *main_VLayout = new QVBoxLayout;
     main_VLayout->setMargin(5);
     main_VLayout->setSpacing(15);
-    main_VLayout->addWidget(markers_GroupBox);
+    main_VLayout->addWidget(mp_markers_GroupBox);
     main_VLayout->addStretch();
     main_VLayout->addLayout(buttons_HLayout);
 
     setLayout(main_VLayout);
-    layout()->setSizeConstraint(QLayout::SetFixedSize);  // No resizing please
+    layout()->setSizeConstraint(QLayout::SetFixedSize);  // No resizing
 }
 
 
@@ -100,6 +104,12 @@ void c_markers_dialog::set_maximum_frame(int value)
 {
     mp_start_marker_SpinBox->setMaximum(value);
     mp_end_marker_SpinBox->setMaximum(value);
+}
+
+
+bool c_markers_dialog::get_markers_enabled()
+{
+    return mp_markers_GroupBox->isChecked();
 }
 
 

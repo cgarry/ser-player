@@ -22,13 +22,15 @@
 #include <QSlider>
 
 
+class c_markers_dialog;
+
+
 class c_frame_slider : public QSlider
 {
     Q_OBJECT
 
 public:
     c_frame_slider(QWidget *parent = 0);
-    void set_markers_active(bool active);
     bool get_markers_active();
     void set_repeat(bool repeat);
     void set_direction(int dir);
@@ -42,6 +44,9 @@ signals:
     void end_marker_changed(int frame);
 
 public slots:
+    void show_markers_dialog();
+    void set_markers_active(bool active);
+    void set_maximum_frame(int max_frame);
     void set_start_marker_slot(int frame);
     void set_end_marker_slot(int frame);
     void reset_all_markers_slot();
@@ -51,9 +56,6 @@ private slots:
 
 protected:
     void paintEvent(QPaintEvent *event);
-    void mousePressEvent(QMouseEvent * ev);
-    void mouseMoveEvent(QMouseEvent * ev);
-    void mouseReleaseEvent(QMouseEvent *event);
 
 private:
     int position_for_value(int val) const;
@@ -61,24 +63,17 @@ private:
     void draw_start_marker(int x_pos);
     void draw_end_marker(int x_pos);
 
-    bool m_markers_active;
+    c_markers_dialog *mp_markers_Dialog;
+
+    bool m_markers_enabled;
     int m_start_marker;
     int m_end_marker;
     bool m_repeat;
     int m_direction;
     int m_current_direction;
     int m_handle_width;
-
     QRect m_start_marker_rect;
-    bool m_moving_start_marker;
-    QPoint m_start_marker_initial_pos;
-    QPoint m_start_marker_current_pos;
-
     QRect m_end_marker_rect;
-    bool m_moving_end_marker;
-    QPoint m_end_marker_initial_pos;
-    QPoint m_end_marker_current_pos;
-
 };
 
 #endif // FRAME_SLIDER_H
