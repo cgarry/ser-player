@@ -45,7 +45,8 @@ private:
     static const QString C_WINDOW_TITLE_QSTRING;
 
     // Menus
-    QAction *m_save_frames_Act;
+    QAction *mp_save_frames_Act;
+    QAction *mp_open_save_folder_Act;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
     QAction *mp_colour_settings_action;
@@ -122,6 +123,7 @@ public slots:
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
     void save_frames_slot();
+    void open_save_folder_slot();
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();

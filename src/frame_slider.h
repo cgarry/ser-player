@@ -59,7 +59,6 @@ protected:
 
 private:
     int position_for_value(int val) const;
-    int value_for_position(int position) const;
     void draw_start_marker(int x_pos);
     void draw_end_marker(int x_pos);
 

@@ -32,6 +32,7 @@ public:
     static QString m_selected_language;
     static QString m_ser_directory;
     static QString m_new_version;
+    static QString m_last_save_folder;
     static bool m_check_for_updates;
     static bool m_enable_debayering;
     static bool m_repeat;

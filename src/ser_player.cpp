@@ -16,13 +16,14 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.9"
+#define VERSION_STRING "v1.3.10"
 
 #include <Qt>
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
 #include <QFileDialog>
@@ -95,10 +96,20 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     file_menu->addSeparator();
 
-    m_save_frames_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
-    m_save_frames_Act->setEnabled(false);
-    file_menu->addAction(m_save_frames_Act);
-    connect(m_save_frames_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot()));
+    mp_save_frames_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
+    mp_save_frames_Act->setEnabled(false);
+    file_menu->addAction(mp_save_frames_Act);
+    connect(mp_save_frames_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot()));
+
+    mp_open_save_folder_Act = new QAction(tr("Open Last Save Folder", "Menu title"), this);
+    file_menu->addAction(mp_open_save_folder_Act);
+    connect(mp_open_save_folder_Act, SIGNAL(triggered()), this, SLOT(open_save_folder_slot()));
+    if (c_persistent_data::m_last_save_folder.length() != 0) {
+        // Save folder has been set
+        mp_open_save_folder_Act->setEnabled(true);
+    } else {
+        mp_open_save_folder_Act->setEnabled(false);
+    }
 
     file_menu->addSeparator();
 
@@ -696,10 +707,12 @@ void c_ser_player::save_frames_slot()
 
             int min_frame = save_frames_Dialog->get_start_frame();
             int max_frame = save_frames_Dialog->get_end_frame();
+            mp_open_save_folder_Act->setEnabled(true);  // Enable 'Open Last Save Folder' menu item
 
             if (min_frame == -1) {
                 // Save current frame only
                 QFile file(filename);
+                c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
                 file.open(QIODevice::WriteOnly);
 
                 // Get frame from ser file
@@ -709,7 +722,7 @@ void c_ser_player::save_frames_slot()
                 delete frame_as_qimage;
             } else {
                 // Save the range of frames specified by min_frame and max_frame
-                QString filepath = QFileInfo(filename).absolutePath();
+                c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
                 QString filename_without_extension = QFileInfo(filename).completeBaseName();
                 QString filename_extension = QFileInfo(filename).suffix();
 
@@ -725,7 +738,7 @@ void c_ser_player::save_frames_slot()
 
                     // Insert frame number into filename
                     QString frame_number_string = QString("%1").arg(frame, required_digits_for_number, 10, QChar('0'));
-                    QString new_filename = filepath +
+                    QString new_filename = c_persistent_data::m_last_save_folder +
                                            QDir::separator() +
                                            filename_without_extension +
                                            QString("_") +
@@ -764,6 +777,23 @@ void c_ser_player::save_frames_slot()
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
         play_button_pressed_slot();
+    }
+}
+
+
+void c_ser_player::open_save_folder_slot()
+{
+    // Open folder for user
+    if (QDir(c_persistent_data::m_last_save_folder).exists()) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(c_persistent_data::m_last_save_folder));
+    } else {
+        // Folder does not exist
+        QMessageBox::warning(NULL,
+                             tr("Cannot Open Last Save Folder", "Message box title for canot open last save folder"),
+                             tr("Folder Not Found:", "Message box title for canot open last save folder") + "\n" + c_persistent_data::m_last_save_folder,
+                             mp_ser_file->get_error_string());
+        c_persistent_data::m_last_save_folder = "";
+        mp_open_save_folder_Act->setEnabled(false);
     }
 }
 
@@ -880,7 +910,8 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_frame_Slider->set_maximum_frame(m_total_frames);
         mp_frame_Slider->reset_all_markers_slot();  // Reset markers to new frame range
 
-        m_save_frames_Act->setEnabled(true);
+        mp_save_frames_Act->setEnabled(true);
+
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
