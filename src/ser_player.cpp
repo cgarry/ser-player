@@ -858,7 +858,9 @@ void c_ser_player::open_ser_file_slot()
 
 void c_ser_player::open_ser_file(const QString &filename)
 {
+    mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
+
     mp_ser_file_Mutex->lock();
     mp_ser_file->close();
     m_total_frames = mp_ser_file->open(filename.toStdString().c_str(), 0, 0);
@@ -876,7 +878,7 @@ void c_ser_player::open_ser_file(const QString &filename)
     } else {
         // This is a valid SER file
         mp_frame_Slider->set_maximum_frame(m_total_frames);
-        mp_frame_Slider->reset_all_markers_slot();
+        mp_frame_Slider->reset_all_markers_slot();  // Reset markers to new frame range
 
         m_save_frames_Act->setEnabled(true);
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
