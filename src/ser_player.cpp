@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.10"
+#define VERSION_STRING "v1.3.11"
 
 #include <Qt>
 #include <QApplication>
@@ -666,7 +666,8 @@ void c_ser_player::save_frames_slot()
                                                                         m_total_frames,
                                                                         mp_frame_Slider->get_start_frame(),
                                                                         mp_frame_Slider->get_end_frame(),
-                                                                        mp_frame_Slider->get_markers_active());
+                                                                        mp_frame_Slider->get_markers_active(),
+                                                                        mp_ser_file->has_timestamps());
     int ret = save_frames_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
@@ -707,6 +708,11 @@ void c_ser_player::save_frames_slot()
 
             int min_frame = save_frames_Dialog->get_start_frame();
             int max_frame = save_frames_Dialog->get_end_frame();
+            int decimate_value = save_frames_Dialog->get_frame_decimation();
+            int sequence_direction = save_frames_Dialog->get_sequence_direction();
+            int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
+            bool use_framenumber_in_name = (sequence_direction == 0) ? true : false;
+            bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
             mp_open_save_folder_Act->setEnabled(true);  // Enable 'Open Last Save Folder' menu item
 
             if (min_frame == -1) {
@@ -727,52 +733,110 @@ void c_ser_player::save_frames_slot()
                 QString filename_extension = QFileInfo(filename).suffix();
 
                 // Setup progress dialog
-                c_save_frames_progress_dialog my_progress_dialog(this, min_frame, max_frame);
-                my_progress_dialog.show();
-                QString progress_title = tr("Saving %1 frames").arg(max_frame - min_frame + 1);
+                c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
+                save_progress_dialog.show();
                 int required_digits_for_number = (int)ceil(log10((double)max_frame));
 
-                for (int frame = min_frame; frame <= max_frame; frame++) {
-                    // Update progress bar
-                    my_progress_dialog.set_value(frame);
+                int saved_frames = 0;
+                QString timestamp_string = "";
 
-                    // Insert frame number into filename
-                    QString frame_number_string = QString("%1").arg(frame, required_digits_for_number, 10, QChar('0'));
-                    QString new_filename = c_persistent_data::m_last_save_folder +
-                                           QDir::separator() +
-                                           filename_without_extension +
-                                           QString("_") +
-                                           frame_number_string +
-                                           "." +
-                                           filename_extension;
+                // Direction loop
+                int start_dir = (sequence_direction == 1) ? 1 : 0;
+                int end_dir = (sequence_direction == 0) ? 0 : 1;
+                for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                    int start_frame = min_frame;
+                    int end_frame = max_frame;
+                    if (current_dir == 1) {  // Reverse direction - count backwards
+                        // Use negative numbers so for loop works counting up or down
+                        start_frame = -max_frame;
+                        end_frame = -min_frame;
+                    }
 
-                    // Open file for writing
-                    QFile file(new_filename);
-                    file.open(QIODevice::WriteOnly);
+                    for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                        // Update progress bar
+                        saved_frames++;
+                        save_progress_dialog.set_value(saved_frames);
 
-                    // Get frame from ser file
-                    QImage *frame_as_qimage = get_frame_as_qimage(frame);
+                        // Get frame from SER file
+                        QImage *frame_as_qimage = get_frame_as_qimage(abs(frame_number));
 
-                    // Save the frame and close image file
-                    QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
-                    file.close();
-                    delete frame_as_qimage;
+                        // Get timestamp for frame if required
+                        if (append_timestamp_to_filename) {
+                            uint64_t ts = mp_ser_file->get_timestamp();
 
-                    if (my_progress_dialog.was_cancelled()) {
-                        // Abort frame saving
-                        break;
+
+
+
+                            timestamp_string = "_" + QString::number(ts);
+
+
+                            if (ts > 0) {
+
+
+                                int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
+                                c_pipp_timestamp::timestamp_to_date(
+                                    ts,
+                                    &ts_year,
+                                    &ts_month,
+                                    &ts_day,
+                                    &ts_hour,
+                                    &ts_minute,
+                                    &ts_second,
+                                    &ts_microsec);
+
+                                timestamp_string = QString("_%1%2%3_%4%5%6.%7_UT")
+                                                   .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                                                   .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+                            } else {
+                                timestamp_string = tr("_no_timestamp", "Appended to save filename when no timestamp is available");
+                            }
+                        }
+
+                        // Insert frame number into filename
+                        int number_for_filename = (use_framenumber_in_name) ? abs(frame_number) : saved_frames;
+                        QString frame_number_string = QString("%1").arg(number_for_filename, required_digits_for_number, 10, QChar('0'));
+                        QString new_filename = c_persistent_data::m_last_save_folder +
+                                               QDir::separator() +
+                                               filename_without_extension +
+                                               QString("_") +
+                                               frame_number_string +
+                                               timestamp_string +
+                                               "." +
+                                               filename_extension;
+
+                        // Open file for writing
+                        QFile file(new_filename);
+                        file.open(QIODevice::WriteOnly);
+
+                        // Save the frame and close image file
+                        QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
+                        file.close();
+                        delete frame_as_qimage;
+
+                        if (save_progress_dialog.was_cancelled()) {
+                            // Abort frame saving
+                            break;
+                        }
                     }
                 }
 
                 // Processing has completed
-                my_progress_dialog.set_complete();
-                while (!my_progress_dialog.was_cancelled()) {
+                save_progress_dialog.set_complete();
+                while (!save_progress_dialog.was_cancelled()) {
                       // Wait
                 }
 
             }
         }
     }
+
+    // Clean up
+    delete save_frames_Dialog;
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {

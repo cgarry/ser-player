@@ -3,7 +3,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "SER Player"
-!define PRODUCT_VERSION "1.3.10"
+!define PRODUCT_VERSION "1.3.11"
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"

@@ -28,7 +28,6 @@
 #include "markers_dialog.h"
 
 
-
 c_frame_slider::c_frame_slider(QWidget *parent)
     : QSlider(parent),
       m_markers_enabled(false),
@@ -228,7 +227,8 @@ void c_frame_slider::set_start_marker_slot(int value)
     if (value < minimum()) {
         m_start_marker = minimum();
     } else if (value > get_end_frame()) {
-        m_start_marker = get_end_frame();
+        set_end_marker_slot(maximum());
+        m_start_marker = value;
     } else {
         // Set start marker
         m_start_marker = value;
@@ -244,7 +244,8 @@ void c_frame_slider::set_end_marker_slot(int value)
     if (value > maximum()) {
         m_end_marker =  maximum();
     } else if (value < get_start_frame()) {
-        m_end_marker = get_start_frame();
+        set_start_marker_slot(minimum());
+        m_end_marker = value;
     } else {
         // Set end marker
         m_end_marker = value;

@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QCheckBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -28,12 +29,16 @@
 
 #include "save_frames_dialog.h"
 
+#define INSIDE_GBOX_SPACING 8
+#define INSIDE_GBOX_MARGIN 10
+
 
 c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            int total_frames,
                                            int marker_start_frame,
                                            int marker_end_frame,
-                                           bool markers_enabled)
+                                           bool markers_enabled,
+                                           bool ser_has_timestamps)
     : QDialog(parent),
 //    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
       m_total_frames(total_frames),
@@ -45,6 +50,11 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     setWindowTitle(tr("Save Frames As Images"));
     QDialog::setModal(true);
     
+
+    //
+    // Frames to save options
+    //
+
     mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only"));
     connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
@@ -81,7 +91,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_end_Spinbox->setValue(total_frames);
     connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(end_Spinbox_changed_slot(int)));
 
-    mp_num_frames_Label = new QLabel;
+    mp_selected_frames_Label = new QLabel;
 
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
@@ -92,19 +102,97 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     custom_range_HLayout->addWidget(mp_end_Spinbox);
     custom_range_HLayout->addStretch();
     
-    QVBoxLayout *save_options_VLayout = new QVBoxLayout;
-    save_options_VLayout->setMargin(15);
-    save_options_VLayout->setSpacing(10);
-    save_options_VLayout->addWidget(mp_save_current_frame_RButton, 0, Qt::AlignLeft);
-    save_options_VLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
-    save_options_VLayout->addLayout(custom_range_HLayout);
-    save_options_VLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
-    save_options_VLayout->addWidget(mp_num_frames_Label, 0, Qt::AlignHCenter);
+    QVBoxLayout *save_range_VLayout = new QVBoxLayout;
+    save_range_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    save_range_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    save_range_VLayout->addWidget(mp_save_current_frame_RButton, 0, Qt::AlignLeft);
+    save_range_VLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
+    save_range_VLayout->addLayout(custom_range_HLayout);
+    save_range_VLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
+    save_range_VLayout->addWidget(mp_selected_frames_Label, 0, Qt::AlignRight);
     
     QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save"));
-    save_optionsGBox->setLayout(save_options_VLayout);
-    save_optionsGBox->setMinimumWidth((save_optionsGBox->minimumSizeHint().width() * 4) / 3);
-    
+    save_optionsGBox->setLayout(save_range_VLayout);
+    save_optionsGBox->setMinimumWidth((save_optionsGBox->minimumSizeHint().width() * 5) / 4);
+
+
+    //
+    // Save frames options
+    //
+
+    // Frame Decimation
+    QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every"));
+    mp_frame_decimation_SpinBox = new QSpinBox;
+    mp_frame_decimation_SpinBox->setMinimum(1);
+    mp_frame_decimation_SpinBox->setMaximum(total_frames);
+    mp_frame_decimation_SpinBox->setValue(2);
+    connect(mp_frame_decimation_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(update_num_frames_slot()));
+
+    QHBoxLayout *frame_decimation_HLayout = new QHBoxLayout;
+    frame_decimation_HLayout->setMargin(INSIDE_GBOX_MARGIN);
+    frame_decimation_HLayout->setSpacing(INSIDE_GBOX_SPACING);
+    frame_decimation_HLayout->addWidget(frame_decimation_Label);
+    frame_decimation_HLayout->addWidget(mp_frame_decimation_SpinBox);
+    frame_decimation_HLayout->addStretch();
+
+    mp_frame_decimation_GBox = new QGroupBox(tr("Enable Frame Decimation"));
+    mp_frame_decimation_GBox->setCheckable(true);
+    mp_frame_decimation_GBox->setChecked(false);
+    mp_frame_decimation_GBox->setLayout(frame_decimation_HLayout);
+    mp_frame_decimation_GBox->setMinimumWidth((mp_frame_decimation_GBox->minimumSizeHint().width() * 5) / 4);
+    connect(mp_frame_decimation_GBox, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+
+
+    // Sequence Direction
+    mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards"));
+    mp_reverse_sequence_RButton = new QRadioButton(tr("Reverse"));
+    mp_forwards_then_reverse_sequence_RButton = new QRadioButton(tr("Forwards Then Reverse"));
+    mp_forwards_sequence_RButton->setChecked(true);
+    connect(mp_forwards_sequence_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+    connect(mp_reverse_sequence_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+    connect(mp_forwards_then_reverse_sequence_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+
+    QVBoxLayout *sequence_direction_VLayout = new QVBoxLayout;
+    sequence_direction_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    sequence_direction_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    sequence_direction_VLayout->addWidget(mp_forwards_sequence_RButton);
+    sequence_direction_VLayout->addWidget(mp_reverse_sequence_RButton);
+    sequence_direction_VLayout->addWidget(mp_forwards_then_reverse_sequence_RButton);
+
+    mp_sequence_direction_GBox = new QGroupBox(tr("Sequence Direction"));
+    mp_sequence_direction_GBox->setLayout(sequence_direction_VLayout);
+    mp_sequence_direction_GBox->setMinimumWidth((mp_sequence_direction_GBox->minimumSizeHint().width() * 5) / 4);
+
+
+    // Filename Generation
+    if (ser_has_timestamps) {
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename"));
+        mp_append_timestamp_CBox->setEnabled(true);
+    } else {
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename") + " (" + tr("No Timestamps In SER File") + ")");
+        mp_append_timestamp_CBox->setEnabled(false);
+    }
+
+    QVBoxLayout *filename_generation_VLayout = new QVBoxLayout;
+    filename_generation_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    filename_generation_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    filename_generation_VLayout->addWidget(mp_append_timestamp_CBox);
+
+    QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation"));
+    filename_generation_GBox->setLayout(filename_generation_VLayout);
+//    filename_generation_GBox->setMinimumWidth((filename_generation_GBox->minimumSizeHint().width() * 5) / 4);
+
+
+    //
+    // Frames to be saved label
+    //
+    mp_total_frames_to_save_Label = new QLabel(tr("xxxx frames will be saved"));
+
+
+    //
+    // Dialog buttons
+    //
+
     QPushButton *cancel_PButton = new QPushButton(tr("Cancel"));
     QPushButton *next_PButton = new QPushButton(tr("Next"));
     next_PButton->setDefault(true);
@@ -122,6 +210,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     dialog_VLayout->setMargin(10);
     dialog_VLayout->setSpacing(0);
     dialog_VLayout->addWidget(save_optionsGBox);
+    dialog_VLayout->addSpacing(10);
+    dialog_VLayout->addWidget(mp_frame_decimation_GBox);
+    dialog_VLayout->addSpacing(10);
+    dialog_VLayout->addWidget(mp_sequence_direction_GBox);
+    dialog_VLayout->addSpacing(10);
+    dialog_VLayout->addWidget(filename_generation_GBox);
+    dialog_VLayout->addSpacing(15);
+    dialog_VLayout->addWidget(mp_total_frames_to_save_Label, 0, Qt::AlignRight);
     dialog_VLayout->addSpacing(15);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
@@ -129,7 +225,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     setLayout(dialog_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    mp_save_marked_frames_RButton->clicked(true);  // Ensure mp_num_frames_Label is set
+    // Ensure mp_num_frames_Label is set
+    if (markers_enabled) {
+        mp_save_marked_frames_RButton->click();
+    } else {
+        mp_save_current_frame_RButton->click();
+    }
 }
 
 
@@ -155,19 +256,32 @@ void c_save_frames_dialog::end_Spinbox_changed_slot(int value)
 
 void c_save_frames_dialog::update_num_frames_slot()
 {
-    int frames_to_be_saved;
     if (mp_save_current_frame_RButton->isChecked()) {
-        frames_to_be_saved = 1;
-        mp_num_frames_Label->setText(tr("1 frame will be saved"));
+        m_total_selected_frames = 1;
+        mp_selected_frames_Label->setText(tr("1 frame selected"));
     } else if (mp_save_all_frames_RButton->isChecked()) {
-        frames_to_be_saved = m_total_frames;
-        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(m_total_frames));
+        m_total_selected_frames = m_total_frames;
+        mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
     } else if (mp_save_marked_frames_RButton->isChecked()) {
-        frames_to_be_saved = m_marker_end_frame - m_marker_start_frame + 1;
-        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(m_marker_end_frame - m_marker_start_frame + 1));
+        m_total_selected_frames = m_marker_end_frame - m_marker_start_frame + 1;
+        mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
     } else { // mp_save_frame_range_RButton
-        frames_to_be_saved = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
-        mp_num_frames_Label->setText(tr("%1 frames will be saved").arg(mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1));
+        m_total_selected_frames = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
+        mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
+    }
+
+    if (m_total_selected_frames == 1) {
+        mp_frame_decimation_GBox->setEnabled(false);
+        mp_sequence_direction_GBox->setEnabled(false);
+    } else {
+        mp_frame_decimation_GBox->setEnabled(true);
+        mp_sequence_direction_GBox->setEnabled(true);
+    }
+
+    if (get_frames_to_be_saved() == 1) {
+        mp_total_frames_to_save_Label->setText(tr("1 frame will be saved"));
+    } else {
+        mp_total_frames_to_save_Label->setText(tr("%1 frames will be saved").arg(get_frames_to_be_saved()));
     }
 }
 
@@ -190,3 +304,53 @@ void c_save_frames_dialog::next_button_clicked_slot()
 
     accept();
 }
+
+
+int c_save_frames_dialog::get_frame_decimation()
+{
+    int decimate_value = 1;
+    if (mp_frame_decimation_GBox->isEnabled() && mp_frame_decimation_GBox->isChecked()) {
+        decimate_value = mp_frame_decimation_SpinBox->value();
+    }
+
+    return decimate_value;
+}
+
+
+int c_save_frames_dialog::get_sequence_direction()
+{
+    int direction = 0;
+    if (mp_sequence_direction_GBox->isEnabled()) {
+        if (mp_forwards_sequence_RButton->isChecked()) {
+            // Forwards sequence
+            direction = 0;
+        } else if (mp_reverse_sequence_RButton->isChecked()) {
+            // Reverse sequence
+            direction = 1;
+        } else {
+            // Forwards then reverse sequence
+            direction = 2;
+        }
+    }
+
+    return direction;
+}
+
+
+bool c_save_frames_dialog::get_append_timestamp_to_filename()
+{
+    return mp_append_timestamp_CBox->isEnabled() & mp_append_timestamp_CBox->isChecked();
+}
+
+
+int c_save_frames_dialog::get_frames_to_be_saved()
+{
+    int decimate_value = (mp_frame_decimation_GBox->isChecked()) ? get_frame_decimation() : 1;
+    int frames_to_be_saved  = (m_total_selected_frames + decimate_value - 1) / decimate_value;
+    if (get_sequence_direction() == 2) {
+        frames_to_be_saved *= 2;
+    }
+
+    return frames_to_be_saved;
+}
+

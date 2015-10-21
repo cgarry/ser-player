@@ -241,6 +241,13 @@ class c_pipp_ser {
             uint32_t frame_number,
             uint8_t *buffer);
 
+        //
+        // Return is SER file has timestamps
+        //
+        bool has_timestamps() {
+            return mp_timestamp != NULL;
+        }
+
 
         //
         // Get timestamp from SER file
