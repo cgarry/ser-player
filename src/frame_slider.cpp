@@ -307,8 +307,10 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
             QMenu markers_Menu;
             QAction *move_start_marker_to_current_Act = NULL;
             QAction *move_end_marker_to_current_Act = NULL;
-            move_start_marker_to_current_Act = markers_Menu.addAction(tr("Move Start Marker to current frame"));
-            move_end_marker_to_current_Act = markers_Menu.addAction(tr("Move End Marker to current frame"));
+            QAction *reset_markers_Act = NULL;
+            move_start_marker_to_current_Act = markers_Menu.addAction(tr("Move Start Marker To Current Frame"));
+            move_end_marker_to_current_Act = markers_Menu.addAction(tr("Move End Marker To Current Frame"));
+            reset_markers_Act = markers_Menu.addAction(tr("Reset Markers"));
 
             QAction* selectedItem = markers_Menu.exec(globalPos);
             if (selectedItem != NULL) {
@@ -316,6 +318,9 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
                     set_start_marker_slot(value());
                 } else if (selectedItem == move_end_marker_to_current_Act) {
                     set_end_marker_slot(value());
+                } else if (selectedItem == reset_markers_Act) {
+                    set_start_marker_slot(minimum());
+                    set_end_marker_slot(maximum());
                 }
 
                 update();
