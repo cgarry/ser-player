@@ -274,17 +274,6 @@ int c_frame_slider::position_for_value(int val) const
 }
 
 
-int c_frame_slider::value_for_position(int position) const
-{
-    QStyleOptionSlider opt;
-    initStyleOption(&opt);
-    opt.subControls = QStyle::SC_All;
-    int available = opt.rect.width() - style()->pixelMetric(QStyle::PM_SliderLength, &opt, this);
-    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
-    return QStyle::sliderValueFromPosition(opt.minimum, opt.maximum, position, available);
-}
-
-
 void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
 {
     if (m_markers_enabled) {
@@ -332,21 +321,18 @@ void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
 
 void c_frame_slider::draw_start_marker(int x_pos)
 {
-    QStyleOptionSlider opt;
-    initStyleOption(&opt);
-    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QPainter painter(this);
 
     painter.drawLine(x_pos,
-                     groove_rect.top(),
+                     rect().top(),
                      x_pos,
-                     groove_rect.bottom());
+                     rect().bottom());
 
     // Draw start marker triangle
     QPolygon start_triangle;
-    start_triangle << QPoint(x_pos, groove_rect.bottom())
-                   << QPoint(x_pos - 6, groove_rect.bottom())
-                   << QPoint(x_pos, groove_rect.bottom() - 6);
+    start_triangle << QPoint(x_pos, rect().bottom())
+                   << QPoint(x_pos - 6, rect().bottom())
+                   << QPoint(x_pos, rect().bottom() - 6);
 
     // Brush
     QBrush brush;
@@ -365,21 +351,18 @@ void c_frame_slider::draw_start_marker(int x_pos)
 
 void c_frame_slider::draw_end_marker(int x_pos)
 {
-    QStyleOptionSlider opt;
-    initStyleOption(&opt);
-    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QPainter painter(this);
 
     painter.drawLine(x_pos,
-                     groove_rect.top(),
+                     rect().top(),
                      x_pos,
-                     groove_rect.bottom());
+                     rect().bottom());
 
     // Draw start marker triangle
     QPolygon end_triangle;
-    end_triangle << QPoint(x_pos, groove_rect.bottom())
-                 << QPoint(x_pos + 6, groove_rect.bottom())
-                 << QPoint(x_pos, groove_rect.bottom() - 6);
+    end_triangle << QPoint(x_pos, rect().bottom())
+                 << QPoint(x_pos + 6, rect().bottom())
+                 << QPoint(x_pos, rect().bottom() - 6);
 
     // Brush
     QBrush brush;
@@ -408,7 +391,6 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
     }
 
     // Get details of slider layout
-    QRect groove_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
     QRect handle_rect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
     m_handle_width = handle_rect.width();
 
@@ -420,9 +402,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
             int start_pos = position_for_value(minimum());
             int end_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
             QRect rect(start_pos,
-                       groove_rect.top(),
+                       rect().top(),
                        end_pos - start_pos,
-                       groove_rect.height());
+                       rect().height());
             painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
@@ -431,9 +413,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
             int start_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
             int end_pos = position_for_value(maximum()) + handle_rect.width() - 1;
             QRect rect(start_pos,
-                       groove_rect.top(),
+                       rect().top(),
                        end_pos - start_pos,
-                       groove_rect.height());
+                       rect().height());
             painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
@@ -441,7 +423,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
         if (m_start_marker >= minimum()) {
             int slider_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
             draw_start_marker(slider_pos);
-            m_start_marker_rect = QRect(slider_pos - 10, groove_rect.top(), 10, groove_rect.height());
+            m_start_marker_rect = QRect(slider_pos - 10, rect().top(), 10, rect().height());
         }
 
         // Draw end marker
@@ -449,7 +431,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
             // Draw start marker
             int slider_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
             draw_end_marker(slider_pos);
-            m_end_marker_rect = QRect(slider_pos, groove_rect.top(), 10, groove_rect.height());
+            m_end_marker_rect = QRect(slider_pos, rect().top(), 10, rect().height());
         }
     }
 }
