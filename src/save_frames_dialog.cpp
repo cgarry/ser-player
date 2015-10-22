@@ -374,7 +374,7 @@ int c_save_frames_dialog::get_frames_to_be_saved()
 }
 
 
-int c_save_frames_dialog::get_number_of_leading_zeros()
+int c_save_frames_dialog::get_required_digits_for_number()
 {
     int leading_zeros = -1;  // Can't calculate number of zeros required
     if (mp_forwards_sequence_RButton->isChecked()) {
