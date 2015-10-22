@@ -93,6 +93,18 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
     mp_selected_frames_Label = new QLabel;
 
+    QHBoxLayout *save_current_HLayout = new QHBoxLayout;
+    save_current_HLayout->setMargin(0);
+    save_current_HLayout->setSpacing(0);
+    save_current_HLayout->addWidget(mp_save_current_frame_RButton, 0, Qt::AlignLeft);
+    save_current_HLayout->addStretch(0);
+
+    QHBoxLayout *save_marked_HLayout = new QHBoxLayout;
+    save_marked_HLayout->setMargin(0);
+    save_marked_HLayout->setSpacing(0);
+    save_marked_HLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
+    save_marked_HLayout->addStretch(0);
+
     QHBoxLayout *custom_range_HLayout = new QHBoxLayout;
     custom_range_HLayout->setMargin(0);
     custom_range_HLayout->setSpacing(0);
@@ -100,15 +112,21 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     custom_range_HLayout->addWidget(mp_start_Spinbox);
     custom_range_HLayout->addWidget(new QLabel(tr(" to ")));
     custom_range_HLayout->addWidget(mp_end_Spinbox);
-    custom_range_HLayout->addStretch();
+    custom_range_HLayout->addStretch(0);
+
+    QHBoxLayout *save_all_HLayout = new QHBoxLayout;
+    save_all_HLayout->setMargin(0);
+    save_all_HLayout->setSpacing(0);
+    save_all_HLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
+    save_all_HLayout->addStretch(0);
     
     QVBoxLayout *save_range_VLayout = new QVBoxLayout;
     save_range_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     save_range_VLayout->setSpacing(INSIDE_GBOX_SPACING);
-    save_range_VLayout->addWidget(mp_save_current_frame_RButton, 0, Qt::AlignLeft);
-    save_range_VLayout->addWidget(mp_save_marked_frames_RButton, 0, Qt::AlignLeft);
+    save_range_VLayout->addLayout(save_current_HLayout);
+    save_range_VLayout->addLayout(save_marked_HLayout);
     save_range_VLayout->addLayout(custom_range_HLayout);
-    save_range_VLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
+    save_range_VLayout->addLayout(save_all_HLayout);
     save_range_VLayout->addWidget(mp_selected_frames_Label, 0, Qt::AlignRight);
     
     QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save"));
