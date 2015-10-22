@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.11"
+#define VERSION_STRING "v1.3.12"
 
 #include <Qt>
 #include <QApplication>
@@ -150,59 +150,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_framerate_Menu->addAction(fps_action);
     fps_ActGroup->addAction(fps_action);
 
-    fps_action = new QAction(tr("1 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(1);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
+    const int fps_values[] = {1, 5, 10, 24, 30, 50, 75, 100, 150, 200};
+    for (int x = 0; x <  (int)(sizeof(fps_values) / sizeof(fps_values[0])); x++) {
+        fps_action = new QAction(tr("%1 fps", "Framerate menu").arg(fps_values[x]), this);
+        fps_action->setCheckable(true);
+        fps_action->setData(fps_values[x]);
+        mp_framerate_Menu->addAction(fps_action);
+        fps_ActGroup->addAction(fps_action);
+    }
 
-    fps_action = new QAction(tr("5 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(5);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("10 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(10);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("25 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(25);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("50 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(50);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("75 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(75);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("100 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(100);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("150 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(150);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
-
-    fps_action = new QAction(tr("200 fps", "Framerate menu"), this);
-    fps_action->setCheckable(true);
-    fps_action->setData(200);
-    mp_framerate_Menu->addAction(fps_action);
-    fps_ActGroup->addAction(fps_action);
     connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
 
 
@@ -711,7 +667,7 @@ void c_ser_player::save_frames_slot()
             int decimate_value = save_frames_Dialog->get_frame_decimation();
             int sequence_direction = save_frames_Dialog->get_sequence_direction();
             int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
-            bool use_framenumber_in_name = (sequence_direction == 0) ? true : false;
+            bool use_framenumber_in_name = save_frames_Dialog->get_use_framenumber_in_name();
             bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
             int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
 
@@ -764,16 +720,8 @@ void c_ser_player::save_frames_slot()
                         // Get timestamp for frame if required
                         if (append_timestamp_to_filename) {
                             uint64_t ts = mp_ser_file->get_timestamp();
-
-
-
-
                             timestamp_string = "_" + QString::number(ts);
-
-
                             if (ts > 0) {
-
-
                                 int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
                                 c_pipp_timestamp::timestamp_to_date(
                                     ts,

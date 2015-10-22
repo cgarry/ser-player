@@ -50,7 +50,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 {
     setWindowTitle(tr("Save Frames As Images"));
     QDialog::setModal(true);
-    
+
 
     //
     // Frames to save options
@@ -184,6 +184,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
 
     // Filename Generation
+    mp_use_framenumber_in_filename = new QCheckBox(tr("Use Framenumber In Filename (Instead Of A Sequential Count)"));
+    mp_use_framenumber_in_filename->setChecked(true);
+
     if (ser_has_timestamps) {
         mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename"));
         mp_append_timestamp_CBox->setEnabled(true);
@@ -195,6 +198,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QVBoxLayout *filename_generation_VLayout = new QVBoxLayout;
     filename_generation_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     filename_generation_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    filename_generation_VLayout->addWidget(mp_use_framenumber_in_filename);
     filename_generation_VLayout->addWidget(mp_append_timestamp_CBox);
 
     QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation"));
@@ -297,6 +301,14 @@ void c_save_frames_dialog::update_num_frames_slot()
         mp_sequence_direction_GBox->setEnabled(true);
     }
 
+    if (!mp_save_current_frame_RButton->isChecked() &&
+        (!mp_sequence_direction_GBox->isEnabled() || mp_forwards_sequence_RButton->isChecked())) {
+        // Use frame number rather than a sequential count in filename
+        mp_use_framenumber_in_filename->setEnabled(true);
+    } else {
+        mp_use_framenumber_in_filename->setEnabled(false);
+    }
+
     if (get_frames_to_be_saved() == 1) {
         mp_total_frames_to_save_Label->setText(tr("1 frame will be saved"));
     } else {
@@ -376,20 +388,29 @@ int c_save_frames_dialog::get_frames_to_be_saved()
 
 int c_save_frames_dialog::get_required_digits_for_number()
 {
-    int leading_zeros = -1;  // Can't calculate number of zeros required
-    if (mp_forwards_sequence_RButton->isChecked()) {
+    int digits;  // Can't calculate number of zeros required
+    if (mp_use_framenumber_in_filename->isEnabled() && mp_use_framenumber_in_filename->isChecked()) {
         // File numbering is using frame numbers, allow enough zeros for the maximum
         // frame number of the subsequently saved sequences of images will have the same
         // number of leading zeros
-        leading_zeros = (int)ceil(log10((double)m_total_frames));
+        digits = (int)ceil(log10((double)(m_total_frames + 1)));
     } else {
         // File numbering is not using actual frame numbers, so just allow enough zeros
         // for the count being used to save this sequence
-        leading_zeros = (int)ceil(log10((double)get_frames_to_be_saved()));
+        digits = (int)ceil(log10((double)(get_frames_to_be_saved() + 1)));
     }
 
-    return leading_zeros;
+    return digits;
 }
 
 
+bool c_save_frames_dialog::get_use_framenumber_in_name()
+{
+    bool use_framenumber_in_name = false;
+    if (mp_use_framenumber_in_filename->isEnabled() && mp_use_framenumber_in_filename->isChecked()) {
+        use_framenumber_in_name = true;
+    }
+
+    return use_framenumber_in_name;
+}
 

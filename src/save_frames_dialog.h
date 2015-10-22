@@ -57,12 +57,12 @@ public:
     bool get_append_timestamp_to_filename();
     int get_frames_to_be_saved();
     int get_required_digits_for_number();
+    bool get_use_framenumber_in_name();
 
 
 signals:
 
 
-    
 private slots:
     void start_Spinbox_changed_slot(int value);
     void end_Spinbox_changed_slot(int value);
@@ -91,6 +91,7 @@ private:
     QRadioButton *mp_reverse_sequence_RButton;
     QRadioButton *mp_forwards_then_reverse_sequence_RButton;
 
+    QCheckBox *mp_use_framenumber_in_filename;
     QCheckBox *mp_append_timestamp_CBox;
 
     QLabel *mp_total_frames_to_save_Label;
