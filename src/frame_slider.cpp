@@ -403,9 +403,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
             int start_pos = position_for_value(minimum());
             int end_pos = position_for_value(m_start_marker) + handle_rect.width()/2 - 1;
             QRect rect(start_pos,
-                       rect().top(),
+                       this->rect().top(),
                        end_pos - start_pos,
-                       rect().height());
+                       this->rect().height());
             painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
@@ -414,9 +414,9 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
             int start_pos = position_for_value(m_end_marker) + handle_rect.width()/2;
             int end_pos = position_for_value(maximum()) + handle_rect.width() - 1;
             QRect rect(start_pos,
-                       rect().top(),
+                       this->rect().top(),
                        end_pos - start_pos,
-                       rect().height());
+                       this->rect().height());
             painter.fillRect(rect, QBrush(QColor(255, 0, 0, 64)));
         }
 
