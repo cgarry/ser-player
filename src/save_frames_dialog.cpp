@@ -26,6 +26,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include <cmath>
 
 #include "save_frames_dialog.h"
 
@@ -353,4 +354,24 @@ int c_save_frames_dialog::get_frames_to_be_saved()
 
     return frames_to_be_saved;
 }
+
+
+int c_save_frames_dialog::get_number_of_leading_zeros()
+{
+    int leading_zeros = -1;  // Can't calculate number of zeros required
+    if (mp_forwards_sequence_RButton->isChecked()) {
+        // File numbering is using frame numbers, allow enough zeros for the maximum
+        // frame number of the subsequently saved sequences of images will have the same
+        // number of leading zeros
+        leading_zeros = (int)ceil(log10((double)m_total_frames));
+    } else {
+        // File numbering is not using actual frame numbers, so just allow enough zeros
+        // for the count being used to save this sequence
+        leading_zeros = (int)ceil(log10((double)get_frames_to_be_saved()));
+    }
+
+    return leading_zeros;
+}
+
+
 

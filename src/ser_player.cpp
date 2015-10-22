@@ -713,6 +713,7 @@ void c_ser_player::save_frames_slot()
             int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
             bool use_framenumber_in_name = (sequence_direction == 0) ? true : false;
             bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
+            int required_digits_for_number = save_frames_Dialog->get_number_of_leading_zeros();
             mp_open_save_folder_Act->setEnabled(true);  // Enable 'Open Last Save Folder' menu item
 
             if (min_frame == -1) {
@@ -735,7 +736,6 @@ void c_ser_player::save_frames_slot()
                 // Setup progress dialog
                 c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
                 save_progress_dialog.show();
-                int required_digits_for_number = (int)ceil(log10((double)max_frame));
 
                 int saved_frames = 0;
                 QString timestamp_string = "";

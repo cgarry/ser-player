@@ -56,6 +56,7 @@ public:
     int get_sequence_direction();
     bool get_append_timestamp_to_filename();
     int get_frames_to_be_saved();
+    int get_required_digits_for_number();
 
 
 signals:
