@@ -622,7 +622,7 @@ void c_ser_player::save_frames_slot()
                                                                         m_total_frames,
                                                                         mp_frame_Slider->get_start_frame(),
                                                                         mp_frame_Slider->get_end_frame(),
-                                                                        mp_frame_Slider->get_markers_active(),
+                                                                        mp_frame_Slider->get_markers_enable(),
                                                                         mp_ser_file->has_timestamps());
     int ret = save_frames_Dialog->exec();
 
@@ -922,6 +922,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         // This is a valid SER file
         mp_frame_Slider->set_maximum_frame(m_total_frames);
         mp_frame_Slider->reset_all_markers_slot();  // Reset markers to new frame range
+        mp_frame_Slider->set_markers_show(true);  // Un-hide markers
 
         mp_save_frames_Act->setEnabled(true);
 

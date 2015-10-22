@@ -37,6 +37,7 @@ public:
     static bool m_enable_debayering;
     static bool m_repeat;
     static int m_play_direction;
+    static bool m_markers_enabled;
 
 
     //

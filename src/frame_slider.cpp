@@ -24,13 +24,15 @@
 #include <QSlider>
 #include <QStyleOptionSlider>
 
+#include "persistent_data.h"
 #include "frame_slider.h"
 #include "markers_dialog.h"
 
 
 c_frame_slider::c_frame_slider(QWidget *parent)
     : QSlider(parent),
-      m_markers_enabled(false),
+      m_show_markers(false),
+      m_markers_enabled(c_persistent_data::m_markers_enabled),
       m_start_marker(1),
       m_end_marker(1),
       m_repeat(false),
@@ -52,18 +54,26 @@ c_frame_slider::c_frame_slider(QWidget *parent)
     connect(this, SIGNAL(end_marker_changed(int)), mp_markers_Dialog, SLOT(set_end_marker_slot(int)));
     connect(mp_markers_Dialog, SIGNAL(start_marker_changed(int)), this, SLOT(set_start_marker_slot(int)));
     connect(mp_markers_Dialog, SIGNAL(end_marker_changed(int)), this, SLOT(set_end_marker_slot(int)));
-    connect(mp_markers_Dialog, SIGNAL(markers_enabled_changed(bool)), this, SLOT(set_markers_active(bool)));
+    connect(mp_markers_Dialog, SIGNAL(markers_enabled_changed(bool)), this, SLOT(set_markers_enable(bool)));
 }
 
 
-void c_frame_slider::set_markers_active(bool enabled)
+void c_frame_slider::set_markers_show(bool show)
+{
+    m_show_markers = show;
+}
+
+
+
+void c_frame_slider::set_markers_enable(bool enabled)
 {
     m_markers_enabled = enabled;
+    c_persistent_data::m_markers_enabled = m_markers_enabled;
     update();
 }
 
 
-bool c_frame_slider::get_markers_active()
+bool c_frame_slider::get_markers_enable()
 {
     return m_markers_enabled;
 }
@@ -277,7 +287,7 @@ int c_frame_slider::position_for_value(int val) const
 
 void c_frame_slider::ShowContextMenu(const QPoint& pos) // this is a slot
 {
-    if (m_markers_enabled) {
+    if (m_show_markers && m_markers_enabled) {
         // for most widgets
         QPoint globalPos = mapToGlobal(pos);
         // for QAbstractScrollArea and derived classes you would use:
@@ -397,7 +407,7 @@ void c_frame_slider::paintEvent(QPaintEvent *ev)
 
     QPainter painter(this);
 
-    if (m_markers_enabled) {
+    if (m_show_markers && m_markers_enabled) {
         // Draw rectangle for frames excluded by start marker
         if (m_start_marker >= minimum()) {
             int start_pos = position_for_value(minimum());

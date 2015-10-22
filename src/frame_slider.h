@@ -31,7 +31,7 @@ class c_frame_slider : public QSlider
 
 public:
     c_frame_slider(QWidget *parent = 0);
-    bool get_markers_active();
+    bool get_markers_enable();
     void set_repeat(bool repeat);
     void set_direction(int dir);
     void goto_first_frame();
@@ -45,7 +45,8 @@ signals:
 
 public slots:
     void show_markers_dialog();
-    void set_markers_active(bool active);
+    void set_markers_show(bool show);
+    void set_markers_enable(bool active);
     void set_maximum_frame(int max_frame);
     void set_start_marker_slot(int frame);
     void set_end_marker_slot(int frame);
@@ -64,6 +65,7 @@ private:
 
     c_markers_dialog *mp_markers_Dialog;
 
+    bool m_show_markers;
     bool m_markers_enabled;
     int m_start_marker;
     int m_end_marker;

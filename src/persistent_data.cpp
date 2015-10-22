@@ -48,6 +48,8 @@ bool c_persistent_data::m_check_for_updates = true;
 bool c_persistent_data::m_enable_debayering = true;
 bool c_persistent_data::m_repeat = false;
 int c_persistent_data::m_play_direction = 0;
+bool c_persistent_data::m_markers_enabled = false;
+
 
 //
 // Load persistent data
@@ -90,6 +92,11 @@ void c_persistent_data::load()
     if (settings.value("play_direction") != QVariant::Invalid) {
         m_play_direction = settings.value("play_direction").toInt();
     }
+
+    if (settings.value("markers_enabled") != QVariant::Invalid) {
+        m_markers_enabled = settings.value("markers_enabled").toBool();
+    }
+
 }
 	
 	
@@ -108,4 +115,5 @@ void c_persistent_data::save()
     settings.setValue("enable_debayering", m_enable_debayering);
     settings.setValue("playback_repeat", m_repeat);
     settings.setValue("play_direction", m_play_direction);
+    settings.setValue("markers_enabled", m_markers_enabled);
 }

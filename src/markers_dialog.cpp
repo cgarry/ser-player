@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 
 #include "markers_dialog.h"
+#include "persistent_data.h"
 
 
 c_markers_dialog::c_markers_dialog(QWidget *parent)
@@ -77,7 +78,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_markers_GroupBox = new QGroupBox(tr("Enable Markers"));
     mp_markers_GroupBox->setLayout(markers_HLayout);
     mp_markers_GroupBox->setCheckable(true);
-    mp_markers_GroupBox->setChecked(false);
+    mp_markers_GroupBox->setChecked(c_persistent_data::m_markers_enabled);
     connect(mp_markers_GroupBox, SIGNAL(clicked(bool)), this, SIGNAL(markers_enabled_changed(bool)));
 
     QPushButton *close_Button = new QPushButton(tr("Close"));
