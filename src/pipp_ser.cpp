@@ -353,6 +353,21 @@ int32_t c_pipp_ser::find_pixel_depth(
 
 
 // ------------------------------------------
+// Get size of buffer required to store frame
+// ------------------------------------------
+int32_t c_pipp_ser::get_buffer_size()
+{
+    int size = m_header.image_width * m_header.image_height * m_bytes_per_sample;
+
+    if (m_header.colour_id == COLOURID_RGB || m_header.colour_id == COLOURID_BGR) {
+        size *= 3;
+    }
+
+    return size;
+}
+
+
+// ------------------------------------------
 // Get header strings
 // ------------------------------------------
 void c_pipp_ser::get_header_strings(
@@ -1048,8 +1063,6 @@ int32_t c_pipp_ser::get_frame (
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr = temp_buffer_ptr + y * m_header.image_width;
                         for (int32_t x = 0; x < m_header.image_width; x++) {
-                            *write_ptr++ = *read_ptr;
-                            *write_ptr++ = *read_ptr;
                             *write_ptr++ = *read_ptr++;
                         }
                     }
@@ -1060,8 +1073,6 @@ int32_t c_pipp_ser::get_frame (
                         for (int32_t x = 0; x < m_header.image_width; x++) {
                             uint16_t value = (*read_ptr8++) << 8;
                             value += *read_ptr8++;
-                            *write_ptr++ = value;
-                            *write_ptr++ = value;
                             *write_ptr++ = value;
                         }
                     }
@@ -1078,8 +1089,6 @@ int32_t c_pipp_ser::get_frame (
                             value = *read_ptr++;
                             value = (value << shift1) + (value >> shift2);
                             *write_ptr++ = value;
-                            *write_ptr++ = value;
-                            *write_ptr++ = value;
                         }
                     }
                 } else {
@@ -1092,8 +1101,6 @@ int32_t c_pipp_ser::get_frame (
                             uint16_t value = (*read_ptr8++) << 8;
                             value += *read_ptr8++;
                             value = (value << shift1) + (value >> shift2);
-                            *write_ptr++ = value;
-                            *write_ptr++ = value;
                             *write_ptr++ = value;
                         }
                     }
@@ -1169,11 +1176,8 @@ int32_t c_pipp_ser::get_frame (
             uint8_t *write_ptr = buffer;
             for (int32_t y = 0; y < m_header.image_height; y++) {
                 read_ptr = temp_buffer_ptr + (m_header.image_height - 1 - y) * m_header.image_width;
-                for (int32_t x = 0; x < m_header.image_width; x++) {
-                    *write_ptr++ = *read_ptr;
-                    *write_ptr++ = *read_ptr;
-                    *write_ptr++ = *read_ptr++;
-                }
+                memcpy(write_ptr, read_ptr, m_header.image_width);
+                write_ptr += m_header.image_width;
             }
         }
     }

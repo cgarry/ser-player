@@ -34,7 +34,7 @@ void debayer_pixel_bilinear(
     T *rgb_data,
     struct s_image_details &image_details)
 {
-    T *raw_data_ptr = ((T *)raw_data) + ((y * image_details.width + x) * 3);
+    T *raw_data_ptr = ((T *)raw_data) + (y * image_details.width + x);
     T *rgb_data_ptr = ((T *)rgb_data) + ((y * image_details.width + x) * 3);
 
     uint32_t count;
@@ -47,22 +47,22 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*image_details.width-3);
+                total += *(raw_data_ptr-image_details.width-1);
                 count++;
             }
 
             if (y > 0 && x < image_details.width-1) {
-                total += *(raw_data_ptr-3*image_details.width+3);
+                total += *(raw_data_ptr-image_details.width+1);
                 count++;
             }
 
             if (y < image_details.height-1 && x > 0) {
-                total += *(raw_data_ptr+3*image_details.width-3);
+                total += *(raw_data_ptr+image_details.width-1);
                 count++;
             }
 
             if (y < image_details.height-1 && x < image_details.width-1) {
-                total += *(raw_data_ptr+3*image_details.width+3);
+                total += *(raw_data_ptr+image_details.width+1);
                 count++;
             }
 
@@ -72,22 +72,22 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0) {
-                total += *(raw_data_ptr-3);
+                total += *(raw_data_ptr-1);
                 count++;
             }
 
             if (x < image_details.width-1) {
-                total += *(raw_data_ptr+3);
+                total += *(raw_data_ptr+1);
                 count++;
             }
 
             if (y < image_details.height-1) {
-                total += *(raw_data_ptr+3*image_details.width);
+                total += *(raw_data_ptr+image_details.width);
                 count++;
             }
 
             if (y > 0) {
-                total += *(raw_data_ptr-3*image_details.width);
+                total += *(raw_data_ptr-image_details.width);
                 count++;
             }
 
@@ -102,12 +102,12 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (y > 0) {
-                total += *(raw_data_ptr-3*image_details.width);
+                total += *(raw_data_ptr-image_details.width);
                 count++;
             }
 
             if (y < image_details.height-1) {
-                total += *(raw_data_ptr+3*image_details.width);
+                total += *(raw_data_ptr+image_details.width);
                 count++;
             }
 
@@ -117,22 +117,22 @@ void debayer_pixel_bilinear(
             count = 1;
             total = *raw_data_ptr;
             if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*image_details.width-3);
+                total += *(raw_data_ptr-image_details.width-1);
                 count++;
             }
 
             if (y > 0 && x < image_details.width-1) {
-                total += *(raw_data_ptr-3*image_details.width+3);
+                total += *(raw_data_ptr-image_details.width+1);
                 count++;
             }
 
             if (y < image_details.height-1 && x > 0) {
-                total += *(raw_data_ptr+3*image_details.width-3);
+                total += *(raw_data_ptr+image_details.width-1);
                 count++;
             }
 
             if (y < image_details.height-1 && x < image_details.width-1) {
-                total += *(raw_data_ptr+3*image_details.width+3);
+                total += *(raw_data_ptr+image_details.width+1);
                 count++;
             }
 
@@ -142,12 +142,12 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0) {
-                total += *(raw_data_ptr-3);
+                total += *(raw_data_ptr-1);
                 count++;
             }
 
             if (x < image_details.width-1) {
-                total += *(raw_data_ptr+3);
+                total += *(raw_data_ptr+1);
                 count++;
             }
 
@@ -159,12 +159,12 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0) {
-                total += *(raw_data_ptr-3);
+                total += *(raw_data_ptr-1);
                 count++;
             }
 
             if (x < image_details.width-1) {
-                total += *(raw_data_ptr+3);
+                total += *(raw_data_ptr+1);
                 count++;
             }
 
@@ -174,22 +174,22 @@ void debayer_pixel_bilinear(
             count = 1;
             total = *raw_data_ptr;
             if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*image_details.width-3);
+                total += *(raw_data_ptr-image_details.width-1);
                 count++;
             }
 
             if (y > 0 && x < image_details.width-1) {
-                total += *(raw_data_ptr-3*image_details.width+3);
+                total += *(raw_data_ptr-image_details.width+1);
                 count++;
             }
 
             if (y < image_details.height-1 && x > 0) {
-                total += *(raw_data_ptr+3*image_details.width-3);
+                total += *(raw_data_ptr+image_details.width-1);
                 count++;
             }
 
             if (y < image_details.height-1 && x < image_details.width-1) {
-                total += *(raw_data_ptr+3*image_details.width+3);
+                total += *(raw_data_ptr+image_details.width+1);
                 count++;
             }
 
@@ -199,12 +199,12 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (y > 0) {
-                total += *(raw_data_ptr-3*image_details.width);
+                total += *(raw_data_ptr-image_details.width);
                 count++;
             }
 
             if (y < image_details.height-1) {
-                total += *(raw_data_ptr+3*image_details.width);
+                total += *(raw_data_ptr+image_details.width);
                 count++;
             }
 
@@ -219,22 +219,22 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0) {
-                total += *(raw_data_ptr-3);
+                total += *(raw_data_ptr-1);
                 count++;
             }
 
             if (x < image_details.width-1) {
-                total += *(raw_data_ptr+3);
+                total += *(raw_data_ptr+1);
                 count++;
             }
 
             if (y < image_details.height-1) {
-                total += *(raw_data_ptr+3*image_details.width);
+                total += *(raw_data_ptr+image_details.width);
                 count++;
             }
 
             if (y > 0) {
-                total += *(raw_data_ptr-3*image_details.width);
+                total += *(raw_data_ptr-image_details.width);
                 count++;
             }
 
@@ -244,22 +244,22 @@ void debayer_pixel_bilinear(
             count = 0;
             total = 0;
             if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-3*image_details.width-3);
+                total += *(raw_data_ptr-image_details.width-1);
                 count++;
             }
 
             if (y > 0 && x < image_details.width-1) {
-                total += *(raw_data_ptr-3*image_details.width+3);
+                total += *(raw_data_ptr-image_details.width+1);
                 count++;
             }
 
             if (y < image_details.height-1 && x > 0) {
-                total += *(raw_data_ptr+3*image_details.width-3);
+                total += *(raw_data_ptr+image_details.width-1);
                 count++;
             }
 
             if (y < image_details.height-1 && x < image_details.width-1) {
-                total += *(raw_data_ptr+3*image_details.width+3);
+                total += *(raw_data_ptr+image_details.width+1);
                 count++;
             }
 
@@ -274,9 +274,11 @@ void convert_image_to_8bit(
 {
     uint16_t *p_read_data = (uint16_t *)image_details.p_buffer;
     uint8_t *p_write_data = image_details.p_buffer;
-    for (int pixel = 0; pixel < image_details.width * image_details.height; pixel++) {
-        *p_write_data++ = (*p_read_data++) >> 8;
-        *p_write_data++ = (*p_read_data++) >> 8;
+    int pixel_count = image_details.width * image_details.height;
+    if (image_details.colour_id == COLOURID_RGB || image_details.colour_id == COLOURID_BGR) {
+        pixel_count *= 3;
+    }
+    for (int pixel = 0; pixel < pixel_count; pixel++) {
         *p_write_data++ = (*p_read_data++) >> 8;
     }
 }
@@ -344,7 +346,7 @@ bool debayer_image_bilinear(
 
     // Debayer to create blue, green and red data
     rgb_data_ptr1 = rgb_data + (3 * (image_details.width + 1));
-    raw_data_ptr = image_details.p_buffer + (3 * (image_details.width + 1));
+    raw_data_ptr = image_details.p_buffer + (image_details.width + 1);
     for (y = 1; y < (image_details.height-1); y++) {
         for (x = 1; x < (image_details.width-1); x++) {
             uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
@@ -352,14 +354,12 @@ bool debayer_image_bilinear(
             switch (bayer) {
                 case 0:
                     // Blue - Average of 4 corners;
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                         *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
-                    raw_data_ptr++;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-image_details.width-3) + *(raw_data_ptr-image_details.width+3) +
+                                         *(raw_data_ptr+image_details.width-3) + *(raw_data_ptr+image_details.width+3) ) / 4;
 
                     // Green - Return average of 4 nearest neighbours
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                         *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                    raw_data_ptr++;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-1) + *(raw_data_ptr+1) +
+                                         *(raw_data_ptr+image_details.width) + *(raw_data_ptr-image_details.width) ) /4;
 
                     // Red - Simple case just return data at this position
                     *rgb_data_ptr1++ = *raw_data_ptr++;
@@ -367,49 +367,46 @@ bool debayer_image_bilinear(
 
                 case 1:
                     // Blue - Average of above and below pixels
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
-                    raw_data_ptr++;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-image_details.width) + *(raw_data_ptr+image_details.width) ) / 2;
 
                     // Green - just this position
-                    *rgb_data_ptr1++ = *raw_data_ptr++;;
+                    *rgb_data_ptr1++ = *raw_data_ptr;
 
                     // Red - Average of left and right pixels
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-1) + *(raw_data_ptr+1) ) / 2;
                     raw_data_ptr++;
                     break;
 
                 case 2:
                     // Blue - Average of left and right pixels
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) ) / 2;
-                    raw_data_ptr++;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-1) + *(raw_data_ptr+1) ) / 2;
 
                     // Green - just this position
-                    *rgb_data_ptr1++ = *raw_data_ptr++;
+                    *rgb_data_ptr1++ = *raw_data_ptr;
 
                     // Red - Average of above and below pixels
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width) + *(raw_data_ptr+3*image_details.width) ) / 2;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-image_details.width) + *(raw_data_ptr+image_details.width) ) / 2;
                     raw_data_ptr++;
                     break;
 
                 default:
                     // Blue - Simple case just return data at this position
-                    *rgb_data_ptr1++ = *raw_data_ptr++;
+                    *rgb_data_ptr1++ = *raw_data_ptr;
 
                     // Green - Return average of 4 nearest neighbours
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3) + *(raw_data_ptr+3) +
-                                         *(raw_data_ptr+3*image_details.width) + *(raw_data_ptr-3*image_details.width) ) /4;
-                    raw_data_ptr++;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-1) + *(raw_data_ptr+1) +
+                                         *(raw_data_ptr+image_details.width) + *(raw_data_ptr+image_details.width) ) /4;
 
                     // Red - Average of 4 corners;
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-3*image_details.width-3) + *(raw_data_ptr-3*image_details.width+3) +
-                                         *(raw_data_ptr+3*image_details.width-3) + *(raw_data_ptr+3*image_details.width+3) ) / 4;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-image_details.width-3) + *(raw_data_ptr-image_details.width+3) +
+                                         *(raw_data_ptr+image_details.width-3) + *(raw_data_ptr+image_details.width+3) ) / 4;
                     raw_data_ptr++;
                     break;
             }
         }
 
         rgb_data_ptr1 += 6;
-        raw_data_ptr += 6;
+        raw_data_ptr += 2;
     }
 
     // Make new debayered data the frame buffer data
@@ -686,9 +683,12 @@ void conv_data_ready_for_qimage(
         // Monochrome data just needs to be flipped vertically
         uint8_t *p_write_data = p_output_buffer;
         for (int32_t y = image_details.height - 1; y >= 0; y--) {
-            uint8_t *p_read_data = image_details.p_buffer + y * image_details.width * 3;
-            memcpy(p_write_data, p_read_data, image_details.width * 3);
-            p_write_data += image_details.width * 3;
+            uint8_t *p_read_data = image_details.p_buffer + y * image_details.width;
+            for (int32_t x = 0; x < image_details.width; x++) {
+                *p_write_data++ = *p_read_data;
+                *p_write_data++ = *p_read_data;
+                *p_write_data++ = *p_read_data++;
+            }
 
             for (int32_t x = 0; x < line_pad; x++) {
                 *p_write_data++ = 0;

@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.12"
+#define VERSION_STRING "v1.3.13"
 
 #include <Qt>
 #include <QApplication>
@@ -933,7 +933,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_frame_details.width = mp_ser_file->get_width();
         m_frame_details.height = mp_ser_file->get_height();
         m_frame_details.colour_id = mp_ser_file->get_colour_id();
-        m_frame_details.p_buffer = new uint8_t[m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3];
+        m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
         mp_ser_file->get_frame(m_frame_details.p_buffer);
 
         if (mp_ser_file->get_bytes_per_sample() == 2) {
@@ -1071,9 +1071,8 @@ void c_ser_player::frame_slider_changed_slot()
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
         delete[] m_frame_details.p_buffer;
-        m_frame_details.p_buffer = new uint8_t[frame_size];
+        m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
         int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), m_frame_details.p_buffer);
         uint64_t ts = mp_ser_file->get_timestamp();
         if (ts > 0) {
@@ -1618,7 +1617,7 @@ QImage *c_ser_player::get_frame_as_qimage(int frame_number)
 {
     mp_ser_file_Mutex->lock();
     delete[] m_frame_details.p_buffer;
-    m_frame_details.p_buffer = new uint8_t[m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3];
+    m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
     int32_t ret = mp_ser_file->get_frame(frame_number, m_frame_details.p_buffer);
     mp_ser_file_Mutex->unlock();
 
