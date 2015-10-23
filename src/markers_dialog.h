@@ -50,8 +50,7 @@ public slots:
 
 
 private slots:
-    void start_marker_changed_slot(int value);
-    void end_marker_changed_slot(int value);
+    void marker_changed_slot();
 
     
 private:
@@ -62,8 +61,6 @@ private:
     QGroupBox *mp_markers_GroupBox;
     QLabel *mp_start_market_Label;
     QSpinBox *mp_start_marker_SpinBox;
-    QPalette *mp_red_text_Palette;
-    QPalette *mp_black_text_Palette;
     QLabel *mp_end_market_Label;
     QSpinBox *mp_end_marker_SpinBox;
     QLabel *mp_selected_count_Label;

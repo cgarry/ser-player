@@ -38,17 +38,12 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_start_market_Label = new QLabel(tr("Start Marker:"));
     mp_start_marker_SpinBox = new QSpinBox;
     mp_start_marker_SpinBox->setRange(1, 1);
-    mp_red_text_Palette = new QPalette();
-    mp_red_text_Palette->setColor(QPalette::Text,Qt::red);
-    mp_black_text_Palette = new QPalette();
-    mp_black_text_Palette->setColor(QPalette::Text,Qt::black);
-    mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
-    connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(start_marker_changed_slot(int)));
+    connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
     mp_end_market_Label = new QLabel(tr("End Marker:"));
     mp_end_marker_SpinBox = new QSpinBox;
     mp_end_marker_SpinBox->setRange(1, 1);
-    connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(end_marker_changed_slot(int)));
+    connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
     mp_selected_count_Label = new QLabel("1");
 
@@ -114,33 +109,21 @@ bool c_markers_dialog::get_markers_enabled()
 }
 
 
-void c_markers_dialog::start_marker_changed_slot(int value)
+void c_markers_dialog::marker_changed_slot()
 {
     // Update spinbox handling to allow non-valid combinations to exist while entering
+    QPalette text_Palette;
     if (mp_start_marker_SpinBox->value() > mp_end_marker_SpinBox->value()) {
         // Value is not currently valid
-        mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
-        mp_end_marker_SpinBox->setPalette(*mp_red_text_Palette);
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        mp_start_marker_SpinBox->setPalette(text_Palette);
+        mp_end_marker_SpinBox->setPalette(text_Palette);
     } else {
-        mp_start_marker_SpinBox->setPalette(*mp_black_text_Palette);
-        mp_end_marker_SpinBox->setPalette(*mp_black_text_Palette);
-        emit start_marker_changed(value);
-        emit end_marker_changed(mp_end_marker_SpinBox->value());
-    }
-}
-
-
-void c_markers_dialog::end_marker_changed_slot(int value)
-{
-    if (mp_start_marker_SpinBox->value() > mp_end_marker_SpinBox->value()) {
-        // value is not currently valid
-        mp_start_marker_SpinBox->setPalette(*mp_red_text_Palette);
-        mp_end_marker_SpinBox->setPalette(*mp_red_text_Palette);
-    } else {
-        mp_start_marker_SpinBox->setPalette(*mp_black_text_Palette);
-        mp_end_marker_SpinBox->setPalette(*mp_black_text_Palette);
-        emit end_marker_changed(value);
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        mp_start_marker_SpinBox->setPalette(text_Palette);
+        mp_end_marker_SpinBox->setPalette(text_Palette);
         emit start_marker_changed(mp_start_marker_SpinBox->value());
+        emit end_marker_changed(mp_end_marker_SpinBox->value());
     }
 }
 

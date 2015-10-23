@@ -46,7 +46,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_marker_start_frame(marker_start_frame),
       m_marker_end_frame(marker_end_frame),
       m_start_frame(1),
-      m_end_frame(total_frames)
+      m_end_frame(total_frames),
+      m_spin_boxes_valid(true)
 {
     setWindowTitle(tr("Save Frames As Images"));
     QDialog::setModal(true);
@@ -85,12 +86,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_start_Spinbox->setMinimum(1);
     mp_start_Spinbox->setMaximum(total_frames);
     mp_start_Spinbox->setValue(1);
-    connect(mp_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(start_Spinbox_changed_slot(int)));
+    connect(mp_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed_slot()));
     mp_end_Spinbox = new QSpinBox;
     mp_end_Spinbox->setMinimum(1);
     mp_end_Spinbox->setMaximum(total_frames);
     mp_end_Spinbox->setValue(total_frames);
-    connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(end_Spinbox_changed_slot(int)));
+    connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed_slot()));
 
     mp_selected_frames_Label = new QLabel;
 
@@ -257,22 +258,20 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 }
 
 
-void c_save_frames_dialog::start_Spinbox_changed_slot(int value)
+void c_save_frames_dialog::spinbox_changed_slot()
 {
-    if (value > mp_end_Spinbox->value()) {
-        mp_end_Spinbox->setValue(value);
+    QPalette text_Palette;
+    if (mp_start_Spinbox->value() > mp_end_Spinbox->value()) {
+        // Invalid values
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        m_spin_boxes_valid = false;
+    } else {
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        m_spin_boxes_valid = true;
     }
 
-    update_num_frames_slot();
-}
-
-
-void c_save_frames_dialog::end_Spinbox_changed_slot(int value)
-{
-    if (value < mp_start_Spinbox->value()) {
-        mp_start_Spinbox->setValue(value);
-    }
-
+    mp_start_Spinbox->setPalette(text_Palette);
+    mp_end_Spinbox->setPalette(text_Palette);
     update_num_frames_slot();
 }
 
@@ -289,7 +288,12 @@ void c_save_frames_dialog::update_num_frames_slot()
         m_total_selected_frames = m_marker_end_frame - m_marker_start_frame + 1;
         mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
     } else { // mp_save_frame_range_RButton
-        m_total_selected_frames = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
+        if (m_spin_boxes_valid) {
+            m_total_selected_frames = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
+        } else {
+            m_total_selected_frames = 0;
+        }
+
         mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
     }
 
@@ -333,7 +337,9 @@ void c_save_frames_dialog::next_button_clicked_slot()
         m_end_frame = mp_end_Spinbox->value();
     }
 
-    accept();
+    if (m_total_selected_frames > 0) {
+        accept();
+    }
 }
 
 

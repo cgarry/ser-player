@@ -64,8 +64,7 @@ signals:
 
 
 private slots:
-    void start_Spinbox_changed_slot(int value);
-    void end_Spinbox_changed_slot(int value);
+    void spinbox_changed_slot();
     void update_num_frames_slot();
     void next_button_clicked_slot();
 
@@ -102,6 +101,7 @@ private:
     int m_start_frame;
     int m_end_frame;
     int m_total_selected_frames;
+    bool m_spin_boxes_valid;
 };
 
 #endif // SAVE_FRAMES_DIALOG_H
