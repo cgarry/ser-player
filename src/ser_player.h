@@ -35,6 +35,7 @@ class QTimer;
 
 class c_colour_dialog;
 class c_image_Widget;
+class c_image;
 
 
 class c_ser_player : public QMainWindow
@@ -71,7 +72,7 @@ private:
 //    QPushButton *mp_start_marker_PushButton;
 //    QPushButton *mp_end_marker_PushButton;
     c_image_Widget *mp_frame_image_Widget;
-    QImage *mp_frame_Image;
+    QImage *mp_frame_QImage;
     QTimer *mp_frame_Timer;
     c_frame_slider *mp_frame_Slider;
     QString m_zoom_label_String;
@@ -95,13 +96,13 @@ private:
     bool m_back_button_held;
 
     c_pipp_ser *mp_ser_file;
+    c_image *mp_frame_image;
     QString m_ser_directory;
     enum e_state {STATE_NO_FILE, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_FINISHED};
     enum e_state m_current_state;
     int m_total_frames;
     int m_display_framerate;
     int m_display_frame_time;
-    struct image_functions::s_image_details m_frame_details;
     bool m_is_colour;
     bool m_has_bayer_pattern;
     int m_play_direction;

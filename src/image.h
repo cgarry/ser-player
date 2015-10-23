@@ -1,0 +1,141 @@
+// ---------------------------------------------------------------------
+// Copyright (C) 2015 Chris Garry
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>
+// ---------------------------------------------------------------------
+
+
+#ifndef IMAGE_H
+#define IMAGE_H
+
+#include <stdint.h>
+#include <stddef.h>
+
+
+
+class c_image {
+    private:
+        // Member variables
+        int32_t m_width;
+        int32_t m_height;
+        int32_t m_byte_depth;
+        bool m_colour;
+        int32_t m_colour_id;
+        uint8_t *mp_buffer;
+        int32_t m_buffer_size;
+        uint8_t m_colbal_r_lut[256];
+        uint8_t m_colbal_g_lut[256];
+        uint8_t m_colbal_b_lut[256];
+        bool m_colour_balance_enabled;
+
+
+    // ------------------------------------------
+    // Public definitions
+    // ------------------------------------------
+    public:
+    
+        // ------------------------------------------
+        // Constructor
+        // ------------------------------------------
+        c_image() :
+            m_width(10),
+            m_height(10),
+            m_byte_depth(1),
+            m_colour(false),
+            m_colour_id(0),
+            mp_buffer(NULL),
+            m_buffer_size(0),
+            m_colour_balance_enabled(false)
+        {
+        }
+
+
+
+        // ------------------------------------------
+        // Destructor
+        // ------------------------------------------
+        ~c_image() {
+            delete [] mp_buffer;
+        }
+
+        
+        void set_image_details(int32_t width,
+                               int32_t height,
+                               int32_t byte_depth,
+                               bool colour);
+
+
+        void set_colour_id(int32_t colour_id)
+        {
+            m_colour_id = colour_id;
+        }
+                      
+
+        int32_t get_width()
+        {
+            return m_width;
+        }
+        
+        
+        int32_t get_height()
+        {
+            return m_height;
+        }
+
+
+        uint8_t *get_p_buffer()
+        {
+            return mp_buffer;
+        }
+
+        
+        void convert_image_to_8bit();
+
+        bool debayer_image_bilinear();
+        
+        void estimate_colour_balance(
+            double &red_gain,
+            double &green_gain,
+            double &blue_gain);
+            
+            
+        void set_colour_balance_luts(
+            double red_gain,
+            double green_gain,
+            double blue_gain);
+
+
+        void change_colour_balance();
+
+
+        void change_colour_saturation(
+            double saturation);
+
+        void conv_data_ready_for_qimage();
+        
+        
+    private:
+        void set_buffer_size(int32_t size);
+
+        template <typename T>
+        void debayer_pixel_bilinear(
+            uint32_t bayer,
+            int32_t x,
+            int32_t y,
+            T *raw_data,
+            T *rgb_data);
+};
+
+    
+#endif  // IMAGE_H

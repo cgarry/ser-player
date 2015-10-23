@@ -46,10 +46,10 @@
 
 #include <cmath>
 
+#include "image.h"
 #include "frame_slider.h"
 #include "ser_player.h"
 #include "persistent_data.h"
-#include "image_functions.h"
 #include "pipp_ser.h"
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
@@ -70,14 +70,10 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent)
 {
+    mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
     m_is_colour = false;
     m_has_bayer_pattern = false;
-
-    m_frame_details.width = 100;
-    m_frame_details.height = 100;
-    m_frame_details.colour_id = COLOURID_MONO;
-    m_frame_details.p_buffer = NULL;
 
     // Menu Items
     m_ser_directory = "";
@@ -333,7 +329,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     help_menu->addAction(about_qt_Act);
     connect(about_qt_Act, SIGNAL(triggered()), this, SLOT(about_qt()));
 
-    mp_frame_Image = new QImage(":/res/resources/ser_player_logo.png");
+    mp_frame_QImage = new QImage(":/res/resources/ser_player_logo.png");
     create_no_file_open_image();  // Create m_no_file_open_Pixmap
 
     mp_ser_file_Mutex = new QMutex;
@@ -820,7 +816,7 @@ void c_ser_player::colour_saturation_changed_slot(double value)
 
 void c_ser_player::colour_balance_changed_slot(double red, double green, double blue)
 {
-    image_functions::set_colour_balance_luts(red, green, blue);
+    mp_frame_image->set_colour_balance_luts(red, green, blue);
     frame_slider_changed_slot();
 }
 
@@ -832,21 +828,28 @@ void c_ser_player::estimate_colour_balance()
 
         // Get frame from SER file
         mp_ser_file_Mutex->lock();
-        int32_t frame_size = m_frame_details.width * m_frame_details.height * mp_ser_file->get_bytes_per_sample() * 3;
-        delete[] m_frame_details.p_buffer;
-        m_frame_details.p_buffer = new uint8_t[frame_size];
-        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), m_frame_details.p_buffer);
+        bool is_colour = false;
+        if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
+            is_colour = true;
+        }
+
+        mp_frame_image->set_image_details(
+                    mp_ser_file->get_width(),  // width
+                    mp_ser_file->get_height(),  // height
+                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                    is_colour);  // colour
+
+        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
+
+        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
         mp_ser_file_Mutex->unlock();
 
-        if (mp_ser_file->get_bytes_per_sample() == 2) {
-            image_functions::convert_image_to_8bit(m_frame_details);
-        }
+        mp_frame_image->convert_image_to_8bit();
 
         if (ret >= 0) {
             // Debayer frame if required
-            bool image_debayered = false;
             if (c_persistent_data::m_enable_debayering) {
-                image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+                mp_frame_image->debayer_image_bilinear();
             }
         }
 
@@ -856,7 +859,8 @@ void c_ser_player::estimate_colour_balance()
             double red_gain = 1.0;
             double green_gain = 1.0;
             double blue_gain = 1.0;
-            image_functions::estimate_colour_balance(red_gain, green_gain, blue_gain, m_frame_details);
+
+            mp_frame_image->estimate_colour_balance(red_gain, green_gain, blue_gain);
             mp_colour_settings_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
         }
     }
@@ -930,49 +934,53 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
         setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
 
-        m_frame_details.width = mp_ser_file->get_width();
-        m_frame_details.height = mp_ser_file->get_height();
-        m_frame_details.colour_id = mp_ser_file->get_colour_id();
-        m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
-        mp_ser_file->get_frame(m_frame_details.p_buffer);
-
-        if (mp_ser_file->get_bytes_per_sample() == 2) {
-            image_functions::convert_image_to_8bit(m_frame_details);
+        bool is_colour = false;
+        if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
+            is_colour = true;
         }
+
+        mp_frame_image->set_image_details(
+                    mp_ser_file->get_width(),  // width
+                    mp_ser_file->get_height(),  // height
+                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                    is_colour);  // colour
+
+        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
+
+        mp_ser_file->get_frame(mp_frame_image->get_p_buffer());
+        mp_frame_image->convert_image_to_8bit();
+
 
         // Debayer frame if required
-        bool image_debayered = false;
         if (c_persistent_data::m_enable_debayering) {
-            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+            mp_frame_image->debayer_image_bilinear();
         }
+
+        // Adjust colour balance if required
+        mp_frame_image->change_colour_balance();
 
         // Adjust colour saturation if required
-        if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
-            image_functions::change_colour_balance(
-                m_frame_details); // struct s_image_details &image_details
+        mp_frame_image->change_colour_saturation(m_colour_saturation);
 
-            image_functions::change_colour_saturation(
-                m_colour_saturation,  // double saturation
-                m_frame_details); // struct s_image_details &image_details
-        }
+        mp_frame_image->conv_data_ready_for_qimage();
 
-        image_functions::conv_data_ready_for_qimage(
-            image_debayered,  // bool image_debayered
-            m_frame_details); // struct s_image_details &image_details
+        delete mp_frame_QImage;
+        mp_frame_QImage = new QImage(mp_frame_image->get_p_buffer(),
+                                     mp_frame_image->get_width(),
+                                     mp_frame_image->get_height(),
+                                     QImage::Format_RGB888);
 
-        delete mp_frame_Image;
-        mp_frame_Image = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
-        mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
+        mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_QImage));
 
         m_current_state = STATE_STOPPED;
         mp_frame_Slider->goto_first_frame();
         mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(m_frame_details.width)
-                                  .arg(m_frame_details.height));
+                                  .arg(mp_frame_image->get_width())
+                                  .arg(mp_frame_image->get_height()));
         mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg(mp_ser_file->get_pixel_depth()));
         m_is_colour = false;
 
-        switch (m_frame_details.colour_id) {
+        switch (mp_ser_file->get_colour_id()) {
         case COLOURID_MONO:
             mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
             break;
@@ -1071,9 +1079,20 @@ void c_ser_player::frame_slider_changed_slot()
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
 
         mp_ser_file_Mutex->lock();
-        delete[] m_frame_details.p_buffer;
-        m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
-        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), m_frame_details.p_buffer);
+        bool is_colour = false;
+        if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
+            is_colour = true;
+        }
+
+        mp_frame_image->set_image_details(
+                    mp_ser_file->get_width(),  // width
+                    mp_ser_file->get_height(),  // height
+                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                    is_colour);  // colour
+
+        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
+
+        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
         uint64_t ts = mp_ser_file->get_timestamp();
         if (ts > 0) {
             int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
@@ -1099,33 +1118,29 @@ void c_ser_player::frame_slider_changed_slot()
         mp_ser_file_Mutex->unlock();
 
         if (ret >= 0) {
-            if (mp_ser_file->get_bytes_per_sample() == 2) {
-                image_functions::convert_image_to_8bit(m_frame_details);
-            }
+            mp_frame_image->convert_image_to_8bit();
 
             // Debayer frame if required
-            bool image_debayered = false;
             if (c_persistent_data::m_enable_debayering) {
-                image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+                mp_frame_image->debayer_image_bilinear();
             }
 
-            if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
-                // Adjust colour saturation and balance if required
-                image_functions::change_colour_balance(
-                    m_frame_details); // struct s_image_details &image_details
+            // Adjust colour balance if required
+            mp_frame_image->change_colour_balance();
 
-                image_functions::change_colour_saturation(
-                    m_colour_saturation,  // double saturation
-                    m_frame_details); // struct s_image_details &image_details
-            }
+            // Adjust colour saturation if required
+            mp_frame_image->change_colour_saturation(m_colour_saturation);
 
-            image_functions::conv_data_ready_for_qimage(
-                image_debayered,  // bool image_debayered
-                m_frame_details); // struct s_image_details &image_details
+            mp_frame_image->conv_data_ready_for_qimage();
 
-            delete mp_frame_Image;
-            mp_frame_Image = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
-            mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_Image));
+            delete mp_frame_QImage;
+            mp_frame_QImage = new QImage(
+                                 mp_frame_image->get_p_buffer(),
+                                 mp_frame_image->get_width(),
+                                 mp_frame_image->get_height(),
+                                 QImage::Format_RGB888);
+
+            mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_QImage));
             //m_frame_image_label->setMinimumSize(QSize(1, 1));
         } else {
             mp_frame_Timer->stop();
@@ -1474,7 +1489,7 @@ void c_ser_player::about_ser_player()
 void c_ser_player::create_no_file_open_image()
 {
     QString no_file_open_string = QString(tr("No SER File Open", "No SER file message on inital image"));
-    m_no_file_open_Pixmap = QPixmap::fromImage(*mp_frame_Image);
+    m_no_file_open_Pixmap = QPixmap::fromImage(*mp_frame_QImage);
     int pic_width = m_no_file_open_Pixmap.width();
     int pic_height = m_no_file_open_Pixmap.height();
 
@@ -1616,39 +1631,44 @@ void c_ser_player::calculate_display_framerate()
 QImage *c_ser_player::get_frame_as_qimage(int frame_number)
 {
     mp_ser_file_Mutex->lock();
-    delete[] m_frame_details.p_buffer;
-    m_frame_details.p_buffer = new uint8_t[mp_ser_file->get_buffer_size()];
-    int32_t ret = mp_ser_file->get_frame(frame_number, m_frame_details.p_buffer);
+    bool is_colour = false;
+    if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
+        is_colour = true;
+    }
+
+    mp_frame_image->set_image_details(
+                mp_ser_file->get_width(),  // width
+                mp_ser_file->get_height(),  // height
+                mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                is_colour);  // colour
+
+    mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
+
+    int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
     mp_ser_file_Mutex->unlock();
 
     QImage *p_frame_as_qimage = NULL;
     if (ret >= 0) {
-        if (mp_ser_file->get_bytes_per_sample() == 2) {
-            image_functions::convert_image_to_8bit(m_frame_details);
-        }
+        mp_frame_image->convert_image_to_8bit();
 
         // Debayer frame if required
-        bool image_debayered = false;
-        if (c_persistent_data::m_enable_debayering) {
-            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
-        }
+//        bool image_debayered = false;
+//        if (c_persistent_data::m_enable_debayering) {
+//            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
+//        }
 
-        if (image_debayered || m_frame_details.colour_id == COLOURID_RGB || m_frame_details.colour_id == COLOURID_BGR) {
-            // Adjust colour saturation and balance if required
-            image_functions::change_colour_balance(
-                m_frame_details); // struct s_image_details &image_details
+        mp_frame_image->change_colour_balance();
 
-            image_functions::change_colour_saturation(
-                m_colour_saturation,  // double saturation
-                m_frame_details); // struct s_image_details &image_details
-        }
+        // Adjust colour saturation if required
+        mp_frame_image->change_colour_saturation(m_colour_saturation);
 
-        image_functions::conv_data_ready_for_qimage(
-            image_debayered,  // bool image_debayered
-            m_frame_details); // struct s_image_details &image_details
+        mp_frame_image->conv_data_ready_for_qimage();
 
-
-        p_frame_as_qimage = new QImage(m_frame_details.p_buffer, m_frame_details.width, m_frame_details.height, QImage::Format_RGB888);
+        p_frame_as_qimage = new QImage(
+                                mp_frame_image->get_p_buffer(),
+                                mp_frame_image->get_width(),
+                                mp_frame_image->get_height(),
+                                QImage::Format_RGB888);
     }
 
     return p_frame_as_qimage;
