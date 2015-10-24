@@ -219,7 +219,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
     QPushButton *cancel_PButton = new QPushButton(tr("Cancel"));
     QPushButton *next_PButton = new QPushButton(tr("Next"));
-    next_PButton->setDefault(true);
+    cancel_PButton->setAutoDefault(false);
+    next_PButton->setAutoDefault(false);
     connect(cancel_PButton, SIGNAL(clicked()), this, SLOT(reject()));
     connect(next_PButton, SIGNAL(clicked()), this, SLOT(next_button_clicked_slot()));
 

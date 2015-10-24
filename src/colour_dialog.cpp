@@ -56,6 +56,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colsat_hlayout1->addWidget(mp_colsat_DSpinbox);
 
     QPushButton *reset_colour_saturation_button = new QPushButton(tr("Reset"));
+    reset_colour_saturation_button->setAutoDefault(false);
     connect(reset_colour_saturation_button, SIGNAL(clicked()), this, SLOT(reset_colour_saturation_slot()));
     QHBoxLayout *colsat_hlayout2 = new QHBoxLayout;
     colsat_hlayout2->addWidget(reset_colour_saturation_button);
@@ -110,8 +111,10 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colour_balance_GLayout->addWidget(mp_blue_balance_SpinBox, 2, 2);
 
     QPushButton *reset_colour_balance_button = new QPushButton(tr("Reset"));
+    reset_colour_balance_button->setAutoDefault(false);
     connect(reset_colour_balance_button, SIGNAL(clicked()), this, SLOT(reset_colour_balance_slot()));
     QPushButton *estimate_colour_balance_button = new QPushButton(tr("Estimate", "Estimate Colour Balance Button"));
+    estimate_colour_balance_button->setAutoDefault(false);
     connect(estimate_colour_balance_button, SIGNAL(clicked()), this, SIGNAL(estimate_colour_balance()));
 
     QHBoxLayout *colour_balance_HLayout = new QHBoxLayout;
@@ -131,6 +134,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
 
     // Reset and Close buttons
     QPushButton *close_button = new QPushButton(tr("Close"));
+    close_button->setAutoDefault(false);
     connect(close_button, SIGNAL(clicked()), this, SLOT(hide()));
     QHBoxLayout *buttons_hlayout = new QHBoxLayout;
     buttons_hlayout->addStretch();

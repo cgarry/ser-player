@@ -42,6 +42,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
     QPushButton *start_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    start_marker_mode_Button->setAutoDefault(false);
     connect(start_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_start_marker_to_current()));
 
     mp_end_market_Label = new QLabel(tr("End Marker:"));
@@ -50,6 +51,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
     QPushButton *end_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    end_marker_mode_Button->setAutoDefault(false);
     connect(end_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_end_marker_to_current()));
 
     mp_selected_count_Label = new QLabel("1");
@@ -78,9 +80,11 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     connect(mp_markers_GroupBox, SIGNAL(clicked(bool)), this, SIGNAL(markers_enabled_changed(bool)));
 
     QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
+    reset_markers_Button->setAutoDefault(false);
     connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
 
     QPushButton *close_Button = new QPushButton(tr("Close"));
+    close_Button->setAutoDefault(false);
     connect(close_Button, SIGNAL(clicked()), this, SLOT(hide()));
 
     QHBoxLayout *buttons_HLayout = new QHBoxLayout;
