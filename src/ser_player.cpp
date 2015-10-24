@@ -1652,10 +1652,9 @@ QImage *c_ser_player::get_frame_as_qimage(int frame_number)
         mp_frame_image->convert_image_to_8bit();
 
         // Debayer frame if required
-//        bool image_debayered = false;
-//        if (c_persistent_data::m_enable_debayering) {
-//            image_debayered = image_functions::debayer_image_bilinear(m_frame_details);
-//        }
+        if (c_persistent_data::m_enable_debayering) {
+            mp_frame_image->debayer_image_bilinear();
+        }
 
         mp_frame_image->change_colour_balance();
 

@@ -22,7 +22,6 @@
 #include <QMainWindow>
 #include <QFile>
 #include <cstdint>
-#include "image_functions.h"
 
 class QAction;
 class QLabel;
