@@ -37,6 +37,11 @@ class c_image {
         uint8_t m_colbal_g_lut[256];
         uint8_t m_colbal_b_lut[256];
         bool m_colour_balance_enabled;
+        double m_red_gain;
+        double m_green_gain;
+        double m_blue_gain;
+        double m_gain;
+        double m_gamma;
 
 
     // ------------------------------------------
@@ -54,7 +59,12 @@ class c_image {
             m_colour(false),
             mp_buffer(NULL),
             m_buffer_size(0),
-            m_colour_balance_enabled(false)
+            m_colour_balance_enabled(false),
+            m_red_gain(1.0),
+            m_green_gain(1.0),
+            m_blue_gain(1.0),
+            m_gain(1.0),
+            m_gamma(1.0)
         {
         }
 
@@ -100,9 +110,17 @@ class c_image {
             double &red_gain,
             double &green_gain,
             double &blue_gain);
+
+
+        void set_gain(
+                double gain);
+
+
+        void set_gamma(
+                double gamma);
             
             
-        void set_colour_balance_luts(
+        void set_colour_balance(
             double red_gain,
             double green_gain,
             double blue_gain);
@@ -119,6 +137,7 @@ class c_image {
         
     private:
         void set_buffer_size(int32_t size);
+        void setup_luts();
 
         template <typename T>
         void debayer_pixel_bilinear(

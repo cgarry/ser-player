@@ -399,47 +399,95 @@ void c_image::estimate_colour_balance(
 }
 
 
-void c_image::set_colour_balance_luts(
+void c_image::set_gain(
+        double gain)
+{
+    m_gain = gain;
+    setup_luts();
+}
+
+
+void c_image::set_gamma(
+        double gamma)
+{
+    m_gamma = gamma;
+    setup_luts();
+}
+
+
+void c_image::set_colour_balance(
     double red_gain,
     double green_gain,
     double blue_gain)
 {
+    m_red_gain = red_gain;
+    m_green_gain = green_gain;
+    m_blue_gain = blue_gain;
     if (red_gain == 1.0 && green_gain == 1.0 && blue_gain == 1.0) {
         m_colour_balance_enabled = false;
     } else {
         m_colour_balance_enabled = true;
-        for (int x = 0; x < 256; x++) {
-            // Calculate individual gains
-            double temp_r, temp_g, temp_b;
-            temp_r = red_gain * x;
-            temp_g = green_gain * x;
-            temp_b = blue_gain * x;
+    }
 
-            // Clamp values
-            temp_r = (temp_r > 255) ? 255 : temp_r;
-            temp_g = (temp_g > 255) ? 255 : temp_g;
-            temp_b = (temp_b > 255) ? 255 : temp_b;
+    setup_luts();
+}
 
-            // Write to LUTs
-            m_colbal_r_lut[x] = (uint8_t)temp_r;
-            m_colbal_g_lut[x] = (uint8_t)temp_g;
-            m_colbal_b_lut[x] = (uint8_t)temp_b;
-        }
+
+void c_image::setup_luts()
+{
+    for (int x = 0; x < 256; x++) {
+        // Calculate colour balance gains and main gain
+        double temp_r, temp_g, temp_b;
+        temp_r = m_red_gain * m_gain * x;
+        temp_g = m_green_gain * m_gain * x;
+        temp_b = m_blue_gain * m_gain * x;
+
+        // Clamp values
+        temp_r = (temp_r > 255) ? 255 : temp_r;
+        temp_g = (temp_g > 255) ? 255 : temp_g;
+        temp_b = (temp_b > 255) ? 255 : temp_b;
+
+        // Calculate gamma
+        temp_r = (uint8_t)(pow((double)(temp_r / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
+        temp_g = (uint8_t)(pow((double)(temp_g / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
+        temp_b = (uint8_t)(pow((double)(temp_b / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
+
+        // Clamp values
+        temp_r = (temp_r > 255) ? 255 : temp_r;
+        temp_g = (temp_g > 255) ? 255 : temp_g;
+        temp_b = (temp_b > 255) ? 255 : temp_b;
+
+        // Write to LUTs
+        m_colbal_r_lut[x] = (uint8_t)temp_r;
+        m_colbal_g_lut[x] = (uint8_t)temp_g;
+        m_colbal_b_lut[x] = (uint8_t)temp_b;
     }
 }
 
 
 void c_image::change_colour_balance()
 {
-    if (m_colour_balance_enabled && m_colour) {
-        uint8_t *p_frame_data = mp_buffer;
-        for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-            *p_frame_data = m_colbal_b_lut[*p_frame_data];
-            p_frame_data++;
-            *p_frame_data = m_colbal_g_lut[*p_frame_data];
-            p_frame_data++;
-            *p_frame_data = m_colbal_r_lut[*p_frame_data];
-            p_frame_data++;
+    if (!m_colour) {
+        // Mono images just use 1 LUT
+        if (m_gain != 1.0 || m_gamma != 1.0) {
+            uint8_t *p_frame_data = mp_buffer;
+            for (int pixel = 0; pixel < m_width * m_height; pixel++) {
+                *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                p_frame_data++;
+            }
+        }
+    } else {
+        // Colour images use all 3 LUTs
+        if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0) {
+            uint8_t *p_frame_data = mp_buffer;
+            for (int pixel = 0; pixel < m_width * m_height; pixel++) {
+                *p_frame_data = m_colbal_b_lut[*p_frame_data];
+                p_frame_data++;
+                *p_frame_data = m_colbal_g_lut[*p_frame_data];
+                p_frame_data++;
+                *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                p_frame_data++;
+            }
         }
     }
 }

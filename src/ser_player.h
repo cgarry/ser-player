@@ -32,6 +32,7 @@ class QMutex;
 class QImage;
 class QTimer;
 
+class c_gain_and_gamma_dialog;
 class c_colour_dialog;
 class c_image_Widget;
 class c_image;
@@ -49,10 +50,12 @@ private:
     QAction *mp_open_save_folder_Act;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
-    QAction *mp_colour_settings_action;
-    QAction *mp_markers_dialog_action;
+    QAction *mp_gain_gamma_settings_Act;
+    QAction *mp_colour_settings_Act;
+    QAction *mp_markers_dialog_Act;
 
     // Dialogs
+    c_gain_and_gamma_dialog *mp_gain_and_gamma_Dialog;
     c_colour_dialog *mp_colour_settings_Dialog;
 
     // Other
@@ -112,6 +115,9 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
+    void gain_and_gamma_settings_slot();
+    void gain_changed_slot(double gain);
+    void gamma_changed_slot(double gamma);
     void colour_settings_slot();
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);

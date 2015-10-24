@@ -54,6 +54,7 @@
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
+#include "gain_and_gamma_dialog.h"
 #include "colour_dialog.h"
 #include "markers_dialog.h"
 #include "save_frames_dialog.h"
@@ -172,10 +173,20 @@ c_ser_player::c_ser_player(QWidget *parent)
     //
     QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
 
+    // Gain and Gamma Settings menu action
+    mp_gain_gamma_settings_Act = window_menu->addAction(tr("Gain And Gamma Settings"));
+    mp_gain_gamma_settings_Act->setEnabled(false);
+    connect(mp_gain_gamma_settings_Act, SIGNAL(triggered()), this, SLOT(gain_and_gamma_settings_slot()));
+    mp_gain_and_gamma_Dialog = new c_gain_and_gamma_dialog(this);
+    mp_gain_and_gamma_Dialog->hide();
+    connect(mp_gain_and_gamma_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
+    connect(mp_gain_and_gamma_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
+
+
     // Colour Setting menu action
-    mp_colour_settings_action = window_menu->addAction(tr("Colour Settings"));
-    mp_colour_settings_action->setEnabled(false);
-    connect(mp_colour_settings_action, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
+    mp_colour_settings_Act = window_menu->addAction(tr("Colour Settings"));
+    mp_colour_settings_Act->setEnabled(false);
+    connect(mp_colour_settings_Act, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
     mp_colour_settings_Dialog = new c_colour_dialog(this);
     mp_colour_settings_Dialog->hide();
     connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
@@ -183,8 +194,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
 
     // Markers Dialog action
-    mp_markers_dialog_action = window_menu->addAction(tr("Start/End Markers"));
-    mp_markers_dialog_action->setEnabled(true);
+    mp_markers_dialog_Act = window_menu->addAction(tr("Start/End Markers"));
+    mp_markers_dialog_Act->setEnabled(false);
 
 
     //
@@ -341,7 +352,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->set_maximum_frame(99);
     mp_frame_Slider->set_direction(m_play_direction);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
-    connect(mp_markers_dialog_action, SIGNAL(triggered()), mp_frame_Slider, SLOT(show_markers_dialog()));
+    connect(mp_markers_dialog_Act, SIGNAL(triggered()), mp_frame_Slider, SLOT(show_markers_dialog()));
 
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
@@ -595,6 +606,13 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+// Gain and Gamma menu QAction has been clicked
+void c_ser_player::gain_and_gamma_settings_slot()
+{
+    mp_gain_and_gamma_Dialog->show();
+}
+
+
 // Colour settings menu QAction has been clicked
 void c_ser_player::colour_settings_slot()
 {
@@ -810,6 +828,20 @@ void c_ser_player::open_save_folder_slot()
 }
 
 
+void c_ser_player::gain_changed_slot(double gain)
+{
+    mp_frame_image->set_gain(gain);
+    frame_slider_changed_slot();
+}
+
+
+void c_ser_player::gamma_changed_slot(double gamma)
+{
+    mp_frame_image->set_gamma(gamma);
+    frame_slider_changed_slot();
+}
+
+
 void c_ser_player::colour_saturation_changed_slot(double value)
 {
     m_colour_saturation = value;
@@ -819,7 +851,7 @@ void c_ser_player::colour_saturation_changed_slot(double value)
 
 void c_ser_player::colour_balance_changed_slot(double red, double green, double blue)
 {
-    mp_frame_image->set_colour_balance_luts(red, green, blue);
+    mp_frame_image->set_colour_balance(red, green, blue);
     frame_slider_changed_slot();
 }
 
@@ -1000,9 +1032,9 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Enable colour settings menu item if this is colour data
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
-            mp_colour_settings_action->setEnabled(true);
+            mp_colour_settings_Act->setEnabled(true);
         } else {
-            mp_colour_settings_action->setEnabled(false);
+            mp_colour_settings_Act->setEnabled(false);
             mp_colour_settings_Dialog->hide();
         }
 
@@ -1010,6 +1042,8 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_save_frames_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
+        mp_gain_gamma_settings_Act->setEnabled(true);
+        mp_markers_dialog_Act->setEnabled(true);
 
         // Calculate frame rate, update framerate label an use value for playback timer
         calculate_display_framerate();
@@ -1359,9 +1393,9 @@ void c_ser_player::debayer_enable_slot(bool enabled)
     c_persistent_data::m_enable_debayering = enabled;
     if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
         // This is now a colour image, enable colour saturation menu
-        mp_colour_settings_action->setEnabled(true);
+        mp_colour_settings_Act->setEnabled(true);
     } else {
-        mp_colour_settings_action->setEnabled(false);
+        mp_colour_settings_Act->setEnabled(false);
         mp_colour_settings_Dialog->hide();
     }
 

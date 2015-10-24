@@ -41,7 +41,8 @@ SOURCES += src/main.cpp\
     src/save_frames_dialog.cpp \
     src/save_frames_progress_dialog.cpp \
     src/markers_dialog.cpp \
-    src/image.cpp
+    src/image.cpp \
+    src/gain_and_gamma_dialog.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -63,7 +64,8 @@ HEADERS  += src/ser_player.h \
     src/save_frames_dialog.h \
     src/save_frames_progress_dialog.h \
     src/markers_dialog.h \
-    src/image.h
+    src/image.h \
+    src/gain_and_gamma_dialog.h
 
 # Build directories
 DESTDIR = $$PWD/bin
