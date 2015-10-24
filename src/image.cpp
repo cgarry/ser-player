@@ -605,6 +605,7 @@ bool c_image::debayer_image_bilinear()
     // Debayer to create blue, green and red data
     rgb_data_ptr1 = rgb_data + (3 * (m_width + 1));
     raw_data_ptr = mp_buffer + (m_width + 1);
+
     for (y = 1; y < (m_height-1); y++) {
         for (x = 1; x < (m_width-1); x++) {
             uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
@@ -612,8 +613,8 @@ bool c_image::debayer_image_bilinear()
             switch (bayer) {
                 case 0:
                     // Blue - Average of 4 corners;
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-m_width-3) + *(raw_data_ptr-m_width+3) +
-                                         *(raw_data_ptr+m_width-3) + *(raw_data_ptr+m_width+3) ) / 4;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-m_width-1) + *(raw_data_ptr-m_width+1) +
+                                         *(raw_data_ptr+m_width-1) + *(raw_data_ptr+m_width+1) ) / 4;
 
                     // Green - Return average of 4 nearest neighbours
                     *rgb_data_ptr1++ = ( *(raw_data_ptr-1) + *(raw_data_ptr+1) +
@@ -656,8 +657,8 @@ bool c_image::debayer_image_bilinear()
                                          *(raw_data_ptr+m_width) + *(raw_data_ptr+m_width) ) /4;
 
                     // Red - Average of 4 corners;
-                    *rgb_data_ptr1++ = ( *(raw_data_ptr-m_width-3) + *(raw_data_ptr-m_width+3) +
-                                         *(raw_data_ptr+m_width-3) + *(raw_data_ptr+m_width+3) ) / 4;
+                    *rgb_data_ptr1++ = ( *(raw_data_ptr-m_width-1) + *(raw_data_ptr-m_width+1) +
+                                         *(raw_data_ptr+m_width-1) + *(raw_data_ptr+m_width+1) ) / 4;
                     raw_data_ptr++;
                     break;
             }
@@ -670,7 +671,6 @@ bool c_image::debayer_image_bilinear()
     // Make new debayered data the frame buffer data
     delete[] mp_buffer;
     mp_buffer = rgb_data;
-
     m_colour = true;
     return true;
 }
