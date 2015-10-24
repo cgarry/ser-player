@@ -448,43 +448,42 @@ void c_image::change_colour_balance()
 void c_image::change_colour_saturation(
     double saturation)
 {
-    if (saturation == 1.0 || !m_colour) {
-        // Early return
-        return;
-    }
+    // Only chnage colour saturation for colour images
+    // saturation == 1.0 means no change so do nothing
+    if (m_colour && saturation != 1.0) {
+        const double C_Pr = .299;
+        const double C_Pg = .587;
+        const double C_Pb = .114;
 
-    const double C_Pr = .299;
-    const double C_Pg = .587;
-    const double C_Pb = .114;
+        // 8-bit data always
+        uint8_t *p_frame_data = mp_buffer;
+        for (int pixel = 0; pixel < m_width * m_height; pixel++) {
+            uint8_t *p_blue = p_frame_data++;
+            uint8_t *p_green = p_frame_data++;
+            uint8_t *p_red = p_frame_data++;
 
-    // 8-bit data always
-    uint8_t *p_frame_data = mp_buffer;
-    for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-        uint8_t *p_blue = p_frame_data++;
-        uint8_t *p_green = p_frame_data++;
-        uint8_t *p_red = p_frame_data++;
+            if (*p_blue != *p_green || *p_blue != *p_red) {
+                // This is not a monochrome pixel - apply colour saturation
+                double P = sqrt( (*p_red) * (*p_red) * C_Pr +
+                                 (*p_green) * (*p_green) * C_Pg +
+                                 (*p_blue) * (*p_blue) * C_Pb );
 
-        if (*p_blue != *p_green || *p_blue != *p_red) {
-            // This is not a monochrome pixel - apply colour saturation
-            double P = sqrt( (*p_red) * (*p_red) * C_Pr +
-                             (*p_green) * (*p_green) * C_Pg +
-                             (*p_blue) * (*p_blue) * C_Pb );
+                double dred = P + ((double)(*p_red) - P) * saturation;
+                double dgreen = P + ((double)(*p_green) - P) * saturation;
+                double dblue = P + ((double)(*p_blue) - P) * saturation;
 
-            double dred = P + ((double)(*p_red) - P) * saturation;
-            double dgreen = P + ((double)(*p_green) - P) * saturation;
-            double dblue = P + ((double)(*p_blue) - P) * saturation;
+                // Clip values in 0 to 255 range
+                dred = (dred < 0) ? 0 : dred;
+                dgreen = (dgreen < 0) ? 0 : dgreen;
+                dblue = (dblue < 0) ? 0 : dblue;
+                dred = (dred > 255) ? 255 : dred;
+                dgreen = (dgreen > 255) ? 255 : dgreen;
+                dblue = (dblue > 255) ? 255 : dblue;
 
-            // Clip values in 0 to 255 range
-            dred = (dred < 0) ? 0 : dred;
-            dgreen = (dgreen < 0) ? 0 : dgreen;
-            dblue = (dblue < 0) ? 0 : dblue;
-            dred = (dred > 255) ? 255 : dred;
-            dgreen = (dgreen > 255) ? 255 : dgreen;
-            dblue = (dblue > 255) ? 255 : dblue;
-
-            *p_red = (uint8_t)dred;
-            *p_green = (uint8_t)dgreen;
-            *p_blue = (uint8_t)dblue;
+                *p_red = (uint8_t)dred;
+                *p_green = (uint8_t)dgreen;
+                *p_blue = (uint8_t)dblue;
+            }
         }
     }
 }
@@ -543,10 +542,10 @@ void c_image::conv_data_ready_for_qimage()
 }
 
 
-bool c_image::debayer_image_bilinear()
+bool c_image::debayer_image_bilinear(int32_t colour_id)
 {
     uint32_t bayer_code;
-    switch (m_colour_id) {
+    switch (colour_id) {
     case COLOURID_BAYER_RGGB:
         bayer_code = 2;
         break;

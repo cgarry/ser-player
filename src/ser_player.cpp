@@ -842,8 +842,6 @@ void c_ser_player::estimate_colour_balance()
                     mp_ser_file->get_bytes_per_sample(),  // byte_depth
                     is_colour);  // colour
 
-        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
-
         int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
         mp_ser_file_Mutex->unlock();
 
@@ -852,7 +850,7 @@ void c_ser_player::estimate_colour_balance()
         if (ret >= 0) {
             // Debayer frame if required
             if (c_persistent_data::m_enable_debayering) {
-                mp_frame_image->debayer_image_bilinear();
+                mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
         }
 
@@ -1574,8 +1572,6 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
                 mp_ser_file->get_bytes_per_sample(),  // byte_depth
                 is_colour);  // colour
 
-    mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
-
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
     mp_ser_file_Mutex->unlock();
 
@@ -1584,7 +1580,7 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
 
         // Debayer frame if required
         if (c_persistent_data::m_enable_debayering) {
-            mp_frame_image->debayer_image_bilinear();
+            mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
         }
 
         mp_frame_image->change_colour_balance();

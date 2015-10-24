@@ -31,7 +31,6 @@ class c_image {
         int32_t m_height;
         int32_t m_byte_depth;
         bool m_colour;
-        int32_t m_colour_id;
         uint8_t *mp_buffer;
         int32_t m_buffer_size;
         uint8_t m_colbal_r_lut[256];
@@ -53,7 +52,6 @@ class c_image {
             m_height(10),
             m_byte_depth(1),
             m_colour(false),
-            m_colour_id(0),
             mp_buffer(NULL),
             m_buffer_size(0),
             m_colour_balance_enabled(false)
@@ -74,12 +72,6 @@ class c_image {
                                int32_t height,
                                int32_t byte_depth,
                                bool colour);
-
-
-        void set_colour_id(int32_t colour_id)
-        {
-            m_colour_id = colour_id;
-        }
                       
 
         int32_t get_width()
@@ -102,7 +94,7 @@ class c_image {
         
         void convert_image_to_8bit();
 
-        bool debayer_image_bilinear();
+        bool debayer_image_bilinear(int32_t colour_id);
         
         void estimate_colour_balance(
             double &red_gain,
