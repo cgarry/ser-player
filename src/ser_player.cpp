@@ -329,7 +329,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     help_menu->addAction(about_qt_Act);
     connect(about_qt_Act, SIGNAL(triggered()), this, SLOT(about_qt()));
 
-    mp_frame_QImage = new QImage(":/res/resources/ser_player_logo.png");
     create_no_file_open_image();  // Create m_no_file_open_Pixmap
 
     mp_ser_file_Mutex = new QMutex;
@@ -398,6 +397,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     default:
         mp_play_direction_PushButton->setIcon(m_forward_and_reverse_play_Pixmap);
     }
+
     mp_play_direction_PushButton->setIconSize(m_forward_play_Pixmap.size());
     mp_play_direction_PushButton->setFixedSize(m_forward_play_Pixmap.size() + QSize(10, 10));
     mp_play_direction_PushButton->setToolTip(tr("Play Direction", "Button Tool tip"));
@@ -671,15 +671,17 @@ void c_ser_player::save_frames_slot()
 
             if (min_frame == -1) {
                 // Save current frame only
-                QFile file(filename);
                 c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
-                file.open(QIODevice::WriteOnly);
 
                 // Get frame from ser file
-                QImage *frame_as_qimage = get_frame_as_qimage(mp_frame_Slider->value());
-                QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
-                file.close();
-                delete frame_as_qimage;
+                QImage save_qimage;
+                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), save_qimage);
+                if (valid_frame) {
+                    QFile file(filename);
+                    file.open(QIODevice::WriteOnly);
+                    QPixmap::fromImage(save_qimage).save(&file, p_format);
+                    file.close();
+                }
             } else {
                 // Save the range of frames specified by min_frame and max_frame
                 c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
@@ -711,59 +713,60 @@ void c_ser_player::save_frames_slot()
                         save_progress_dialog.set_value(saved_frames);
 
                         // Get frame from SER file
-                        QImage *frame_as_qimage = get_frame_as_qimage(abs(frame_number));
+                        QImage save_qimage;
+                        bool valid_frame = get_frame_as_qimage(abs(frame_number), save_qimage);
+                        if (valid_frame) {
+                            // Get timestamp for frame if required
+                            if (append_timestamp_to_filename) {
+                                uint64_t ts = mp_ser_file->get_timestamp();
+                                timestamp_string = "_" + QString::number(ts);
+                                if (ts > 0) {
+                                    int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
+                                    c_pipp_timestamp::timestamp_to_date(
+                                        ts,
+                                        &ts_year,
+                                        &ts_month,
+                                        &ts_day,
+                                        &ts_hour,
+                                        &ts_minute,
+                                        &ts_second,
+                                        &ts_microsec);
 
-                        // Get timestamp for frame if required
-                        if (append_timestamp_to_filename) {
-                            uint64_t ts = mp_ser_file->get_timestamp();
-                            timestamp_string = "_" + QString::number(ts);
-                            if (ts > 0) {
-                                int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
-                                c_pipp_timestamp::timestamp_to_date(
-                                    ts,
-                                    &ts_year,
-                                    &ts_month,
-                                    &ts_day,
-                                    &ts_hour,
-                                    &ts_minute,
-                                    &ts_second,
-                                    &ts_microsec);
-
-                                timestamp_string = QString("_%1%2%3_%4%5%6.%7_UT")
-                                                   .arg(ts_year, 4, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_month, 2, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_day, 2, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                                   .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
-                            } else {
-                                timestamp_string = tr("_no_timestamp", "Appended to save filename when no timestamp is available");
+                                    timestamp_string = QString("_%1%2%3_%4%5%6.%7_UT")
+                                                       .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                                                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+                                } else {
+                                    timestamp_string = tr("_no_timestamp", "Appended to save filename when no timestamp is available");
+                                }
                             }
+
+                            // Insert frame number into filename
+                            int number_for_filename = (use_framenumber_in_name) ? abs(frame_number) : saved_frames;
+                            QString frame_number_string = QString("%1").arg(number_for_filename, required_digits_for_number, 10, QChar('0'));
+                            QString new_filename = c_persistent_data::m_last_save_folder +
+                                                   QDir::separator() +
+                                                   filename_without_extension +
+                                                   QString("_") +
+                                                   frame_number_string +
+                                                   timestamp_string +
+                                                   "." +
+                                                   filename_extension;
+
+                            // Open file for writing
+                            QFile file(new_filename);
+                            file.open(QIODevice::WriteOnly);
+
+                            // Save the frame and close image file
+                            QPixmap::fromImage(save_qimage).save(&file, p_format);
+                            file.close();
                         }
 
-                        // Insert frame number into filename
-                        int number_for_filename = (use_framenumber_in_name) ? abs(frame_number) : saved_frames;
-                        QString frame_number_string = QString("%1").arg(number_for_filename, required_digits_for_number, 10, QChar('0'));
-                        QString new_filename = c_persistent_data::m_last_save_folder +
-                                               QDir::separator() +
-                                               filename_without_extension +
-                                               QString("_") +
-                                               frame_number_string +
-                                               timestamp_string +
-                                               "." +
-                                               filename_extension;
-
-                        // Open file for writing
-                        QFile file(new_filename);
-                        file.open(QIODevice::WriteOnly);
-
-                        // Save the frame and close image file
-                        QPixmap::fromImage(*frame_as_qimage).save(&file, p_format);
-                        file.close();
-                        delete frame_as_qimage;
-
-                        if (save_progress_dialog.was_cancelled()) {
+                        if (save_progress_dialog.was_cancelled() || !valid_frame) {
                             // Abort frame saving
                             break;
                         }
@@ -924,62 +927,34 @@ void c_ser_player::open_ser_file(const QString &filename)
 
     } else {
         // This is a valid SER file
+
+        // Ensure we are in the stopped state
+        m_current_state = STATE_STOPPED;
+
+        // Update window title with SER filename
+        QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
+        setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
+
+        // Remember SER file directory
+        m_ser_directory = QFileInfo(filename).canonicalPath();
+
+        // Set up frame slider widget
         mp_frame_Slider->set_maximum_frame(m_total_frames);
         mp_frame_Slider->reset_all_markers_slot();  // Reset markers to new frame range
         mp_frame_Slider->set_markers_show(true);  // Un-hide markers
-
-        mp_save_frames_Act->setEnabled(true);
-
-        QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
-        m_ser_directory = QFileInfo(filename).canonicalPath();  // Remember SER file directory
-        setWindowTitle(ser_filename + " - " + C_WINDOW_TITLE_QSTRING);
-
-        bool is_colour = false;
-        if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
-            is_colour = true;
-        }
-
-        mp_frame_image->set_image_details(
-                    mp_ser_file->get_width(),  // width
-                    mp_ser_file->get_height(),  // height
-                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
-                    is_colour);  // colour
-
-        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
-
-        mp_ser_file->get_frame(mp_frame_image->get_p_buffer());
-        mp_frame_image->convert_image_to_8bit();
-
-
-        // Debayer frame if required
-        if (c_persistent_data::m_enable_debayering) {
-            mp_frame_image->debayer_image_bilinear();
-        }
-
-        // Adjust colour balance if required
-        mp_frame_image->change_colour_balance();
-
-        // Adjust colour saturation if required
-        mp_frame_image->change_colour_saturation(m_colour_saturation);
-
-        mp_frame_image->conv_data_ready_for_qimage();
-
-        delete mp_frame_QImage;
-        mp_frame_QImage = new QImage(mp_frame_image->get_p_buffer(),
-                                     mp_frame_image->get_width(),
-                                     mp_frame_image->get_height(),
-                                     QImage::Format_RGB888);
-
-        mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_QImage));
-
-        m_current_state = STATE_STOPPED;
         mp_frame_Slider->goto_first_frame();
+
+        // Update frame size label
         mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(mp_frame_image->get_width())
-                                  .arg(mp_frame_image->get_height()));
-        mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg(mp_ser_file->get_pixel_depth()));
+                                  .arg(mp_ser_file->get_width())
+                                  .arg(mp_ser_file->get_height()));
+
+        // Update pixel depth label
+        mp_pixel_depth_Label->setText(m_pixel_depth_label_String
+                                      .arg(mp_ser_file->get_pixel_depth()));
         m_is_colour = false;
 
+        // Update colour ID label
         switch (mp_ser_file->get_colour_id()) {
         case COLOURID_MONO:
             mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
@@ -1024,6 +999,7 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
         }
 
+        // Enable colour settings menu item if this is colour data
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
             mp_colour_settings_action->setEnabled(true);
@@ -1032,38 +1008,21 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_settings_Dialog->hide();
         }
 
+        // Enable menu items that are only enabled when a SER file is open
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
+        mp_save_frames_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
+
+        // Calculate frame rate, update framerate label an use value for playback timer
         calculate_display_framerate();
 
-        uint64_t ts = mp_ser_file->get_timestamp();
-        if (ts > 0) {
-            int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
-            c_pipp_timestamp::timestamp_to_date(
-                ts,
-                &ts_year,
-                &ts_month,
-                &ts_day,
-                &ts_hour,
-                &ts_minute,
-                &ts_second,
-                &ts_microsec);
-
-            mp_timestamp_Label->setText(m_timestamp_label_String
-                                     .arg(ts_year, 4, 10, QLatin1Char( '0' ))
-                                     .arg(ts_month, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_day, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_microsec, 6, 10, QLatin1Char( '0' )));
-        } else {
-            mp_timestamp_Label->setText(tr("No Timestamp", "Timestamp label for no timestamp"));
-        }
-
         mp_ser_file_Mutex->unlock();
+
+        // Force first frame to be played and update timestamp label
         frame_slider_changed_slot();
         resize_window_100_percent_slot();
+
+        // Start playback
         play_button_pressed_slot();  // Start playing SER file
     }
 }
@@ -1078,71 +1037,43 @@ void c_ser_player::frame_slider_changed_slot()
         mp_frame_slider_changed_Mutex->lock();
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
 
-        mp_ser_file_Mutex->lock();
         bool is_colour = false;
         if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
             is_colour = true;
         }
 
-        mp_frame_image->set_image_details(
-                    mp_ser_file->get_width(),  // width
-                    mp_ser_file->get_height(),  // height
-                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
-                    is_colour);  // colour
+        QImage frame_qimage;
+        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value() , frame_qimage);
+        if (valid_frame) {
+            // Upate image in player
+            mp_frame_image_Widget->setPixmap(QPixmap::fromImage(frame_qimage));
 
-        mp_frame_image->set_colour_id(mp_ser_file->get_colour_id());
+            // Update timestamp label
+            uint64_t ts = mp_ser_file->get_timestamp();
+            if (ts > 0) {
+                int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
+                c_pipp_timestamp::timestamp_to_date(
+                    ts,
+                    &ts_year,
+                    &ts_month,
+                    &ts_day,
+                    &ts_hour,
+                    &ts_minute,
+                    &ts_second,
+                    &ts_microsec);
 
-        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
-        uint64_t ts = mp_ser_file->get_timestamp();
-        if (ts > 0) {
-            int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
-            c_pipp_timestamp::timestamp_to_date(
-                ts,
-                &ts_year,
-                &ts_month,
-                &ts_day,
-                &ts_hour,
-                &ts_minute,
-                &ts_second,
-                &ts_microsec);
-
-            mp_timestamp_Label->setText(m_timestamp_label_String
-                                     .arg(ts_year, 4, 10, QLatin1Char( '0' ))
-                                     .arg(ts_month, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_day, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                     .arg(ts_microsec, 6, 10, QLatin1Char( '0' )));
-        }
-        mp_ser_file_Mutex->unlock();
-
-        if (ret >= 0) {
-            mp_frame_image->convert_image_to_8bit();
-
-            // Debayer frame if required
-            if (c_persistent_data::m_enable_debayering) {
-                mp_frame_image->debayer_image_bilinear();
+                mp_timestamp_Label->setText(m_timestamp_label_String
+                                         .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                                         .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                                         .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                                         .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                                         .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                                         .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                                         .arg(ts_microsec, 6, 10, QLatin1Char( '0' )));
             }
-
-            // Adjust colour balance if required
-            mp_frame_image->change_colour_balance();
-
-            // Adjust colour saturation if required
-            mp_frame_image->change_colour_saturation(m_colour_saturation);
-
-            mp_frame_image->conv_data_ready_for_qimage();
-
-            delete mp_frame_QImage;
-            mp_frame_QImage = new QImage(
-                                 mp_frame_image->get_p_buffer(),
-                                 mp_frame_image->get_width(),
-                                 mp_frame_image->get_height(),
-                                 QImage::Format_RGB888);
-
-            mp_frame_image_Widget->setPixmap(QPixmap::fromImage(*mp_frame_QImage));
-            //m_frame_image_label->setMinimumSize(QSize(1, 1));
         } else {
+            // Should never get here unless something has gone very wrong
+            // Stop playing as a last resort
             mp_frame_Timer->stop();
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
@@ -1489,7 +1420,8 @@ void c_ser_player::about_ser_player()
 void c_ser_player::create_no_file_open_image()
 {
     QString no_file_open_string = QString(tr("No SER File Open", "No SER file message on inital image"));
-    m_no_file_open_Pixmap = QPixmap::fromImage(*mp_frame_QImage);
+    QImage frame_QImage = QImage(":/res/resources/ser_player_logo.png");
+    m_no_file_open_Pixmap = QPixmap::fromImage(frame_QImage);
     int pic_width = m_no_file_open_Pixmap.width();
     int pic_height = m_no_file_open_Pixmap.height();
 
@@ -1628,7 +1560,7 @@ void c_ser_player::calculate_display_framerate()
 }
 
 
-QImage *c_ser_player::get_frame_as_qimage(int frame_number)
+bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
 {
     mp_ser_file_Mutex->lock();
     bool is_colour = false;
@@ -1647,7 +1579,6 @@ QImage *c_ser_player::get_frame_as_qimage(int frame_number)
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
     mp_ser_file_Mutex->unlock();
 
-    QImage *p_frame_as_qimage = NULL;
     if (ret >= 0) {
         mp_frame_image->convert_image_to_8bit();
 
@@ -1663,12 +1594,11 @@ QImage *c_ser_player::get_frame_as_qimage(int frame_number)
 
         mp_frame_image->conv_data_ready_for_qimage();
 
-        p_frame_as_qimage = new QImage(
-                                mp_frame_image->get_p_buffer(),
-                                mp_frame_image->get_width(),
-                                mp_frame_image->get_height(),
-                                QImage::Format_RGB888);
+        arg_qimage = QImage(mp_frame_image->get_p_buffer(),
+                             mp_frame_image->get_width(),
+                             mp_frame_image->get_height(),
+                             QImage::Format_RGB888);
     }
 
-    return p_frame_as_qimage;
+    return (ret >= 0);
 }

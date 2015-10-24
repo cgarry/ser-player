@@ -68,10 +68,7 @@ private:
     QPushButton *mp_stop_PushButton;
     QPushButton *mp_repeat_PushButton;
     QPushButton *mp_play_direction_PushButton;
-//    QPushButton *mp_start_marker_PushButton;
-//    QPushButton *mp_end_marker_PushButton;
     c_image_Widget *mp_frame_image_Widget;
-    QImage *mp_frame_QImage;
     QTimer *mp_frame_Timer;
     c_frame_slider *mp_frame_Slider;
     QString m_zoom_label_String;
@@ -153,7 +150,7 @@ protected:
 
 private:
     void create_no_file_open_image();
-    QImage *get_frame_as_qimage(int frame_number);
+    bool get_frame_as_qimage(int frame_number, QImage &arg_qimage);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 };
