@@ -32,9 +32,11 @@
 
 
 c_colour_dialog::c_colour_dialog(QWidget *parent)
-    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
+    : QDialog(parent)
+//    : QDialog(parent,   Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
 {
     setWindowTitle(tr("Colour Settings"));
+    QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     // Colour saturation label and spinbox
     mp_colsat_Slider = new QSlider(Qt::Horizontal);
@@ -95,7 +97,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_spinbox_changed_slot(int)));
 
     QGridLayout *colour_balance_GLayout = new QGridLayout;
-    colour_balance_GLayout->setVerticalSpacing(5);
+    colour_balance_GLayout->setVerticalSpacing(10);
     colour_balance_GLayout->setHorizontalSpacing(10);
     colour_balance_GLayout->addWidget(new QLabel(tr("Red")), 0, 0);
     colour_balance_GLayout->addWidget(mp_red_balance_Slider, 0, 1);
@@ -135,7 +137,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     buttons_hlayout->addWidget(close_button);
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
-    dialog_vlayout->setMargin(5);
+    dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
     dialog_vlayout->addWidget(colout_saturation_GroupBox);
     dialog_vlayout->addWidget(colour_balance_GroupBox);
@@ -143,6 +145,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     dialog_vlayout->addLayout(buttons_hlayout);
 
     setLayout(dialog_vlayout);
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
 

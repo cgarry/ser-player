@@ -41,7 +41,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            bool markers_enabled,
                                            bool ser_has_timestamps)
     : QDialog(parent),
-//    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint),
       m_total_frames(total_frames),
       m_marker_start_frame(marker_start_frame),
       m_marker_end_frame(marker_end_frame),
@@ -50,6 +49,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_spin_boxes_valid(true)
 {
     setWindowTitle(tr("Save Frames As Images"));
+    QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
     QDialog::setModal(true);
 
 
@@ -226,9 +226,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QHBoxLayout *buttons_HLayout = new QHBoxLayout;
     buttons_HLayout->addStretch();
     buttons_HLayout->setSpacing(0);
-    buttons_HLayout->addWidget(cancel_PButton);
-    buttons_HLayout->addSpacing(10);
     buttons_HLayout->addWidget(next_PButton);
+    buttons_HLayout->addSpacing(10);
+    buttons_HLayout->addWidget(cancel_PButton);
     
     QVBoxLayout *dialog_VLayout = new QVBoxLayout;
     dialog_VLayout->setMargin(10);

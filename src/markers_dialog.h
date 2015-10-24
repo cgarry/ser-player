@@ -41,7 +41,10 @@ public:
 signals:
     void start_marker_changed(int value);
     void end_marker_changed(int value);
+    void set_start_marker_to_current();
+    void set_end_marker_to_current();
     void markers_enabled_changed(bool enabled);
+
 
 public slots:
     void reset_markers_slot();

@@ -54,6 +54,8 @@ c_frame_slider::c_frame_slider(QWidget *parent)
     connect(this, SIGNAL(end_marker_changed(int)), mp_markers_Dialog, SLOT(set_end_marker_slot(int)));
     connect(mp_markers_Dialog, SIGNAL(start_marker_changed(int)), this, SLOT(set_start_marker_slot(int)));
     connect(mp_markers_Dialog, SIGNAL(end_marker_changed(int)), this, SLOT(set_end_marker_slot(int)));
+    connect(mp_markers_Dialog, SIGNAL(set_start_marker_to_current()), this, SLOT(set_start_marker_to_current()));
+    connect(mp_markers_Dialog, SIGNAL(set_end_marker_to_current()), this, SLOT(set_end_marker_to_current()));
     connect(mp_markers_Dialog, SIGNAL(markers_enabled_changed(bool)), this, SLOT(set_markers_enable(bool)));
 }
 
@@ -232,6 +234,12 @@ void c_frame_slider::set_maximum_frame(int max_frame)
 }
 
 
+void c_frame_slider::set_start_marker_to_current()
+{
+    set_start_marker_slot(value());
+}
+
+
 void c_frame_slider::set_start_marker_slot(int value)
 {
     if (value < minimum()) {
@@ -246,6 +254,12 @@ void c_frame_slider::set_start_marker_slot(int value)
 
     emit start_marker_changed(m_start_marker);
     update();
+}
+
+
+void c_frame_slider::set_end_marker_to_current()
+{
+    set_end_marker_slot(value());
 }
 
 

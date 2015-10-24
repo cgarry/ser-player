@@ -31,44 +31,45 @@
 
 
 c_markers_dialog::c_markers_dialog(QWidget *parent)
-    : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
+    : QDialog(parent)  //, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
 {
     setWindowTitle(tr("Start/End Markers"));
+    QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     mp_start_market_Label = new QLabel(tr("Start Marker:"));
     mp_start_marker_SpinBox = new QSpinBox;
     mp_start_marker_SpinBox->setRange(1, 1);
     connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
+    QPushButton *start_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    connect(start_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_start_marker_to_current()));
+
     mp_end_market_Label = new QLabel(tr("End Marker:"));
     mp_end_marker_SpinBox = new QSpinBox;
     mp_end_marker_SpinBox->setRange(1, 1);
     connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
+    QPushButton *end_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    connect(end_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_end_marker_to_current()));
+
     mp_selected_count_Label = new QLabel("1");
 
-    QFormLayout *markers_FLayout = new QFormLayout;
-    markers_FLayout->setMargin(00);
-    markers_FLayout->setSpacing(10);
-    markers_FLayout->addRow(mp_start_market_Label, mp_start_marker_SpinBox);
-    markers_FLayout->addRow(mp_end_market_Label, mp_end_marker_SpinBox);
-    markers_FLayout->addRow(tr("Marked Frames:"), mp_selected_count_Label);
-
-    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
-    connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
-
-    QHBoxLayout *markers_reset_button_HLayout = new QHBoxLayout;
-    markers_reset_button_HLayout->setMargin(0);
-    markers_reset_button_HLayout->setSpacing(0);
-    markers_reset_button_HLayout->addWidget(reset_markers_Button, 0, Qt::AlignBottom);
-    markers_reset_button_HLayout->addStretch();
+    QGridLayout *markers_GLayout = new QGridLayout;
+    markers_GLayout->setMargin(00);
+    markers_GLayout->setSpacing(10);
+    markers_GLayout->addWidget(mp_start_market_Label, 0, 0);
+    markers_GLayout->addWidget(mp_start_marker_SpinBox, 0, 1);
+    markers_GLayout->addWidget(start_marker_mode_Button, 0, 2);
+    markers_GLayout->addWidget(mp_end_market_Label, 1, 0);
+    markers_GLayout->addWidget(mp_end_marker_SpinBox, 1, 1);
+    markers_GLayout->addWidget(end_marker_mode_Button, 1, 2);
+    markers_GLayout->addWidget(new QLabel(tr("Marked Frames:")), 2, 0);
+    markers_GLayout->addWidget(mp_selected_count_Label, 2, 1);
 
     QHBoxLayout *markers_HLayout = new QHBoxLayout;
     markers_HLayout->setMargin(10);
     markers_HLayout->setSpacing(10);
-    markers_HLayout->addLayout(markers_FLayout);
-    markers_HLayout->addSpacing(20);
-    markers_HLayout->addLayout(markers_reset_button_HLayout);
+    markers_HLayout->addLayout(markers_GLayout);
 
     mp_markers_GroupBox = new QGroupBox(tr("Enable Markers"));
     mp_markers_GroupBox->setLayout(markers_HLayout);
@@ -76,16 +77,21 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_markers_GroupBox->setChecked(c_persistent_data::m_markers_enabled);
     connect(mp_markers_GroupBox, SIGNAL(clicked(bool)), this, SIGNAL(markers_enabled_changed(bool)));
 
+    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
+    connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
+
     QPushButton *close_Button = new QPushButton(tr("Close"));
     connect(close_Button, SIGNAL(clicked()), this, SLOT(hide()));
 
     QHBoxLayout *buttons_HLayout = new QHBoxLayout;
     buttons_HLayout->setMargin(0);
+    buttons_HLayout->setSpacing(10);
     buttons_HLayout->addStretch();
+    buttons_HLayout->addWidget(reset_markers_Button);
     buttons_HLayout->addWidget(close_Button);
 
     QVBoxLayout *main_VLayout = new QVBoxLayout;
-    main_VLayout->setMargin(5);
+    main_VLayout->setMargin(10);
     main_VLayout->setSpacing(15);
     main_VLayout->addWidget(mp_markers_GroupBox);
     main_VLayout->addStretch();

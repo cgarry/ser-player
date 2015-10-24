@@ -48,7 +48,9 @@ public slots:
     void set_markers_show(bool show);
     void set_markers_enable(bool active);
     void set_maximum_frame(int max_frame);
+    void set_start_marker_to_current();
     void set_start_marker_slot(int frame);
+    void set_end_marker_to_current();
     void set_end_marker_slot(int frame);
     void reset_all_markers_slot();
 
