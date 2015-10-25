@@ -157,6 +157,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *event);
 
 private:
+    void add_string_to_stringlist(QStringList &string_list, QString string);
     void update_recent_ser_files_menu();
     void populate_recent_ser_files_menu();
     void update_recent_save_folders_menu();

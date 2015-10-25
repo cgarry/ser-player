@@ -37,12 +37,15 @@ signals:
     void gain_changed(double gain);
     void gamma_changed(double gamma);
 
+
+public slots:
+    void reset_gain_slot();
+    void reset_gamma_slot();
+
     
 private slots:
-    void reset_gain_slot();
     void gain_slider_changed_slot(int gain);
     void gain_spinbox_changed_slot(double gain);
-    void reset_gamma_slot();
     void gamma_slider_changed_slot(int gain);
     void gamma_spinbox_changed_slot(double gain);
 

@@ -69,7 +69,7 @@ void c_save_frames_progress_dialog::set_complete()
 {
     mp_progress_bar->setValue(mp_progress_bar->maximum());
     mp_text_label->setText(mp_text_label->text() + ": " + tr("Complete"));
-    mp_cancel_ok_button->setText(tr("Ok"));
+    mp_cancel_ok_button->setText(tr("OK"));
 }
 
 

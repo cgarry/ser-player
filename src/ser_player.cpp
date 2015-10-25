@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.13"
+#define VERSION_STRING "v1.3.14"
 
 #include <Qt>
 #include <QApplication>
@@ -152,7 +152,7 @@ c_ser_player::c_ser_player(QWidget *parent)
         fps_ActGroup->addAction(fps_action);
     }
 
-    connect(fps_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (fps_changed_slot(QAction *)));
+    connect(fps_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(fps_changed_slot(QAction *)));
 
 
     // Enable Debayer menu action
@@ -575,6 +575,24 @@ c_ser_player::~c_ser_player()
 }
 
 
+void c_ser_player::add_string_to_stringlist(QStringList &string_list, QString string)
+{
+    const int max_list_length = 10;
+
+    // Add new string to stringlist
+    string_list.prepend(string);
+
+    // Remove duplicates from list
+    string_list.removeDuplicates();
+
+    // Limit list length to max_list_length
+    while (string_list.count() > max_list_length) {
+        string_list.removeLast();
+    }
+
+}
+
+
 void c_ser_player::update_recent_ser_files_menu()
 {
     // Delete actions from Menu
@@ -609,7 +627,9 @@ void c_ser_player::populate_recent_ser_files_menu()
             mp_recent_ser_files_ActGroup->addAction(ser_files_action);
         }
 
-        ser_files_action = new QAction(tr("Clear List", "Save Folders menu entry"), this);
+        mp_recent_ser_files_Menu->addSeparator();
+
+        ser_files_action = new QAction(tr("Clear Recent", "Save Folders menu entry"), this);
         ser_files_action->setData(QString(""));
         mp_recent_ser_files_Menu->addAction(ser_files_action);
         mp_recent_ser_files_ActGroup->addAction(ser_files_action);
@@ -655,7 +675,9 @@ void c_ser_player::populate_recent_save_folders_menu()
             mp_recent_save_folders_ActGroup->addAction(save_folders_action);
         }
 
-        save_folders_action = new QAction(tr("Clear List", "Save Folders menu entry"), this);
+        mp_recent_ser_files_Menu->addSeparator();
+
+        save_folders_action = new QAction(tr("Clear Recent", "Save Folders menu entry"), this);
         save_folders_action->setData(QString(""));
         mp_recent_save_folders_Menu->addAction(save_folders_action);
         mp_recent_save_folders_ActGroup->addAction(save_folders_action);
@@ -769,16 +791,8 @@ void c_ser_player::save_frames_slot()
             bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
             int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
 
-            // Keep list of last saved folders
-            c_persistent_data::m_recent_save_folders.prepend(QFileInfo(filename).absolutePath());
-
-            // Remove duplicates from list
-            c_persistent_data::m_recent_save_folders.removeDuplicates();
-
-            // Limit list length
-            if (c_persistent_data::m_recent_save_folders.count() > 5) {
-                c_persistent_data::m_recent_save_folders.removeLast();
-            }
+            // Keep list of last saved folders up to date
+            add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
 
             // Update Save Folders Menu
             update_recent_save_folders_menu();
@@ -1057,6 +1071,14 @@ void c_ser_player::open_ser_file_slot(QAction *action)
 
 void c_ser_player::open_ser_file(const QString &filename)
 {
+    // Reset options before opening a new file
+    mp_framerate_Menu->actions().at(0)->setChecked(true);
+    fps_changed_slot(mp_framerate_Menu->actions().at(0));
+    mp_gain_and_gamma_Dialog->reset_gain_slot();
+    mp_gain_and_gamma_Dialog->reset_gamma_slot();
+    mp_colour_settings_Dialog->reset_colour_saturation_slot();
+    mp_colour_settings_Dialog->reset_colour_balance_slot();
+
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
 
@@ -1073,16 +1095,8 @@ void c_ser_player::open_ser_file(const QString &filename)
     } else {
         // This is a valid SER file
 
-        // Keep list of opened SER files
-        c_persistent_data::m_recent_ser_files.prepend(QFileInfo(filename).absoluteFilePath());
-
-        // Remove duplicates from list
-        c_persistent_data::m_recent_ser_files.removeDuplicates();
-
-        // Limit list length
-        if (c_persistent_data::m_recent_ser_files.count() > 5) {
-            c_persistent_data::m_recent_ser_files.removeLast();
-        }
+        // Keep list of opened SER files up to date
+        add_string_to_stringlist(c_persistent_data::m_recent_ser_files, QFileInfo(filename).absoluteFilePath());
 
         // Update Recent SER Files menu
         update_recent_ser_files_menu();

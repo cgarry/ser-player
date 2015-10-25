@@ -33,17 +33,20 @@ class c_colour_dialog : public QDialog
 public:
     c_colour_dialog(QWidget *parent = 0);
     void set_colour_balance(double red, double green, double blue);
-//    ~c_colour_dialog();
+
 
 signals:
     void colour_saturation_changed(double saturation);
     void colour_balance_changed(double red, double green, double blue);
     void estimate_colour_balance();
 
-    
-private slots:
+
+public slots:
     void reset_colour_saturation_slot();
     void reset_colour_balance_slot();
+
+    
+private slots:
     void colour_saturation_slider_changed_slot(int sat);
     void colour_saturation_spinbox_changed_slot(double sat);
     void red_balance_slider_changed_slot(int balance);
