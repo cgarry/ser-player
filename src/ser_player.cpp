@@ -34,7 +34,6 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMimeData>
-#include <QMutex>
 #include <QPainter>
 #include <QProgressDialog>
 #include <QPushButton>
@@ -341,9 +340,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(about_qt_Act, SIGNAL(triggered()), this, SLOT(about_qt()));
 
     create_no_file_open_image();  // Create m_no_file_open_Pixmap
-
-    mp_ser_file_Mutex = new QMutex;
-    mp_frame_slider_changed_Mutex = new QMutex;
 
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
@@ -859,10 +855,7 @@ void c_ser_player::colour_balance_changed_slot(double red, double green, double 
 void c_ser_player::estimate_colour_balance()
 {
     if (m_current_state != STATE_NO_FILE) {
-        mp_frame_slider_changed_Mutex->lock();
-
         // Get frame from SER file
-        mp_ser_file_Mutex->lock();
         bool is_colour = false;
         if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
             is_colour = true;
@@ -875,7 +868,6 @@ void c_ser_player::estimate_colour_balance()
                     is_colour);  // colour
 
         int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
-        mp_ser_file_Mutex->unlock();
 
         mp_frame_image->convert_image_to_8bit();
 
@@ -885,8 +877,6 @@ void c_ser_player::estimate_colour_balance()
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
         }
-
-        mp_frame_slider_changed_Mutex->unlock();
 
         if (ret >= 0) {
             double red_gain = 1.0;
@@ -941,7 +931,6 @@ void c_ser_player::open_ser_file(const QString &filename)
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
 
-    mp_ser_file_Mutex->lock();
     mp_ser_file->close();
     m_total_frames = mp_ser_file->open(filename.toStdString().c_str(), 0, 0);
 
@@ -952,9 +941,6 @@ void c_ser_player::open_ser_file(const QString &filename)
                                  tr("Invalid SER File", "Message box title for invalid SER file"),
                                  mp_ser_file->get_error_string());
         }
-
-        mp_ser_file_Mutex->unlock();
-
     } else {
         // This is a valid SER file
 
@@ -1048,8 +1034,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Calculate frame rate, update framerate label an use value for playback timer
         calculate_display_framerate();
 
-        mp_ser_file_Mutex->unlock();
-
         // Force first frame to be played and update timestamp label
         frame_slider_changed_slot();
         resize_window_100_percent_slot();
@@ -1066,7 +1050,6 @@ void c_ser_player::frame_slider_changed_slot()
     if (m_current_state == STATE_NO_FILE) {
         mp_frame_Slider->setValue(1);
     } else {
-        mp_frame_slider_changed_Mutex->lock();
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
 
         bool is_colour = false;
@@ -1109,8 +1092,6 @@ void c_ser_player::frame_slider_changed_slot()
             mp_frame_Timer->stop();
             mp_play_PushButton->setIcon(m_play_Pixmap);
         }
-
-        mp_frame_slider_changed_Mutex->unlock();
     }
 }
 
@@ -1594,7 +1575,6 @@ void c_ser_player::calculate_display_framerate()
 
 bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
 {
-    mp_ser_file_Mutex->lock();
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
         is_colour = true;
@@ -1607,7 +1587,6 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
                 is_colour);  // colour
 
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
-    mp_ser_file_Mutex->unlock();
 
     if (ret >= 0) {
         mp_frame_image->convert_image_to_8bit();

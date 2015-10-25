@@ -28,7 +28,6 @@ class QLabel;
 class c_pipp_ser;
 class c_frame_slider;
 class QPushButton;
-class QMutex;
 class QImage;
 class QTimer;
 
@@ -89,8 +88,6 @@ private:
     QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
 
-    QMutex *mp_ser_file_Mutex;
-    QMutex *mp_frame_slider_changed_Mutex;
     bool m_forward_button_held;
     bool m_back_button_held;
 
