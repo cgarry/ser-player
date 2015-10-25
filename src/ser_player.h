@@ -24,6 +24,7 @@
 #include <cstdint>
 
 class QAction;
+class QActionGroup;
 class QLabel;
 class c_pipp_ser;
 class c_frame_slider;
@@ -46,7 +47,10 @@ private:
 
     // Menus
     QAction *mp_save_frames_Act;
-    QAction *mp_open_save_folder_Act;
+    QMenu *mp_recent_ser_files_Menu;
+    QActionGroup *mp_recent_ser_files_ActGroup;
+    QMenu *mp_recent_save_folders_Menu;
+    QActionGroup *mp_recent_save_folders_ActGroup;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
     QAction *mp_gain_gamma_settings_Act;
@@ -122,8 +126,9 @@ public slots:
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
+    void open_ser_file_slot(QAction *action);
     void save_frames_slot();
-    void open_save_folder_slot();
+    void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
@@ -152,6 +157,10 @@ protected:
     virtual void resizeEvent(QResizeEvent *event);
 
 private:
+    void update_recent_ser_files_menu();
+    void populate_recent_ser_files_menu();
+    void update_recent_save_folders_menu();
+    void populate_recent_save_folders_menu();
     void create_no_file_open_image();
     bool get_frame_as_qimage(int frame_number, QImage &arg_qimage);
     void calculate_display_framerate();

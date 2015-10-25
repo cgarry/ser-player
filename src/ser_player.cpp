@@ -90,6 +90,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     file_menu->addAction(fileopen_Act);
     connect(fileopen_Act, SIGNAL(triggered()), this, SLOT(open_ser_file_slot()));
 
+    mp_recent_ser_files_Menu = file_menu->addMenu(tr("Open Recent", "Menu title"));
+    populate_recent_ser_files_menu();
+
     file_menu->addSeparator();
 
     mp_save_frames_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
@@ -97,15 +100,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     file_menu->addAction(mp_save_frames_Act);
     connect(mp_save_frames_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot()));
 
-    mp_open_save_folder_Act = new QAction(tr("Open Last Save Folder", "Menu title"), this);
-    file_menu->addAction(mp_open_save_folder_Act);
-    connect(mp_open_save_folder_Act, SIGNAL(triggered()), this, SLOT(open_save_folder_slot()));
-    if (c_persistent_data::m_last_save_folder.length() != 0) {
-        // Save folder has been set
-        mp_open_save_folder_Act->setEnabled(true);
-    } else {
-        mp_open_save_folder_Act->setEnabled(false);
-    }
+
+    mp_recent_save_folders_Menu = file_menu->addMenu(tr("Recent Save Folders", "Menu title"));
+    populate_recent_save_folders_menu();
 
     file_menu->addSeparator();
 
@@ -575,7 +572,98 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 c_ser_player::~c_ser_player()
 {
+}
 
+
+void c_ser_player::update_recent_ser_files_menu()
+{
+    // Delete actions from Menu
+    mp_recent_ser_files_Menu->clear();
+
+    // Delete actions
+    QList<QAction *> action_list =  mp_recent_ser_files_ActGroup->actions();
+    for (int i = 0; i < action_list.count(); i++) {
+        delete action_list.at(i);  // Delete action
+    }
+
+    // Disconnect action group
+    disconnect(mp_recent_ser_files_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(open_ser_file_slot(QAction *)));
+
+    // Delete action group
+    delete mp_recent_ser_files_ActGroup;
+
+    // Populate menu again
+    populate_recent_ser_files_menu();
+}
+
+
+void c_ser_player::populate_recent_ser_files_menu()
+{
+    mp_recent_ser_files_ActGroup = new QActionGroup(mp_recent_ser_files_Menu);
+    QAction *ser_files_action;
+    if (c_persistent_data::m_recent_ser_files.count() > 0) {
+        for (int x = 0; x < c_persistent_data::m_recent_ser_files.count() ; x++) {
+            ser_files_action = new QAction(c_persistent_data::m_recent_ser_files.at(x), this);
+            ser_files_action->setData(c_persistent_data::m_recent_ser_files.at(x));
+            mp_recent_ser_files_Menu->addAction(ser_files_action);
+            mp_recent_ser_files_ActGroup->addAction(ser_files_action);
+        }
+
+        ser_files_action = new QAction(tr("Clear List", "Save Folders menu entry"), this);
+        ser_files_action->setData(QString(""));
+        mp_recent_ser_files_Menu->addAction(ser_files_action);
+        mp_recent_ser_files_ActGroup->addAction(ser_files_action);
+        connect(mp_recent_ser_files_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(open_ser_file_slot(QAction *)));
+    } else {
+        ser_files_action = new QAction(tr("No SER Files In List", "Recent SER Files menu entry"), this);
+        mp_recent_ser_files_Menu->addAction(ser_files_action);
+    }
+}
+
+
+void c_ser_player::update_recent_save_folders_menu()
+{
+    // Delete actions from Menu
+    mp_recent_save_folders_Menu->clear();
+
+    // Delete actions
+    QList<QAction *> action_list =  mp_recent_save_folders_ActGroup->actions();
+    for (int i = 0; i < action_list.count(); i++) {
+        delete action_list.at(i);  // Delete action
+    }
+
+    // Disconnect action group
+    disconnect(mp_recent_save_folders_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(open_save_folder_slot(QAction *)));
+
+    // Delete action group
+    delete mp_recent_save_folders_ActGroup;
+
+    // Populate menu again
+    populate_recent_save_folders_menu();
+}
+
+
+void c_ser_player::populate_recent_save_folders_menu()
+{
+    mp_recent_save_folders_ActGroup = new QActionGroup(mp_recent_save_folders_Menu);
+    QAction *save_folders_action;
+    if (c_persistent_data::m_recent_save_folders.count() > 0) {
+        for (int x = 0; x < c_persistent_data::m_recent_save_folders.count() ; x++) {
+            save_folders_action = new QAction(c_persistent_data::m_recent_save_folders.at(x), this);
+            save_folders_action->setData(c_persistent_data::m_recent_save_folders.at(x));
+            mp_recent_save_folders_Menu->addAction(save_folders_action);
+            mp_recent_save_folders_ActGroup->addAction(save_folders_action);
+        }
+
+        save_folders_action = new QAction(tr("Clear List", "Save Folders menu entry"), this);
+        save_folders_action->setData(QString(""));
+        mp_recent_save_folders_Menu->addAction(save_folders_action);
+        mp_recent_save_folders_ActGroup->addAction(save_folders_action);
+        connect(mp_recent_save_folders_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(open_save_folder_slot(QAction *)));
+    } else {
+        save_folders_action = new QAction(tr("No Save Folders In List", "Recent Save Folders menu entry"), this);
+        mp_recent_save_folders_Menu->addAction(save_folders_action);
+    }
 }
 
 
@@ -681,12 +769,24 @@ void c_ser_player::save_frames_slot()
             bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
             int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
 
-            mp_open_save_folder_Act->setEnabled(true);  // Enable 'Open Last Save Folder' menu item
+            // Keep list of last saved folders
+            c_persistent_data::m_recent_save_folders.prepend(QFileInfo(filename).absolutePath());
+
+            // Remove duplicates from list
+            c_persistent_data::m_recent_save_folders.removeDuplicates();
+
+            // Limit list length
+            if (c_persistent_data::m_recent_save_folders.count() > 5) {
+                c_persistent_data::m_recent_save_folders.removeLast();
+            }
+
+            // Update Save Folders Menu
+            update_recent_save_folders_menu();
+
+            QString save_folder = QFileInfo(filename).absolutePath();
 
             if (min_frame == -1) {
                 // Save current frame only
-                c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
-
                 // Get frame from ser file
                 QImage save_qimage;
                 bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), save_qimage);
@@ -698,7 +798,6 @@ void c_ser_player::save_frames_slot()
                 }
             } else {
                 // Save the range of frames specified by min_frame and max_frame
-                c_persistent_data::m_last_save_folder = QFileInfo(filename).absolutePath();
                 QString filename_without_extension = QFileInfo(filename).completeBaseName();
                 QString filename_extension = QFileInfo(filename).suffix();
 
@@ -762,7 +861,7 @@ void c_ser_player::save_frames_slot()
                             // Insert frame number into filename
                             int number_for_filename = (use_framenumber_in_name) ? abs(frame_number) : saved_frames;
                             QString frame_number_string = QString("%1").arg(number_for_filename, required_digits_for_number, 10, QChar('0'));
-                            QString new_filename = c_persistent_data::m_last_save_folder +
+                            QString new_filename = save_folder +
                                                    QDir::separator() +
                                                    filename_without_extension +
                                                    QString("_") +
@@ -807,19 +906,26 @@ void c_ser_player::save_frames_slot()
 }
 
 
-void c_ser_player::open_save_folder_slot()
+void c_ser_player::open_save_folder_slot(QAction *action)
 {
-    // Open folder for user
-    if (QDir(c_persistent_data::m_last_save_folder).exists()) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(c_persistent_data::m_last_save_folder));
-    } else {
-        // Folder does not exist
-        QMessageBox::warning(NULL,
-                             tr("Cannot Open Last Save Folder", "Message box title for canot open last save folder"),
-                             tr("Folder Not Found:", "Message box title for canot open last save folder") + "\n" + c_persistent_data::m_last_save_folder,
-                             mp_ser_file->get_error_string());
-        c_persistent_data::m_last_save_folder = "";
-        mp_open_save_folder_Act->setEnabled(false);
+    if (action != NULL) {
+        // Open folder
+        QString dir = action->data().toString();
+        if (dir.isEmpty()) {
+            // Clear all entries from the list
+            c_persistent_data::m_recent_save_folders.clear();
+            update_recent_save_folders_menu();
+        } else if (QDir(dir).exists()) {
+            // Open
+            QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+        } else {
+            // Folder does not exist
+            QMessageBox::warning(NULL,
+                                 tr("Cannot Open Last Save Folder", "Message box title for canot open last save folder"),
+                                 tr("Folder Not Found:", "Message box title for cannot open last save folder") + "\n" + dir);
+            c_persistent_data::m_recent_save_folders.removeAll(dir);
+            update_recent_save_folders_menu();
+        }
     }
 }
 
@@ -926,6 +1032,29 @@ void c_ser_player::open_ser_file_slot()
 }
 
 
+void c_ser_player::open_ser_file_slot(QAction *action)
+{
+    if (action != NULL) {
+        QString filename = action->data().toString();
+        if (filename.isEmpty()) {
+            // Clear list
+            c_persistent_data::m_recent_ser_files.clear();
+            update_recent_ser_files_menu();
+        } else if (QFile(filename).exists()) {
+            // Open SER File
+            open_ser_file(filename);
+        } else {
+            // File does not exist
+            QMessageBox::warning(NULL,
+                                 tr("Cannot Open SER File"),
+                                 tr("File Not Found:", "Message box title for cannot open SER file") + "\n" + filename);
+            c_persistent_data::m_recent_ser_files.removeAll(filename);
+            update_recent_ser_files_menu();
+        }
+    }
+}
+
+
 void c_ser_player::open_ser_file(const QString &filename)
 {
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
@@ -943,6 +1072,21 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
     } else {
         // This is a valid SER file
+
+        // Keep list of opened SER files
+        c_persistent_data::m_recent_ser_files.prepend(QFileInfo(filename).absoluteFilePath());
+
+        // Remove duplicates from list
+        c_persistent_data::m_recent_ser_files.removeDuplicates();
+
+        // Limit list length
+        if (c_persistent_data::m_recent_ser_files.count() > 5) {
+            c_persistent_data::m_recent_ser_files.removeLast();
+        }
+
+        // Update Recent SER Files menu
+        update_recent_ser_files_menu();
+
 
         // Ensure we are in the stopped state
         m_current_state = STATE_STOPPED;

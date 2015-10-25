@@ -42,7 +42,8 @@ QString c_persistent_data::m_ser_directory = QDesktopServices::storageLocation(Q
 #endif
 
 QString c_persistent_data::m_new_version = "v1.0.0";
-QString c_persistent_data::m_last_save_folder = "";
+QStringList c_persistent_data::m_recent_ser_files = QStringList();
+QStringList c_persistent_data::m_recent_save_folders = QStringList();
 
 bool c_persistent_data::m_check_for_updates = true;
 bool c_persistent_data::m_enable_debayering = true;
@@ -73,8 +74,12 @@ void c_persistent_data::load()
         m_new_version = settings.value("new_version").toString();
     }
 
-    if (settings.value("last_save_folder") != QVariant::Invalid) {
-        m_last_save_folder = settings.value("last_save_folder").toString();
+    if (settings.value("recent_ser_files") != QVariant::Invalid) {
+        m_recent_ser_files = settings.value("recent_ser_files").toStringList();
+    }
+
+    if (settings.value("recent_save_folders") != QVariant::Invalid) {
+        m_recent_save_folders = settings.value("recent_save_folders").toStringList();
     }
 
     if (settings.value("check_for_updates") != QVariant::Invalid) {
@@ -110,7 +115,8 @@ void c_persistent_data::save()
     settings.setValue("selected_language", m_selected_language);
     settings.setValue("ser_directory", m_ser_directory);
     settings.setValue("new_version", m_new_version);
-    settings.setValue("last_save_folder", m_last_save_folder);
+    settings.setValue("recent_ser_files", m_recent_ser_files);
+    settings.setValue("recent_save_folders", m_recent_save_folders);
     settings.setValue("check_for_updates", m_check_for_updates);
     settings.setValue("enable_debayering", m_enable_debayering);
     settings.setValue("playback_repeat", m_repeat);
