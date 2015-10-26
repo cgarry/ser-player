@@ -21,6 +21,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QThread>
+#include <cmath>
 
 #include "histogram_thread.h"
 #include "image.h"
