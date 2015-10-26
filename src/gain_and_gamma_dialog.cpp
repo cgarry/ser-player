@@ -103,21 +103,11 @@ c_gain_and_gamma_dialog::c_gain_and_gamma_dialog(QWidget *parent)
     QGroupBox *gamma_GroupBox = new QGroupBox(tr("Gamma"));
     gamma_GroupBox->setLayout(gamma_Vlayout);
 
-    // Reset and Close buttons
-    QPushButton *close_button = new QPushButton(tr("Close"));
-    close_button->setAutoDefault(false);
-    connect(close_button, SIGNAL(clicked()), this, SLOT(hide()));
-    QHBoxLayout *buttons_hlayout = new QHBoxLayout;
-    buttons_hlayout->addStretch();
-    buttons_hlayout->addWidget(close_button);
-
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
     dialog_vlayout->addWidget(gain_GroupBox);
     dialog_vlayout->addWidget(gamma_GroupBox);
-    dialog_vlayout->addStretch();
-    dialog_vlayout->addLayout(buttons_hlayout);
 
     setLayout(dialog_vlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);

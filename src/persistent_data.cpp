@@ -49,6 +49,7 @@ bool c_persistent_data::m_check_for_updates = true;
 bool c_persistent_data::m_enable_debayering = true;
 bool c_persistent_data::m_repeat = false;
 int c_persistent_data::m_play_direction = 0;
+bool c_persistent_data::m_histogram_enabled = false;
 bool c_persistent_data::m_markers_enabled = false;
 
 
@@ -98,6 +99,10 @@ void c_persistent_data::load()
         m_play_direction = settings.value("play_direction").toInt();
     }
 
+    if (settings.value("histogram_enabled") != QVariant::Invalid) {
+        m_histogram_enabled = settings.value("histogram_enabled").toBool();
+    }
+
     if (settings.value("markers_enabled") != QVariant::Invalid) {
         m_markers_enabled = settings.value("markers_enabled").toBool();
     }
@@ -120,6 +125,7 @@ void c_persistent_data::save()
     settings.setValue("check_for_updates", m_check_for_updates);
     settings.setValue("enable_debayering", m_enable_debayering);
     settings.setValue("playback_repeat", m_repeat);
-    settings.setValue("play_direction", m_play_direction);
+    settings.setValue("play_direction", m_play_direction);   
+    settings.setValue("histogram_enabled", m_histogram_enabled);
     settings.setValue("markers_enabled", m_markers_enabled);
 }

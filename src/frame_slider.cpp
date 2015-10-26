@@ -221,9 +221,9 @@ int c_frame_slider::get_end_frame()
 }
 
 
-void c_frame_slider::show_markers_dialog()
+void c_frame_slider::show_markers_dialog(bool show)
 {
-    mp_markers_Dialog->show();
+    mp_markers_Dialog->setVisible(show);
 }
 
 

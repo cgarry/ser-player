@@ -56,6 +56,10 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
 
     mp_selected_count_Label = new QLabel("1");
 
+    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
+    reset_markers_Button->setAutoDefault(false);
+    connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
+
     QGridLayout *markers_GLayout = new QGridLayout;
     markers_GLayout->setMargin(00);
     markers_GLayout->setSpacing(10);
@@ -67,6 +71,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     markers_GLayout->addWidget(end_marker_mode_Button, 1, 2);
     markers_GLayout->addWidget(new QLabel(tr("Marked Frames:")), 2, 0);
     markers_GLayout->addWidget(mp_selected_count_Label, 2, 1);
+    markers_GLayout->addWidget(reset_markers_Button, 2, 2);
 
     QHBoxLayout *markers_HLayout = new QHBoxLayout;
     markers_HLayout->setMargin(10);
@@ -79,27 +84,10 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_markers_GroupBox->setChecked(c_persistent_data::m_markers_enabled);
     connect(mp_markers_GroupBox, SIGNAL(clicked(bool)), this, SIGNAL(markers_enabled_changed(bool)));
 
-    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
-    reset_markers_Button->setAutoDefault(false);
-    connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
-
-    QPushButton *close_Button = new QPushButton(tr("Close"));
-    close_Button->setAutoDefault(false);
-    connect(close_Button, SIGNAL(clicked()), this, SLOT(hide()));
-
-    QHBoxLayout *buttons_HLayout = new QHBoxLayout;
-    buttons_HLayout->setMargin(0);
-    buttons_HLayout->setSpacing(10);
-    buttons_HLayout->addStretch();
-    buttons_HLayout->addWidget(reset_markers_Button);
-    buttons_HLayout->addWidget(close_Button);
-
     QVBoxLayout *main_VLayout = new QVBoxLayout;
     main_VLayout->setMargin(10);
     main_VLayout->setSpacing(15);
     main_VLayout->addWidget(mp_markers_GroupBox);
-    main_VLayout->addStretch();
-    main_VLayout->addLayout(buttons_HLayout);
 
     setLayout(main_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);  // No resizing

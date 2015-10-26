@@ -124,11 +124,14 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
-    void histogram_viewer_slot();
-    void gain_and_gamma_settings_slot();
+    void histogram_viewer_closed_slot();
+    void histogram_viewer_slot(bool checked);
+    void gain_and_gamma_settings_closed_slot();
+    void gain_and_gamma_settings_slot(bool checked);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
-    void colour_settings_slot();
+    void colour_settings_closed_slot();
+    void colour_settings_slot(bool checked);
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
@@ -173,7 +176,7 @@ private:
     void update_recent_save_folders_menu();
     void populate_recent_save_folders_menu();
     void create_no_file_open_image();
-    bool get_frame_as_qimage(int frame_number, QImage &arg_qimage);
+    bool get_frame_as_qimage(int frame_number, bool for_saving, QImage &arg_qimage);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 };

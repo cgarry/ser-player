@@ -196,7 +196,7 @@ void c_histogram_thread::run()
 
         // Create an instance of QPixmap to render the histogram image on
         QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_MONO);
-        p_histogram_Pixmap->fill(QColor(255-15, 255-15, 255-15, 255));  // Mono
+        p_histogram_Pixmap->fill(QColor(255-31, 255-31, 255-31, 255));  // Mono
 
         // Create an instance of QPainter to draw on the QPixmap instance
         QPainter *p_paint = new QPainter(p_histogram_Pixmap);

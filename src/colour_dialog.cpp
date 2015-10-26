@@ -132,21 +132,11 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     QGroupBox *colour_balance_GroupBox = new QGroupBox(tr("Colour Balance"));
     colour_balance_GroupBox->setLayout(colour_balance_VLayout);
 
-    // Reset and Close buttons
-    QPushButton *close_button = new QPushButton(tr("Close"));
-    close_button->setAutoDefault(false);
-    connect(close_button, SIGNAL(clicked()), this, SLOT(hide()));
-    QHBoxLayout *buttons_hlayout = new QHBoxLayout;
-    buttons_hlayout->addStretch();
-    buttons_hlayout->addWidget(close_button);
-
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
     dialog_vlayout->addWidget(colout_saturation_GroupBox);
     dialog_vlayout->addWidget(colour_balance_GroupBox);
-    dialog_vlayout->addStretch();
-    dialog_vlayout->addLayout(buttons_hlayout);
 
     setLayout(dialog_vlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);

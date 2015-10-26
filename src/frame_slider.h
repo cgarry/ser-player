@@ -44,7 +44,7 @@ signals:
     void end_marker_changed(int frame);
 
 public slots:
-    void show_markers_dialog();
+    void show_markers_dialog(bool show);
     void set_markers_show(bool show);
     void set_markers_enable(bool active);
     void set_maximum_frame(int max_frame);

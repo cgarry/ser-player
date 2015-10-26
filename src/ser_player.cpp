@@ -176,34 +176,46 @@ c_ser_player::c_ser_player(QWidget *parent)
     // Histogram viewer
     mp_histogram_viewer_Act = window_menu->addAction(tr("Histogram Viewer"));
     mp_histogram_viewer_Act->setEnabled(false);
-    connect(mp_histogram_viewer_Act, SIGNAL(triggered()), this, SLOT(histogram_viewer_slot()));
+    mp_histogram_viewer_Act->setCheckable(true);
+    mp_histogram_viewer_Act->setChecked(c_persistent_data::m_histogram_enabled);
+    connect(mp_histogram_viewer_Act, SIGNAL(triggered(bool)), this, SLOT(histogram_viewer_slot(bool)));
     mp_histogram_dialog = new c_histogram_dialog(this);
     mp_histogram_dialog->hide();
+    connect(mp_histogram_dialog, SIGNAL(rejected()), this, SLOT(histogram_viewer_closed_slot()));
 
 
     // Gain and Gamma Settings menu action
     mp_gain_gamma_settings_Act = window_menu->addAction(tr("Gain And Gamma Settings"));
     mp_gain_gamma_settings_Act->setEnabled(false);
-    connect(mp_gain_gamma_settings_Act, SIGNAL(triggered()), this, SLOT(gain_and_gamma_settings_slot()));
+    mp_gain_gamma_settings_Act->setCheckable(true);
+    mp_gain_gamma_settings_Act->setChecked(false);
+    connect(mp_gain_gamma_settings_Act, SIGNAL(triggered(bool)), this, SLOT(gain_and_gamma_settings_slot(bool)));
     mp_gain_and_gamma_Dialog = new c_gain_and_gamma_dialog(this);
     mp_gain_and_gamma_Dialog->hide();
     connect(mp_gain_and_gamma_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
     connect(mp_gain_and_gamma_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
+    connect(mp_gain_and_gamma_Dialog, SIGNAL(rejected()), this, SLOT(gain_and_gamma_settings_closed_slot()));
 
 
     // Colour Setting menu action
     mp_colour_settings_Act = window_menu->addAction(tr("Colour Settings"));
     mp_colour_settings_Act->setEnabled(false);
-    connect(mp_colour_settings_Act, SIGNAL(triggered()), this, SLOT(colour_settings_slot()));
+    mp_colour_settings_Act->setCheckable(true);
+    mp_colour_settings_Act->setChecked(false);
+    connect(mp_colour_settings_Act, SIGNAL(triggered(bool)), this, SLOT(colour_settings_slot(bool)));
     mp_colour_settings_Dialog = new c_colour_dialog(this);
     mp_colour_settings_Dialog->hide();
     connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
     connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
+    connect(mp_colour_settings_Dialog, SIGNAL(rejected()), this, SLOT(colour_settings_closed_slot()));
+
 
     // Markers Dialog action
     mp_markers_dialog_Act = window_menu->addAction(tr("Start/End Markers"));
     mp_markers_dialog_Act->setEnabled(false);
+    mp_markers_dialog_Act->setCheckable(true);
+    mp_markers_dialog_Act->setChecked(false);
 
 
     //
@@ -357,7 +369,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->set_maximum_frame(99);
     mp_frame_Slider->set_direction(m_play_direction);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
-    connect(mp_markers_dialog_Act, SIGNAL(triggered()), mp_frame_Slider, SLOT(show_markers_dialog()));
+    connect(mp_markers_dialog_Act, SIGNAL(triggered(bool)), mp_frame_Slider, SLOT(show_markers_dialog(bool)));
 
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
@@ -725,23 +737,50 @@ void c_ser_player::fps_changed_slot(QAction *action)
 
 
 // Histogram viewer
-void c_ser_player::histogram_viewer_slot()
+void c_ser_player::histogram_viewer_slot(bool checked)
 {
-    mp_histogram_dialog->show();
+    if (checked) {
+        mp_histogram_dialog->show();
+        frame_slider_changed_slot();
+    } else {
+        mp_histogram_dialog->hide();
+    }
+
+    c_persistent_data::m_histogram_enabled = checked;
+
+}
+
+
+void c_ser_player::histogram_viewer_closed_slot()
+{
+    mp_histogram_viewer_Act->setChecked(false);
+    c_persistent_data::m_histogram_enabled = false;
 }
 
 
 // Gain and Gamma menu QAction has been clicked
-void c_ser_player::gain_and_gamma_settings_slot()
+void c_ser_player::gain_and_gamma_settings_slot(bool checked)
 {
-    mp_gain_and_gamma_Dialog->show();
+    mp_gain_and_gamma_Dialog->setVisible(checked);
+}
+
+
+void c_ser_player::gain_and_gamma_settings_closed_slot()
+{
+    mp_gain_gamma_settings_Act->setChecked(false);
 }
 
 
 // Colour settings menu QAction has been clicked
-void c_ser_player::colour_settings_slot()
+void c_ser_player::colour_settings_slot(bool checked)
 {
-    mp_colour_settings_Dialog->show();
+    mp_colour_settings_Dialog->setVisible(checked);
+}
+
+
+void c_ser_player::colour_settings_closed_slot()
+{
+    mp_colour_settings_Act->setChecked(false);
 }
 
 
@@ -822,7 +861,7 @@ void c_ser_player::save_frames_slot()
                 // Save current frame only
                 // Get frame from ser file
                 QImage save_qimage;
-                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), save_qimage);
+                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), true, save_qimage);
                 if (valid_frame) {
                     QFile file(filename);
                     file.open(QIODevice::WriteOnly);
@@ -860,7 +899,7 @@ void c_ser_player::save_frames_slot()
 
                         // Get frame from SER file
                         QImage save_qimage;
-                        bool valid_frame = get_frame_as_qimage(abs(frame_number), save_qimage);
+                        bool valid_frame = get_frame_as_qimage(abs(frame_number), true, save_qimage);
                         if (valid_frame) {
                             // Get timestamp for frame if required
                             if (append_timestamp_to_filename) {
@@ -1206,6 +1245,10 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_save_frames_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_histogram_viewer_Act->setEnabled(true);
+        if (mp_histogram_viewer_Act->isChecked()) {
+            mp_histogram_dialog->show();
+        }
+
         mp_gain_gamma_settings_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
 
@@ -1229,14 +1272,8 @@ void c_ser_player::frame_slider_changed_slot()
         mp_frame_Slider->setValue(1);
     } else {
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
-
-        bool is_colour = false;
-        if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
-            is_colour = true;
-        }
-
         QImage frame_qimage;
-        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value() , frame_qimage);
+        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), false, frame_qimage);
 
         if (valid_frame) {
             // Upate image in player
@@ -1758,7 +1795,7 @@ void c_ser_player::calculate_display_framerate()
 }
 
 
-bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
+bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage &arg_qimage)
 {
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
@@ -1787,7 +1824,8 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
         mp_frame_image->change_colour_saturation(m_colour_saturation);
 
         // Start histogram generation if one is not already being generated
-        if (mp_histogram_dialog->isVisible() && mp_histogram_thread->is_histogram_done()) {
+        if (!for_saving && mp_histogram_dialog->isVisible() && mp_histogram_thread->is_histogram_done()) {
+
             mp_histogram_thread->generate_histogram(mp_frame_image);
         }
 

@@ -21,6 +21,8 @@
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 #include "histogram_dialog.h"
 
@@ -31,14 +33,14 @@ c_histogram_dialog::c_histogram_dialog(QWidget *parent)
     setWindowTitle(tr("Histogram"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    mp_histogram_Label = new QLabel;
-    
-    QHBoxLayout *dialog_hlayout = new QHBoxLayout;
-    dialog_hlayout->addWidget(mp_histogram_Label);
-    dialog_hlayout->setMargin(0);
-    dialog_hlayout->setSpacing(0);
+    mp_histogram_Label = new QLabel("Histogram");
+
+    QVBoxLayout *dialog_vlayout = new QVBoxLayout;
+    dialog_vlayout->addWidget(mp_histogram_Label);
+    dialog_vlayout->setMargin(0);
+    dialog_vlayout->setSpacing(0);
    
-    setLayout(dialog_hlayout);
+    setLayout(dialog_vlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
