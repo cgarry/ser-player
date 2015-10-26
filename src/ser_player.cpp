@@ -72,9 +72,6 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent)
 {
-    mp_histogram_dialog = new c_histogram_dialog(this);  //Debug
-    mp_histogram_dialog->show();
-
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
     m_is_colour = false;
@@ -175,6 +172,14 @@ c_ser_player::c_ser_player(QWidget *parent)
     // Windows menu
     //
     QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
+
+    // Histogram viewer
+    mp_histogram_viewer_Act = window_menu->addAction(tr("Histogram Viewer"));
+    mp_histogram_viewer_Act->setEnabled(false);
+    connect(mp_histogram_viewer_Act, SIGNAL(triggered()), this, SLOT(histogram_viewer_slot()));
+    mp_histogram_dialog = new c_histogram_dialog(this);
+    mp_histogram_dialog->hide();
+
 
     // Gain and Gamma Settings menu action
     mp_gain_gamma_settings_Act = window_menu->addAction(tr("Gain And Gamma Settings"));
@@ -719,6 +724,13 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+// Histogram viewer
+void c_ser_player::histogram_viewer_slot()
+{
+    mp_histogram_dialog->show();
+}
+
+
 // Gain and Gamma menu QAction has been clicked
 void c_ser_player::gain_and_gamma_settings_slot()
 {
@@ -1193,6 +1205,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_save_frames_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
+        mp_histogram_viewer_Act->setEnabled(true);
         mp_gain_gamma_settings_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
 
@@ -1774,7 +1787,7 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
         mp_frame_image->change_colour_saturation(m_colour_saturation);
 
         // Start histogram generation if one is not already being generated
-        if (mp_histogram_thread->is_histogram_done()) {
+        if (mp_histogram_dialog->isVisible() && mp_histogram_thread->is_histogram_done()) {
             mp_histogram_thread->generate_histogram(mp_frame_image);
         }
 

@@ -55,6 +55,7 @@ private:
     QActionGroup *mp_recent_save_folders_ActGroup;
     QMenu *mp_framerate_Menu;
     QAction *m_debayer_Act;
+    QAction *mp_histogram_viewer_Act;
     QAction *mp_gain_gamma_settings_Act;
     QAction *mp_colour_settings_Act;
     QAction *mp_markers_dialog_Act;
@@ -123,6 +124,7 @@ public:
 
 public slots:
     void fps_changed_slot(QAction *);
+    void histogram_viewer_slot();
     void gain_and_gamma_settings_slot();
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
