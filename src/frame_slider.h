@@ -42,6 +42,7 @@ public:
 signals:
     void start_marker_changed(int frame);
     void end_marker_changed(int frame);
+    void markers_dialog_closed();
 
 public slots:
     void show_markers_dialog(bool show);

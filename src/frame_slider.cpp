@@ -57,6 +57,7 @@ c_frame_slider::c_frame_slider(QWidget *parent)
     connect(mp_markers_Dialog, SIGNAL(set_start_marker_to_current()), this, SLOT(set_start_marker_to_current()));
     connect(mp_markers_Dialog, SIGNAL(set_end_marker_to_current()), this, SLOT(set_end_marker_to_current()));
     connect(mp_markers_Dialog, SIGNAL(markers_enabled_changed(bool)), this, SLOT(set_markers_enable(bool)));
+    connect(mp_markers_Dialog, SIGNAL(rejected()), this, SIGNAL(markers_dialog_closed()));
 }
 
 

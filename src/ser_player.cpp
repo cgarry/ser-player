@@ -370,6 +370,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Slider->set_direction(m_play_direction);
     mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
     connect(mp_markers_dialog_Act, SIGNAL(triggered(bool)), mp_frame_Slider, SLOT(show_markers_dialog(bool)));
+    connect(mp_frame_Slider, SIGNAL(markers_dialog_closed()), this, SLOT(markers_dialog_closed_slot()));
 
 
     m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
@@ -1262,6 +1263,12 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Start playback
         play_button_pressed_slot();  // Start playing SER file
     }
+}
+
+
+void c_ser_player::markers_dialog_closed_slot()
+{
+    mp_markers_dialog_Act->setChecked(false);
 }
 
 

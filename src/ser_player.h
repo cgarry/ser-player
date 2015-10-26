@@ -144,6 +144,7 @@ public slots:
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
+    void markers_dialog_closed_slot();
     void forward_button_pressed_slot();
     void forward_button_released_slot();
     void back_button_pressed_slot();
