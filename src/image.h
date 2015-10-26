@@ -95,6 +95,17 @@ class c_image {
             return m_height;
         }
 
+        bool get_colour()
+        {
+            return m_colour;
+        }
+
+
+        int32_t get_byte_depth()
+        {
+            return m_byte_depth;
+        }
+
 
         uint8_t *get_p_buffer()
         {

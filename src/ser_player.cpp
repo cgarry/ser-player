@@ -45,6 +45,8 @@
 
 #include <cmath>
 
+#include "histogram_thread.h"
+#include "histogram_dialog.h"
 #include "image.h"
 #include "frame_slider.h"
 #include "ser_player.h"
@@ -70,10 +72,15 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent)
 {
+    mp_histogram_dialog = new c_histogram_dialog(this);  //Debug
+    mp_histogram_dialog->show();
+
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
     m_is_colour = false;
     m_has_bayer_pattern = false;
+    mp_histogram_thread = new c_histogram_thread;
+    connect(mp_histogram_thread, SIGNAL(histogram_done(QPixmap)), this, SLOT(histogram_done_slot(QPixmap)));
 
     // Menu Items
     m_ser_directory = "";
@@ -858,7 +865,7 @@ void c_ser_player::save_frames_slot()
                                         &ts_minute,
                                         &ts_second,
                                         &ts_microsec);
-
+                                    int32_t ts_millisec = ts_microsec / 1000;
                                     timestamp_string = QString("_%1%2%3_%4%5%6.%7_UT")
                                                        .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                                                        .arg(ts_month, 2, 10, QLatin1Char( '0' ))
@@ -866,7 +873,7 @@ void c_ser_player::save_frames_slot()
                                                        .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                                                        .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                                                        .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+                                                       .arg(ts_millisec, 3, 10, QLatin1Char( '0' ));
                                 } else {
                                     timestamp_string = tr("_no_timestamp", "Appended to save filename when no timestamp is available");
                                 }
@@ -1217,6 +1224,7 @@ void c_ser_player::frame_slider_changed_slot()
 
         QImage frame_qimage;
         bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value() , frame_qimage);
+
         if (valid_frame) {
             // Upate image in player
             mp_frame_image_Widget->setPixmap(QPixmap::fromImage(frame_qimage));
@@ -1235,6 +1243,7 @@ void c_ser_player::frame_slider_changed_slot()
                     &ts_second,
                     &ts_microsec);
 
+                int32_t ts_millisec = ts_microsec / 1000;
                 mp_timestamp_Label->setText(m_timestamp_label_String
                                          .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                                          .arg(ts_month, 2, 10, QLatin1Char( '0' ))
@@ -1242,7 +1251,7 @@ void c_ser_player::frame_slider_changed_slot()
                                          .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                                          .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                                          .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_microsec, 6, 10, QLatin1Char( '0' )));
+                                         .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
             }
         } else {
             // Should never get here unless something has gone very wrong
@@ -1548,6 +1557,11 @@ void c_ser_player::new_version_available_slot(QString version)
 }
 
 
+void c_ser_player::histogram_done_slot(QPixmap histogram)
+{
+    mp_histogram_dialog->set_pixmap(histogram);
+}
+
 
 void c_ser_player::about_ser_player()
 {
@@ -1758,6 +1772,11 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, QImage &arg_qimage)
 
         // Adjust colour saturation if required
         mp_frame_image->change_colour_saturation(m_colour_saturation);
+
+        // Start histogram generation if one is not already being generated
+        if (mp_histogram_thread->is_histogram_done()) {
+            mp_histogram_thread->generate_histogram(mp_frame_image);
+        }
 
         mp_frame_image->conv_data_ready_for_qimage();
 

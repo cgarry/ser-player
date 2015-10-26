@@ -32,10 +32,12 @@ class QPushButton;
 class QImage;
 class QTimer;
 
+class c_histogram_dialog;
 class c_gain_and_gamma_dialog;
 class c_colour_dialog;
 class c_image_Widget;
 class c_image;
+class c_histogram_thread;
 
 
 class c_ser_player : public QMainWindow
@@ -60,8 +62,12 @@ private:
     // Dialogs
     c_gain_and_gamma_dialog *mp_gain_and_gamma_Dialog;
     c_colour_dialog *mp_colour_settings_Dialog;
+    c_histogram_dialog *mp_histogram_dialog;
 
-    // Other
+    // Threads
+    c_histogram_thread *mp_histogram_thread;
+
+    // Widgets
     QPixmap m_no_file_open_Pixmap;
     QPixmap m_play_Pixmap;
     QPixmap m_pause_Pixmap;
@@ -92,6 +98,7 @@ private:
     QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
 
+    // Other
     bool m_forward_button_held;
     bool m_back_button_held;
 
@@ -151,6 +158,7 @@ public slots:
     void handle_arguments();
     void about_ser_player();
     void forward_button_held_slot();
+    void histogram_done_slot(QPixmap histogram);
 
 
 protected:
