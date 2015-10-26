@@ -67,11 +67,14 @@ void c_histogram_thread::run()
     // Generate histogram
     int32_t max_value = 0;
     if (m_colour) {
-        // Generate colour histogram
+        //
+        // Generate monochrome histogram
+        //
         memset(m_blue_table, 0, 256 * sizeof(int32_t));
         memset(m_green_table, 0, 256 * sizeof(int32_t));
         memset(m_red_table, 0, 256 * sizeof(int32_t));
 
+        // Create histogram table
         uint8_t *p_data = mp_buffer;
         for (int i = 0; i < m_width * m_height; i++) {
             m_blue_table[*p_data++]++;
@@ -79,67 +82,93 @@ void c_histogram_thread::run()
             m_red_table[*p_data++]++;
         }
 
+        delete [] mp_buffer;  // Free image buffer
+
+        // Find max value in histogram table
         for (int i = 0; i < 256; i++) {
             max_value = (m_blue_table[i] > max_value) ? m_blue_table[i] : max_value;
             max_value = (m_green_table[i] > max_value) ? m_green_table[i] : max_value;
             max_value = (m_red_table[i] > max_value) ? m_red_table[i] : max_value;
         }
 
+        // Convert the histogram table into log10 normalised values
         double max_value_log10 = log((double)max_value) + 1.0;
         for (int i = 0; i < 256; i++) {
             if (m_blue_table[i] > 0) {
-                m_blue_table[i] = (int32_t)(((log((double)m_blue_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-1));
+                m_blue_table[i] = (int32_t)(((log((double)m_blue_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-13));
             } else {
                 m_blue_table[i] = 0;
             }
 
             if (m_green_table[i] > 0) {
-                m_green_table[i] = (int32_t)(((log((double)m_green_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-1));
+                m_green_table[i] = (int32_t)(((log((double)m_green_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-13));
             } else {
                 m_green_table[i] = 0;
             }
 
             if (m_red_table[i] > 0) {
-                m_red_table[i] = (int32_t)(((log((double)m_red_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-1));
+                m_red_table[i] = (int32_t)(((log((double)m_red_table[i]) + 1.0) / max_value_log10) * (HISTO_HEIGHT_COLOUR/3-13));
             } else {
                 m_red_table[i] = 0;
             }
         }
 
-        delete [] mp_buffer;  // Free buffer
-
-        // Generate image
+        // Create an instance of QPixmap to render the histogram image on
         QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_COLOUR);
-        p_histogram_Pixmap->fill(QColor(0, 0, 64, 255));
+        p_histogram_Pixmap->fill(QColor(255-31, 255-31, 255, 255));  // B
 
+        // Create an instance of QPainter to draw on the QPixmap instance
         QPainter *p_paint = new QPainter(p_histogram_Pixmap);
-
-        p_paint->setPen(*(new QColor(64, 64, 64, 255)));
-        for (int x = 0; x < 256; x += 20) {
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR-1, x, 0);
+        p_paint->setPen(*(new QColor(255, 255-31, 255-31, 255)));
+        for (int y = 0; y < HISTO_HEIGHT_COLOUR/3; y++) {
+            p_paint->drawLine(0, y, HISTO_WIDTH, y);
         }
 
-        p_paint->setPen(*(new QColor(QColor(0, 0, 255, 225))));
-        for (int x = 0; x < HISTO_WIDTH; x++) {
-            p_paint->drawLine(x, 299, x, 299-m_blue_table[x]);
+        p_paint->setPen(*(new QColor(255-31, 255, 255-31, 255)));
+        for (int y = HISTO_HEIGHT_COLOUR/3; y < 2*HISTO_HEIGHT_COLOUR/3; y++) {
+            p_paint->drawLine(0, y, HISTO_WIDTH, y);
         }
 
-        p_paint->setPen(*(new QColor(QColor(0, 255, 0, 225))));
-        for (int x = 0; x < HISTO_WIDTH; x++) {
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR-HISTO_HEIGHT_COLOUR/3-1, x, HISTO_HEIGHT_COLOUR-HISTO_HEIGHT_COLOUR/3-1-m_green_table[x]);
+        // Draw vertical lines every 25 pixels and label them
+        for (int x = 0; x < 256; x += 25) {
+            p_paint->setPen(*(new QColor(196, 196, 196, 255)));
+            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR, x, 0);
+
+            p_paint->setPen(*(new QColor(0, 0, 0, 255)));
+            if (x == 0) {
+                p_paint->drawText(QRect(x, HISTO_HEIGHT_COLOUR-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
+                p_paint->drawText(QRect(x, (2*HISTO_HEIGHT_COLOUR)/3-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
+                p_paint->drawText(QRect(x, HISTO_HEIGHT_COLOUR/3-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
+            } else {
+                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_COLOUR-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
+                p_paint->drawText(QRect(x-10, (2*HISTO_HEIGHT_COLOUR)/3-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
+                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_COLOUR/3-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
+            }
         }
 
-        p_paint->setPen(*(new QColor(QColor(255, 0, 0, 225))));
-        for (int x = 0; x < HISTO_WIDTH; x++) {
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR/3-1, x, HISTO_HEIGHT_COLOUR/3-1-m_red_table[x]);
+        // Draw histogram graph except the last column
+        p_paint->setPen(*(new QColor(QColor(64, 64, 64, 192))));
+        for (int x = 0; x < 255; x++) {
+            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
+            p_paint->drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
+            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
         }
+
+        // Draw final column of histogram graph in red to indicate potential clipping
+        p_paint->setPen(*(new QColor(QColor(255, 0, 0, 255))));
+        p_paint->drawLine(255, HISTO_HEIGHT_COLOUR-12, 255, HISTO_HEIGHT_COLOUR-12-m_blue_table[255]);
+        p_paint->drawLine(255, (2*HISTO_HEIGHT_COLOUR)/3-12, 255, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[255]);
+        p_paint->drawLine(255, HISTO_HEIGHT_COLOUR/3-12, 255, HISTO_HEIGHT_COLOUR/3-12-m_red_table[255]);
 
         emit histogram_done(*p_histogram_Pixmap);  // Send histogram image out
+
         delete p_paint;
         delete p_histogram_Pixmap;
 
     } else {
+        //
         // Generate monochrome histogram
+        //
         memset(m_blue_table, 0, 256 * sizeof(int32_t));
 
         // Create histogram table
@@ -167,14 +196,10 @@ void c_histogram_thread::run()
 
         // Create an instance of QPixmap to render the histogram image on
         QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_MONO);
-//        p_histogram_Pixmap->fill(QColor(255-15, 255-15, 255-15, 255));  // Mono
-        p_histogram_Pixmap->fill(QColor(255, 255-15, 255-15, 255));  // R
-//        p_histogram_Pixmap->fill(QColor(255-31, 255, 255-31, 255));  // G
-//        p_histogram_Pixmap->fill(QColor(255-31, 255-31, 255, 255));  // B
+        p_histogram_Pixmap->fill(QColor(255-15, 255-15, 255-15, 255));  // Mono
 
         // Create an instance of QPainter to draw on the QPixmap instance
         QPainter *p_paint = new QPainter(p_histogram_Pixmap);
-
 
         // Draw vertical lines every 25 pixels and label them
         for (int x = 0; x < 256; x += 25) {
@@ -182,7 +207,11 @@ void c_histogram_thread::run()
             p_paint->drawLine(x, HISTO_HEIGHT_MONO, x, 0);
 
             p_paint->setPen(*(new QColor(0, 0, 0, 255)));
-            p_paint->drawText(QRect(x-10, HISTO_HEIGHT_MONO-11, 20, 10), Qt::AlignCenter, QString::number(x));
+            if (x == 0) {
+                p_paint->drawText(QRect(x, HISTO_HEIGHT_MONO-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
+            } else {
+                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_MONO-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
+            }
         }
 
         // Draw histogram graph except the last column
