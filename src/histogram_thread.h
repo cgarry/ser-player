@@ -34,6 +34,7 @@ class c_histogram_thread : public QThread
 
 public:
     c_histogram_thread();
+    ~c_histogram_thread();
     void generate_histogram(c_image *p_image);
     bool is_histogram_done()
     {
@@ -66,6 +67,8 @@ private:
     int32_t m_red_table[256];
     int32_t m_green_table[256];
     int32_t m_blue_table[256];
+    QPixmap *mp_histogram_base_colour_Pixmap;
+    QPixmap *mp_histogram_base_mono_Pixmap;
 };
 
 #endif // HISTOGRAM_THREAD_H

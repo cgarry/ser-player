@@ -31,11 +31,18 @@ c_histogram_thread::c_histogram_thread()
     : m_histogram_done(true),
       m_run_count(0)
 {
-
+    // Initialise histogram base images - graphs are painted on these images
+    mp_histogram_base_colour_Pixmap = new QPixmap(":/res/resources/histogram_colour.png");
+    mp_histogram_base_mono_Pixmap = new QPixmap(":/res/resources/histogram_mono.png");
 }
 
 
-void generate_histogram();
+c_histogram_thread::~c_histogram_thread()
+{
+    // Free up histogram base images
+    delete mp_histogram_base_colour_Pixmap;
+    delete mp_histogram_base_mono_Pixmap;
+}
 
 
 
@@ -61,7 +68,6 @@ void c_histogram_thread::generate_histogram(c_image *p_image)
 
 void c_histogram_thread::run()
 {
-    const int HISTO_WIDTH = 256 + 5;
     const int HISTO_HEIGHT_MONO = 150;
     const int HISTO_HEIGHT_COLOUR = 300;
     // Generate histogram
@@ -113,58 +119,27 @@ void c_histogram_thread::run()
             }
         }
 
-        // Create an instance of QPixmap to render the histogram image on
-        QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_COLOUR);
-        p_histogram_Pixmap->fill(QColor(255-50, 255-50, 255, 255));  // B
+        // Create an instance of QPixmap with base histogram image on it to render the histogram graph on
+        QPixmap histogram_Pixmap = *mp_histogram_base_colour_Pixmap;
 
         // Create an instance of QPainter to draw on the QPixmap instance
-        QPainter *p_paint = new QPainter(p_histogram_Pixmap);
-        p_paint->setPen(*(new QColor(255, 255-50, 255-50, 255)));
-        for (int y = 0; y < HISTO_HEIGHT_COLOUR/3; y++) {
-            p_paint->drawLine(0, y, HISTO_WIDTH, y);
-        }
-
-        p_paint->setPen(*(new QColor(255-50, 255, 255-50, 255)));
-        for (int y = HISTO_HEIGHT_COLOUR/3; y < 2*HISTO_HEIGHT_COLOUR/3; y++) {
-            p_paint->drawLine(0, y, HISTO_WIDTH, y);
-        }
-
-        // Draw vertical lines every 25 pixels and label them
-        for (int x = 0; x < 256; x += 25) {
-            p_paint->setPen(*(new QColor(196, 196, 196, 255)));
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR, x, 0);
-
-            p_paint->setPen(*(new QColor(0, 0, 0, 255)));
-            if (x == 0) {
-                p_paint->drawText(QRect(x, HISTO_HEIGHT_COLOUR-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
-                p_paint->drawText(QRect(x, (2*HISTO_HEIGHT_COLOUR)/3-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
-                p_paint->drawText(QRect(x, HISTO_HEIGHT_COLOUR/3-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
-            } else {
-                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_COLOUR-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
-                p_paint->drawText(QRect(x-10, (2*HISTO_HEIGHT_COLOUR)/3-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
-                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_COLOUR/3-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
-            }
-        }
+        QPainter histo_paint(&histogram_Pixmap);
 
         // Draw histogram graph except the last column
         for (int x = 0; x < 255; x++) {
-            p_paint->setPen(*(new QColor(2*x/3, 2*x/3, 2*x/3, 255)));
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
-            p_paint->drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
-            p_paint->drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
+            histo_paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 255));
+            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
+            histo_paint.drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
+            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
         }
 
         // Draw final column of histogram graph in red to indicate potential clipping
-        p_paint->setPen(*(new QColor(QColor(255, 0, 0, 255))));
-        p_paint->drawLine(255, HISTO_HEIGHT_COLOUR-12, 255, HISTO_HEIGHT_COLOUR-12-m_blue_table[255]);
-        p_paint->drawLine(255, (2*HISTO_HEIGHT_COLOUR)/3-12, 255, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[255]);
-        p_paint->drawLine(255, HISTO_HEIGHT_COLOUR/3-12, 255, HISTO_HEIGHT_COLOUR/3-12-m_red_table[255]);
+        histo_paint.setPen(QColor(QColor(255, 0, 0, 255)));
+        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR-12, 255, HISTO_HEIGHT_COLOUR-12-m_blue_table[255]);
+        histo_paint.drawLine(255, (2*HISTO_HEIGHT_COLOUR)/3-12, 255, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[255]);
+        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR/3-12, 255, HISTO_HEIGHT_COLOUR/3-12-m_red_table[255]);
 
-        emit histogram_done(*p_histogram_Pixmap);  // Send histogram image out
-
-        delete p_paint;
-        delete p_histogram_Pixmap;
-
+        emit histogram_done(histogram_Pixmap);  // Send histogram image out
     } else {
         //
         // Generate monochrome histogram
@@ -195,40 +170,23 @@ void c_histogram_thread::run()
             }
         }
 
-        // Create an instance of QPixmap to render the histogram image on
-        QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_MONO);
-        p_histogram_Pixmap->fill(QColor(255-15, 255-15, 255-15, 255));  // Mono
+        // Create an instance of QPixmap with base histogram image on it to render the histogram graph on
+        QPixmap histogram_Pixmap = *mp_histogram_base_mono_Pixmap;
 
         // Create an instance of QPainter to draw on the QPixmap instance
-        QPainter *p_paint = new QPainter(p_histogram_Pixmap);
-
-        // Draw vertical lines every 25 pixels and label them
-        for (int x = 0; x < 256; x += 25) {
-            p_paint->setPen(*(new QColor(196, 196, 196, 255)));
-            p_paint->drawLine(x, HISTO_HEIGHT_MONO, x, 0);
-
-            p_paint->setPen(*(new QColor(0, 0, 0, 255)));
-            if (x == 0) {
-                p_paint->drawText(QRect(x, HISTO_HEIGHT_MONO-11, 20, 10), Qt::AlignLeft | Qt::AlignVCenter, QString::number(x));
-            } else {
-                p_paint->drawText(QRect(x-10, HISTO_HEIGHT_MONO-11, 20, 10), Qt::AlignHCenter | Qt::AlignVCenter, QString::number(x));
-            }
-        }
+        QPainter paint(&histogram_Pixmap);
 
         // Draw histogram graph except the last column
         for (int x = 0; x < 255; x++) {
-            p_paint->setPen(*(new QColor(2*x/3, 2*x/3, 2*x/3, 255)));
-            p_paint->drawLine(x, HISTO_HEIGHT_MONO-12, x, HISTO_HEIGHT_MONO-12-m_blue_table[x]);
+            paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 255));
+            paint.drawLine(x, HISTO_HEIGHT_MONO-12, x, HISTO_HEIGHT_MONO-12-m_blue_table[x]);
         }
 
         // Draw final column of histogram graph in red to indicate potential clipping
-        p_paint->setPen(*(new QColor(QColor(255, 0, 0, 255))));
-        p_paint->drawLine(255, HISTO_HEIGHT_MONO-12, 255, HISTO_HEIGHT_MONO-12-m_blue_table[255]);
+        paint.setPen(QColor(QColor(255, 0, 0, 255)));
+        paint.drawLine(255, HISTO_HEIGHT_MONO-12, 255, HISTO_HEIGHT_MONO-12-m_blue_table[255]);
 
-        emit histogram_done(*p_histogram_Pixmap);  // Send histogram image out
-
-        delete p_paint;
-        delete p_histogram_Pixmap;
+        emit histogram_done(histogram_Pixmap);  // Send histogram image out
     }
 
     m_run_count++;
