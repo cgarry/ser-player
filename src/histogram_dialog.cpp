@@ -33,7 +33,8 @@ c_histogram_dialog::c_histogram_dialog(QWidget *parent)
     setWindowTitle(tr("Histogram"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    mp_histogram_Label = new QLabel("Histogram");
+    mp_histogram_Label = new QLabel;
+    mp_histogram_Label->setPixmap(QPixmap(256, 150));
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->addWidget(mp_histogram_Label);

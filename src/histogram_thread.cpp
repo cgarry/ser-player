@@ -115,16 +115,16 @@ void c_histogram_thread::run()
 
         // Create an instance of QPixmap to render the histogram image on
         QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_COLOUR);
-        p_histogram_Pixmap->fill(QColor(255-31, 255-31, 255, 255));  // B
+        p_histogram_Pixmap->fill(QColor(255-50, 255-50, 255, 255));  // B
 
         // Create an instance of QPainter to draw on the QPixmap instance
         QPainter *p_paint = new QPainter(p_histogram_Pixmap);
-        p_paint->setPen(*(new QColor(255, 255-31, 255-31, 255)));
+        p_paint->setPen(*(new QColor(255, 255-50, 255-50, 255)));
         for (int y = 0; y < HISTO_HEIGHT_COLOUR/3; y++) {
             p_paint->drawLine(0, y, HISTO_WIDTH, y);
         }
 
-        p_paint->setPen(*(new QColor(255-31, 255, 255-31, 255)));
+        p_paint->setPen(*(new QColor(255-50, 255, 255-50, 255)));
         for (int y = HISTO_HEIGHT_COLOUR/3; y < 2*HISTO_HEIGHT_COLOUR/3; y++) {
             p_paint->drawLine(0, y, HISTO_WIDTH, y);
         }
@@ -147,8 +147,8 @@ void c_histogram_thread::run()
         }
 
         // Draw histogram graph except the last column
-        p_paint->setPen(*(new QColor(QColor(64, 64, 64, 192))));
         for (int x = 0; x < 255; x++) {
+            p_paint->setPen(*(new QColor(2*x/3, 2*x/3, 2*x/3, 255)));
             p_paint->drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
             p_paint->drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
             p_paint->drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
@@ -184,6 +184,7 @@ void c_histogram_thread::run()
             max_value = (m_blue_table[i] > max_value) ? m_blue_table[i] : max_value;
         }
 
+
         // Convert the histogram table into log10 normalised values
         double max_value_log10 = log((double)max_value) + 1.0;
         for (int i = 0; i < 256; i++) {
@@ -196,7 +197,7 @@ void c_histogram_thread::run()
 
         // Create an instance of QPixmap to render the histogram image on
         QPixmap *p_histogram_Pixmap = new QPixmap(HISTO_WIDTH, HISTO_HEIGHT_MONO);
-        p_histogram_Pixmap->fill(QColor(255-31, 255-31, 255-31, 255));  // Mono
+        p_histogram_Pixmap->fill(QColor(255-15, 255-15, 255-15, 255));  // Mono
 
         // Create an instance of QPainter to draw on the QPixmap instance
         QPainter *p_paint = new QPainter(p_histogram_Pixmap);
@@ -215,8 +216,8 @@ void c_histogram_thread::run()
         }
 
         // Draw histogram graph except the last column
-        p_paint->setPen(*(new QColor(QColor(64, 64, 64, 192))));
         for (int x = 0; x < 255; x++) {
+            p_paint->setPen(*(new QColor(2*x/3, 2*x/3, 2*x/3, 255)));
             p_paint->drawLine(x, HISTO_HEIGHT_MONO-12, x, HISTO_HEIGHT_MONO-12-m_blue_table[x]);
         }
 
