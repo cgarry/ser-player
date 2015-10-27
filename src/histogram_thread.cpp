@@ -81,11 +81,20 @@ void c_histogram_thread::run()
         memset(m_red_table, 0, 256 * sizeof(int32_t));
 
         // Create histogram table
-        uint8_t *p_data = mp_buffer;
-        for (int i = 0; i < m_width * m_height; i++) {
-            m_blue_table[*p_data++]++;
-            m_green_table[*p_data++]++;
-            m_red_table[*p_data++]++;
+        if (m_byte_depth == 1) {
+            uint8_t *p_data = mp_buffer;
+            for (int i = 0; i < m_width * m_height; i++) {
+                m_blue_table[*p_data++]++;
+                m_green_table[*p_data++]++;
+                m_red_table[*p_data++]++;
+            }
+        } else {  // m_byte_depth == 2
+            uint16_t *p_data = (uint16_t *)mp_buffer;
+            for (int i = 0; i < m_width * m_height; i++) {
+                m_blue_table[(*p_data++) >> 8]++;
+                m_green_table[(*p_data++) >> 8]++;
+                m_red_table[(*p_data++) >> 8]++;
+            }
         }
 
         delete [] mp_buffer;  // Free image buffer
@@ -147,9 +156,16 @@ void c_histogram_thread::run()
         memset(m_blue_table, 0, 256 * sizeof(int32_t));
 
         // Create histogram table
-        uint8_t *p_data = mp_buffer;
-        for (int i = 0; i < m_width * m_height; i++) {
-            m_blue_table[*p_data++]++;
+        if (m_byte_depth == 1) {
+            uint8_t *p_data = mp_buffer;
+            for (int i = 0; i < m_width * m_height; i++) {
+                m_blue_table[*p_data++]++;
+            }
+        } else {  // m_byte_depth == 2
+            uint16_t *p_data = (uint16_t *)mp_buffer;
+            for (int i = 0; i < m_width * m_height; i++) {
+                m_blue_table[(*p_data++) >> 8]++;
+            }
         }
 
         delete [] mp_buffer;  // Free image buffer
@@ -190,5 +206,6 @@ void c_histogram_thread::run()
     }
 
     m_run_count++;
+    msleep(50);
     m_histogram_done = true;
 }

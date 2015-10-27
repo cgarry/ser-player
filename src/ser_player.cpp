@@ -1832,7 +1832,6 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage
 
         // Start histogram generation if one is not already being generated
         if (!for_saving && mp_histogram_dialog->isVisible() && mp_histogram_thread->is_histogram_done()) {
-
             mp_histogram_thread->generate_histogram(mp_frame_image);
         }
 
