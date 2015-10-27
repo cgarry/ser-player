@@ -14,5 +14,7 @@
         <file>resources/play_forward.png</file>
         <file>resources/play_forward_and_reverse.png</file>
         <file>resources/play_reverse.png</file>
+        <file>resources/histogram_colour.png</file>
+        <file>resources/histogram_mono.png</file>
     </qresource>
 </RCC>
