@@ -700,7 +700,7 @@ void c_ser_player::populate_recent_save_folders_menu()
             mp_recent_save_folders_ActGroup->addAction(save_folders_action);
         }
 
-        mp_recent_ser_files_Menu->addSeparator();
+        mp_recent_save_folders_Menu->addSeparator();
 
         save_folders_action = new QAction(tr("Clear Recent", "Save Folders menu entry"), this);
         save_folders_action->setData(QString(""));

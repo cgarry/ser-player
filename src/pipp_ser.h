@@ -23,23 +23,6 @@
 #include <QString>
 #include <stdint.h>
 #include "pipp_buffer.h"
-//#include "pipp_options.h"
-
-#ifdef DLL_BUILD
-#include "pipp_dll.h"
-#endif
-
-// 64-bit fseek for various platforms
-#ifdef __linux__
-#define fseek64 fseeko64  // Linux
-#define ftell64 ftello64  // Linux
-#elif defined (__APPLE__)
-#define fseek64 fseeko  // OS X
-#define ftell64 ftello  // OS X
-#else
-#define fseek64 _fseeki64  // Windows
-#define ftell64 _ftelli64  // Windows
-#endif
 
 
 // Codes for ColourID
@@ -113,14 +96,14 @@ class c_pipp_ser {
             m_bytes_per_sample(0),
             m_colour(0),
             mp_timestamp(NULL),
-            m_error_string("") {};
+            m_error_string("") {}
 
 
         // ------------------------------------------
         // Destructor
         // ------------------------------------------
         ~c_pipp_ser() {
-        };
+        }
 
 
         // ------------------------------------------
@@ -149,7 +132,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_width() {
             return m_header.image_width;
-        };
+        }
 
 
         // ------------------------------------------
@@ -157,7 +140,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_height() {
             return m_header.image_height;
-        };
+        }
 
 
         // ------------------------------------------
@@ -165,7 +148,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_fps_rate() {
             return m_fps_rate;
-        };
+        }
 
 
         // ------------------------------------------
@@ -173,7 +156,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_fps_scale() {
             return m_fps_scale;
-        };
+        }
 
 
         // ------------------------------------------
@@ -181,7 +164,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_colour_id() {
             return m_header.colour_id;
-        };
+        }
 
 
         // ------------------------------------------
@@ -189,7 +172,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_colour() {
             return m_colour;
-        };
+        }
 
 
         // ------------------------------------------
@@ -197,7 +180,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_bytes_per_sample() {
             return m_bytes_per_sample;
-        };
+        }
 
 
         // ------------------------------------------
@@ -205,7 +188,7 @@ class c_pipp_ser {
         // ------------------------------------------
         int32_t get_pixel_depth() {
             return m_header.pixel_depth;
-        };
+        }
 
 
         // ------------------------------------------
@@ -221,16 +204,6 @@ class c_pipp_ser {
         // Get error string
         // ------------------------------------------
         QString& get_error_string();
-
-
-#ifdef DLL_BUILD
-        // ------------------------------------------
-        // Get info about a SER file
-        // ------------------------------------------
-        static int32_t get_ser_info(
-            const char *ser_filename,
-            const char *tmp_filename);
-#endif
 
 
         // ------------------------------------------
