@@ -33,12 +33,26 @@ class c_histogram_thread : public QThread
 
 
 public:
+    // Constructor
     c_histogram_thread();
+
+    // Destructor
     ~c_histogram_thread();
-    void generate_histogram(c_image *p_image);
-    bool is_histogram_done()
+
+    // Method to initiate histogram generation
+    void generate_histogram(c_image *p_image, int frame_number);
+
+    // Methed to return frame number for the last histogram generated or the
+    // histogram currently being generated
+    int get_frame_number()
     {
-        return m_histogram_done;
+        return m_frame_number;
+    }
+
+    // Method to return if the thread is ready to generate a new histogram
+    bool is_ready()
+    {
+        return m_is_ready;
     }
     
     
@@ -47,6 +61,7 @@ protected:
 
 
 signals:
+    // Signal to pass the histogram pixmap back once it is generated
     void histogram_done(QPixmap histogram);
 
 public slots:
@@ -56,7 +71,8 @@ private slots:
 
     
 private:
-    bool m_histogram_done;
+    bool m_is_ready;
+    int m_frame_number;
     int m_run_count;
     int32_t m_width;
     int32_t m_height;

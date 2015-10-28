@@ -28,7 +28,7 @@
 
 
 c_histogram_thread::c_histogram_thread()
-    : m_histogram_done(true),
+    : m_is_ready(true),
       m_run_count(0)
 {
     // Initialise histogram base images - graphs are painted on these images
@@ -46,11 +46,12 @@ c_histogram_thread::~c_histogram_thread()
 
 
 
-void c_histogram_thread::generate_histogram(c_image *p_image)
+void c_histogram_thread::generate_histogram(c_image *p_image, int frame_number)
 {
-    m_histogram_done = false;
+    m_is_ready = false;
 
     // Copy image details
+    m_frame_number = frame_number;
     m_width = p_image->get_width();
     m_height = p_image->get_height();
     m_colour = p_image->get_colour();
@@ -136,7 +137,7 @@ void c_histogram_thread::run()
 
         // Draw histogram graph except the last column
         for (int x = 0; x < 255; x++) {
-            histo_paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 255));
+            histo_paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 220));
             histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
             histo_paint.drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
             histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
@@ -194,9 +195,13 @@ void c_histogram_thread::run()
 
         // Draw histogram graph except the last column
         for (int x = 0; x < 255; x++) {
-            paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 255));
+            paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 220));
             paint.drawLine(x, HISTO_HEIGHT_MONO-12, x, HISTO_HEIGHT_MONO-12-m_blue_table[x]);
         }
+
+        // Debug - Display frame number on histogram
+        //paint.drawText(255-40, 0, 40, 10, Qt::AlignVCenter | Qt::AlignRight, QString::number(m_frame_number));
+        // Debug - End
 
         // Draw final column of histogram graph in red to indicate potential clipping
         paint.setPen(QColor(QColor(255, 0, 0, 255)));
@@ -206,6 +211,6 @@ void c_histogram_thread::run()
     }
 
     m_run_count++;
-    msleep(50);
-    m_histogram_done = true;
+    msleep(100);
+    m_is_ready = true;
 }

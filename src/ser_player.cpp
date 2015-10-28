@@ -646,7 +646,7 @@ void c_ser_player::populate_recent_ser_files_menu()
     QAction *ser_files_action;
     if (c_persistent_data::m_recent_ser_files.count() > 0) {
         for (int x = 0; x < c_persistent_data::m_recent_ser_files.count() ; x++) {
-            ser_files_action = new QAction(c_persistent_data::m_recent_ser_files.at(x), this);
+            ser_files_action = new QAction(QString::number(x+1) + " " + c_persistent_data::m_recent_ser_files.at(x), this);
             ser_files_action->setData(c_persistent_data::m_recent_ser_files.at(x));
             mp_recent_ser_files_Menu->addAction(ser_files_action);
             mp_recent_ser_files_ActGroup->addAction(ser_files_action);
@@ -694,7 +694,7 @@ void c_ser_player::populate_recent_save_folders_menu()
     QAction *save_folders_action;
     if (c_persistent_data::m_recent_save_folders.count() > 0) {
         for (int x = 0; x < c_persistent_data::m_recent_save_folders.count() ; x++) {
-            save_folders_action = new QAction(c_persistent_data::m_recent_save_folders.at(x), this);
+            save_folders_action = new QAction(QString::number(x+1) + " " + c_persistent_data::m_recent_save_folders.at(x), this);
             save_folders_action->setData(c_persistent_data::m_recent_save_folders.at(x));
             mp_recent_save_folders_Menu->addAction(save_folders_action);
             mp_recent_save_folders_ActGroup->addAction(save_folders_action);
@@ -1310,6 +1310,15 @@ void c_ser_player::frame_slider_changed_slot()
                                          .arg(ts_second, 2, 10, QLatin1Char( '0' ))
                                          .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
             }
+
+            // Ensure displayed histogram matches displayed frame
+            if (m_current_state != STATE_PLAYING) {
+                if (mp_histogram_dialog->isVisible() && mp_frame_Slider->value() != mp_histogram_thread->get_frame_number()) {
+                    // We have stopped playing but the histogram is not the histogram for the last frame
+                    // Display the last frame again to regenerate the histogram
+                    QTimer::singleShot(5, this, SLOT(frame_slider_changed_slot()));
+                }
+            }
         } else {
             // Should never get here unless something has gone very wrong
             // Stop playing as a last resort
@@ -1329,6 +1338,11 @@ void c_ser_player::frame_timer_timeout_slot()
         if (!mp_frame_Slider->goto_next_frame()) {
             // End of playback
             m_current_state = STATE_FINISHED;
+            if (mp_histogram_dialog->isVisible()) {
+                // A slightly messy way to ensure the displayed histogram matches the displayed frame
+                // when playback has stopped
+                QTimer::singleShot(5, this, SLOT(frame_slider_changed_slot()));
+            }
         }
 
         if (m_current_state != STATE_PLAYING) {
@@ -1831,8 +1845,12 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage
         mp_frame_image->change_colour_saturation(m_colour_saturation);
 
         // Start histogram generation if one is not already being generated
-        if (!for_saving && mp_histogram_dialog->isVisible() && mp_histogram_thread->is_histogram_done()) {
-            mp_histogram_thread->generate_histogram(mp_frame_image);
+        if (!for_saving) {
+            if (mp_histogram_dialog->isVisible()) {
+                if (mp_histogram_thread->is_ready()) {
+                    mp_histogram_thread->generate_histogram(mp_frame_image, frame_number);
+                }
+            }
         }
 
         mp_frame_image->conv_data_ready_for_qimage();
