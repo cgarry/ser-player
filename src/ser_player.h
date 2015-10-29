@@ -164,7 +164,7 @@ public slots:
     void handle_arguments();
     void about_ser_player();
     void forward_button_held_slot();
-    void histogram_done_slot(QPixmap histogram);
+    void histogram_done_slot();
 
 
 protected:
@@ -180,6 +180,8 @@ private:
     bool get_frame_as_qimage(int frame_number, bool for_saving, QImage &arg_qimage);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
+
+    void debug_count(int thread_number);
 };
 
 #endif // SER_PLAYER_H

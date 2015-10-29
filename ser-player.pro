@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT += core gui
+QT += concurrent
 !DISABLE_NEW_VERSION_CHECK: QT += network
 
 CONFIG += c++11

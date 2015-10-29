@@ -27,6 +27,7 @@
 #include <QDesktopWidget>
 #include <QDragEnterEvent>
 #include <QFileDialog>
+#include <QFuture>
 #include <QImage>
 #include <QImageWriter>
 #include <QLabel>
@@ -77,7 +78,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_is_colour = false;
     m_has_bayer_pattern = false;
     mp_histogram_thread = new c_histogram_thread;
-    connect(mp_histogram_thread, SIGNAL(histogram_done(QPixmap)), this, SLOT(histogram_done_slot(QPixmap)));
+    connect(mp_histogram_thread, SIGNAL(histogram_done()), this, SLOT(histogram_done_slot()));
 
     // Menu Items
     m_ser_directory = "";
@@ -782,6 +783,14 @@ void c_ser_player::colour_settings_slot(bool checked)
 void c_ser_player::colour_settings_closed_slot()
 {
     mp_colour_settings_Act->setChecked(false);
+}
+
+
+void c_ser_player::debug_count(int thread_number)
+{
+    for (int x = 0; x < 0xFFFFF; x++) {
+        qDebug() << thread_number << " - Debug count: " << x;
+    }
 }
 
 
@@ -1628,9 +1637,11 @@ void c_ser_player::new_version_available_slot(QString version)
 }
 
 
-void c_ser_player::histogram_done_slot(QPixmap histogram)
+void c_ser_player::histogram_done_slot()
 {
-    mp_histogram_dialog->set_pixmap(histogram);
+    QPixmap histogram_Pixmap;
+    mp_histogram_thread->draw_histogram_pixmap(histogram_Pixmap);
+    mp_histogram_dialog->set_pixmap(histogram_Pixmap);
 }
 
 
@@ -1847,7 +1858,7 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage
         // Start histogram generation if one is not already being generated
         if (!for_saving) {
             if (mp_histogram_dialog->isVisible()) {
-                if (mp_histogram_thread->is_ready()) {
+                if (!mp_histogram_thread->is_running()) {
                     mp_histogram_thread->generate_histogram(mp_frame_image, frame_number);
                 }
             }

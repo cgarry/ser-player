@@ -21,13 +21,14 @@
 
 #include <QDialog>
 #include <QThread>
+#include <QFuture>
 #include <cstdint>
 
 
 class c_image;
 
 
-class c_histogram_thread : public QThread
+class c_histogram_thread : public QObject
 {
     Q_OBJECT
 
@@ -39,8 +40,11 @@ public:
     // Destructor
     ~c_histogram_thread();
 
-    // Method to initiate histogram generation
+    // Method to initiate histogram data generation
     void generate_histogram(c_image *p_image, int frame_number);
+
+    // Method to draw histogram on pixmap
+    void draw_histogram_pixmap(QPixmap &histogram);
 
     // Methed to return frame number for the last histogram generated or the
     // histogram currently being generated
@@ -50,19 +54,20 @@ public:
     }
 
     // Method to return if the thread is ready to generate a new histogram
-    bool is_ready()
+    bool is_running()
     {
-        return m_is_ready;
+        return m_is_running;
+//        return generate_histogram_data_thread.isRunning();
     }
     
     
-protected:
-    void run();
+private:
+    void calculate_pixmap_data();
 
 
 signals:
     // Signal to pass the histogram pixmap back once it is generated
-    void histogram_done(QPixmap histogram);
+    void histogram_done();
 
 public slots:
 
@@ -71,9 +76,8 @@ private slots:
 
     
 private:
-    bool m_is_ready;
+    bool m_is_running;
     int m_frame_number;
-    int m_run_count;
     int32_t m_width;
     int32_t m_height;
     bool m_colour;
@@ -85,6 +89,7 @@ private:
     int32_t m_blue_table[256];
     QPixmap *mp_histogram_base_colour_Pixmap;
     QPixmap *mp_histogram_base_mono_Pixmap;
+    QFuture<void> generate_histogram_data_thread;
 };
 
 #endif // HISTOGRAM_THREAD_H

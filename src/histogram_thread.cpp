@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QtConcurrent>
 #include <QPainter>
 #include <QPixmap>
 #include <QThread>
@@ -28,8 +29,7 @@
 
 
 c_histogram_thread::c_histogram_thread()
-    : m_is_ready(true),
-      m_run_count(0)
+    : m_is_running(false)
 {
     // Initialise histogram base images - graphs are painted on these images
     mp_histogram_base_colour_Pixmap = new QPixmap(":/res/resources/histogram_colour.png");
@@ -48,31 +48,36 @@ c_histogram_thread::~c_histogram_thread()
 
 void c_histogram_thread::generate_histogram(c_image *p_image, int frame_number)
 {
-    m_is_ready = false;
+    if (!m_is_running) {
+        m_is_running = true;
 
-    // Copy image details
-    m_frame_number = frame_number;
-    m_width = p_image->get_width();
-    m_height = p_image->get_height();
-    m_colour = p_image->get_colour();
-    m_byte_depth = p_image->get_byte_depth();
-    m_buffer_size = m_width * m_height * m_byte_depth;
-    m_buffer_size = (m_colour) ? m_buffer_size * 3 : m_buffer_size;
-    mp_buffer = new uint8_t[m_buffer_size];
+        // Copy image details
+        m_frame_number = frame_number;
+        m_width = p_image->get_width();
+        m_height = p_image->get_height();
+        m_colour = p_image->get_colour();
+        m_byte_depth = p_image->get_byte_depth();
+        m_buffer_size = m_width * m_height * m_byte_depth;
+        m_buffer_size = (m_colour) ? m_buffer_size * 3 : m_buffer_size;
+        mp_buffer = new uint8_t[m_buffer_size];
 
-    // Copy image data to local buffer
-    memcpy(mp_buffer, p_image->get_p_buffer(), m_buffer_size);
+        // Copy image data to local buffer
+        memcpy(mp_buffer, p_image->get_p_buffer(), m_buffer_size);
 
-    start();
+
+        generate_histogram_data_thread = QtConcurrent::run(this, &c_histogram_thread::calculate_pixmap_data);
+    }
 }
 
 
-void c_histogram_thread::run()
+void c_histogram_thread::calculate_pixmap_data()
 {
     const int HISTO_HEIGHT_MONO = 150;
     const int HISTO_HEIGHT_COLOUR = 300;
+
     // Generate histogram
     int32_t max_value = 0;
+
     if (m_colour) {
         //
         // Generate monochrome histogram
@@ -128,28 +133,6 @@ void c_histogram_thread::run()
                 m_red_table[i] = 0;
             }
         }
-
-        // Create an instance of QPixmap with base histogram image on it to render the histogram graph on
-        QPixmap histogram_Pixmap = *mp_histogram_base_colour_Pixmap;
-
-        // Create an instance of QPainter to draw on the QPixmap instance
-        QPainter histo_paint(&histogram_Pixmap);
-
-        // Draw histogram graph except the last column
-        for (int x = 0; x < 255; x++) {
-            histo_paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 220));
-            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
-            histo_paint.drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
-            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
-        }
-
-        // Draw final column of histogram graph in red to indicate potential clipping
-        histo_paint.setPen(QColor(QColor(255, 0, 0, 255)));
-        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR-12, 255, HISTO_HEIGHT_COLOUR-12-m_blue_table[255]);
-        histo_paint.drawLine(255, (2*HISTO_HEIGHT_COLOUR)/3-12, 255, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[255]);
-        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR/3-12, 255, HISTO_HEIGHT_COLOUR/3-12-m_red_table[255]);
-
-        emit histogram_done(histogram_Pixmap);  // Send histogram image out
     } else {
         //
         // Generate monochrome histogram
@@ -186,9 +169,45 @@ void c_histogram_thread::run()
                 m_blue_table[i] = 0;
             }
         }
+    }
 
+    // A a short delay to limit the rate that histograms are generated and displayed
+    // This creates the same user experience but gives the processor an easier time
+    QThread::msleep(50);
+    emit histogram_done();  // Signal that the processing is done
+}
+
+
+// Method to draw histogram on pixmap
+void c_histogram_thread::draw_histogram_pixmap(QPixmap &histogram_Pixmap)
+{
+    const int HISTO_HEIGHT_MONO = 150;
+    const int HISTO_HEIGHT_COLOUR = 300;
+
+    if (m_colour) {
         // Create an instance of QPixmap with base histogram image on it to render the histogram graph on
-        QPixmap histogram_Pixmap = *mp_histogram_base_mono_Pixmap;
+        histogram_Pixmap = *mp_histogram_base_colour_Pixmap;
+
+        // Create an instance of QPainter to draw on the QPixmap instance
+        QPainter histo_paint(&histogram_Pixmap);
+
+        // Draw histogram graph except the last column
+        for (int x = 0; x < 255; x++) {
+            histo_paint.setPen(QColor(2*x/3, 2*x/3, 2*x/3, 220));
+            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR-12, x, HISTO_HEIGHT_COLOUR-12-m_blue_table[x]);
+            histo_paint.drawLine(x, (2*HISTO_HEIGHT_COLOUR)/3-12, x, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[x]);
+            histo_paint.drawLine(x, HISTO_HEIGHT_COLOUR/3-12, x, HISTO_HEIGHT_COLOUR/3-12-m_red_table[x]);
+        }
+
+        // Draw final column of histogram graph in red to indicate potential clipping
+        histo_paint.setPen(QColor(QColor(255, 0, 0, 255)));
+        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR-12, 255, HISTO_HEIGHT_COLOUR-12-m_blue_table[255]);
+        histo_paint.drawLine(255, (2*HISTO_HEIGHT_COLOUR)/3-12, 255, (2*HISTO_HEIGHT_COLOUR)/3-12-m_green_table[255]);
+        histo_paint.drawLine(255, HISTO_HEIGHT_COLOUR/3-12, 255, HISTO_HEIGHT_COLOUR/3-12-m_red_table[255]);
+    } else {
+        // Monochrome
+        // Create an instance of QPixmap with base histogram image on it to render the histogram graph on
+        histogram_Pixmap = *mp_histogram_base_mono_Pixmap;
 
         // Create an instance of QPainter to draw on the QPixmap instance
         QPainter paint(&histogram_Pixmap);
@@ -206,11 +225,7 @@ void c_histogram_thread::run()
         // Draw final column of histogram graph in red to indicate potential clipping
         paint.setPen(QColor(QColor(255, 0, 0, 255)));
         paint.drawLine(255, HISTO_HEIGHT_MONO-12, 255, HISTO_HEIGHT_MONO-12-m_blue_table[255]);
-
-        emit histogram_done(histogram_Pixmap);  // Send histogram image out
     }
 
-    m_run_count++;
-    msleep(100);
-    m_is_ready = true;
+    m_is_running = false;  // Signal that the next conversion can start
 }
