@@ -34,13 +34,15 @@ class c_save_frames_dialog : public QDialog
     Q_OBJECT
 
 public:
+    enum e_save_type {SAVE_IMAGES, SAVE_SER};
+
     c_save_frames_dialog(QWidget *parent,
+                         e_save_type save_type,
                          int total_frames,
                          int marker_start_frame,
                          int marker_end_frame,
                          bool markers_enabled,
                          bool ser_has_timestamps);
-
 
     int get_start_frame()
     {

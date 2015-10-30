@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.15"
+#define VERSION_STRING "v1.3.16"
 
 #include <Qt>
 #include <QApplication>
@@ -53,6 +53,7 @@
 #include "ser_player.h"
 #include "persistent_data.h"
 #include "pipp_ser.h"
+#include "pipp_ser_write.h"
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
@@ -100,10 +101,15 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     file_menu->addSeparator();
 
-    mp_save_frames_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
-    mp_save_frames_Act->setEnabled(false);
-    file_menu->addAction(mp_save_frames_Act);
-    connect(mp_save_frames_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot()));
+    mp_save_frames_as_ser_Act = new QAction(tr("Save Frames As SER File...", "Menu title"), this);
+    mp_save_frames_as_ser_Act->setEnabled(false);
+    file_menu->addAction(mp_save_frames_as_ser_Act);
+    connect(mp_save_frames_as_ser_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot_as_ser_slot()));
+
+    mp_save_frames_as_images_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
+    mp_save_frames_as_images_Act->setEnabled(false);
+    file_menu->addAction(mp_save_frames_as_images_Act);
+    connect(mp_save_frames_as_images_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot_as_images_slot()));
 
 
     mp_recent_save_folders_Menu = file_menu->addMenu(tr("Recent Save Folders", "Menu title"));
@@ -786,16 +792,7 @@ void c_ser_player::colour_settings_closed_slot()
 }
 
 
-void c_ser_player::debug_count(int thread_number)
-{
-    for (int x = 0; x < 0xFFFFF; x++) {
-        qDebug() << thread_number << " - Debug count: " << x;
-    }
-}
-
-
-// Colour settings menu QAction has been clicked
-void c_ser_player::save_frames_slot()
+void c_ser_player::save_frames_slot_as_ser_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
@@ -807,6 +804,150 @@ void c_ser_player::save_frames_slot()
 
     // Use save_frames dialog to get range of frames to be saved
     c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this,
+                                                                        c_save_frames_dialog::SAVE_SER,
+                                                                        m_total_frames,
+                                                                        mp_frame_Slider->get_start_frame(),
+                                                                        mp_frame_Slider->get_end_frame(),
+                                                                        mp_frame_Slider->get_markers_enable(),
+                                                                        mp_ser_file->has_timestamps());
+
+    int ret = save_frames_Dialog->exec();
+
+    if (ret != QDialog::Rejected &&
+        m_current_state != STATE_NO_FILE &&
+        m_current_state != STATE_PLAYING) {
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As SER File"),
+                                   m_ser_directory,
+                                   tr("SER Files (*.ser)", "Filetype filter"));
+
+        if (!filename.isEmpty()) {
+            // Handle the case on Linux where an extension is not added by the save file dialog
+            if (!filename.endsWith(tr(".ser"), Qt::CaseInsensitive)) {
+                filename = filename + tr(".ser");
+            }
+
+            int min_frame = save_frames_Dialog->get_start_frame();
+            int max_frame = save_frames_Dialog->get_end_frame();
+            int decimate_value = save_frames_Dialog->get_frame_decimation();
+            int sequence_direction = save_frames_Dialog->get_sequence_direction();
+            int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
+            bool include_timestamps = false;
+
+            c_pipp_ser_write ser_write_file;
+            ser_write_file.create(filename.toStdString().c_str(), // const char *filename
+                                  mp_ser_file->get_width(),  // int32_t  width
+                                  mp_ser_file->get_height(), // int32_t  height
+                                  mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
+                                  1);  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
+
+            // Keep list of last saved folders up to date
+            add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
+
+            // Update Save Folders Menu
+            update_recent_save_folders_menu();
+
+            // Setup progress dialog
+            c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
+            save_progress_dialog.show();
+
+            int saved_frames = 0;
+
+            // Direction loop
+            int start_dir = (sequence_direction == 1) ? 1 : 0;
+            int end_dir = (sequence_direction == 0) ? 0 : 1;
+            for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                int start_frame = min_frame;
+                int end_frame = max_frame;
+                if (current_dir == 1) {  // Reverse direction - count backwards
+                    // Use negative numbers so for loop works counting up or down
+                    start_frame = -max_frame;
+                    end_frame = -min_frame;
+                }
+
+                for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                    // Update progress bar
+                    saved_frames++;
+                    save_progress_dialog.set_value(saved_frames);
+
+                    // Get frame from SER file
+                    bool valid_frame = get_frame_as_qimage(abs(frame_number), true);
+                    if (valid_frame) {
+                        // Get timestamp for frame if required
+                        uint64_t timestamp = 0;
+                        if (include_timestamps) {
+                            timestamp = mp_ser_file->get_timestamp();
+                        }
+
+                        // Write frame to SER file
+                        ser_write_file.write_frame(
+                            mp_frame_image->get_p_buffer(),  // uint8_t  *data,
+                            timestamp);  // uint64_t timestamp);
+                    }
+
+                    if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                        // Abort frame saving
+                        break;
+                    }
+                }
+            }
+
+            // Get timestamp for this frame
+            int64_t utc_to_local_diff = 0;
+            if (include_timestamps) {
+                utc_to_local_diff = mp_ser_file->get_utc_to_local_diff();
+            }
+
+            // Get Colour ID for this frame
+            // By default use colour ID from original header to preserve any bayer pattern ID that is present
+            int32_t colour_id = mp_ser_file->get_colour_id();
+            if (mp_frame_image->get_colour()) {
+                // We only support BGR format for writing colour SER files, so use this colour ID for all
+                // colour data whether is was colour originally or debayered.
+                colour_id = COLOURID_BGR;
+            }
+
+            // Set details for SER file
+            ser_write_file.set_details(
+                0,                  // int32_t lu_id - always 0
+                colour_id,          // int32_t colour_id,
+                utc_to_local_diff,  // int64_t utc_to_local_diff,
+                mp_ser_file->get_observer_string(),
+                mp_ser_file->get_instrument_string(),
+                mp_ser_file->get_telescope_string());
+
+            // Write header and close SER file
+            ser_write_file.close();
+
+            // Processing has completed
+            save_progress_dialog.set_complete();
+            while (!save_progress_dialog.was_cancelled()) {
+                  // Wait
+            }
+        }
+    }
+
+    delete save_frames_Dialog;
+
+    // Restart playing if it was playing to start with
+    if (restart_playing == true) {
+        play_button_pressed_slot();
+    }
+}
+
+
+void c_ser_player::save_frames_slot_as_images_slot()
+{
+    // Pause playback if currently playing
+    bool restart_playing = false;
+    if (m_current_state == STATE_PLAYING) {
+        // Pause playing while frame is saved
+        restart_playing = true;
+        play_button_pressed_slot();
+    }
+
+    // Use save_frames dialog to get range of frames to be saved
+    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this,
+                                                                        c_save_frames_dialog::SAVE_IMAGES,
                                                                         m_total_frames,
                                                                         mp_frame_Slider->get_start_frame(),
                                                                         mp_frame_Slider->get_end_frame(),
@@ -828,6 +969,7 @@ void c_ser_player::save_frames_slot()
         const QString tif_ext = QString(tr(".tif"));
         const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
         QString selected_filter;
+        QString selected_ext;
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Images"),
                                    m_ser_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
@@ -836,18 +978,27 @@ void c_ser_player::save_frames_slot()
         if (!filename.isEmpty() && !selected_filter.isEmpty()) {
             if (selected_filter == jpg_filter) {
                 p_format = "JPG";
+                selected_ext = jpg_ext;
             }
 
             if (selected_filter == bmp_filter) {
                 p_format = "BMP";
+                selected_ext = bmp_ext;
             }
 
             if (selected_filter == png_filter) {
                 p_format = "PNG";
+                selected_ext = png_ext;
             }
 
             if (selected_filter == tif_filter) {
                 p_format = "TIFF";
+                selected_ext = tif_ext;
+            }
+
+            // Handle the case on Linux where an extension is not added by the save file dialog
+            if (!filename.endsWith(selected_ext, Qt::CaseInsensitive)) {
+                filename = filename + selected_ext;
             }
 
             int min_frame = save_frames_Dialog->get_start_frame();
@@ -870,9 +1021,15 @@ void c_ser_player::save_frames_slot()
             if (min_frame == -1) {
                 // Save current frame only
                 // Get frame from ser file
-                QImage save_qimage;
-                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), true, save_qimage);
+                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), true);
                 if (valid_frame) {
+                    mp_frame_image->conv_data_ready_for_qimage();
+
+                    QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
+                                                mp_frame_image->get_width(),
+                                                mp_frame_image->get_height(),
+                                                QImage::Format_RGB888);
+
                     QFile file(filename);
                     file.open(QIODevice::WriteOnly);
                     QPixmap::fromImage(save_qimage).save(&file, p_format);
@@ -908,9 +1065,15 @@ void c_ser_player::save_frames_slot()
                         save_progress_dialog.set_value(saved_frames);
 
                         // Get frame from SER file
-                        QImage save_qimage;
-                        bool valid_frame = get_frame_as_qimage(abs(frame_number), true, save_qimage);
+                        bool valid_frame = get_frame_as_qimage(abs(frame_number), true);
                         if (valid_frame) {
+                            mp_frame_image->conv_data_ready_for_qimage();
+
+                            QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
+                                                        mp_frame_image->get_width(),
+                                                        mp_frame_image->get_height(),
+                                                        QImage::Format_RGB888);
+
                             // Get timestamp for frame if required
                             if (append_timestamp_to_filename) {
                                 uint64_t ts = mp_ser_file->get_timestamp();
@@ -978,7 +1141,6 @@ void c_ser_player::save_frames_slot()
         }
     }
 
-    // Clean up
     delete save_frames_Dialog;
 
     // Restart playing if it was playing to start with
@@ -1052,7 +1214,7 @@ void c_ser_player::estimate_colour_balance()
         mp_frame_image->set_image_details(
                     mp_ser_file->get_width(),  // width
                     mp_ser_file->get_height(),  // height
-                    mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                    mp_ser_file->get_byte_depth(),  // byte_depth
                     is_colour);  // colour
 
         int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
@@ -1108,7 +1270,6 @@ void c_ser_player::open_ser_file_slot()
                                                     tr("SER Files (*.ser)", "Filetype filter"));
 
     if (!filename.isEmpty()) {
-        c_persistent_data::m_ser_directory = QFileInfo(filename).absolutePath();
         open_ser_file(filename);
     }
 }
@@ -1165,6 +1326,7 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Keep list of opened SER files up to date
         add_string_to_stringlist(c_persistent_data::m_recent_ser_files, QFileInfo(filename).absoluteFilePath());
+        c_persistent_data::m_ser_directory = QFileInfo(filename).absolutePath();
 
         // Update Recent SER Files menu
         update_recent_ser_files_menu();
@@ -1252,7 +1414,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Enable menu items that are only enabled when a SER file is open
         m_debayer_Act->setEnabled(m_has_bayer_pattern);
-        mp_save_frames_Act->setEnabled(true);
+        mp_save_frames_as_ser_Act->setEnabled(true);
+        mp_save_frames_as_images_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_histogram_viewer_Act->setEnabled(true);
         if (mp_histogram_viewer_Act->isChecked()) {
@@ -1288,10 +1451,16 @@ void c_ser_player::frame_slider_changed_slot()
         mp_frame_Slider->setValue(1);
     } else {
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
-        QImage frame_qimage;
-        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), false, frame_qimage);
+        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), false);
 
         if (valid_frame) {
+            mp_frame_image->conv_data_ready_for_qimage();
+
+            QImage frame_qimage = QImage(mp_frame_image->get_p_buffer(),
+                                         mp_frame_image->get_width(),
+                                         mp_frame_image->get_height(),
+                                         QImage::Format_RGB888);
+
             // Upate image in player
             mp_frame_image_Widget->setPixmap(QPixmap::fromImage(frame_qimage));
 
@@ -1827,7 +1996,7 @@ void c_ser_player::calculate_display_framerate()
 }
 
 
-bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage &arg_qimage)
+bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving)
 {
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
@@ -1837,7 +2006,7 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage
     mp_frame_image->set_image_details(
                 mp_ser_file->get_width(),  // width
                 mp_ser_file->get_height(),  // height
-                mp_ser_file->get_bytes_per_sample(),  // byte_depth
+                mp_ser_file->get_byte_depth(),  // byte_depth
                 is_colour);  // colour
 
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
@@ -1863,13 +2032,6 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving, QImage
                 }
             }
         }
-
-        mp_frame_image->conv_data_ready_for_qimage();
-
-        arg_qimage = QImage(mp_frame_image->get_p_buffer(),
-                             mp_frame_image->get_width(),
-                             mp_frame_image->get_height(),
-                             QImage::Format_RGB888);
     }
 
     return (ret >= 0);

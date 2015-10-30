@@ -48,7 +48,8 @@ private:
     static const QString C_WINDOW_TITLE_QSTRING;
 
     // Menus
-    QAction *mp_save_frames_Act;
+    QAction *mp_save_frames_as_images_Act;
+    QAction *mp_save_frames_as_ser_Act;
     QMenu *mp_recent_ser_files_Menu;
     QActionGroup *mp_recent_ser_files_ActGroup;
     QMenu *mp_recent_save_folders_Menu;
@@ -139,7 +140,8 @@ public slots:
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
     void open_ser_file_slot(QAction *action);
-    void save_frames_slot();
+    void save_frames_slot_as_ser_slot();
+    void save_frames_slot_as_images_slot();
     void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();
@@ -177,11 +179,9 @@ private:
     void update_recent_save_folders_menu();
     void populate_recent_save_folders_menu();
     void create_no_file_open_image();
-    bool get_frame_as_qimage(int frame_number, bool for_saving, QImage &arg_qimage);
+    bool get_frame_as_qimage(int frame_number, bool for_saving);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
-
-    void debug_count(int thread_number);
 };
 
 #endif // SER_PLAYER_H

@@ -107,12 +107,12 @@ class c_pipp_ser_write {
             bool     colour,
             int32_t  byte_depth);
             
+
         // ------------------------------------------
         // Write frame to SER file
         // ------------------------------------------
         int32_t write_frame(
             uint8_t  *data,
-            int32_t  colour,
             uint64_t timestamp);
             
           
@@ -129,7 +129,7 @@ class c_pipp_ser_write {
           
         
         // ------------------------------------------
-        // Write header and close AVI file
+        // Write header and close SER file
         // ------------------------------------------
         int32_t close();
 

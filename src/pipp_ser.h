@@ -67,7 +67,7 @@ class c_pipp_ser {
         int64_t m_filesize;
         uint32_t m_framesize;
         s_ser_header m_header;
-        int32_t m_bytes_per_sample;
+        int32_t m_bytes_depth;
         int32_t m_colour;
         uint32_t m_current_frame;
         uint64_t m_timestamp;
@@ -93,7 +93,7 @@ class c_pipp_ser {
         c_pipp_ser() :
             mp_ser_file(NULL),
             m_filesize(0),
-            m_bytes_per_sample(0),
+            m_bytes_depth(0),
             m_colour(0),
             mp_timestamp(NULL),
             m_error_string("") {}
@@ -176,10 +176,10 @@ class c_pipp_ser {
 
 
         // ------------------------------------------
-        // Get bytes_per_sample
+        // Get byte_depth
         // ------------------------------------------
-        int32_t get_bytes_per_sample() {
-            return m_bytes_per_sample;
+        int32_t get_byte_depth() {
+            return m_bytes_depth;
         }
 
 
@@ -198,6 +198,24 @@ class c_pipp_ser {
             char *observer_string,
             char *instrument_string,
             char *telescope_string);
+
+
+        // ------------------------------------------
+        // Get observer strings
+        // ------------------------------------------
+        QString get_observer_string();
+
+
+        // ------------------------------------------
+        // Get instrument strings
+        // ------------------------------------------
+        QString get_instrument_string();
+
+
+        // ------------------------------------------
+        // Get telescope strings
+        // ------------------------------------------
+        QString get_telescope_string();
 
 
         // ------------------------------------------

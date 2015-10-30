@@ -152,9 +152,9 @@ int32_t c_pipp_ser::open(
 
     // Check the pixel depth
     if (m_header.pixel_depth > 8) {
-        m_bytes_per_sample = 2;
+        m_bytes_depth = 2;
     } else {
-        m_bytes_per_sample = 1;
+        m_bytes_depth = 1;
     }
 
     // Decide if this is a colour or mono image (raw colour is mono!)
@@ -168,7 +168,7 @@ int32_t c_pipp_ser::open(
         break;
     }
 
-    int32_t total_bytes_per_sample = m_bytes_per_sample * (1 + m_colour * 2);
+    int32_t total_bytes_per_sample = m_bytes_depth * (1 + m_colour * 2);
 
     // Check that the file is large enough to hold all the frames
     if (m_filesize < (m_header.frame_count * m_header.image_height * m_header.image_width * total_bytes_per_sample + 178)) {
@@ -290,7 +290,7 @@ int32_t c_pipp_ser::open(
     }
 
     // Code to check m_header.pixel_depth since many software packages seem to set this incorrectly
-    if (m_bytes_per_sample == 2 && m_header.frame_count > 0) {
+    if (m_bytes_depth == 2 && m_header.frame_count > 0) {
         const int FRAMES_TO_CHECK_FOR_PIXEL_DEPTH = 10;
         int32_t pixel_depth[FRAMES_TO_CHECK_FOR_PIXEL_DEPTH];
         pixel_depth[0] = find_pixel_depth(1);  // First frame
@@ -360,7 +360,7 @@ int32_t c_pipp_ser::find_pixel_depth(
 // ------------------------------------------
 int32_t c_pipp_ser::get_buffer_size()
 {
-    int size = m_header.image_width * m_header.image_height * m_bytes_per_sample;
+    int size = m_header.image_width * m_header.image_height * m_bytes_depth;
 
     if (m_header.colour_id == COLOURID_RGB || m_header.colour_id == COLOURID_BGR) {
         size *= 3;
@@ -382,6 +382,62 @@ void c_pipp_ser::get_header_strings(
     strncpy(observer_string, m_header.observer, 40);
     strncpy(instrument_string, m_header.instrument, 40);
     strncpy(telescope_string, m_header.telescope, 40);
+}
+
+
+// ------------------------------------------
+// Get observer string
+// ------------------------------------------
+QString c_pipp_ser::get_observer_string()
+{
+    QString observer_string;
+    // Copy up to 40 characters into QString
+    for (int i = 0; i < 40; i++) {
+        if (m_header.observer[i] != 0) {
+            observer_string += m_header.observer[i];
+        } else {
+            break;
+        }
+    }
+
+    return observer_string;
+}
+
+
+// ------------------------------------------
+// Get instrument string
+// ------------------------------------------
+QString c_pipp_ser::get_instrument_string()
+{
+    QString instrument_string;
+    // Copy up to 40 characters into QString
+    for (int i = 0; i < 40; i++) {
+        if (m_header.instrument[i] != 0) {
+            instrument_string += m_header.instrument[i];
+        } else {
+            break;
+        }
+    }
+
+    return instrument_string;
+}
+
+
+// ------------------------------------------
+// Get telescope string
+// ------------------------------------------
+QString c_pipp_ser::get_telescope_string()
+{
+    QString telescope_string;
+    for (int i = 0; i < 40; i++) {
+        if (m_header.telescope[i] != 0) {
+            telescope_string += m_header.telescope[i];
+        } else {
+            break;
+        }
+    }
+
+    return telescope_string;
 }
 
 

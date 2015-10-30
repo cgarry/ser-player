@@ -105,7 +105,6 @@ int32_t c_pipp_ser_write::create(
 // ------------------------------------------
 int32_t c_pipp_ser_write::write_frame(
     uint8_t *data,
-    int32_t  colour,
     uint64_t timestamp)
 {
     int32_t ret;
@@ -118,17 +117,13 @@ int32_t c_pipp_ser_write::write_frame(
     // Generate buffer
     uint8_t *buffer = m_temp_buffer.get_buffer(m_width * m_height * m_bytes_per_sample);
 
-    if (colour < 0 || colour > 2) {
-        colour = 0;
-    }
-
     if (m_bytes_per_sample == 1) {
         // 8-bit mono data
         uint8_t *write_ptr = buffer;
         uint8_t *read_ptr;
 
         for (int32_t y = m_height-1; y >= 0; y--) {
-            read_ptr = data + (y * m_width + colour);
+            read_ptr = data + (y * m_width);
             memcpy(write_ptr, read_ptr, m_width);
             write_ptr += m_width;
         }
@@ -138,7 +133,7 @@ int32_t c_pipp_ser_write::write_frame(
         uint16_t *read_ptr;
         uint16_t *data_16 = (uint16_t *)data;
         for (int32_t y = m_height-1; y >= 0; y--) {
-            read_ptr = data_16 + (y * m_width + colour);
+            read_ptr = data_16 + (y * m_width);
             memcpy(write_ptr, read_ptr, m_width * 2);
             write_ptr += m_width;
         }

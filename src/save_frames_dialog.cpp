@@ -35,6 +35,7 @@
 
 
 c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
+                                           e_save_type save_type,
                                            int total_frames,
                                            int marker_start_frame,
                                            int marker_end_frame,
@@ -48,7 +49,15 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_end_frame(total_frames),
       m_spin_boxes_valid(true)
 {
-    setWindowTitle(tr("Save Frames As Images"));
+    switch (save_type) {
+    case SAVE_IMAGES:
+        setWindowTitle(tr("Save Frames As Images"));
+        break;
+    case SAVE_SER:
+        setWindowTitle(tr("Save Frames As SER File"));
+        break;
+    }
+
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
     QDialog::setModal(true);
 
@@ -75,11 +84,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: "));
     connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
-    // Select the default frame selection option depending on whether of not the markers are enabled
-    if (markers_enabled) {
-        mp_save_marked_frames_RButton->setChecked(true);
-    } else {
-        mp_save_current_frame_RButton->setChecked(true);
+    // Hide save current frame button when this is a save as SER file dilalog
+    if (save_type == SAVE_SER) {
+        mp_save_current_frame_RButton->hide();
     }
 
     mp_start_Spinbox = new QSpinBox;
@@ -121,7 +128,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     save_all_HLayout->setSpacing(0);
     save_all_HLayout->addWidget(mp_save_all_frames_RButton, 0, Qt::AlignLeft);
     save_all_HLayout->addStretch(0);
-    
+
     QVBoxLayout *save_range_VLayout = new QVBoxLayout;
     save_range_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     save_range_VLayout->setSpacing(INSIDE_GBOX_SPACING);
@@ -161,7 +168,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_frame_decimation_GBox->setLayout(frame_decimation_HLayout);
     mp_frame_decimation_GBox->setMinimumWidth((mp_frame_decimation_GBox->minimumSizeHint().width() * 5) / 4);
     connect(mp_frame_decimation_GBox, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
-
 
     // Sequence Direction
     mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards"));
@@ -204,7 +210,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
     QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation"));
     filename_generation_GBox->setLayout(filename_generation_VLayout);
-//    filename_generation_GBox->setMinimumWidth((filename_generation_GBox->minimumSizeHint().width() * 5) / 4);
+    if (save_type == SAVE_SER) {
+        filename_generation_GBox->hide();
+    }
 
 
     //
@@ -233,28 +241,30 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     
     QVBoxLayout *dialog_VLayout = new QVBoxLayout;
     dialog_VLayout->setMargin(10);
-    dialog_VLayout->setSpacing(0);
+    dialog_VLayout->setSpacing(10);
     dialog_VLayout->addWidget(save_optionsGBox);
-    dialog_VLayout->addSpacing(10);
     dialog_VLayout->addWidget(mp_frame_decimation_GBox);
-    dialog_VLayout->addSpacing(10);
     dialog_VLayout->addWidget(mp_sequence_direction_GBox);
-    dialog_VLayout->addSpacing(10);
     dialog_VLayout->addWidget(filename_generation_GBox);
-    dialog_VLayout->addSpacing(15);
+    dialog_VLayout->addSpacing(5);
     dialog_VLayout->addWidget(mp_total_frames_to_save_Label, 0, Qt::AlignRight);
-    dialog_VLayout->addSpacing(15);
+    dialog_VLayout->addSpacing(5);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
     
     setLayout(dialog_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    // Ensure mp_num_frames_Label is set
+    // Ensure mp_num_frames_Label is set and
+    // Select the default frame selection option depending on whether of not the markers are enabled
     if (markers_enabled) {
         mp_save_marked_frames_RButton->click();
     } else {
-        mp_save_current_frame_RButton->click();
+        if (save_type == SAVE_IMAGES) {
+            mp_save_current_frame_RButton->click();
+        } else {
+            mp_save_all_frames_RButton->click();
+        }
     }
 }
 
