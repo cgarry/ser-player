@@ -129,6 +129,9 @@ class c_image {
 
         void set_gamma(
                 double gamma);
+
+
+        void monochrome_conversion(int conv_type);
             
             
         void set_colour_balance(

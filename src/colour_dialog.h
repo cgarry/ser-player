@@ -21,6 +21,8 @@
 
 #include <QDialog>
 
+class QComboBox;
+class QGroupBox;
 class QDoubleSpinBox;
 class QSlider;
 class QSpinBox;
@@ -36,6 +38,7 @@ public:
 
 
 signals:
+    void monochrome_conversion_changed(bool enabled, int selection);
     void colour_saturation_changed(double saturation);
     void colour_balance_changed(double red, double green, double blue);
     void estimate_colour_balance();
@@ -47,14 +50,15 @@ public slots:
 
     
 private slots:
+    void monochrome_conversion_changed_slot();
     void colour_saturation_slider_changed_slot(int sat);
-    void colour_saturation_spinbox_changed_slot(double sat);
+    void colour_saturation_spinbox_changed_slot();
     void red_balance_slider_changed_slot(int balance);
     void green_balance_slider_changed_slot(int balance);
     void blue_balance_slider_changed_slot(int balance);
-    void red_balance_spinbox_changed_slot(int balance);
-    void green_balance_spinbox_changed_slot(int balance);
-    void blue_balance_spinbox_changed_slot(int balance);
+    void red_balance_spinbox_changed_slot();
+    void green_balance_spinbox_changed_slot();
+    void blue_balance_spinbox_changed_slot();
 
     
 private:
@@ -62,8 +66,12 @@ private:
     void helper_method();
     
     // Widgets
+    QComboBox *mp_monochrome_conversion_Combobox;
+    QGroupBox *mp_monochrome_conversion_GroupBox;
+    QGroupBox *mp_colour_saturation_GroupBox;
     QSlider *mp_colsat_Slider;
     QDoubleSpinBox *mp_colsat_DSpinbox;
+    QGroupBox *mp_colour_balance_GroupBox;
     QSlider *mp_red_balance_Slider;
     QSlider *mp_green_balance_Slider;
     QSlider *mp_blue_balance_Slider;

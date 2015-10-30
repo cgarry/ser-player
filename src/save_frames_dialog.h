@@ -60,6 +60,7 @@ public:
     int get_frames_to_be_saved();
     int get_required_digits_for_number();
     bool get_use_framenumber_in_name();
+    bool get_include_timestamps_in_ser_file();
 
 
 signals:
@@ -94,6 +95,8 @@ private:
 
     QCheckBox *mp_use_framenumber_in_filename;
     QCheckBox *mp_append_timestamp_CBox;
+
+    QCheckBox *mp_include_timestamps;
 
     QLabel *mp_total_frames_to_save_Label;
 

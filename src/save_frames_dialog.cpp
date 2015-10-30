@@ -143,11 +143,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     save_optionsGBox->setMinimumWidth((save_optionsGBox->minimumSizeHint().width() * 5) / 4);
 
 
-    //
+    //---------------------
     // Save frames options
-    //
+    //---------------------
 
+    //
     // Frame Decimation
+    //
     QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every"));
     mp_frame_decimation_SpinBox = new QSpinBox;
     mp_frame_decimation_SpinBox->setMinimum(1);
@@ -169,7 +171,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_frame_decimation_GBox->setMinimumWidth((mp_frame_decimation_GBox->minimumSizeHint().width() * 5) / 4);
     connect(mp_frame_decimation_GBox, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
+    //
     // Sequence Direction
+    //
     mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards"));
     mp_reverse_sequence_RButton = new QRadioButton(tr("Reverse"));
     mp_forwards_then_reverse_sequence_RButton = new QRadioButton(tr("Forwards Then Reverse"));
@@ -189,8 +193,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_sequence_direction_GBox->setLayout(sequence_direction_VLayout);
     mp_sequence_direction_GBox->setMinimumWidth((mp_sequence_direction_GBox->minimumSizeHint().width() * 5) / 4);
 
-
-    // Filename Generation
+    //
+    // Filename Generation - Only for saving as image files
+    //
     mp_use_framenumber_in_filename = new QCheckBox(tr("Use Framenumber In Filename (Instead Of A Sequential Count)"));
     mp_use_framenumber_in_filename->setChecked(true);
 
@@ -213,6 +218,25 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     if (save_type == SAVE_SER) {
         filename_generation_GBox->hide();
     }
+
+    //
+    // SER file saving specific options
+    //
+    if (ser_has_timestamps) {
+        mp_include_timestamps = new QCheckBox(tr("Include Timestamps"));
+        mp_include_timestamps->setChecked(true);
+    } else {
+        mp_include_timestamps = new QCheckBox(tr("Include Timestamps") + " (" + tr("No Timestamps In SER File") + ")");
+        mp_include_timestamps->setEnabled(false);
+    }
+
+    QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
+    ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    ser_file_options_VLayout->addWidget(mp_include_timestamps);
+
+    QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
+    ser_file_options_GBox->setLayout(ser_file_options_VLayout);
 
 
     //
@@ -246,6 +270,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     dialog_VLayout->addWidget(mp_frame_decimation_GBox);
     dialog_VLayout->addWidget(mp_sequence_direction_GBox);
     dialog_VLayout->addWidget(filename_generation_GBox);
+    dialog_VLayout->addWidget(ser_file_options_GBox);
     dialog_VLayout->addSpacing(5);
     dialog_VLayout->addWidget(mp_total_frames_to_save_Label, 0, Qt::AlignRight);
     dialog_VLayout->addSpacing(5);
@@ -320,8 +345,12 @@ void c_save_frames_dialog::update_num_frames_slot()
         (!mp_sequence_direction_GBox->isEnabled() || mp_forwards_sequence_RButton->isChecked())) {
         // Use frame number rather than a sequential count in filename
         mp_use_framenumber_in_filename->setEnabled(true);
+        // Give option to include timestamps in SER file
+        mp_include_timestamps->setEnabled(true);
     } else {
         mp_use_framenumber_in_filename->setEnabled(false);
+        // Timestamps make to sense when frames are not in their natural order
+        mp_include_timestamps->setEnabled(false);
     }
 
     if (get_frames_to_be_saved() == 1) {
@@ -431,3 +460,13 @@ bool c_save_frames_dialog::get_use_framenumber_in_name()
     return use_framenumber_in_name;
 }
 
+
+bool c_save_frames_dialog::get_include_timestamps_in_ser_file()
+{
+    bool include_timestamps_in_ser_file = mp_include_timestamps->isChecked();
+    if (!mp_include_timestamps->isEnabled()) {
+        include_timestamps_in_ser_file = false;
+    }
+
+    return include_timestamps_in_ser_file;
+}

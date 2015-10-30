@@ -85,6 +85,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_ser_directory = "";
     m_display_framerate = -1;
     m_colour_saturation = 1.0;
+    m_monochrome_conversion_enable = false;
+    m_monochrome_conversion_type = 0;
     m_play_direction = c_persistent_data::m_play_direction;
 
 
@@ -212,6 +214,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_colour_settings_Act, SIGNAL(triggered(bool)), this, SLOT(colour_settings_slot(bool)));
     mp_colour_settings_Dialog = new c_colour_dialog(this);
     mp_colour_settings_Dialog->hide();
+    connect(mp_colour_settings_Dialog, SIGNAL(monochrome_conversion_changed(bool,int)), this, SLOT(monochrome_conversion_changed_slot(bool,int)));
     connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
     connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
@@ -779,6 +782,13 @@ void c_ser_player::gain_and_gamma_settings_closed_slot()
 }
 
 
+void c_ser_player::monochrome_conversion_changed_slot(bool enabled, int selection)
+{
+    m_monochrome_conversion_enable = enabled;
+    m_monochrome_conversion_type = selection;
+}
+
+
 // Colour settings menu QAction has been clicked
 void c_ser_player::colour_settings_slot(bool checked)
 {
@@ -831,7 +841,7 @@ void c_ser_player::save_frames_slot_as_ser_slot()
             int decimate_value = save_frames_Dialog->get_frame_decimation();
             int sequence_direction = save_frames_Dialog->get_sequence_direction();
             int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
-            bool include_timestamps = false;
+            bool include_timestamps = save_frames_Dialog->get_include_timestamps_in_ser_file();
 
             c_pipp_ser_write ser_write_file;
             ser_write_file.create(filename.toStdString().c_str(), // const char *filename
@@ -870,7 +880,7 @@ void c_ser_player::save_frames_slot_as_ser_slot()
                     save_progress_dialog.set_value(saved_frames);
 
                     // Get frame from SER file
-                    bool valid_frame = get_frame_as_qimage(abs(frame_number), true);
+                    bool valid_frame = get_frame_as_qimage(abs(frame_number));
                     if (valid_frame) {
                         // Get timestamp for frame if required
                         uint64_t timestamp = 0;
@@ -1021,7 +1031,7 @@ void c_ser_player::save_frames_slot_as_images_slot()
             if (min_frame == -1) {
                 // Save current frame only
                 // Get frame from ser file
-                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), true);
+                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value());
                 if (valid_frame) {
                     mp_frame_image->conv_data_ready_for_qimage();
 
@@ -1065,7 +1075,7 @@ void c_ser_player::save_frames_slot_as_images_slot()
                         save_progress_dialog.set_value(saved_frames);
 
                         // Get frame from SER file
-                        bool valid_frame = get_frame_as_qimage(abs(frame_number), true);
+                        bool valid_frame = get_frame_as_qimage(abs(frame_number));
                         if (valid_frame) {
                             mp_frame_image->conv_data_ready_for_qimage();
 
@@ -1451,9 +1461,14 @@ void c_ser_player::frame_slider_changed_slot()
         mp_frame_Slider->setValue(1);
     } else {
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
-        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value(), false);
+        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value());
 
         if (valid_frame) {
+            // Start histogram generation if one is not already being generated
+            if (mp_histogram_dialog->isVisible() && !mp_histogram_thread->is_running()) {
+                mp_histogram_thread->generate_histogram(mp_frame_image, mp_frame_Slider->value());
+            }
+
             mp_frame_image->conv_data_ready_for_qimage();
 
             QImage frame_qimage = QImage(mp_frame_image->get_p_buffer(),
@@ -1793,7 +1808,7 @@ void c_ser_player::debayer_enable_slot(bool enabled)
         mp_colour_settings_Act->setEnabled(true);
     } else {
         mp_colour_settings_Act->setEnabled(false);
-        mp_colour_settings_Dialog->hide();
+        mp_colour_settings_Dialog->reject();
     }
 
     frame_slider_changed_slot();
@@ -1996,7 +2011,7 @@ void c_ser_player::calculate_display_framerate()
 }
 
 
-bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving)
+bool c_ser_player::get_frame_as_qimage(int frame_number)
 {
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
@@ -2019,19 +2034,14 @@ bool c_ser_player::get_frame_as_qimage(int frame_number, bool for_saving)
             mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
         }
 
+        if (m_monochrome_conversion_enable) {
+            mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);
+        }
+
         mp_frame_image->change_colour_balance();
 
         // Adjust colour saturation if required
         mp_frame_image->change_colour_saturation(m_colour_saturation);
-
-        // Start histogram generation if one is not already being generated
-        if (!for_saving) {
-            if (mp_histogram_dialog->isVisible()) {
-                if (!mp_histogram_thread->is_running()) {
-                    mp_histogram_thread->generate_histogram(mp_frame_image, frame_number);
-                }
-            }
-        }
     }
 
     return (ret >= 0);

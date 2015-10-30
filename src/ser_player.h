@@ -116,6 +116,8 @@ private:
     bool m_has_bayer_pattern;
     int m_play_direction;
 
+    bool m_monochrome_conversion_enable;
+    int m_monochrome_conversion_type;
     double m_colour_saturation;
 
 public:
@@ -131,6 +133,7 @@ public slots:
     void gain_and_gamma_settings_slot(bool checked);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
+    void monochrome_conversion_changed_slot(bool enabled, int selection);
     void colour_settings_closed_slot();
     void colour_settings_slot(bool checked);
     void colour_saturation_changed_slot(double saturation);
@@ -179,7 +182,7 @@ private:
     void update_recent_save_folders_menu();
     void populate_recent_save_folders_menu();
     void create_no_file_open_image();
-    bool get_frame_as_qimage(int frame_number, bool for_saving);
+    bool get_frame_as_qimage(int frame_number);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 };

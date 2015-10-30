@@ -465,6 +465,139 @@ void c_image::setup_luts()
 }
 
 
+void c_image::monochrome_conversion(int conv_type)
+{
+    if (m_colour) {
+        switch (conv_type) {
+        case 0:  // conv_type 0 - make mono from all RGB channels
+            if (m_byte_depth == 1) {
+                uint8_t *write_data_ptr = mp_buffer;
+                uint8_t *read_data_ptr = mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RGB values to luminace
+                    uint32_t luminance = (114 * *read_data_ptr + 587 * *(read_data_ptr+1) + 299 * *(read_data_ptr+2)) / 1000;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint8_t)luminance;
+                }
+            } else {
+                uint16_t *write_data_ptr = (uint16_t *)mp_buffer;
+                uint16_t *read_data_ptr = (uint16_t *)mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RGB values to luminace
+                    uint32_t luminance = (114 * *read_data_ptr + 587 * *(read_data_ptr+1) + 299 * *(read_data_ptr+2)) / 1000;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint16_t)luminance;
+                }
+            }
+
+            m_colour = false;
+            break;
+
+        case 1:  // conv_type 1 - make mono from all R channel only
+        case 2:  // conv_type 2 - make mono from all G channel only
+        case 3:  // conv_type 3 - make mono from all B channel only
+            if (m_byte_depth == 1) {
+                uint8_t *write_data_ptr = mp_buffer;
+                uint8_t *read_data_ptr = mp_buffer + (3 - conv_type);  // Start on correct coloured pixel
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RG or B values to luminace
+                    *write_data_ptr++ = *read_data_ptr;
+                    read_data_ptr += 3;
+                }
+            } else {
+                uint16_t *write_data_ptr = (uint16_t *)mp_buffer;
+                uint16_t *read_data_ptr = (uint16_t *)mp_buffer + (3 - conv_type);  // Start on correct coloured pixel
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RG or B values to luminace
+                    *write_data_ptr++ = *read_data_ptr;
+                    read_data_ptr += 3;
+                }
+            }
+
+            m_colour = false;
+            break;
+
+        case 4:  // R and G
+            if (m_byte_depth == 1) {
+                uint8_t *write_data_ptr = mp_buffer;
+                uint8_t *read_data_ptr = mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RG values to luminace
+                    uint32_t luminance = (587 * *(read_data_ptr+1) + 299 * *(read_data_ptr+2)) / 886;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint8_t)luminance;
+                }
+
+            } else {
+                uint16_t *write_data_ptr = (uint16_t *)mp_buffer;
+                uint16_t *read_data_ptr = (uint16_t *)mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RG values to luminace
+                    uint32_t luminance = (587 * *(read_data_ptr+1) + 299 * *(read_data_ptr+2)) / 886;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint16_t)luminance;
+                }
+            }
+
+            m_colour = false;
+            break;
+        case 5:  // R and B
+            if (m_byte_depth == 1) {
+                uint8_t *write_data_ptr = mp_buffer;
+                uint8_t *read_data_ptr = mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RB values to luminace
+                    uint32_t luminance = (114 * *(read_data_ptr) + 299 * *(read_data_ptr+2)) / 413;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint8_t)luminance;
+                }
+
+            } else {
+                uint16_t *write_data_ptr = (uint16_t *)mp_buffer;
+                uint16_t *read_data_ptr = (uint16_t *)mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RB values to luminace
+                    uint32_t luminance = (114 * *(read_data_ptr) + 299 * *(read_data_ptr+2)) / 413;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint16_t)luminance;
+                }
+            }
+
+            m_colour = false;
+            break;
+        case 6:  // G and B
+            if (m_byte_depth == 1) {
+                uint8_t *write_data_ptr = mp_buffer;
+                uint8_t *read_data_ptr = mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert GB values to luminace
+                    uint32_t luminance = (114 * *(read_data_ptr) + 587 * *(read_data_ptr+1)) / 701;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint8_t)luminance;
+                }
+
+            } else {
+                uint16_t *write_data_ptr = (uint16_t *)mp_buffer;
+                uint16_t *read_data_ptr = (uint16_t *)mp_buffer;
+                for (int32_t x = 0; x < m_height * m_width; x++) {
+                    // Convert RB values to luminace
+                    uint32_t luminance = (114 * *(read_data_ptr) + 587 * *(read_data_ptr+1)) / 701;
+                    read_data_ptr += 3;
+                    *write_data_ptr++ = (uint16_t)luminance;
+                }
+            }
+
+            m_colour = false;
+            break;
+
+        default:
+            break;
+            // Do nothing
+        }
+    }
+}
+
+
 void c_image::change_colour_balance()
 {
     if (!m_colour) {

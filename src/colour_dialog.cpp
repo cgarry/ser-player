@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -38,7 +39,39 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     setWindowTitle(tr("Colour Settings"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    // Colour saturation label and spinbox
+    //
+    // Monochrome Conversion
+    //
+    QLabel *monochrome_conversion_Label = new QLabel(tr("Convert Colour To Monochrome Using: "));
+
+    mp_monochrome_conversion_Combobox = new QComboBox;
+    mp_monochrome_conversion_Combobox->addItem(tr("RG & B Channels"));
+    mp_monochrome_conversion_Combobox->addItem(tr("R Channel Only"));
+    mp_monochrome_conversion_Combobox->addItem(tr("G Channel Only"));
+    mp_monochrome_conversion_Combobox->addItem(tr("B Channel Only"));
+    mp_monochrome_conversion_Combobox->addItem(tr("R & G Channels"));
+    mp_monochrome_conversion_Combobox->addItem(tr("R & B Channels"));
+    mp_monochrome_conversion_Combobox->addItem(tr("G & B Channels"));
+    connect(mp_monochrome_conversion_Combobox, SIGNAL(activated(int)), this, SLOT(monochrome_conversion_changed_slot()));
+
+    QHBoxLayout *monochrome_conversion_GroupBox_Hlayout = new QHBoxLayout;
+    monochrome_conversion_GroupBox_Hlayout->addWidget(monochrome_conversion_Label);
+    monochrome_conversion_GroupBox_Hlayout->addWidget(mp_monochrome_conversion_Combobox);
+    monochrome_conversion_GroupBox_Hlayout->addStretch();
+
+
+    mp_monochrome_conversion_GroupBox = new QGroupBox(tr("Monochrome Conversion"));
+    mp_monochrome_conversion_GroupBox->setCheckable(true);
+    mp_monochrome_conversion_GroupBox->setChecked(false);
+    mp_monochrome_conversion_GroupBox->setLayout(monochrome_conversion_GroupBox_Hlayout);
+    connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(monochrome_conversion_changed_slot()));
+    connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(colour_saturation_spinbox_changed_slot()));
+    connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(red_balance_spinbox_changed_slot()));
+
+
+    //
+    // Colour Saturation
+    //
     mp_colsat_Slider = new QSlider(Qt::Horizontal);
     mp_colsat_Slider->setRange(0, 1500);
     mp_colsat_Slider->setValue(100);
@@ -49,7 +82,8 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_colsat_DSpinbox->setSingleStep(0.01);
     mp_colsat_DSpinbox->setValue(1.0);
 
-    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_spinbox_changed_slot(double)));
+    connect(mp_colsat_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(colour_saturation_spinbox_changed_slot()));
+
     QHBoxLayout *colsat_hlayout1 = new QHBoxLayout;
     colsat_hlayout1->addWidget(new QLabel(tr("Saturation")));
     colsat_hlayout1->addWidget(mp_colsat_Slider);
@@ -65,10 +99,13 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colsat_vlayout->setSpacing(15);
     colsat_vlayout->addLayout(colsat_hlayout1);
     colsat_vlayout->addLayout(colsat_hlayout2);
-    QGroupBox *colout_saturation_GroupBox = new QGroupBox(tr("Colour Saturation"));
-    colout_saturation_GroupBox->setLayout(colsat_vlayout);
+    mp_colour_saturation_GroupBox = new QGroupBox(tr("Colour Saturation"));
+    mp_colour_saturation_GroupBox->setLayout(colsat_vlayout);
 
+
+    //
     // Colour balance
+    //
     mp_red_balance_Slider = new QSlider(Qt::Horizontal);
     mp_red_balance_Slider->setRange(-100, 100);
     mp_red_balance_Slider->setValue(0);
@@ -77,7 +114,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_red_balance_SpinBox = new QSpinBox;
     mp_red_balance_SpinBox->setRange(-100, 100);
     mp_red_balance_SpinBox->setValue(0);
-    connect(mp_red_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(red_balance_spinbox_changed_slot(int)));
+    connect(mp_red_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(red_balance_spinbox_changed_slot()));
 
     mp_green_balance_Slider = new QSlider(Qt::Horizontal);
     mp_green_balance_Slider->setRange(-100, 100);
@@ -86,7 +123,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_green_balance_SpinBox = new QSpinBox;
     mp_green_balance_SpinBox->setRange(-100, 100);
     mp_green_balance_SpinBox->setValue(0);
-    connect(mp_green_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(green_balance_spinbox_changed_slot(int)));
+    connect(mp_green_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(green_balance_spinbox_changed_slot()));
 
     mp_blue_balance_Slider = new QSlider(Qt::Horizontal);
     mp_blue_balance_Slider->setRange(-100, 100);
@@ -95,7 +132,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     mp_blue_balance_SpinBox = new QSpinBox;
     mp_blue_balance_SpinBox->setRange(-100, 100);
     mp_blue_balance_SpinBox->setValue(0);
-    connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_spinbox_changed_slot(int)));
+    connect(mp_blue_balance_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(blue_balance_spinbox_changed_slot()));
 
     QGridLayout *colour_balance_GLayout = new QGridLayout;
     colour_balance_GLayout->setVerticalSpacing(10);
@@ -129,18 +166,28 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colour_balance_VLayout->addLayout(colour_balance_GLayout);
     colour_balance_VLayout->addLayout(colour_balance_HLayout);
 
-    QGroupBox *colour_balance_GroupBox = new QGroupBox(tr("Colour Balance"));
-    colour_balance_GroupBox->setLayout(colour_balance_VLayout);
+    mp_colour_balance_GroupBox = new QGroupBox(tr("Colour Balance"));
+    mp_colour_balance_GroupBox->setLayout(colour_balance_VLayout);
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
-    dialog_vlayout->addWidget(colout_saturation_GroupBox);
-    dialog_vlayout->addWidget(colour_balance_GroupBox);
+    dialog_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
+    dialog_vlayout->addWidget(mp_colour_saturation_GroupBox);
+    dialog_vlayout->addWidget(mp_colour_balance_GroupBox);
 
     setLayout(dialog_vlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
+
+
+void c_colour_dialog::monochrome_conversion_changed_slot()
+{
+    mp_colour_saturation_GroupBox->setEnabled(!mp_monochrome_conversion_GroupBox->isChecked());
+    mp_colour_balance_GroupBox->setEnabled(!mp_monochrome_conversion_GroupBox->isChecked());
+    emit monochrome_conversion_changed(mp_monochrome_conversion_GroupBox->isChecked(), mp_monochrome_conversion_Combobox->currentIndex());
+}
+
 
 
 void c_colour_dialog::colour_saturation_slider_changed_slot(int sat)
@@ -149,10 +196,16 @@ void c_colour_dialog::colour_saturation_slider_changed_slot(int sat)
 }
 
 
-void c_colour_dialog::colour_saturation_spinbox_changed_slot(double sat)
+void c_colour_dialog::colour_saturation_spinbox_changed_slot()
 {
-    mp_colsat_Slider->setValue(100 * sat);
-    emit colour_saturation_changed(sat);
+    mp_colsat_Slider->setValue(100 * mp_colsat_DSpinbox->value());
+    if (mp_colsat_DSpinbox->isEnabled()) {
+        // Control is anabled
+        emit colour_saturation_changed(mp_colsat_DSpinbox->value());
+    } else {
+        // Control is not enabled
+        emit colour_saturation_changed(1.0);
+    }
 }
 
 
@@ -161,13 +214,17 @@ void c_colour_dialog::red_balance_slider_changed_slot(int balance)
     mp_red_balance_SpinBox->setValue(balance);
 }
 
-void c_colour_dialog::red_balance_spinbox_changed_slot(int balance)
+void c_colour_dialog::red_balance_spinbox_changed_slot()
 {
-    mp_red_balance_Slider->setValue(balance);
-    emit colour_balance_changed(
-                1.0 + (double)mp_red_balance_SpinBox->value() / 300,
-                1.0 + (double)mp_green_balance_SpinBox->value() / 300,
-                1.0 + (double)mp_blue_balance_SpinBox->value() / 300);
+    mp_red_balance_Slider->setValue(mp_red_balance_SpinBox->value());
+    if (mp_red_balance_SpinBox->isEnabled()) {
+        emit colour_balance_changed(
+                    1.0 + (double)mp_red_balance_SpinBox->value() / 300,
+                    1.0 + (double)mp_green_balance_SpinBox->value() / 300,
+                    1.0 + (double)mp_blue_balance_SpinBox->value() / 300);
+    } else {
+        emit colour_balance_changed(1.0, 1.0, 1.0);
+    }
 }
 
 
@@ -177,9 +234,9 @@ void c_colour_dialog::green_balance_slider_changed_slot(int balance)
 }
 
 
-void c_colour_dialog::green_balance_spinbox_changed_slot(int balance)
+void c_colour_dialog::green_balance_spinbox_changed_slot()
 {
-    mp_green_balance_Slider->setValue(balance);
+    mp_green_balance_Slider->setValue(mp_green_balance_SpinBox->value());
     emit colour_balance_changed(
                 1.0 + (double)mp_red_balance_SpinBox->value() / 300,
                 1.0 + (double)mp_green_balance_SpinBox->value() / 300,
@@ -192,9 +249,9 @@ void c_colour_dialog::blue_balance_slider_changed_slot(int balance)
     mp_blue_balance_SpinBox->setValue(balance);
 }
 
-void c_colour_dialog::blue_balance_spinbox_changed_slot(int balance)
+void c_colour_dialog::blue_balance_spinbox_changed_slot()
 {
-    mp_blue_balance_Slider->setValue(balance);
+    mp_blue_balance_Slider->setValue(mp_blue_balance_SpinBox->value());
     emit colour_balance_changed(
                 1.0 + (double)mp_red_balance_SpinBox->value() / 300,
                 1.0 + (double)mp_green_balance_SpinBox->value() / 300,
