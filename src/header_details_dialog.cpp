@@ -27,7 +27,7 @@
 c_header_details_dialog::c_header_details_dialog(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("SER Header Details"));
+    setWindowTitle(tr("SER File Details"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     mp_header_details_Tedit = new QTextEdit;

@@ -272,11 +272,18 @@ void c_image::debayer_pixel_bilinear(
 void c_image::set_image_details(int32_t width,
                                 int32_t height,
                                 int32_t byte_depth,
+                                int32_t colour_id,
                                 bool colour)
 {
     m_width = width;
     m_height = height;
     m_byte_depth = byte_depth;
+    m_colour_id = colour_id;
+    if (m_colour_id == COLOURID_RGB) {
+        // Colour images are always in BGR format as they are converted in the SER class
+        m_colour_id = COLOURID_BGR;
+    }
+
     m_colour = colour;
     
     int32_t frame_size = m_width * m_height * m_byte_depth;
@@ -490,6 +497,7 @@ void c_image::monochrome_conversion(int conv_type)
                 }
             }
 
+            m_colour_id = COLOURID_MONO;
             m_colour = false;
             break;
 
@@ -514,6 +522,7 @@ void c_image::monochrome_conversion(int conv_type)
                 }
             }
 
+            m_colour_id = COLOURID_MONO;
             m_colour = false;
             break;
 
@@ -539,6 +548,7 @@ void c_image::monochrome_conversion(int conv_type)
                 }
             }
 
+            m_colour_id = COLOURID_MONO;
             m_colour = false;
             break;
         case 5:  // R and B
@@ -563,6 +573,7 @@ void c_image::monochrome_conversion(int conv_type)
                 }
             }
 
+            m_colour_id = COLOURID_MONO;
             m_colour = false;
             break;
         case 6:  // G and B
@@ -587,6 +598,7 @@ void c_image::monochrome_conversion(int conv_type)
                 }
             }
 
+            m_colour_id = COLOURID_MONO;
             m_colour = false;
             break;
 
@@ -851,6 +863,7 @@ bool c_image::debayer_image_bilinear(int32_t colour_id)
     // Make new debayered data the frame buffer data
     delete[] mp_buffer;
     mp_buffer = rgb_data;
+    m_colour_id = COLOURID_BGR;
     m_colour = true;
     return true;
 }

@@ -30,6 +30,7 @@ class c_image {
         int32_t m_width;
         int32_t m_height;
         int32_t m_byte_depth;
+        int32_t m_colour_id;
         bool m_colour;
         uint8_t *mp_buffer;
         int32_t m_buffer_size;
@@ -56,6 +57,7 @@ class c_image {
             m_width(10),
             m_height(10),
             m_byte_depth(1),
+            m_colour_id(0),
             m_colour(false),
             mp_buffer(NULL),
             m_buffer_size(0),
@@ -81,6 +83,7 @@ class c_image {
         void set_image_details(int32_t width,
                                int32_t height,
                                int32_t byte_depth,
+                               int32_t colour_id,
                                bool colour);
                       
 
@@ -93,6 +96,11 @@ class c_image {
         int32_t get_height()
         {
             return m_height;
+        }
+
+        int32_t get_colour_id()
+        {
+            return m_colour_id;
         }
 
         bool get_colour()

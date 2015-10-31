@@ -148,7 +148,7 @@ public slots:
     void language_changed_slot(QAction *);
     void open_ser_file_slot();
     void open_ser_file_slot(QAction *action);
-    void save_frames_slot_as_ser_slot();
+    void save_frames_as_ser_slot();
     void save_frames_slot_as_images_slot();
     void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();

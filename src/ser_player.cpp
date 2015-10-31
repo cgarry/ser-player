@@ -107,7 +107,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_save_frames_as_ser_Act = new QAction(tr("Save Frames As SER File...", "Menu title"), this);
     mp_save_frames_as_ser_Act->setEnabled(false);
     file_menu->addAction(mp_save_frames_as_ser_Act);
-    connect(mp_save_frames_as_ser_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot_as_ser_slot()));
+    connect(mp_save_frames_as_ser_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_ser_slot()));
 
     mp_save_frames_as_images_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
     mp_save_frames_as_images_Act->setEnabled(false);
@@ -183,8 +183,8 @@ c_ser_player::c_ser_player(QWidget *parent)
     //
     QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
 
-    // SER Header Details
-    mp_header_details_Act = window_menu->addAction(tr("SER Header Details"));
+    // SER File Details
+    mp_header_details_Act = window_menu->addAction(tr("SER File Details"));
     mp_header_details_Act->setEnabled(false);
     mp_header_details_Act->setCheckable(true);
     mp_header_details_Act->setChecked(false);
@@ -827,7 +827,7 @@ void c_ser_player::colour_settings_closed_slot()
 }
 
 
-void c_ser_player::save_frames_slot_as_ser_slot()
+void c_ser_player::save_frames_as_ser_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
@@ -932,19 +932,10 @@ void c_ser_player::save_frames_slot_as_ser_slot()
                 utc_to_local_diff = mp_ser_file->get_utc_to_local_diff();
             }
 
-            // Get Colour ID for this frame
-            // By default use colour ID from original header to preserve any bayer pattern ID that is present
-            int32_t colour_id = mp_ser_file->get_colour_id();
-            if (mp_frame_image->get_colour()) {
-                // We only support BGR format for writing colour SER files, so use this colour ID for all
-                // colour data whether is was colour originally or debayered.
-                colour_id = COLOURID_BGR;
-            }
-
             // Set details for SER file
             ser_write_file.set_details(
                 0,                  // int32_t lu_id - always 0
-                colour_id,          // int32_t colour_id,
+                mp_frame_image->get_colour_id(),  // int32_t colour_id,
                 utc_to_local_diff,  // int64_t utc_to_local_diff,
                 mp_ser_file->get_observer_string(),
                 mp_ser_file->get_instrument_string(),
@@ -1250,6 +1241,7 @@ void c_ser_player::estimate_colour_balance()
                     mp_ser_file->get_width(),  // width
                     mp_ser_file->get_height(),  // height
                     mp_ser_file->get_byte_depth(),  // byte_depth
+                    mp_ser_file->get_colour_id(),  // colour_id
                     is_colour);  // colour
 
         int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
@@ -2069,6 +2061,7 @@ bool c_ser_player::get_frame_as_qimage(int frame_number)
                 mp_ser_file->get_width(),  // width
                 mp_ser_file->get_height(),  // height
                 mp_ser_file->get_byte_depth(),  // byte_depth
+                mp_ser_file->get_colour_id(),  // colour_id
                 is_colour);  // colour
 
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
