@@ -95,6 +95,7 @@ int32_t c_pipp_ser::open(
     char file_id[15];
     ret = fread(file_id, 1, 14, mp_ser_file);
     file_id[14] = 0;
+    m_file_id = file_id;
 
     // Read the rest of the header
     ret = fread(&m_header, 1, sizeof(m_header), mp_ser_file);
@@ -371,21 +372,6 @@ int32_t c_pipp_ser::get_buffer_size()
 
 
 // ------------------------------------------
-// Get header strings
-// ------------------------------------------
-void c_pipp_ser::get_header_strings(
-    char *observer_string,
-    char *instrument_string,
-    char *telescope_string)
-{
-    // Copy header strings to supplied buffers
-    strncpy(observer_string, m_header.observer, 40);
-    strncpy(instrument_string, m_header.instrument, 40);
-    strncpy(telescope_string, m_header.telescope, 40);
-}
-
-
-// ------------------------------------------
 // Get observer string
 // ------------------------------------------
 QString c_pipp_ser::get_observer_string()
@@ -438,6 +424,133 @@ QString c_pipp_ser::get_telescope_string()
     }
 
     return telescope_string;
+}
+
+
+// ------------------------------------------
+// Get information about timestamps
+// ------------------------------------------
+QString c_pipp_ser::get_timestamp_info()
+{
+    QString info_string;
+
+    if (mp_timestamp != NULL) {
+        //mp_timestamp = (uint64_t *)(m_timestamp_buffer.get_buffer_ptr() + (8 * m_current_frame));
+        uint64_t *timestamp_ptr = (uint64_t *)m_timestamp_buffer.get_buffer_ptr();
+        bool timestamps_in_order = true;
+        uint64_t previous_ts = 0L;
+        uint64_t min_ts = *timestamp_ptr;
+        uint64_t max_ts = *timestamp_ptr;
+        for (int x = 0; x < m_header.frame_count; x++) {
+            if (*timestamp_ptr < previous_ts) {
+                // Timestamps are not in order
+                timestamps_in_order = false;
+            }
+
+            previous_ts = *timestamp_ptr;
+
+            // Keep track of maximum timestamp value
+            if (*timestamp_ptr > max_ts) {
+                max_ts = *timestamp_ptr;
+            }
+
+            // Keep track of minimum timestamp value
+            if (*timestamp_ptr < min_ts) {
+                min_ts = *timestamp_ptr;
+            }
+
+            timestamp_ptr++;
+        }
+
+        if (timestamps_in_order) {
+            if (min_ts == max_ts) {
+                info_string += tr(" * Timestamps are all identical\n");
+            } else {
+                info_string += tr(" * Timestamps are all in order\n");
+            }
+        } else {
+            info_string += tr(" * Out of order timestamps detected\n");
+        }
+
+        int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
+
+        c_pipp_timestamp::timestamp_to_date(
+            min_ts,
+            &ts_year,
+            &ts_month,
+            &ts_day,
+            &ts_hour,
+            &ts_minute,
+            &ts_second,
+            &ts_microsec);
+
+        info_string += tr(" * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT\n")
+                       .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                       .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+
+        c_pipp_timestamp::timestamp_to_date(
+            max_ts,
+            &ts_year,
+            &ts_month,
+            &ts_day,
+            &ts_hour,
+            &ts_minute,
+            &ts_second,
+            &ts_microsec);
+
+        info_string += tr(" * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT\n")
+                       .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                       .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+
+        // Calculate timestamp diff
+        uint64_t ts_diff = max_ts - min_ts;
+
+        int32_t diff_days, diff_hours, diff_minutes, diff_seconds, diff_microsecs;
+
+        c_pipp_timestamp::ts_diff_to_time(
+            ts_diff,
+            &diff_days,
+            &diff_hours,
+            &diff_minutes,
+            &diff_seconds,
+            &diff_microsecs);
+
+        double d_secs = ((double)diff_microsecs / 1000000.0) + diff_seconds;
+
+        if (diff_days != 0) {
+            info_string += tr(" * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s\n")
+                           .arg(diff_days).arg(diff_hours).arg(diff_minutes).arg(d_secs);
+        } else if (diff_hours != 0) {
+            info_string += tr(" * Min to Max timestamp difference: %1 hours %2 min %3 s\n")
+                           .arg(diff_hours).arg(diff_minutes).arg(d_secs);
+        } else if (diff_minutes != 0) {
+            info_string += tr(" * Min to Max timestamp difference: %1 min %2 s\n")
+                           .arg(diff_minutes).arg(d_secs);
+        } else {
+            info_string += tr(" * Min to Max timestamp difference: %2 s\n")
+                           .arg(d_secs);
+        }
+
+        if (ts_diff != 0 && m_header.frame_count > 1) {
+            double d_fps = (double)(m_header.frame_count - 1) / ((double)ts_diff / (double)c_pipp_timestamp::C_SEPASECONDS_PER_SECOND);
+            info_string += tr(" * Average frames per second: %1")
+                           .arg(d_fps);
+        }
+    } else {
+        info_string += tr(" * No Timestamps\n");
+    }
+
+    return info_string;
 }
 
 

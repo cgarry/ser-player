@@ -80,6 +80,7 @@ class c_pipp_ser {
         int64_t m_timestamp_correction_value;
         int64_t m_utc_to_local_offset;
         QString m_error_string;
+        QString m_file_id;
 
 
     // ------------------------------------------
@@ -168,10 +169,34 @@ class c_pipp_ser {
 
 
         // ------------------------------------------
+        // Get file_id
+        // ------------------------------------------
+        QString get_file_id() {
+            return m_file_id;
+        }
+
+
+        // ------------------------------------------
+        // Get lu_id
+        // ------------------------------------------
+        int32_t get_lu_id() {
+            return m_header.lu_id;
+        }
+
+
+        // ------------------------------------------
         // Get colour
         // ------------------------------------------
         int32_t get_colour() {
             return m_colour;
+        }
+
+
+        // ------------------------------------------
+        // Get little_endian
+        // ------------------------------------------
+        int32_t get_little_endian() {
+            return m_header.little_endian;
         }
 
 
@@ -192,15 +217,6 @@ class c_pipp_ser {
 
 
         // ------------------------------------------
-        // Get header strings
-        // ------------------------------------------
-        void get_header_strings(
-            char *observer_string,
-            char *instrument_string,
-            char *telescope_string);
-
-
-        // ------------------------------------------
         // Get observer strings
         // ------------------------------------------
         QString get_observer_string();
@@ -216,6 +232,30 @@ class c_pipp_ser {
         // Get telescope strings
         // ------------------------------------------
         QString get_telescope_string();
+
+
+        // ------------------------------------------
+        // Get information about timestamps
+        // ------------------------------------------
+        QString get_timestamp_info();
+
+
+        // ------------------------------------------
+        // Get date_time
+        // ------------------------------------------
+        uint64_t get_data_time()
+        {
+            return (uint64_t)m_header.date_time[1] << 32 | m_header.date_time[0];
+        }
+
+
+        // ------------------------------------------
+        // Get date_time_utc
+        // ------------------------------------------
+        uint64_t get_data_time_utc()
+        {
+            return (uint64_t)m_header.date_time_utc[1] << 32 | m_header.date_time_utc[0];
+        }
 
 
         // ------------------------------------------

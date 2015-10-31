@@ -62,6 +62,7 @@
 #include "markers_dialog.h"
 #include "save_frames_dialog.h"
 #include "save_frames_progress_dialog.h"
+#include "header_details_dialog.h"
 
 
 #ifndef DISABLE_NEW_VERSION_CHECK
@@ -182,6 +183,17 @@ c_ser_player::c_ser_player(QWidget *parent)
     //
     QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
 
+    // SER Header Details
+    mp_header_details_Act = window_menu->addAction(tr("SER Header Details"));
+    mp_header_details_Act->setEnabled(false);
+    mp_header_details_Act->setCheckable(true);
+    mp_header_details_Act->setChecked(false);
+    connect(mp_header_details_Act, SIGNAL(triggered(bool)), this, SLOT(header_details_dialog_slot(bool)));
+    mp_header_details_dialog = new c_header_details_dialog(this);
+    mp_header_details_dialog->hide();
+    connect(mp_header_details_dialog, SIGNAL(rejected()), this, SLOT(header_details_dialog_closed_slot()));
+
+
     // Histogram viewer
     mp_histogram_viewer_Act = window_menu->addAction(tr("Histogram Viewer"));
     mp_histogram_viewer_Act->setEnabled(false);
@@ -192,6 +204,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_histogram_dialog->hide();
     connect(mp_histogram_dialog, SIGNAL(rejected()), this, SLOT(histogram_viewer_closed_slot()));
 
+    window_menu->addSeparator();
 
     // Gain and Gamma Settings menu action
     mp_gain_gamma_settings_Act = window_menu->addAction(tr("Gain And Gamma Settings"));
@@ -759,6 +772,18 @@ void c_ser_player::histogram_viewer_slot(bool checked)
 
     c_persistent_data::m_histogram_enabled = checked;
 
+}
+
+
+void c_ser_player::header_details_dialog_closed_slot()
+{
+    mp_header_details_Act->setChecked(false);
+}
+
+
+void c_ser_player::header_details_dialog_slot(bool checked)
+{
+    mp_header_details_dialog->setVisible(checked);
 }
 
 
@@ -1334,6 +1359,27 @@ void c_ser_player::open_ser_file(const QString &filename)
     } else {
         // This is a valid SER file
 
+        // Set SER file header details in header details dialog
+        mp_header_details_dialog->set_details(
+                filename,
+                QFileInfo(filename).size(),  // int filesize,
+                mp_ser_file->get_file_id(), // QString file_id,
+                mp_ser_file->get_lu_id(),  // int lu_id,
+                mp_ser_file->get_colour_id(),  // int colour_id,
+                mp_ser_file->get_little_endian(),  // int little_endian,
+                mp_ser_file->get_width(),  // int image_width,
+                mp_ser_file->get_height(),  // int image_height,
+                mp_ser_file->get_pixel_depth(),  // int pixel_depth,
+                m_total_frames,  // int frame_count,
+                mp_ser_file->get_observer_string(),  // QString observer,
+                mp_ser_file->get_instrument_string(),  // QString instrument,
+                mp_ser_file->get_telescope_string(),  // QString telescope,
+                mp_ser_file->get_data_time(),  // uint64_t date_time,
+                mp_ser_file->get_data_time_utc(),  // uint64_t date_time_utc)
+                mp_ser_file->get_timestamp_info());  // QString timestamp_info
+
+
+
         // Keep list of opened SER files up to date
         add_string_to_stringlist(c_persistent_data::m_recent_ser_files, QFileInfo(filename).absoluteFilePath());
         c_persistent_data::m_ser_directory = QFileInfo(filename).absolutePath();
@@ -1427,6 +1473,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_save_frames_as_ser_Act->setEnabled(true);
         mp_save_frames_as_images_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
+        mp_header_details_Act->setEnabled(true);
         mp_histogram_viewer_Act->setEnabled(true);
         if (mp_histogram_viewer_Act->isChecked()) {
             mp_histogram_dialog->show();
