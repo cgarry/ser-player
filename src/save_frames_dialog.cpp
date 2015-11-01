@@ -274,17 +274,25 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_telescope_LEdit->setValidator(mp_utf8_validator);
     mp_telescope_LEdit->setToolTip(tr("Set the text to be written to the 'Telescope' string in the generated SER file") + "<b></b>");
 
-    QFormLayout  *header_fields_FLayout = new QFormLayout;
-    header_fields_FLayout->setVerticalSpacing(5);
-    header_fields_FLayout->addRow(tr("Observer:"), mp_observer_LEdit);
-    header_fields_FLayout->addRow(tr("Instrument:"), mp_instrument_LEdit);
-    header_fields_FLayout->addRow(tr("Telescope:"), mp_telescope_LEdit);
+    QGridLayout  *header_fields_GLayout = new QGridLayout;
+    header_fields_GLayout->addWidget(new QLabel(tr("Observer:")), 0, 0);
+    header_fields_GLayout->addWidget(mp_observer_LEdit, 0, 1);
+    header_fields_GLayout->addWidget(new QLabel(tr("Instrument:")), 1, 0);
+    header_fields_GLayout->addWidget(mp_instrument_LEdit, 1, 1);
+    header_fields_GLayout->addWidget(new QLabel(tr("Telescope:")), 2, 0);
+    header_fields_GLayout->addWidget(mp_telescope_LEdit, 2, 1);
+
+//    QFormLayout  *header_fields_FLayout = new QFormLayout;
+//    header_fields_FLayout->setVerticalSpacing(5);
+//    header_fields_FLayout->addRow(tr("Observer:"), mp_observer_LEdit);
+//    header_fields_FLayout->addRow(tr("Instrument:"), mp_instrument_LEdit);
+//    header_fields_FLayout->addRow(tr("Telescope:"), mp_telescope_LEdit);
 
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
     ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     ser_file_options_VLayout->addWidget(mp_include_timestamps);
-    ser_file_options_VLayout->addLayout(header_fields_FLayout);
+    ser_file_options_VLayout->addLayout(header_fields_GLayout);
 
     QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
     ser_file_options_GBox->setLayout(ser_file_options_VLayout);
