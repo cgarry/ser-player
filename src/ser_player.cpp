@@ -871,9 +871,19 @@ void c_ser_player::save_frames_as_ser_slot()
             default_filename.append(".ser");
         }
 
+        QString selected_filter;
+        QFileDialog::Options save_dialog_options = 0;
+        #ifdef __APPLE__
+        // The native save file dialog on OS X does not fill out a default filename
+        // so we use QT's save file dialog instead
+        save_dialog_options |= QFileDialog::DontUseNativeDialog;
+        #endif
+
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As SER File"),
                                    default_filename,
-                                   tr("SER Files (*.ser)", "Filetype filter"));
+                                   tr("SER Files (*.ser)", "Filetype filter"),
+                                   &selected_filter,
+                                   save_dialog_options);
 
         if (!filename.isEmpty()) {
             // Handle the case on Linux where an extension is not added by the save file dialog
