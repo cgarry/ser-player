@@ -63,6 +63,7 @@ class c_pipp_ser {
 
 
         // Member variables
+        QString m_filename;
         FILE *mp_ser_file;
         int64_t m_filesize;
         uint32_t m_framesize;
@@ -111,7 +112,7 @@ class c_pipp_ser {
         // Open SER file
         // ------------------------------------------
         int32_t open(
-            const char *filename,
+            const QString &filename,
             int32_t bpp,
             int32_t quiet);
 
@@ -120,6 +121,15 @@ class c_pipp_ser {
         // Close AVI file
         // ------------------------------------------
         int32_t close();
+
+
+        // ------------------------------------------
+        // Get filename
+        // ------------------------------------------
+        QString get_filename(){
+            return m_filename;
+        }
+
 
 
         // ------------------------------------------

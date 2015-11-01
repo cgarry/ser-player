@@ -7,6 +7,8 @@
 #include "pipp_ser_write.h"
 #include "pipp_utf8.h"
 
+#include <QDebug>
+
 using namespace std;
 
 
@@ -40,7 +42,7 @@ c_pipp_ser_write::c_pipp_ser_write() :
 // Create a new SER file
 // ------------------------------------------
 int32_t c_pipp_ser_write::create(
-    const char *filename,
+    const QString &filename,
     int32_t  width,
     int32_t  height,
     bool     colour,
@@ -57,7 +59,7 @@ int32_t c_pipp_ser_write::create(
     }
 
     // Open new file
-    mp_ser_file = fopen_utf8(filename, "wb+");
+    mp_ser_file = fopen_utf8(filename.toUtf8().constData(), "wb+");
 
     // Check file opened
     // Return if file did not open
@@ -69,9 +71,9 @@ int32_t c_pipp_ser_write::create(
     }
     
     // Generate temp index filename
-    int32_t filename_len = strlen(filename);
+    int32_t filename_len = filename.length();
     mp_index_filename = new char[filename_len + 5];
-    strcpy(mp_index_filename, filename);
+    strcpy(mp_index_filename, filename.toUtf8().constData());
     strcat(mp_index_filename, ".idx");
 
     // Open index file
@@ -208,9 +210,13 @@ int32_t c_pipp_ser_write::set_details(
 
     m_header.date_time = m_date_time_utc - utc_to_local_diff;
     m_header.date_time_utc = m_date_time_utc;
-    memcpy(m_header.observer, observer.toStdString().c_str(), 40);
-    memcpy(m_header.instrument, instrument.toStdString().c_str(), 40);
-    memcpy(m_header.telescope, telescope.toStdString().c_str(), 40);
+
+    memset(m_header.observer, 0, 40);
+    memcpy(m_header.observer, observer.toUtf8().constData(), 40);
+    memset(m_header.instrument, 0, 40);
+    memcpy(m_header.instrument, instrument.toUtf8().constData(), 40);
+    memset(m_header.telescope, 0, 40);
+    memcpy(m_header.telescope, telescope.toUtf8().constData(), 40);
 
     return 0;
 }

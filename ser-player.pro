@@ -47,7 +47,8 @@ SOURCES += src/main.cpp\
     src/histogram_thread.cpp \
     src/histogram_dialog.cpp \
     src/pipp_ser_write.cpp \
-    src/header_details_dialog.cpp
+    src/header_details_dialog.cpp \
+    src/utf8_validator.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -74,7 +75,8 @@ HEADERS  += src/ser_player.h \
     src/histogram_thread.h \
     src/histogram_dialog.h \
     src/pipp_ser_write.h \
-    src/header_details_dialog.h
+    src/header_details_dialog.h \
+    src/utf8_validator.h
 
 # Build directories
 DESTDIR = $$PWD/bin

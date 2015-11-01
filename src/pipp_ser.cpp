@@ -49,7 +49,7 @@ using namespace std;
 // Open SER file
 // ------------------------------------------
 int32_t c_pipp_ser::open(
-    const char *filename,
+    const QString &filename,
     int32_t bpp,
     int32_t quiet)
 {
@@ -66,8 +66,11 @@ int32_t c_pipp_ser::open(
         fclose(mp_ser_file);  // Close file
     }
 
+    // Remember filename
+    m_filename = filename;
+
     // Open SER file
-    mp_ser_file = fopen_utf8(filename, "rb");
+    mp_ser_file = fopen_utf8(filename.toUtf8().constData(), "rb");
 
     // Return if file did not open
     if (!mp_ser_file) {
@@ -377,15 +380,11 @@ int32_t c_pipp_ser::get_buffer_size()
 QString c_pipp_ser::get_observer_string()
 {
     QString observer_string;
-    // Copy up to 40 characters into QString
-    for (int i = 0; i < 40; i++) {
-        if (m_header.observer[i] != 0) {
-            observer_string += m_header.observer[i];
-        } else {
-            break;
-        }
-    }
+    char temp[41];
+    memcpy(temp, m_header.observer, 40);
+    temp[40] = 0;
 
+    observer_string = temp;
     return observer_string;
 }
 
@@ -396,15 +395,11 @@ QString c_pipp_ser::get_observer_string()
 QString c_pipp_ser::get_instrument_string()
 {
     QString instrument_string;
-    // Copy up to 40 characters into QString
-    for (int i = 0; i < 40; i++) {
-        if (m_header.instrument[i] != 0) {
-            instrument_string += m_header.instrument[i];
-        } else {
-            break;
-        }
-    }
+    char temp[41];
+    memcpy(temp, m_header.instrument, 40);
+    temp[40] = 0;
 
+    instrument_string = temp;
     return instrument_string;
 }
 
@@ -415,14 +410,11 @@ QString c_pipp_ser::get_instrument_string()
 QString c_pipp_ser::get_telescope_string()
 {
     QString telescope_string;
-    for (int i = 0; i < 40; i++) {
-        if (m_header.telescope[i] != 0) {
-            telescope_string += m_header.telescope[i];
-        } else {
-            break;
-        }
-    }
+    char temp[41];
+    memcpy(temp, m_header.telescope, 40);
+    temp[40] = 0;
 
+    telescope_string = temp;
     return telescope_string;
 }
 

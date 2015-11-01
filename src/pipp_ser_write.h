@@ -101,7 +101,7 @@ class c_pipp_ser_write {
         // Create a new SER file
         // ------------------------------------------
         int32_t create(
-            const char *filename,
+            const QString &filename,
             int32_t  width,
             int32_t  height,
             bool     colour,

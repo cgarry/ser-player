@@ -844,15 +844,35 @@ void c_ser_player::save_frames_as_ser_slot()
                                                                         mp_frame_Slider->get_start_frame(),
                                                                         mp_frame_Slider->get_end_frame(),
                                                                         mp_frame_Slider->get_markers_enable(),
-                                                                        mp_ser_file->has_timestamps());
-
+                                                                        mp_ser_file->has_timestamps(),
+                                                                        mp_ser_file->get_observer_string(),
+                                                                        mp_ser_file->get_instrument_string(),
+                                                                        mp_ser_file->get_telescope_string());
     int ret = save_frames_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
         m_current_state != STATE_NO_FILE &&
         m_current_state != STATE_PLAYING) {
+
+        int min_frame = save_frames_Dialog->get_start_frame();
+        int max_frame = save_frames_Dialog->get_end_frame();
+        QString default_filename =  mp_ser_file->get_filename();
+        int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
+
+        if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
+            default_filename.insert(default_filename.length()-4,
+                                    QString("_F%1-%2")
+                                    .arg(min_frame, required_digits_for_number, 10, QChar('0'))
+                                    .arg(max_frame, required_digits_for_number, 10, QChar('0')));
+        } else {
+            default_filename.append(QString("_F%1-%2")
+                                    .arg(min_frame, required_digits_for_number, 10, QChar('0'))
+                                    .arg(max_frame, required_digits_for_number, 10, QChar('0')));
+            default_filename.append(".ser");
+        }
+
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As SER File"),
-                                   m_ser_directory,
+                                   default_filename,
                                    tr("SER Files (*.ser)", "Filetype filter"));
 
         if (!filename.isEmpty()) {
@@ -861,15 +881,13 @@ void c_ser_player::save_frames_as_ser_slot()
                 filename = filename + tr(".ser");
             }
 
-            int min_frame = save_frames_Dialog->get_start_frame();
-            int max_frame = save_frames_Dialog->get_end_frame();
             int decimate_value = save_frames_Dialog->get_frame_decimation();
             int sequence_direction = save_frames_Dialog->get_sequence_direction();
             int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
             bool include_timestamps = save_frames_Dialog->get_include_timestamps_in_ser_file();
 
             c_pipp_ser_write ser_write_file;
-            ser_write_file.create(filename.toStdString().c_str(), // const char *filename
+            ser_write_file.create(filename, //  QString filename
                                   mp_ser_file->get_width(),  // int32_t  width
                                   mp_ser_file->get_height(), // int32_t  height
                                   mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
@@ -883,6 +901,7 @@ void c_ser_player::save_frames_as_ser_slot()
 
             // Setup progress dialog
             c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
+            save_progress_dialog.setWindowTitle(tr("Save Frames As SER File"));
             save_progress_dialog.show();
 
             int saved_frames = 0;
@@ -937,9 +956,9 @@ void c_ser_player::save_frames_as_ser_slot()
                 0,                  // int32_t lu_id - always 0
                 mp_frame_image->get_colour_id(),  // int32_t colour_id,
                 utc_to_local_diff,  // int64_t utc_to_local_diff,
-                mp_ser_file->get_observer_string(),
-                mp_ser_file->get_instrument_string(),
-                mp_ser_file->get_telescope_string());
+                save_frames_Dialog->get_observer_string(),
+                save_frames_Dialog->get_instrument_string(),
+                save_frames_Dialog->get_telescope_string());
 
             // Write header and close SER file
             ser_write_file.close();
@@ -1339,7 +1358,7 @@ void c_ser_player::open_ser_file(const QString &filename)
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
 
     mp_ser_file->close();
-    m_total_frames = mp_ser_file->open(filename.toStdString().c_str(), 0, 0);
+    m_total_frames = mp_ser_file->open(filename, 0, 0);
 
     if (m_total_frames <= 0) {
         // Invalid SER file

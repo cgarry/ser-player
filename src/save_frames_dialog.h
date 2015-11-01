@@ -20,13 +20,16 @@
 #define SAVE_FRAMES_DIALOG_H
 
 #include <QDialog>
+#include <QString>
 
 
 class QRadioButton;
 class QSpinBox;
 class QLabel;
+class QLineEdit;
 class QGroupBox;
 class QCheckBox;
+class c_utf8_validator;
 
 
 class c_save_frames_dialog : public QDialog
@@ -42,7 +45,12 @@ public:
                          int marker_start_frame,
                          int marker_end_frame,
                          bool markers_enabled,
-                         bool ser_has_timestamps);
+                         bool ser_has_timestamps,
+                         QString observer_string = "",
+                         QString instrument_string = "",
+                         QString telescope_string = "");
+
+    ~c_save_frames_dialog();
 
     int get_start_frame()
     {
@@ -61,6 +69,9 @@ public:
     int get_required_digits_for_number();
     bool get_use_framenumber_in_name();
     bool get_include_timestamps_in_ser_file();
+    QString get_observer_string();
+    QString get_instrument_string();
+    QString get_telescope_string();
 
 
 signals:
@@ -97,8 +108,13 @@ private:
     QCheckBox *mp_append_timestamp_CBox;
 
     QCheckBox *mp_include_timestamps;
+    QLineEdit *mp_observer_LEdit;
+    QLineEdit *mp_instrument_LEdit;
+    QLineEdit *mp_telescope_LEdit;
 
     QLabel *mp_total_frames_to_save_Label;
+
+    c_utf8_validator *mp_utf8_validator;
 
     int m_total_frames;
     int m_marker_start_frame;

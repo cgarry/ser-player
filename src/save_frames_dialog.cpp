@@ -19,9 +19,11 @@
 
 #include <Qt>
 #include <QCheckBox>
+#include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSpinBox>
@@ -29,6 +31,7 @@
 #include <cmath>
 
 #include "save_frames_dialog.h"
+#include "utf8_validator.h"
 
 #define INSIDE_GBOX_SPACING 8
 #define INSIDE_GBOX_MARGIN 10
@@ -40,7 +43,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            int marker_start_frame,
                                            int marker_end_frame,
                                            bool markers_enabled,
-                                           bool ser_has_timestamps)
+                                           bool ser_has_timestamps,
+                                           QString observer_string,
+                                           QString instrument_string,
+                                           QString telescope_string)
     : QDialog(parent),
       m_total_frames(total_frames),
       m_marker_start_frame(marker_start_frame),
@@ -151,11 +157,16 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // Frame Decimation
     //
     QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every"));
+    frame_decimation_Label->setToolTip(tr("Reduce the number of saved frames by only saving 1 frame"
+                                          " for every specified number of frames.") + "<b></b>");
+
     mp_frame_decimation_SpinBox = new QSpinBox;
     mp_frame_decimation_SpinBox->setMinimum(1);
     mp_frame_decimation_SpinBox->setMaximum(total_frames);
     mp_frame_decimation_SpinBox->setValue(2);
     connect(mp_frame_decimation_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(update_num_frames_slot()));
+    mp_frame_decimation_SpinBox->setToolTip(tr("Reduce the number of saved frames by only saving 1 frame"
+                                               " for every specified number of frames.") + "<b></b>");
 
     QHBoxLayout *frame_decimation_HLayout = new QHBoxLayout;
     frame_decimation_HLayout->setMargin(INSIDE_GBOX_MARGIN);
@@ -170,13 +181,22 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_frame_decimation_GBox->setLayout(frame_decimation_HLayout);
     mp_frame_decimation_GBox->setMinimumWidth((mp_frame_decimation_GBox->minimumSizeHint().width() * 5) / 4);
     connect(mp_frame_decimation_GBox, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
+    mp_frame_decimation_GBox->setToolTip(tr("Reduce the number of saved frames by only saving 1 frame"
+                                            " for every specified number of frames.") + "<b></b>");
 
     //
     // Sequence Direction
     //
     mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards"));
+    mp_forwards_sequence_RButton->setToolTip(tr("Save the frames in their forward order.") + "<b></b>");
+
     mp_reverse_sequence_RButton = new QRadioButton(tr("Reverse"));
+    mp_reverse_sequence_RButton->setToolTip(tr("Save the frames in their reverse order.") + "<b></b>");
+
     mp_forwards_then_reverse_sequence_RButton = new QRadioButton(tr("Forwards Then Reverse"));
+    mp_forwards_then_reverse_sequence_RButton->setToolTip(tr("Save the frames in their forward order"
+                                                             " and then in their reverse order. "
+                                                             "This will result in twice as many frames being saved.") + "<b></b>");
     mp_forwards_sequence_RButton->setChecked(true);
     connect(mp_forwards_sequence_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     connect(mp_reverse_sequence_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
@@ -198,7 +218,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     mp_use_framenumber_in_filename = new QCheckBox(tr("Use Framenumber In Filename (Instead Of A Sequential Count)"));
     mp_use_framenumber_in_filename->setChecked(true);
-
+    mp_use_framenumber_in_filename->setToolTip(tr("This option controls whether generated image files will have their frame number "
+                                                  "or a simple sequential count appended to their filename in order to make the "
+                                                  "image filenames unique.") + "<b></b>");
     if (ser_has_timestamps) {
         mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename"));
         mp_append_timestamp_CBox->setEnabled(true);
@@ -206,6 +228,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename") + " (" + tr("No Timestamps In SER File") + ")");
         mp_append_timestamp_CBox->setEnabled(false);
     }
+
+    mp_append_timestamp_CBox->setToolTip(tr("Append each image filename with its timestamp") + "<b></b>");
 
     QVBoxLayout *filename_generation_VLayout = new QVBoxLayout;
     filename_generation_VLayout->setMargin(INSIDE_GBOX_MARGIN);
@@ -226,17 +250,48 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         mp_include_timestamps = new QCheckBox(tr("Include Timestamps"));
         mp_include_timestamps->setChecked(true);
     } else {
-        mp_include_timestamps = new QCheckBox(tr("Include Timestamps") + " (" + tr("No Timestamps In SER File") + ")");
+        mp_include_timestamps = new QCheckBox(tr("Include Timestamps") + " (" + tr("No Timestamps In Source SER File") + ")");
         mp_include_timestamps->setEnabled(false);
     }
+
+    mp_include_timestamps->setToolTip(tr("Timestamps are optional in SER Files."
+                                         "  This option controls whether or not timestamps are included in the generated SER file") + "<b></b>");
+
+    mp_utf8_validator = new c_utf8_validator;
+
+    mp_observer_LEdit = new QLineEdit;
+    mp_observer_LEdit->setText(observer_string.trimmed());
+    mp_observer_LEdit->setValidator(mp_utf8_validator);
+    mp_observer_LEdit->setToolTip(tr("Set the text to be written to the 'Observer' string in the generated SER file") + "<b></b>");
+
+    mp_instrument_LEdit = new QLineEdit;
+    mp_instrument_LEdit->setText(instrument_string.trimmed());
+    mp_instrument_LEdit->setValidator(mp_utf8_validator);
+    mp_instrument_LEdit->setToolTip(tr("Set the text to be written to the 'Instrument' string in the generated SER file") + "<b></b>");
+
+    mp_telescope_LEdit = new QLineEdit;
+    mp_telescope_LEdit->setText(telescope_string.trimmed());
+    mp_telescope_LEdit->setValidator(mp_utf8_validator);
+    mp_telescope_LEdit->setToolTip(tr("Set the text to be written to the 'Telescope' string in the generated SER file") + "<b></b>");
+
+    QFormLayout  *header_fields_FLayout = new QFormLayout;
+    header_fields_FLayout->setVerticalSpacing(5);
+    header_fields_FLayout->addRow(tr("Observer:"), mp_observer_LEdit);
+    header_fields_FLayout->addRow(tr("Instrument:"), mp_instrument_LEdit);
+    header_fields_FLayout->addRow(tr("Telescope:"), mp_telescope_LEdit);
 
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
     ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     ser_file_options_VLayout->addWidget(mp_include_timestamps);
+    ser_file_options_VLayout->addLayout(header_fields_FLayout);
 
     QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
     ser_file_options_GBox->setLayout(ser_file_options_VLayout);
+    // Hide save current frame button when this is a save as SER file dilalog
+    if (save_type == SAVE_IMAGES) {
+        ser_file_options_GBox->hide();
+    }
 
 
     //
@@ -291,6 +346,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
             mp_save_all_frames_RButton->click();
         }
     }
+}
+
+
+c_save_frames_dialog::~c_save_frames_dialog()
+{
+    delete mp_utf8_validator;
 }
 
 
@@ -470,3 +531,21 @@ bool c_save_frames_dialog::get_include_timestamps_in_ser_file()
 
     return include_timestamps_in_ser_file;
 }
+
+QString c_save_frames_dialog::get_observer_string()
+{
+    return mp_observer_LEdit->text();
+}
+
+
+QString c_save_frames_dialog::get_instrument_string()
+{
+    return mp_instrument_LEdit->text();
+}
+
+
+QString c_save_frames_dialog::get_telescope_string()
+{
+    return mp_telescope_LEdit->text();
+}
+
