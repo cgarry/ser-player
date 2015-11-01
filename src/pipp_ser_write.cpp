@@ -59,7 +59,7 @@ int32_t c_pipp_ser_write::create(
     }
 
     // Open new file
-    mp_ser_file = fopen_utf8(filename.toUtf8().constData(), "wb+");
+    mp_ser_file = fopen_utf8(filename.toUtf8().data(), "wb+");
 
     // Check file opened
     // Return if file did not open
