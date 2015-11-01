@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.16"
+#define VERSION_STRING "v1.3.17"
 
 #include <Qt>
 #include <QApplication>
