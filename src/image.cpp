@@ -610,28 +610,78 @@ void c_image::monochrome_conversion(int conv_type)
 }
 
 
-void c_image::change_colour_balance()
+void c_image::do_lut_based_processing()
 {
-    if (!m_colour) {
-        // Mono images just use 1 LUT
-        if (m_gain != 1.0 || m_gamma != 1.0) {
-            uint8_t *p_frame_data = mp_buffer;
-            for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-                *p_frame_data = m_colbal_r_lut[*p_frame_data];
-                p_frame_data++;
+    if (m_byte_depth == 1) {
+        // 8-bit version just uses LUTs
+        if (!m_colour) {
+            // Mono images just use 1 LUT
+            if (m_gain != 1.0 || m_gamma != 1.0) {
+                uint8_t *p_frame_data = mp_buffer;
+                for (int pixel = 0; pixel < m_width * m_height; pixel++) {
+                    *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                    p_frame_data++;
+                }
+            }
+        } else {
+            // Colour images use all 3 LUTs
+            if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0) {
+                uint8_t *p_frame_data = mp_buffer;
+                for (int pixel = 0; pixel < m_width * m_height; pixel++) {
+                    *p_frame_data = m_colbal_b_lut[*p_frame_data];
+                    p_frame_data++;
+                    *p_frame_data = m_colbal_g_lut[*p_frame_data];
+                    p_frame_data++;
+                    *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                    p_frame_data++;
+                }
             }
         }
     } else {
-        // Colour images use all 3 LUTs
-        if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0) {
-            uint8_t *p_frame_data = mp_buffer;
-            for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-                *p_frame_data = m_colbal_b_lut[*p_frame_data];
-                p_frame_data++;
-                *p_frame_data = m_colbal_g_lut[*p_frame_data];
-                p_frame_data++;
-                *p_frame_data = m_colbal_r_lut[*p_frame_data];
-                p_frame_data++;
+        // 16-bit version
+        if (!m_colour) {
+            // Monochrome processing
+            uint16_t *data_ptr = (uint16_t *)mp_buffer;
+            for (int x = 0; x < m_width * m_height; x++) {
+                double mono_data = *data_ptr;
+
+                // Apply main gain
+                mono_data *= m_gain;
+                mono_data = (mono_data > 65535.0) ? 65535.0 : mono_data;
+
+                // Apply gamma
+                mono_data = (uint16_t)(pow((double)(mono_data / 65535.0), (double)(1 / m_gamma)) * 65535.0 + 0.5);
+                mono_data = (mono_data > 65535.0) ? 65535.0 : mono_data;
+
+                *data_ptr++ = mono_data;
+            }
+        } else {
+            // Colour processing
+            uint16_t *data_ptr = (uint16_t *)mp_buffer;
+            for (int x = 0; x < m_width * m_height; x++) {
+                double b_data = *data_ptr;
+                double g_data = *(data_ptr + 1);
+                double r_data = *(data_ptr + 2);
+
+                // Apply colour balance gains and main gain
+                b_data *=  m_blue_gain * m_gain;
+                g_data *=  m_green_gain * m_gain;
+                r_data *=  m_red_gain * m_gain;
+                b_data = (b_data > 65535.0) ? 65535.0 : b_data;
+                g_data = (g_data > 65535.0) ? 65535.0 : g_data;
+                r_data = (r_data > 65535.0) ? 65535.0 : r_data;
+
+                // Apply gamma
+                b_data = pow((double)(b_data / 65535.0), (double)(1 / m_gamma)) * 65535.0 + 0.5;
+                g_data = pow((double)(g_data / 65535.0), (double)(1 / m_gamma)) * 65535.0 + 0.5;
+                r_data = pow((double)(r_data / 65535.0), (double)(1 / m_gamma)) * 65535.0 + 0.5;
+                b_data = (b_data > 65535.0) ? 65535.0 : b_data;
+                g_data = (g_data > 65535.0) ? 65535.0 : g_data;
+                r_data = (r_data > 65535.0) ? 65535.0 : r_data;
+
+                *data_ptr++ = (uint16_t)b_data;
+                *data_ptr++ = (uint16_t)g_data;
+                *data_ptr++ = (uint16_t)r_data;
             }
         }
     }
@@ -641,6 +691,18 @@ void c_image::change_colour_balance()
 void c_image::change_colour_saturation(
     double saturation)
 {
+    if (m_byte_depth == 1) {
+        return change_colour_saturation_int <uint8_t> (saturation);
+    } else {
+        return change_colour_saturation_int <uint16_t> (saturation);
+    }
+}
+
+
+template <typename T>
+void c_image::change_colour_saturation_int(
+    double saturation)
+{
     // Only chnage colour saturation for colour images
     // saturation == 1.0 means no change so do nothing
     if (m_colour && saturation != 1.0) {
@@ -648,18 +710,17 @@ void c_image::change_colour_saturation(
         const double C_Pg = .587;
         const double C_Pb = .114;
 
-        // 8-bit data always
-        uint8_t *p_frame_data = mp_buffer;
+        T *p_frame_data = (T *)mp_buffer;
         for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-            uint8_t *p_blue = p_frame_data++;
-            uint8_t *p_green = p_frame_data++;
-            uint8_t *p_red = p_frame_data++;
+            T *p_blue = p_frame_data++;
+            T *p_green = p_frame_data++;
+            T *p_red = p_frame_data++;
 
             if (*p_blue != *p_green || *p_blue != *p_red) {
                 // This is not a monochrome pixel - apply colour saturation
-                double P = sqrt( (*p_red) * (*p_red) * C_Pr +
-                                 (*p_green) * (*p_green) * C_Pg +
-                                 (*p_blue) * (*p_blue) * C_Pb );
+                double P = sqrt( C_Pr * (*p_red) * (*p_red) +
+                                 C_Pg * (*p_green) * (*p_green) +
+                                 C_Pb * (*p_blue) * (*p_blue) );
 
                 double dred = P + ((double)(*p_red) - P) * saturation;
                 double dgreen = P + ((double)(*p_green) - P) * saturation;
@@ -669,13 +730,14 @@ void c_image::change_colour_saturation(
                 dred = (dred < 0) ? 0 : dred;
                 dgreen = (dgreen < 0) ? 0 : dgreen;
                 dblue = (dblue < 0) ? 0 : dblue;
-                dred = (dred > 255) ? 255 : dred;
-                dgreen = (dgreen > 255) ? 255 : dgreen;
-                dblue = (dblue > 255) ? 255 : dblue;
 
-                *p_red = (uint8_t)dred;
-                *p_green = (uint8_t)dgreen;
-                *p_blue = (uint8_t)dblue;
+                dred = (dred > std::numeric_limits<T>::max()) ? std::numeric_limits<T>::max() : dred;
+                dgreen = (dgreen > std::numeric_limits<T>::max()) ? std::numeric_limits<T>::max() : dgreen;
+                dblue = (dblue > std::numeric_limits<T>::max()) ? std::numeric_limits<T>::max() : dblue;
+
+                *p_red = (T)dred;
+                *p_green = (T)dgreen;
+                *p_blue = (T)dblue;
             }
         }
     }
@@ -693,38 +755,75 @@ void c_image::conv_data_ready_for_qimage()
     int32_t buffer_size = (m_width + line_pad) * m_height * 3;
     uint8_t *p_output_buffer = new uint8_t [buffer_size];
 
-    // 1 byte per sample
     if (m_colour) {
         // Colour data needs to be changed from BGR to RGB format and flipped vertically
         uint8_t *p_write_data = p_output_buffer;
-        for (int32_t y = m_height - 1; y >= 0; y--) {
-            uint8_t *p_read_data = mp_buffer + y * m_width * 3;
-            for (int32_t x = 0; x < m_width; x++) {
-                uint8_t b_pixel = *p_read_data++;
-                uint8_t g_pixel = *p_read_data++;
-                uint8_t r_pixel = *p_read_data++;
-                *p_write_data++ = r_pixel;
-                *p_write_data++ = g_pixel;
-                *p_write_data++ = b_pixel;
-            }
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            for (int32_t y = m_height - 1; y >= 0; y--) {
+                uint8_t *p_read_data = mp_buffer + y * m_width * 3;
+                for (int32_t x = 0; x < m_width; x++) {
+                    uint8_t b_pixel = *p_read_data++;
+                    uint8_t g_pixel = *p_read_data++;
+                    uint8_t r_pixel = *p_read_data++;
+                    *p_write_data++ = r_pixel;
+                    *p_write_data++ = g_pixel;
+                    *p_write_data++ = b_pixel;
+                }
 
-            for (int32_t x = 0; x < line_pad; x++) {
-                *p_write_data++ = 0;
+                for (int32_t x = 0; x < line_pad; x++) {
+                    *p_write_data++ = 0;
+                }
+            }
+        } else {
+            // 16-bit data
+            for (int32_t y = m_height - 1; y >= 0; y--) {
+                uint16_t *p_read_data = ((uint16_t *)mp_buffer) + y * m_width * 3;
+                for (int32_t x = 0; x < m_width; x++) {
+                    uint8_t b_pixel = (*p_read_data++) >> 8;
+                    uint8_t g_pixel = (*p_read_data++) >> 8;
+                    uint8_t r_pixel = (*p_read_data++) >> 8;
+                    *p_write_data++ = r_pixel;
+                    *p_write_data++ = g_pixel;
+                    *p_write_data++ = b_pixel;
+                }
+
+                for (int32_t x = 0; x < line_pad; x++) {
+                    *p_write_data++ = 0;
+                }
             }
         }
     } else {
         // Monochrome data just needs to be flipped vertically
         uint8_t *p_write_data = p_output_buffer;
-        for (int32_t y = m_height - 1; y >= 0; y--) {
-            uint8_t *p_read_data = mp_buffer + y * m_width;
-            for (int32_t x = 0; x < m_width; x++) {
-                *p_write_data++ = *p_read_data;
-                *p_write_data++ = *p_read_data;
-                *p_write_data++ = *p_read_data++;
-            }
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            for (int32_t y = m_height - 1; y >= 0; y--) {
+                uint8_t *p_read_data = mp_buffer + y * m_width;
+                for (int32_t x = 0; x < m_width; x++) {
+                    *p_write_data++ = *p_read_data;
+                    *p_write_data++ = *p_read_data;
+                    *p_write_data++ = *p_read_data++;
+                }
 
-            for (int32_t x = 0; x < line_pad; x++) {
-                *p_write_data++ = 0;
+                for (int32_t x = 0; x < line_pad; x++) {
+                    *p_write_data++ = 0;
+                }
+            }
+        } else {
+            // 16-bit data
+            for (int32_t y = m_height - 1; y >= 0; y--) {
+                uint16_t *p_read_data = ((uint16_t *)mp_buffer) + y * m_width;
+                for (int32_t x = 0; x < m_width; x++) {
+                    uint8_t temp = (*p_read_data++) >> 8;
+                    *p_write_data++ = temp;
+                    *p_write_data++ = temp;
+                    *p_write_data++ = temp;
+                }
+
+                for (int32_t x = 0; x < line_pad; x++) {
+                    *p_write_data++ = 0;
+                }
             }
         }
     }
@@ -736,6 +835,19 @@ void c_image::conv_data_ready_for_qimage()
 
 
 bool c_image::debayer_image_bilinear(int32_t colour_id)
+{
+    if (m_byte_depth == 1) {
+        // 8-bit data
+        return debayer_image_bilinear_int <uint8_t> (colour_id);
+    } else {
+        // 16-bit data
+        return debayer_image_bilinear_int <uint16_t> (colour_id);
+    }
+}
+
+
+template <typename T>
+bool c_image::debayer_image_bilinear_int(int32_t colour_id)
 {
     uint32_t bayer_code;
     switch (colour_id) {
@@ -757,46 +869,46 @@ bool c_image::debayer_image_bilinear(int32_t colour_id)
     }
 
     int32_t x, y;
-    uint8_t *raw_data_ptr;
-    uint8_t *rgb_data_ptr1;
+    T *raw_data_ptr;
+    T *rgb_data_ptr1;
 
     uint32_t bayer_x = bayer_code % 2;
     uint32_t bayer_y = ((bayer_code/2) % 2) ^ (m_height % 2);
 
     // Buffer to create RGB image in
-    uint8_t *rgb_data = new uint8_t[3 * m_width * m_height];
+    T *rgb_data = (T *)new uint8_t[3 * m_width * m_height * m_byte_depth];
 
     // Debayer bottom line
     y = 0;
     for (x = 0; x < m_width; x++) {
         uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-        debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_buffer, rgb_data);
+        debayer_pixel_bilinear <T> (bayer, x, y, (T *)mp_buffer, rgb_data);
     }
 
     // Debayer top line
     y = m_height -1;
     for (x = 0; x < m_width; x++) {
         uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-        debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_buffer, rgb_data);
+        debayer_pixel_bilinear <T> (bayer, x, y, (T *)mp_buffer, rgb_data);
     }
 
     // Debayer left edge
     x = 0;
     for (y = 1; y < m_height-1; y++) {
         uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-        debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_buffer, rgb_data);
+        debayer_pixel_bilinear <T> (bayer, x, y, (T *)mp_buffer, rgb_data);
     }
 
     // Debayer right edge
     x = m_width-1;
     for (y = 1; y < m_height-1; y++) {
         uint32_t bayer = ((x + bayer_x) % 2) + (2 * ((y + bayer_y) % 2));
-        debayer_pixel_bilinear <uint8_t> (bayer, x, y, mp_buffer, rgb_data);
+        debayer_pixel_bilinear <T> (bayer, x, y, (T *)mp_buffer, rgb_data);
     }
 
     // Debayer to create blue, green and red data
     rgb_data_ptr1 = rgb_data + (3 * (m_width + 1));
-    raw_data_ptr = mp_buffer + (m_width + 1);
+    raw_data_ptr = ((T *)mp_buffer) + (m_width + 1);
 
     for (y = 1; y < (m_height-1); y++) {
         for (x = 1; x < (m_width-1); x++) {
@@ -862,7 +974,7 @@ bool c_image::debayer_image_bilinear(int32_t colour_id)
 
     // Make new debayered data the frame buffer data
     delete[] mp_buffer;
-    mp_buffer = rgb_data;
+    mp_buffer = (uint8_t *)rgb_data;
     m_colour_id = COLOURID_BGR;
     m_colour = true;
     return true;

@@ -931,8 +931,8 @@ void c_ser_player::save_frames_as_ser_slot()
 
                     // Get frame from SER file
                     bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
-                                                           do_frame_processing,  // conv_to_8_bit  // Temp until processing options support 16-bit
-                                                           do_frame_processing);  // do_processing
+                                                             false,  // conv_to_8_bit
+                                                             do_frame_processing);  // do_processing
                     if (valid_frame) {
                         // Get timestamp for frame if required
                         uint64_t timestamp = 0;
@@ -2124,7 +2124,7 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
                 mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);
             }
 
-            mp_frame_image->change_colour_balance();
+            mp_frame_image->do_lut_based_processing();
 
             // Adjust colour saturation if required
             mp_frame_image->change_colour_saturation(m_colour_saturation);

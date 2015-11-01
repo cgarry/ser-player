@@ -148,7 +148,7 @@ class c_image {
             double blue_gain);
 
 
-        void change_colour_balance();
+        void do_lut_based_processing();
 
 
         void change_colour_saturation(
@@ -162,12 +162,20 @@ class c_image {
         void setup_luts();
 
         template <typename T>
+        void change_colour_saturation_int(
+            double saturation);
+
+        template <typename T>
         void debayer_pixel_bilinear(
             uint32_t bayer,
             int32_t x,
             int32_t y,
             T *raw_data,
             T *rgb_data);
+
+        template <typename T>
+        bool debayer_image_bilinear_int(
+            int32_t colour_id);
 };
 
     
