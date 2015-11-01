@@ -187,7 +187,7 @@ private:
     void update_recent_save_folders_menu();
     void populate_recent_save_folders_menu();
     void create_no_file_open_image();
-    bool get_frame_as_qimage(int frame_number);
+    bool get_and_process_frame(int frame_number, bool conv_to_8_bit, bool do_processing);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
 };

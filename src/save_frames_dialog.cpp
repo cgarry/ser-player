@@ -213,6 +213,28 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_sequence_direction_GBox->setLayout(sequence_direction_VLayout);
     mp_sequence_direction_GBox->setMinimumWidth((mp_sequence_direction_GBox->minimumSizeHint().width() * 5) / 4);
 
+
+    //
+    // Image processing
+    //
+    mp_processing_enable_CBox = new QCheckBox(tr("Apply Processing To Frames Before Saving"));
+    mp_processing_enable_CBox->setChecked(true);
+
+    QVBoxLayout *processing_enable_VLayout = new QVBoxLayout;
+    processing_enable_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    processing_enable_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    processing_enable_VLayout->addWidget(mp_processing_enable_CBox);
+
+    mp_processing_GBox = new QGroupBox(tr("Image Processing"));
+    mp_processing_GBox->setLayout(processing_enable_VLayout);
+    mp_processing_GBox->setToolTip(tr("This option controls whether active processing options are performed "
+                                             "on the frames before saving.  If this option is disabled then "
+                                             "the frames saved will be the original frames from the source SER file.  "
+                                             "If it is enabled then any processing options that are active, such as "
+                                             "debayering, gamma, gain, colour saturation or colour balance, will be "
+                                             "applied to the frames before saving.") + "<b></b>");
+
+
     //
     // Filename Generation - Only for saving as image files
     //
@@ -242,6 +264,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     if (save_type == SAVE_SER) {
         filename_generation_GBox->hide();
     }
+
 
     //
     // SER file saving specific options
@@ -282,12 +305,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     header_fields_GLayout->addWidget(new QLabel(tr("Telescope:")), 2, 0);
     header_fields_GLayout->addWidget(mp_telescope_LEdit, 2, 1);
 
-//    QFormLayout  *header_fields_FLayout = new QFormLayout;
-//    header_fields_FLayout->setVerticalSpacing(5);
-//    header_fields_FLayout->addRow(tr("Observer:"), mp_observer_LEdit);
-//    header_fields_FLayout->addRow(tr("Instrument:"), mp_instrument_LEdit);
-//    header_fields_FLayout->addRow(tr("Telescope:"), mp_telescope_LEdit);
-
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
     ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
@@ -311,7 +328,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Dialog buttons
     //
-
     QPushButton *cancel_PButton = new QPushButton(tr("Cancel"));
     QPushButton *next_PButton = new QPushButton(tr("Next"));
     cancel_PButton->setAutoDefault(false);
@@ -332,6 +348,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     dialog_VLayout->addWidget(save_optionsGBox);
     dialog_VLayout->addWidget(mp_frame_decimation_GBox);
     dialog_VLayout->addWidget(mp_sequence_direction_GBox);
+    dialog_VLayout->addWidget(mp_processing_GBox);
     dialog_VLayout->addWidget(filename_generation_GBox);
     dialog_VLayout->addWidget(ser_file_options_GBox);
     dialog_VLayout->addSpacing(5);
@@ -480,6 +497,18 @@ int c_save_frames_dialog::get_sequence_direction()
     }
 
     return direction;
+}
+
+
+bool c_save_frames_dialog::get_processing_enable()
+{
+    bool ret = false;
+    if (mp_processing_enable_CBox->isEnabled() && mp_processing_enable_CBox->isChecked())
+    {
+        ret = true;
+    }
+
+    return ret;
 }
 
 

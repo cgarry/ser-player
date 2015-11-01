@@ -895,13 +895,9 @@ void c_ser_player::save_frames_as_ser_slot()
             int sequence_direction = save_frames_Dialog->get_sequence_direction();
             int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
             bool include_timestamps = save_frames_Dialog->get_include_timestamps_in_ser_file();
+            bool do_frame_processing = save_frames_Dialog->get_processing_enable();
 
             c_pipp_ser_write ser_write_file;
-            ser_write_file.create(filename, //  QString filename
-                                  mp_ser_file->get_width(),  // int32_t  width
-                                  mp_ser_file->get_height(), // int32_t  height
-                                  mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
-                                  1);  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
 
             // Keep list of last saved folders up to date
             add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
@@ -934,12 +930,23 @@ void c_ser_player::save_frames_as_ser_slot()
                     save_progress_dialog.set_value(saved_frames);
 
                     // Get frame from SER file
-                    bool valid_frame = get_frame_as_qimage(abs(frame_number));
+                    bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
+                                                           do_frame_processing,  // conv_to_8_bit  // Temp until processing options support 16-bit
+                                                           do_frame_processing);  // do_processing
                     if (valid_frame) {
                         // Get timestamp for frame if required
                         uint64_t timestamp = 0;
                         if (include_timestamps) {
                             timestamp = mp_ser_file->get_timestamp();
+                        }
+
+                        if (!ser_write_file.get_open()) {
+                            // Create SER file - only done once
+                            ser_write_file.create(filename, //  QString filename
+                                                  mp_ser_file->get_width(),  // int32_t  width
+                                                  mp_ser_file->get_height(), // int32_t  height
+                                                  mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
+                                                  mp_frame_image->get_byte_depth());  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
                         }
 
                         // Write frame to SER file
@@ -1064,6 +1071,7 @@ void c_ser_player::save_frames_slot_as_images_slot()
             bool use_framenumber_in_name = save_frames_Dialog->get_use_framenumber_in_name();
             bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
             int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
+            bool do_frame_processing = save_frames_Dialog->get_processing_enable();
 
             // Keep list of last saved folders up to date
             add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
@@ -1076,7 +1084,9 @@ void c_ser_player::save_frames_slot_as_images_slot()
             if (min_frame == -1) {
                 // Save current frame only
                 // Get frame from ser file
-                bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value());
+                bool valid_frame = get_and_process_frame(mp_frame_Slider->value(),  // frame_number
+                                                       true,  // conv_to_8_bit
+                                                       do_frame_processing);  // do_processing
                 if (valid_frame) {
                     mp_frame_image->conv_data_ready_for_qimage();
 
@@ -1120,7 +1130,9 @@ void c_ser_player::save_frames_slot_as_images_slot()
                         save_progress_dialog.set_value(saved_frames);
 
                         // Get frame from SER file
-                        bool valid_frame = get_frame_as_qimage(abs(frame_number));
+                        bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
+                                                               true,  // conv_to_8_bit
+                                                               do_frame_processing);  // do_processing
                         if (valid_frame) {
                             mp_frame_image->conv_data_ready_for_qimage();
 
@@ -1529,7 +1541,9 @@ void c_ser_player::frame_slider_changed_slot()
         mp_frame_Slider->setValue(1);
     } else {
         mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
-        bool valid_frame = get_frame_as_qimage(mp_frame_Slider->value());
+        bool valid_frame = get_and_process_frame(mp_frame_Slider->value(),  // frame_number
+                                               true,  // conv_to_8_bit
+                                               true);  // do_processing
 
         if (valid_frame) {
             // Start histogram generation if one is not already being generated
@@ -2079,7 +2093,7 @@ void c_ser_player::calculate_display_framerate()
 }
 
 
-bool c_ser_player::get_frame_as_qimage(int frame_number)
+bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, bool do_processing)
 {
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
@@ -2096,21 +2110,25 @@ bool c_ser_player::get_frame_as_qimage(int frame_number)
     int32_t ret = mp_ser_file->get_frame(frame_number, mp_frame_image->get_p_buffer());
 
     if (ret >= 0) {
-        mp_frame_image->convert_image_to_8bit();
-
-        // Debayer frame if required
-        if (c_persistent_data::m_enable_debayering) {
-            mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
+        if (conv_to_8_bit) {
+            mp_frame_image->convert_image_to_8bit();
         }
 
-        if (m_monochrome_conversion_enable) {
-            mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);
+        if (do_processing) {
+            // Debayer frame if required
+            if (c_persistent_data::m_enable_debayering) {
+                mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
+            }
+
+            if (m_monochrome_conversion_enable) {
+                mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);
+            }
+
+            mp_frame_image->change_colour_balance();
+
+            // Adjust colour saturation if required
+            mp_frame_image->change_colour_saturation(m_colour_saturation);
         }
-
-        mp_frame_image->change_colour_balance();
-
-        // Adjust colour saturation if required
-        mp_frame_image->change_colour_saturation(m_colour_saturation);
     }
 
     return (ret >= 0);

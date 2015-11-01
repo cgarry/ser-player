@@ -30,7 +30,7 @@ using namespace std;
 // ------------------------------------------
 c_pipp_ser_write::c_pipp_ser_write() :
     mp_ser_file(NULL),
-    m_open(0),
+    m_open(false),
     m_error_string("")
 {
     // Clear header details
@@ -95,7 +95,7 @@ int32_t c_pipp_ser_write::create(
     fwrite (&m_header, 1, sizeof(s_ser_header), mp_ser_file );
 
     // Note that the SER file is open
-    m_open = 1;
+    m_open = true;
     m_date_time_utc = 0L;
 
     return 0;
@@ -275,7 +275,7 @@ int32_t c_pipp_ser_write::close()
     }
 
     // Note that the SER file is closed
-    m_open = 0;
+    m_open = false;
 
     fclose(mp_ser_file);
     mp_ser_file = NULL;

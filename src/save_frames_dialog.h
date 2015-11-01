@@ -64,6 +64,7 @@ public:
 
     int get_frame_decimation();
     int get_sequence_direction();
+    bool get_processing_enable();
     bool get_append_timestamp_to_filename();
     int get_frames_to_be_saved();
     int get_required_digits_for_number();
@@ -103,6 +104,9 @@ private:
     QRadioButton *mp_forwards_sequence_RButton;
     QRadioButton *mp_reverse_sequence_RButton;
     QRadioButton *mp_forwards_then_reverse_sequence_RButton;
+
+    QCheckBox *mp_processing_enable_CBox;
+    QGroupBox *mp_processing_GBox;
 
     QCheckBox *mp_use_framenumber_in_filename;
     QCheckBox *mp_append_timestamp_CBox;

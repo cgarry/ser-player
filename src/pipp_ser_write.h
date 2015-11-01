@@ -50,7 +50,7 @@ class c_pipp_ser_write {
         char *mp_index_filename;
         FILE *mp_ser_index_file;
         s_ser_header m_header;
-        int32_t m_open;
+        bool m_open;
         int32_t m_width;
         int32_t m_height;
         bool m_colour;
@@ -92,7 +92,7 @@ class c_pipp_ser_write {
         // ------------------------------------------
         // Return the open state of the SER file
         // ------------------------------------------
-        int32_t get_open () {
+        bool get_open () {
             return m_open;
         }
 
