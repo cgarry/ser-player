@@ -33,7 +33,7 @@ public:
     c_header_details_dialog(QWidget *parent = 0);
 
     void set_details(QString filename,
-                     int filesize,
+                     int64_t filesize,
                      QString file_id,
                      int lu_id,
                      int colour_id,
