@@ -34,9 +34,10 @@ class c_image {
         bool m_colour;
         uint8_t *mp_buffer;
         int32_t m_buffer_size;
-        uint8_t m_colbal_r_lut[256];
-        uint8_t m_colbal_g_lut[256];
-        uint8_t m_colbal_b_lut[256];
+        uint8_t m_mono_lut[256];
+        uint8_t m_red_lut[256];
+        uint8_t m_green_lut[256];
+        uint8_t m_blue_lut[256];
         bool m_colour_balance_enabled;
         double m_red_gain;
         double m_green_gain;

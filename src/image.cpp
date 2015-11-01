@@ -444,30 +444,35 @@ void c_image::setup_luts()
 {
     for (int x = 0; x < 256; x++) {
         // Calculate colour balance gains and main gain
-        double temp_r, temp_g, temp_b;
+        double temp_r, temp_g, temp_b, temp_m;
         temp_r = m_red_gain * m_gain * x;
         temp_g = m_green_gain * m_gain * x;
         temp_b = m_blue_gain * m_gain * x;
+        temp_m = m_gain * x;
 
         // Clamp values
         temp_r = (temp_r > 255) ? 255 : temp_r;
         temp_g = (temp_g > 255) ? 255 : temp_g;
         temp_b = (temp_b > 255) ? 255 : temp_b;
+        temp_m = (temp_m > 255) ? 255 : temp_m;
 
         // Calculate gamma
-        temp_r = (uint8_t)(pow((double)(temp_r / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
-        temp_g = (uint8_t)(pow((double)(temp_g / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
-        temp_b = (uint8_t)(pow((double)(temp_b / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5);
+        temp_r = pow((double)(temp_r / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5;
+        temp_g = pow((double)(temp_g / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5;
+        temp_b = pow((double)(temp_b / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5;
+        temp_m = pow((double)(temp_m / 255.0), (double)(1 / m_gamma)) * 255.0 + 0.5;
 
         // Clamp values
         temp_r = (temp_r > 255) ? 255 : temp_r;
         temp_g = (temp_g > 255) ? 255 : temp_g;
         temp_b = (temp_b > 255) ? 255 : temp_b;
+        temp_m = (temp_m > 255) ? 255 : temp_m;
 
         // Write to LUTs
-        m_colbal_r_lut[x] = (uint8_t)temp_r;
-        m_colbal_g_lut[x] = (uint8_t)temp_g;
-        m_colbal_b_lut[x] = (uint8_t)temp_b;
+        m_red_lut[x] = (uint8_t)temp_r;
+        m_green_lut[x] = (uint8_t)temp_g;
+        m_blue_lut[x] = (uint8_t)temp_b;
+        m_mono_lut[x] = (uint8_t)temp_m;
     }
 }
 
@@ -619,7 +624,7 @@ void c_image::do_lut_based_processing()
             if (m_gain != 1.0 || m_gamma != 1.0) {
                 uint8_t *p_frame_data = mp_buffer;
                 for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-                    *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                    *p_frame_data = m_mono_lut[*p_frame_data];
                     p_frame_data++;
                 }
             }
@@ -628,11 +633,11 @@ void c_image::do_lut_based_processing()
             if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0) {
                 uint8_t *p_frame_data = mp_buffer;
                 for (int pixel = 0; pixel < m_width * m_height; pixel++) {
-                    *p_frame_data = m_colbal_b_lut[*p_frame_data];
+                    *p_frame_data = m_blue_lut[*p_frame_data];
                     p_frame_data++;
-                    *p_frame_data = m_colbal_g_lut[*p_frame_data];
+                    *p_frame_data = m_green_lut[*p_frame_data];
                     p_frame_data++;
-                    *p_frame_data = m_colbal_r_lut[*p_frame_data];
+                    *p_frame_data = m_red_lut[*p_frame_data];
                     p_frame_data++;
                 }
             }
