@@ -793,6 +793,7 @@ void c_ser_player::monochrome_conversion_changed_slot(bool enabled, int selectio
 {
     m_monochrome_conversion_enable = enabled;
     m_monochrome_conversion_type = selection;
+    frame_slider_changed_slot();
 }
 
 
