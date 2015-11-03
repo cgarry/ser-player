@@ -37,7 +37,6 @@ SOURCES += src/main.cpp\
     src/pipp_timestamp.cpp \
     src/image_widget.cpp \
     src/application.cpp \
-    src/colour_dialog.cpp \
     src/frame_slider.cpp \
     src/save_frames_dialog.cpp \
     src/save_frames_progress_dialog.cpp \
@@ -48,7 +47,8 @@ SOURCES += src/main.cpp\
     src/pipp_ser_write.cpp \
     src/header_details_dialog.cpp \
     src/utf8_validator.cpp \
-    src/processing_options_dialog.cpp
+    src/processing_options_dialog.cpp \
+    src/icon_groupbox.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -65,7 +65,6 @@ HEADERS  += src/ser_player.h \
     src/image_widget.h \
     src/application.h \
     src/new_version_checker.h \
-    src/colour_dialog.h \
     src/frame_slider.h \
     src/save_frames_dialog.h \
     src/save_frames_progress_dialog.h \
@@ -76,7 +75,8 @@ HEADERS  += src/ser_player.h \
     src/pipp_ser_write.h \
     src/header_details_dialog.h \
     src/utf8_validator.h \
-    src/processing_options_dialog.h
+    src/processing_options_dialog.h \
+    src/icon_groupbox.h
 
 # Build directories
 DESTDIR = $$PWD/bin

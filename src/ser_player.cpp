@@ -58,7 +58,6 @@
 #include "pipp_utf8.h"
 #include "image_widget.h"
 #include "processing_options_dialog.h"
-#include "colour_dialog.h"
 #include "markers_dialog.h"
 #include "save_frames_dialog.h"
 #include "save_frames_progress_dialog.h"
@@ -197,34 +196,23 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     window_menu->addSeparator();
 
-    // Gain and Gamma Settings menu action
-    mp_gain_gamma_settings_Act = window_menu->addAction(tr("Gain And Gamma Settings"));
-    mp_gain_gamma_settings_Act->setEnabled(false);
-    mp_gain_gamma_settings_Act->setCheckable(true);
-    mp_gain_gamma_settings_Act->setChecked(false);
-    connect(mp_gain_gamma_settings_Act, SIGNAL(triggered(bool)), this, SLOT(gain_and_gamma_settings_slot(bool)));
-    mp_gain_and_gamma_Dialog = new c_processing_options_dialog(this);
-    mp_gain_and_gamma_Dialog->hide();
-    connect(mp_gain_and_gamma_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot(bool)));
-    connect(mp_gain_and_gamma_Dialog, SIGNAL(invert_frames(bool)), this, SLOT(invert_changed_slot(bool)));
-    connect(mp_gain_and_gamma_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
-    connect(mp_gain_and_gamma_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
-    connect(mp_gain_and_gamma_Dialog, SIGNAL(rejected()), this, SLOT(gain_and_gamma_settings_closed_slot()));
-
-
-    // Colour Setting menu action
-    mp_colour_settings_Act = window_menu->addAction(tr("Colour Settings"));
-    mp_colour_settings_Act->setEnabled(false);
-    mp_colour_settings_Act->setCheckable(true);
-    mp_colour_settings_Act->setChecked(false);
-    connect(mp_colour_settings_Act, SIGNAL(triggered(bool)), this, SLOT(colour_settings_slot(bool)));
-    mp_colour_settings_Dialog = new c_colour_dialog(this);
-    mp_colour_settings_Dialog->hide();
-    connect(mp_colour_settings_Dialog, SIGNAL(monochrome_conversion_changed(bool,int)), this, SLOT(monochrome_conversion_changed_slot(bool,int)));
-    connect(mp_colour_settings_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
-    connect(mp_colour_settings_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
-    connect(mp_colour_settings_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
-    connect(mp_colour_settings_Dialog, SIGNAL(rejected()), this, SLOT(colour_settings_closed_slot()));
+    // Processing Options menu action
+    mp_processing_options_Act = window_menu->addAction(tr("Processing Options"));
+    mp_processing_options_Act->setEnabled(false);
+    mp_processing_options_Act->setCheckable(true);
+    mp_processing_options_Act->setChecked(false);
+    connect(mp_processing_options_Act, SIGNAL(triggered(bool)), this, SLOT(processor_options_slot(bool)));
+    mp_processing_options_Dialog = new c_processing_options_dialog(this);
+    mp_processing_options_Dialog->hide();
+    connect(mp_processing_options_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot(bool)));
+    connect(mp_processing_options_Dialog, SIGNAL(invert_frames(bool)), this, SLOT(invert_changed_slot(bool)));
+    connect(mp_processing_options_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
+    connect(mp_processing_options_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
+    connect(mp_processing_options_Dialog, SIGNAL(monochrome_conversion_changed(bool,int)), this, SLOT(monochrome_conversion_changed_slot(bool,int)));
+    connect(mp_processing_options_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
+    connect(mp_processing_options_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
+    connect(mp_processing_options_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
+    connect(mp_processing_options_Dialog, SIGNAL(rejected()), this, SLOT(processor_options_closed_slot()));
 
 
     // Markers Dialog action
@@ -788,16 +776,16 @@ void c_ser_player::histogram_viewer_closed_slot()
 }
 
 
-// Gain and Gamma menu QAction has been clicked
-void c_ser_player::gain_and_gamma_settings_slot(bool checked)
+// Processing Options menu QAction has been clicked
+void c_ser_player::processor_options_slot(bool checked)
 {
-    mp_gain_and_gamma_Dialog->setVisible(checked);
+    mp_processing_options_Dialog->setVisible(checked);
 }
 
 
-void c_ser_player::gain_and_gamma_settings_closed_slot()
+void c_ser_player::processor_options_closed_slot()
 {
-    mp_gain_gamma_settings_Act->setChecked(false);
+    mp_processing_options_Act->setChecked(false);
 }
 
 
@@ -805,19 +793,6 @@ void c_ser_player::monochrome_conversion_changed_slot(bool enabled, int selectio
 {
     m_monochrome_conversion_enable = enabled;
     m_monochrome_conversion_type = selection;
-}
-
-
-// Colour settings menu QAction has been clicked
-void c_ser_player::colour_settings_slot(bool checked)
-{
-    mp_colour_settings_Dialog->setVisible(checked);
-}
-
-
-void c_ser_player::colour_settings_closed_slot()
-{
-    mp_colour_settings_Act->setChecked(false);
 }
 
 
@@ -1303,7 +1278,7 @@ void c_ser_player::estimate_colour_balance()
             double blue_gain = 1.0;
 
             mp_frame_image->estimate_colour_balance(red_gain, green_gain, blue_gain);
-            mp_colour_settings_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
+            mp_processing_options_Dialog->set_colour_balance(red_gain, green_gain, blue_gain);
         }
     }
 }
@@ -1372,9 +1347,9 @@ void c_ser_player::open_ser_file(const QString &filename)
     // Reset options before opening a new file
     mp_framerate_Menu->actions().at(0)->setChecked(true);
     fps_changed_slot(mp_framerate_Menu->actions().at(0));
-    mp_gain_and_gamma_Dialog->reset_gain_and_gamma_slot();
-    mp_colour_settings_Dialog->reset_colour_saturation_slot();
-    mp_colour_settings_Dialog->reset_colour_balance_slot();
+    mp_processing_options_Dialog->reset_gain_and_gamma_slot();
+    mp_processing_options_Dialog->reset_colour_saturation_slot();
+    mp_processing_options_Dialog->reset_colour_balance_slot();
 
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
@@ -1495,10 +1470,10 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Enable colour settings menu item if this is colour data
         if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
             // This is now a colour image, enable colour saturation menu
-            mp_colour_settings_Act->setEnabled(true);
+//            mp_colour_settings_Act->setEnabled(true);
         } else {
-            mp_colour_settings_Act->setEnabled(false);
-            mp_colour_settings_Dialog->hide();
+//            mp_colour_settings_Act->setEnabled(false);
+//            mp_colour_settings_Dialog->hide();
         }
 
         // Enable menu items that are only enabled when a SER file is open
@@ -1511,7 +1486,7 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_histogram_dialog->show();
         }
 
-        mp_gain_gamma_settings_Act->setEnabled(true);
+        mp_processing_options_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
 
         // Calculate frame rate, update framerate label an use value for playback timer
@@ -1886,10 +1861,10 @@ void c_ser_player::debayer_enable_slot(bool enabled)
     c_persistent_data::m_enable_debayering = enabled;
     if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
         // This is now a colour image, enable colour saturation menu
-        mp_colour_settings_Act->setEnabled(true);
+//        mp_colour_settings_Act->setEnabled(true);
     } else {
-        mp_colour_settings_Act->setEnabled(false);
-        mp_colour_settings_Dialog->reject();
+//        mp_colour_settings_Act->setEnabled(false);
+//        mp_colour_settings_Dialog->reject();
     }
 
     frame_slider_changed_slot();

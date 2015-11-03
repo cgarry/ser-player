@@ -33,6 +33,7 @@
 #include "save_frames_dialog.h"
 #include "utf8_validator.h"
 
+
 #define INSIDE_GBOX_SPACING 8
 #define INSIDE_GBOX_MARGIN 10
 

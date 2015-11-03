@@ -16,5 +16,11 @@
         <file>resources/play_reverse.png</file>
         <file>resources/histogram_colour.png</file>
         <file>resources/histogram_mono.png</file>
+        <file>resources/colour_balance_icon.png</file>
+        <file>resources/debayer_icon.png</file>
+        <file>resources/gain_icon.png</file>
+        <file>resources/invert_icon.png</file>
+        <file>resources/monochrome_conversion_icon.png</file>
+        <file>resources/saturation_icon.png</file>
     </qresource>
 </RCC>

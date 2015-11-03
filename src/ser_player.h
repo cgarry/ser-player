@@ -58,14 +58,12 @@ private:
     QMenu *mp_framerate_Menu;
     QAction *mp_header_details_Act;
     QAction *mp_histogram_viewer_Act;
-    QAction *mp_gain_gamma_settings_Act;
-    QAction *mp_colour_settings_Act;
+    QAction *mp_processing_options_Act;
     QAction *mp_markers_dialog_Act;
 
     // Dialogs
     c_header_details_dialog *mp_header_details_dialog;
-    c_processing_options_dialog *mp_gain_and_gamma_Dialog;
-    c_colour_dialog *mp_colour_settings_Dialog;
+    c_processing_options_dialog *mp_processing_options_Dialog;
     c_histogram_dialog *mp_histogram_dialog;
 
     // Threads
@@ -133,14 +131,12 @@ public slots:
     void header_details_dialog_slot(bool checked);
     void histogram_viewer_closed_slot();
     void histogram_viewer_slot(bool checked);
-    void gain_and_gamma_settings_closed_slot();
-    void gain_and_gamma_settings_slot(bool checked);
+    void processor_options_closed_slot();
+    void processor_options_slot(bool checked);
     void invert_changed_slot(bool invert);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
     void monochrome_conversion_changed_slot(bool enabled, int selection);
-    void colour_settings_closed_slot();
-    void colour_settings_slot(bool checked);
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
