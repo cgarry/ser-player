@@ -24,7 +24,8 @@
 
 
 
-class c_image {
+class c_image
+{
     private:
         // Member variables
         int32_t m_width;
@@ -38,6 +39,7 @@ class c_image {
         uint8_t m_red_lut[256];
         uint8_t m_green_lut[256];
         uint8_t m_blue_lut[256];
+        bool m_invert;
         bool m_colour_balance_enabled;
         double m_red_gain;
         double m_green_gain;
@@ -62,6 +64,7 @@ class c_image {
             m_colour(false),
             mp_buffer(NULL),
             m_buffer_size(0),
+            m_invert(false),
             m_colour_balance_enabled(false),
             m_red_gain(1.0),
             m_green_gain(1.0),
@@ -131,6 +134,8 @@ class c_image {
             double &green_gain,
             double &blue_gain);
 
+        void set_invert_image(
+                bool invert);
 
         void set_gain(
                 double gain);

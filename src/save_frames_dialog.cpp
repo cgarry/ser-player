@@ -244,10 +244,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                                   "or a simple sequential count appended to their filename in order to make the "
                                                   "image filenames unique.") + "<b></b>");
     if (ser_has_timestamps) {
-        mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename"));
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename"));
         mp_append_timestamp_CBox->setEnabled(true);
     } else {
-        mp_append_timestamp_CBox = new QCheckBox(tr("Append Timestamp To Filename") + " (" + tr("No Timestamps In SER File") + ")");
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename") + " (" + tr("No Frame Timestamps In SER File") + ")");
         mp_append_timestamp_CBox->setEnabled(false);
     }
 
@@ -270,14 +270,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // SER file saving specific options
     //
     if (ser_has_timestamps) {
-        mp_include_timestamps = new QCheckBox(tr("Include Timestamps"));
+        mp_include_timestamps = new QCheckBox(tr("Include Frame Timestamps"));
         mp_include_timestamps->setChecked(true);
     } else {
-        mp_include_timestamps = new QCheckBox(tr("Include Timestamps") + " (" + tr("No Timestamps In Source SER File") + ")");
+        mp_include_timestamps = new QCheckBox(tr("Include Frame Timestamps") + " (" + tr("No Frame Timestamps In Source SER File") + ")");
         mp_include_timestamps->setEnabled(false);
     }
 
-    mp_include_timestamps->setToolTip(tr("Timestamps are optional in SER Files."
+    mp_include_timestamps->setToolTip(tr("Frame Timestamps are optional in SER Files."
                                          "  This option controls whether or not timestamps are included in the generated SER file") + "<b></b>");
 
     mp_utf8_validator = new c_utf8_validator;

@@ -34,7 +34,7 @@ class QTimer;
 
 class c_header_details_dialog;
 class c_histogram_dialog;
-class c_gain_and_gamma_dialog;
+class c_processing_options_dialog;
 class c_colour_dialog;
 class c_image_Widget;
 class c_image;
@@ -56,7 +56,6 @@ private:
     QMenu *mp_recent_save_folders_Menu;
     QActionGroup *mp_recent_save_folders_ActGroup;
     QMenu *mp_framerate_Menu;
-    QAction *m_debayer_Act;
     QAction *mp_header_details_Act;
     QAction *mp_histogram_viewer_Act;
     QAction *mp_gain_gamma_settings_Act;
@@ -65,7 +64,7 @@ private:
 
     // Dialogs
     c_header_details_dialog *mp_header_details_dialog;
-    c_gain_and_gamma_dialog *mp_gain_and_gamma_Dialog;
+    c_processing_options_dialog *mp_gain_and_gamma_Dialog;
     c_colour_dialog *mp_colour_settings_Dialog;
     c_histogram_dialog *mp_histogram_dialog;
 
@@ -136,6 +135,7 @@ public slots:
     void histogram_viewer_slot(bool checked);
     void gain_and_gamma_settings_closed_slot();
     void gain_and_gamma_settings_slot(bool checked);
+    void invert_changed_slot(bool invert);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
     void monochrome_conversion_changed_slot(bool enabled, int selection);

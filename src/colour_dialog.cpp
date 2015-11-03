@@ -96,7 +96,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colsat_hlayout2->addWidget(reset_colour_saturation_button);
     colsat_hlayout2->addStretch();
     QVBoxLayout *colsat_vlayout = new QVBoxLayout;
-    colsat_vlayout->setSpacing(15);
+    colsat_vlayout->setSpacing(10);
     colsat_vlayout->addLayout(colsat_hlayout1);
     colsat_vlayout->addLayout(colsat_hlayout2);
     mp_colour_saturation_GroupBox = new QGroupBox(tr("Colour Saturation"));
@@ -162,7 +162,7 @@ c_colour_dialog::c_colour_dialog(QWidget *parent)
     colour_balance_HLayout->addStretch();
 
     QVBoxLayout *colour_balance_VLayout = new QVBoxLayout;
-    colour_balance_VLayout->setSpacing(15);
+    colour_balance_VLayout->setSpacing(10);
     colour_balance_VLayout->addLayout(colour_balance_GLayout);
     colour_balance_VLayout->addLayout(colour_balance_HLayout);
 

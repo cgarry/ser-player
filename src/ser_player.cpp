@@ -57,7 +57,7 @@
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
-#include "gain_and_gamma_dialog.h"
+#include "processing_options_dialog.h"
 #include "colour_dialog.h"
 #include "markers_dialog.h"
 #include "save_frames_dialog.h"
@@ -169,15 +169,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(fps_ActGroup, SIGNAL(triggered(QAction *)), this, SLOT(fps_changed_slot(QAction *)));
 
 
-    // Enable Debayer menu action
-    m_debayer_Act = new QAction(tr("Enable Debayering"), this);
-    m_debayer_Act->setCheckable(true);
-    m_debayer_Act->setChecked(c_persistent_data::m_enable_debayering);
-    playback_menu->addAction(m_debayer_Act);
-    connect(m_debayer_Act, SIGNAL(triggered(bool)), this, SLOT(debayer_enable_slot(bool)));
-    m_debayer_Act->setEnabled(false);
-
-
     //
     // Windows menu
     //
@@ -212,8 +203,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_gain_gamma_settings_Act->setCheckable(true);
     mp_gain_gamma_settings_Act->setChecked(false);
     connect(mp_gain_gamma_settings_Act, SIGNAL(triggered(bool)), this, SLOT(gain_and_gamma_settings_slot(bool)));
-    mp_gain_and_gamma_Dialog = new c_gain_and_gamma_dialog(this);
+    mp_gain_and_gamma_Dialog = new c_processing_options_dialog(this);
     mp_gain_and_gamma_Dialog->hide();
+    connect(mp_gain_and_gamma_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot(bool)));
+    connect(mp_gain_and_gamma_Dialog, SIGNAL(invert_frames(bool)), this, SLOT(invert_changed_slot(bool)));
     connect(mp_gain_and_gamma_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
     connect(mp_gain_and_gamma_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
     connect(mp_gain_and_gamma_Dialog, SIGNAL(rejected()), this, SLOT(gain_and_gamma_settings_closed_slot()));
@@ -571,6 +564,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_resize_Timer = new QTimer(this);
     mp_resize_Timer->setSingleShot(true);
+
     connect(mp_resize_Timer, SIGNAL(timeout()), this, SLOT(resize_timer_timeout_slot()));
 
     connect(mp_forward_PushButton, SIGNAL(pressed()),
@@ -1241,6 +1235,13 @@ void c_ser_player::open_save_folder_slot(QAction *action)
 }
 
 
+void c_ser_player::invert_changed_slot(bool invert)
+{
+    mp_frame_image->set_invert_image(invert);
+    frame_slider_changed_slot();
+}
+
+
 void c_ser_player::gain_changed_slot(double gain)
 {
     mp_frame_image->set_gain(gain);
@@ -1371,8 +1372,7 @@ void c_ser_player::open_ser_file(const QString &filename)
     // Reset options before opening a new file
     mp_framerate_Menu->actions().at(0)->setChecked(true);
     fps_changed_slot(mp_framerate_Menu->actions().at(0));
-    mp_gain_and_gamma_Dialog->reset_gain_slot();
-    mp_gain_and_gamma_Dialog->reset_gamma_slot();
+    mp_gain_and_gamma_Dialog->reset_gain_and_gamma_slot();
     mp_colour_settings_Dialog->reset_colour_saturation_slot();
     mp_colour_settings_Dialog->reset_colour_balance_slot();
 
@@ -1502,7 +1502,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         // Enable menu items that are only enabled when a SER file is open
-        m_debayer_Act->setEnabled(m_has_bayer_pattern);
         mp_save_frames_as_ser_Act->setEnabled(true);
         mp_save_frames_as_images_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);

@@ -43,12 +43,12 @@ SOURCES += src/main.cpp\
     src/save_frames_progress_dialog.cpp \
     src/markers_dialog.cpp \
     src/image.cpp \
-    src/gain_and_gamma_dialog.cpp \
     src/histogram_thread.cpp \
     src/histogram_dialog.cpp \
     src/pipp_ser_write.cpp \
     src/header_details_dialog.cpp \
-    src/utf8_validator.cpp
+    src/utf8_validator.cpp \
+    src/processing_options_dialog.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -71,12 +71,12 @@ HEADERS  += src/ser_player.h \
     src/save_frames_progress_dialog.h \
     src/markers_dialog.h \
     src/image.h \
-    src/gain_and_gamma_dialog.h \
     src/histogram_thread.h \
     src/histogram_dialog.h \
     src/pipp_ser_write.h \
     src/header_details_dialog.h \
-    src/utf8_validator.h
+    src/utf8_validator.h \
+    src/processing_options_dialog.h
 
 # Build directories
 DESTDIR = $$PWD/bin

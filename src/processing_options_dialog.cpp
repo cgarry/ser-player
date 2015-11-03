@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -27,14 +28,40 @@
 #include <QDoubleSpinBox>
 #include <QVBoxLayout>
 
-#include "gain_and_gamma_dialog.h"
+#include "processing_options_dialog.h"
+#include "persistent_data.h"
 
 
-c_gain_and_gamma_dialog::c_gain_and_gamma_dialog(QWidget *parent)
+c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("Gain And Gamma Settings"));
+    setWindowTitle(tr("Processing Options"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+
+    // Debayer checkbox
+    QCheckBox *mp_debayer_CheckBox = new QCheckBox(tr("Enable Debayering"));
+    mp_debayer_CheckBox->setChecked(c_persistent_data::m_enable_debayering);
+    connect(mp_debayer_CheckBox, SIGNAL(toggled(bool)), this, SLOT(debayer_enable_slot(bool)));
+
+    QHBoxLayout *debayer_HLayout1 = new QHBoxLayout;
+    debayer_HLayout1->addWidget(mp_debayer_CheckBox);
+
+    QGroupBox *debayer_GroupBox = new QGroupBox(tr("Colour Debayer"));
+    debayer_GroupBox->setLayout(debayer_HLayout1);
+
+
+    // Invert checkbox
+    QCheckBox *mp_invert_CheckBox = new QCheckBox(tr("Invert Frames"));
+    mp_invert_CheckBox->setChecked(false);
+    connect(mp_invert_CheckBox, SIGNAL(toggled(bool)), this, SIGNAL(invert_frames(bool)));
+
+    QHBoxLayout *invert_HLayout1 = new QHBoxLayout;
+    invert_HLayout1->addWidget(mp_invert_CheckBox);
+
+    QGroupBox *invert_GroupBox = new QGroupBox(tr("Frame Inversion"));
+    invert_GroupBox->setLayout(invert_HLayout1);
+
 
     // Gain widgets
     mp_gain_Slider = new QSlider(Qt::Horizontal);
@@ -53,23 +80,6 @@ c_gain_and_gamma_dialog::c_gain_and_gamma_dialog(QWidget *parent)
     gain_HLayout1->addWidget(mp_gain_Slider);
     gain_HLayout1->addWidget(mp_gain_DSpinbox);
 
-    QPushButton *reset_gain_Button = new QPushButton(tr("Reset"));
-    reset_gain_Button->setAutoDefault(false);
-    connect(reset_gain_Button, SIGNAL(clicked()), this, SLOT(reset_gain_slot()));
-
-    QHBoxLayout *gain_HLayout2 = new QHBoxLayout;
-    gain_HLayout2->addWidget(reset_gain_Button);
-    gain_HLayout2->addStretch();
-
-    QVBoxLayout *gain_Vlayout = new QVBoxLayout;
-    gain_Vlayout->setSpacing(15);
-    gain_Vlayout->addLayout(gain_HLayout1);
-    gain_Vlayout->addLayout(gain_HLayout2);
-
-    QGroupBox *gain_GroupBox = new QGroupBox(tr("Gain"));
-    gain_GroupBox->setLayout(gain_Vlayout);
-
-
     // Gamma widgets
     mp_gamma_Slider = new QSlider(Qt::Horizontal);
     mp_gamma_Slider->setRange(10, 300);
@@ -87,65 +97,70 @@ c_gain_and_gamma_dialog::c_gain_and_gamma_dialog(QWidget *parent)
     gamma_HLayout1->addWidget(mp_gamma_Slider);
     gamma_HLayout1->addWidget(mp_gamma_DSpinbox);
 
-    QPushButton *reset_gamma_Button = new QPushButton(tr("Reset"));
-    reset_gamma_Button->setAutoDefault(false);
-    connect(reset_gamma_Button, SIGNAL(clicked()), this, SLOT(reset_gamma_slot()));
+    QPushButton *reset_gain_and_gamma_Button = new QPushButton(tr("Reset"));
+    reset_gain_and_gamma_Button->setAutoDefault(false);
+    connect(reset_gain_and_gamma_Button, SIGNAL(clicked()), this, SLOT(reset_gain_and_gamma_slot()));
 
     QHBoxLayout *gamma_HLayout2 = new QHBoxLayout;
-    gamma_HLayout2->addWidget(reset_gamma_Button);
+    gamma_HLayout2->addWidget(reset_gain_and_gamma_Button);
     gamma_HLayout2->addStretch();
 
-    QVBoxLayout *gamma_Vlayout = new QVBoxLayout;
-    gamma_Vlayout->setSpacing(15);
-    gamma_Vlayout->addLayout(gamma_HLayout1);
-    gamma_Vlayout->addLayout(gamma_HLayout2);
+    QVBoxLayout *gain_and_gamma_Vlayout = new QVBoxLayout;
+    gain_and_gamma_Vlayout->setSpacing(10);
+    gain_and_gamma_Vlayout->addLayout(gain_HLayout1);
+    gain_and_gamma_Vlayout->addLayout(gamma_HLayout1);
+    gain_and_gamma_Vlayout->addLayout(gamma_HLayout2);
 
-    QGroupBox *gamma_GroupBox = new QGroupBox(tr("Gamma"));
-    gamma_GroupBox->setLayout(gamma_Vlayout);
+    QGroupBox *gain_and_gammaGroupBox = new QGroupBox(tr("Gain And Gamma"));
+    gain_and_gammaGroupBox->setLayout(gain_and_gamma_Vlayout);
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
-    dialog_vlayout->addWidget(gain_GroupBox);
-    dialog_vlayout->addWidget(gamma_GroupBox);
+    dialog_vlayout->addWidget(debayer_GroupBox);
+    dialog_vlayout->addWidget(invert_GroupBox);
+    dialog_vlayout->addWidget(gain_and_gammaGroupBox);
 
     setLayout(dialog_vlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
 
-void c_gain_and_gamma_dialog::reset_gain_slot()
+void c_processing_options_dialog::debayer_enable_slot(bool enable)
 {
-    mp_gain_DSpinbox->setValue(1.0);
+    c_persistent_data::m_enable_debayering = enable;
+    emit debayer_enable(enable);
 }
 
 
-void c_gain_and_gamma_dialog::gain_slider_changed_slot(int gain)
+
+void c_processing_options_dialog::gain_slider_changed_slot(int gain)
 {
     mp_gain_DSpinbox->setValue(((double)gain/100.0));
 }
 
 
-void c_gain_and_gamma_dialog::gain_spinbox_changed_slot(double gain)
+void c_processing_options_dialog::gain_spinbox_changed_slot(double gain)
 {
     mp_gain_Slider->setValue(100 * gain);
     emit gain_changed(gain);
 }
 
 
-void c_gain_and_gamma_dialog::reset_gamma_slot()
+void c_processing_options_dialog::reset_gain_and_gamma_slot()
 {
+    mp_gain_DSpinbox->setValue(1.0);
     mp_gamma_DSpinbox->setValue(1.0);
 }
 
 
-void c_gain_and_gamma_dialog::gamma_slider_changed_slot(int gamma)
+void c_processing_options_dialog::gamma_slider_changed_slot(int gamma)
 {
     mp_gamma_DSpinbox->setValue(((double)gamma/100.0));
 }
 
 
-void c_gain_and_gamma_dialog::gamma_spinbox_changed_slot(double gamma)
+void c_processing_options_dialog::gamma_spinbox_changed_slot(double gamma)
 {
     mp_gamma_Slider->setValue(100 * gamma);
     emit gamma_changed(gamma);

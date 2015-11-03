@@ -406,6 +406,14 @@ void c_image::estimate_colour_balance(
 }
 
 
+void c_image::set_invert_image(
+        bool invert)
+{
+    m_invert = invert;
+    setup_luts();
+}
+
+
 void c_image::set_gain(
         double gain)
 {
@@ -445,10 +453,23 @@ void c_image::setup_luts()
     for (int x = 0; x < 256; x++) {
         // Calculate colour balance gains and main gain
         double temp_r, temp_g, temp_b, temp_m;
-        temp_r = m_red_gain * m_gain * x;
-        temp_g = m_green_gain * m_gain * x;
-        temp_b = m_blue_gain * m_gain * x;
-        temp_m = m_gain * x;
+
+        if (m_invert) {
+            temp_r = 255 - x;
+            temp_g = 255 - x;
+            temp_b = 255 - x;
+            temp_m = 255 - x;
+        } else {
+            temp_r = x;
+            temp_g = x;
+            temp_b = x;
+            temp_m = x;
+        }
+
+        temp_r *= m_red_gain * m_gain;
+        temp_g *= m_green_gain * m_gain;
+        temp_b *= m_blue_gain * m_gain;
+        temp_m *= m_gain;
 
         // Clamp values
         temp_r = (temp_r > 255) ? 255 : temp_r;
@@ -621,7 +642,7 @@ void c_image::do_lut_based_processing()
         // 8-bit version just uses LUTs
         if (!m_colour) {
             // Mono images just use 1 LUT
-            if (m_gain != 1.0 || m_gamma != 1.0) {
+            if (m_gain != 1.0 || m_gamma != 1.0 || m_invert) {
                 uint8_t *p_frame_data = mp_buffer;
                 for (int pixel = 0; pixel < m_width * m_height; pixel++) {
                     *p_frame_data = m_mono_lut[*p_frame_data];
@@ -630,7 +651,7 @@ void c_image::do_lut_based_processing()
             }
         } else {
             // Colour images use all 3 LUTs
-            if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0) {
+            if ((m_colour_balance_enabled && m_colour) || m_gain != 1.0 || m_gamma != 1.0 || m_invert) {
                 uint8_t *p_frame_data = mp_buffer;
                 for (int pixel = 0; pixel < m_width * m_height; pixel++) {
                     *p_frame_data = m_blue_lut[*p_frame_data];
@@ -650,6 +671,11 @@ void c_image::do_lut_based_processing()
             for (int x = 0; x < m_width * m_height; x++) {
                 double mono_data = *data_ptr;
 
+                // Invert pixel
+                if (m_invert) {
+                    mono_data = 65535.0 - mono_data;
+                }
+
                 // Apply main gain
                 mono_data *= m_gain;
                 mono_data = (mono_data > 65535.0) ? 65535.0 : mono_data;
@@ -667,6 +693,13 @@ void c_image::do_lut_based_processing()
                 double b_data = *data_ptr;
                 double g_data = *(data_ptr + 1);
                 double r_data = *(data_ptr + 2);
+
+                // Invert pixel
+                if (m_invert) {
+                    b_data = 65535.0 - b_data;
+                    g_data = 65535.0 - g_data;
+                    r_data = 65535.0 - r_data;
+                }
 
                 // Apply colour balance gains and main gain
                 b_data *=  m_blue_gain * m_gain;

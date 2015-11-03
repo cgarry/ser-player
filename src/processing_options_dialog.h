@@ -16,34 +16,37 @@
 // ---------------------------------------------------------------------
 
 
-#ifndef GAIN_AND_GAMMA_H
-#define GAIN_AND_GAMMA_H
+#ifndef PROCESSING_OPTIONS_H
+#define PROCESSING_OPTIONS_H
 
 #include <QDialog>
 
+class QCheckBox;
 class QDoubleSpinBox;
 class QSlider;
 
 
-class c_gain_and_gamma_dialog : public QDialog
+class c_processing_options_dialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    c_gain_and_gamma_dialog(QWidget *parent = 0);
+    c_processing_options_dialog(QWidget *parent = 0);
 
 
 signals:
+    void debayer_enable(bool);
+    void invert_frames(bool);
     void gain_changed(double gain);
     void gamma_changed(double gamma);
 
 
 public slots:
-    void reset_gain_slot();
-    void reset_gamma_slot();
+    void reset_gain_and_gamma_slot();
 
     
 private slots:
+    void debayer_enable_slot(bool enable);
     void gain_slider_changed_slot(int gain);
     void gain_spinbox_changed_slot(double gain);
     void gamma_slider_changed_slot(int gain);
@@ -52,10 +55,11 @@ private slots:
     
 private:
     // Widgets
+    QCheckBox *mp_invert_CheckBox;
     QSlider *mp_gain_Slider;
     QDoubleSpinBox *mp_gain_DSpinbox;
     QSlider *mp_gamma_Slider;
     QDoubleSpinBox *mp_gamma_DSpinbox;
 };
 
-#endif // GAIN_AND_GAMMA_H
+#endif // PROCESSING_OPTIONS_H
