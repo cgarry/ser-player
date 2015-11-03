@@ -84,11 +84,6 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_gain_DSpinbox->setValue(1.0);
     connect(mp_gain_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(gain_spinbox_changed_slot(double)));
 
-    QHBoxLayout *gain_HLayout1 = new QHBoxLayout;
-    gain_HLayout1->addWidget(new QLabel(tr("Gain")));
-    gain_HLayout1->addWidget(mp_gain_Slider);
-    gain_HLayout1->addWidget(mp_gain_DSpinbox);
-
     // Gamma widgets
     mp_gamma_Slider = new QSlider(Qt::Horizontal);
     mp_gamma_Slider->setRange(10, 300);
@@ -101,10 +96,15 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_gamma_DSpinbox->setValue(1.0);
     connect(mp_gamma_DSpinbox, SIGNAL(valueChanged(double)), this, SLOT(gamma_spinbox_changed_slot(double)));
 
-    QHBoxLayout *gamma_HLayout1 = new QHBoxLayout;
-    gamma_HLayout1->addWidget(new QLabel(tr("Gamma")));
-    gamma_HLayout1->addWidget(mp_gamma_Slider);
-    gamma_HLayout1->addWidget(mp_gamma_DSpinbox);
+    QGridLayout *gain_and_gamma_GLayout = new QGridLayout;
+    gain_and_gamma_GLayout->setVerticalSpacing(10);
+    gain_and_gamma_GLayout->setHorizontalSpacing(10);
+    gain_and_gamma_GLayout->addWidget(new QLabel(tr("Gain")), 0, 0);
+    gain_and_gamma_GLayout->addWidget(mp_gain_Slider, 0, 1);
+    gain_and_gamma_GLayout->addWidget(mp_gain_DSpinbox, 0, 2);
+    gain_and_gamma_GLayout->addWidget(new QLabel(tr("Gamma")), 1, 0);
+    gain_and_gamma_GLayout->addWidget(mp_gamma_Slider, 1, 1);
+    gain_and_gamma_GLayout->addWidget(mp_gamma_DSpinbox, 1, 2);
 
     QPushButton *reset_gain_and_gamma_Button = new QPushButton(tr("Reset"));
     reset_gain_and_gamma_Button->setAutoDefault(false);
@@ -117,8 +117,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     QVBoxLayout *gain_and_gamma_Vlayout = new QVBoxLayout;
     gain_and_gamma_Vlayout->setMargin(5);
     gain_and_gamma_Vlayout->setSpacing(10);
-    gain_and_gamma_Vlayout->addLayout(gain_HLayout1);
-    gain_and_gamma_Vlayout->addLayout(gamma_HLayout1);
+    gain_and_gamma_Vlayout->addLayout(gain_and_gamma_GLayout);
     gain_and_gamma_Vlayout->addLayout(gamma_HLayout2);
 
     c_icon_groupbox *gain_and_gammaGroupBox = new c_icon_groupbox;
@@ -269,12 +268,17 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
-    dialog_vlayout->setSpacing(15);
+    dialog_vlayout->setSpacing(0);
     dialog_vlayout->addWidget(debayer_GroupBox);
+    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
+    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(invert_GroupBox);
+    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(gain_and_gammaGroupBox);
+    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_colour_saturation_GroupBox);
+    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_colour_balance_GroupBox);
 
     setLayout(dialog_vlayout);
