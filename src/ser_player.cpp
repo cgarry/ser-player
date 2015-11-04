@@ -204,7 +204,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Act, SIGNAL(triggered(bool)), this, SLOT(processor_options_slot(bool)));
     mp_processing_options_Dialog = new c_processing_options_dialog(this);
     mp_processing_options_Dialog->hide();
-    connect(mp_processing_options_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot(bool)));
+    connect(mp_processing_options_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot()));
     connect(mp_processing_options_Dialog, SIGNAL(invert_frames(bool)), this, SLOT(invert_changed_slot(bool)));
     connect(mp_processing_options_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
     connect(mp_processing_options_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
@@ -1853,7 +1853,7 @@ void c_ser_player::check_for_updates_slot(bool enabled)
 }
 
 
-void c_ser_player::debayer_enable_slot(bool enabled)
+void c_ser_player::debayer_enable_slot()
 {
     if (m_has_bayer_pattern) {
         frame_slider_changed_slot();

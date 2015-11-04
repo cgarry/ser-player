@@ -162,7 +162,7 @@ public slots:
     void repeat_button_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
-    void debayer_enable_slot(bool enabled);
+    void debayer_enable_slot();
     void new_version_available_slot(QString version);
     void about_qt();
     void dragEnterEvent(QDragEnterEvent *e);
