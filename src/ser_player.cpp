@@ -130,7 +130,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     QMenu *playback_menu = menuBar()->addMenu(tr("Playback", "Menu title"));
 
     const int zoom_levels[] = {25, 50, 75, 100, 125, 150, 200, 250, 300};
-    QMenu *zoom_Menu = playback_menu->addMenu(tr("Change Zoom", "Zoom menu"));
+    QMenu *zoom_Menu = playback_menu->addMenu(tr("Zoom", "Zoom menu"));
     QActionGroup *zoom_ActGroup = new QActionGroup(zoom_Menu);
     QAction *zoom_action;
     for (int x = 0; x <  (int)(sizeof(zoom_levels) / sizeof(zoom_levels[0])); x++) {
@@ -169,12 +169,12 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     //
-    // Windows menu
+    // Tools menu
     //
-    QMenu *window_menu = menuBar()->addMenu(tr("Window", "Menu title"));
+    QMenu *tools_menu = menuBar()->addMenu(tr("Tools", "Menu title"));
 
     // SER File Details
-    mp_header_details_Act = window_menu->addAction(tr("SER File Details"));
+    mp_header_details_Act = tools_menu->addAction(tr("SER File Details"));
     mp_header_details_Act->setEnabled(false);
     mp_header_details_Act->setCheckable(true);
     mp_header_details_Act->setChecked(false);
@@ -185,7 +185,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     // Histogram viewer
-    mp_histogram_viewer_Act = window_menu->addAction(tr("Histogram Viewer"));
+    mp_histogram_viewer_Act = tools_menu->addAction(tr("Histogram Viewer"));
     mp_histogram_viewer_Act->setEnabled(false);
     mp_histogram_viewer_Act->setCheckable(true);
     mp_histogram_viewer_Act->setChecked(c_persistent_data::m_histogram_enabled);
@@ -194,10 +194,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_histogram_dialog->hide();
     connect(mp_histogram_dialog, SIGNAL(rejected()), this, SLOT(histogram_viewer_closed_slot()));
 
-    window_menu->addSeparator();
+    tools_menu->addSeparator();
 
     // Processing Options menu action
-    mp_processing_options_Act = window_menu->addAction(tr("Processing Options"));
+    mp_processing_options_Act = tools_menu->addAction(tr("Processing Options"));
     mp_processing_options_Act->setEnabled(false);
     mp_processing_options_Act->setCheckable(true);
     mp_processing_options_Act->setChecked(false);
@@ -216,7 +216,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     // Markers Dialog action
-    mp_markers_dialog_Act = window_menu->addAction(tr("Start/End Markers"));
+    mp_markers_dialog_Act = tools_menu->addAction(tr("Start/End Markers"));
     mp_markers_dialog_Act->setEnabled(false);
     mp_markers_dialog_Act->setCheckable(true);
     mp_markers_dialog_Act->setChecked(false);
@@ -1347,8 +1347,6 @@ void c_ser_player::open_ser_file_slot(QAction *action)
 void c_ser_player::open_ser_file(const QString &filename)
 {
     // Reset options before opening a new file
-    mp_framerate_Menu->actions().at(0)->setChecked(true);
-    fps_changed_slot(mp_framerate_Menu->actions().at(0));
     mp_processing_options_Dialog->reset_all_slot();
 
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
@@ -1883,7 +1881,7 @@ void c_ser_player::about_ser_player()
     QPixmap ser_player_logoPixmap(":/res/resources/ser_player_logo_150x150.png");
     QMessageBox msgBox;
     msgBox.setText("<b><big>" + tr("SER Player") + "</big> (" VERSION_STRING ")</b>");
-    QString informative_text = tr("A simple video player for SER files.");
+    QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
     informative_text += "Copyright (c) 2015 Chris Garry";
 
@@ -1894,6 +1892,11 @@ void c_ser_player::about_ser_player()
         informative_text += ("<qt>");
         informative_text += translator_credit;
     }
+
+    informative_text += "<qt>&nbsp;<br>";
+    informative_text += tr("Credits:");
+    informative_text += "<br>";
+    informative_text += tr("Sylvain Weiller for all his suggestions, testing and feedback.");
 
     informative_text += "<qt>&nbsp;<br>";
     informative_text += "This program is free software: you can redistribute it and/or modify "

@@ -56,7 +56,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
 
     mp_selected_count_Label = new QLabel("1");
 
-    QPushButton *reset_markers_Button = new QPushButton(tr("Reset"));
+    QPushButton *reset_markers_Button = new QPushButton(tr("Reset", "Reset Markers"));
     reset_markers_Button->setAutoDefault(false);
     connect(reset_markers_Button, SIGNAL(clicked()), this, SLOT(reset_markers_slot()));
 
