@@ -59,10 +59,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 {
     switch (save_type) {
     case SAVE_IMAGES:
-        setWindowTitle(tr("Save Frames As Images"));
+        setWindowTitle(tr("Save Frames As Images", "Save frames dialog"));
         break;
     case SAVE_SER:
-        setWindowTitle(tr("Save Frames As SER File"));
+        setWindowTitle(tr("Save Frames As SER File", "Save frames dialog"));
         break;
     }
 
@@ -74,22 +74,22 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // Frames to save options
     //
 
-    mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only"));
+    mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only", "Save frames dialog"));
     connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
-    mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames").arg(total_frames));
+    mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames", "Save frames dialog").arg(total_frames));
     connect(mp_save_all_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     if (!markers_enabled) {
         // No markers enabled
-        mp_save_marked_frames_RButton = new QRadioButton(tr("Start/End Markers Disabled"));
+        mp_save_marked_frames_RButton = new QRadioButton(tr("Start/End Markers Disabled", "Save frames dialog"));
         mp_save_marked_frames_RButton->setEnabled(false);
     } else {
-        mp_save_marked_frames_RButton = new QRadioButton(tr("Save Frames Selected By Start/End Markers (%1 to %2)")
+        mp_save_marked_frames_RButton = new QRadioButton(tr("Save Frames Selected By Start/End Markers (%1 to %2)", "Save frames dialog")
                                                          .arg(marker_start_frame).arg(marker_end_frame));
         connect(mp_save_marked_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
         // Markers are selected
     }
 
-    mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: "));
+    mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: ", "Save frames dialog"));
     connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
     // Hide save current frame button when this is a save as SER file dilalog
@@ -127,7 +127,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     custom_range_HLayout->setSpacing(0);
     custom_range_HLayout->addWidget(mp_save_frame_range_RButton, 0, Qt::AlignLeft);
     custom_range_HLayout->addWidget(mp_start_Spinbox);
-    custom_range_HLayout->addWidget(new QLabel(tr(" to ")));
+    custom_range_HLayout->addWidget(new QLabel(tr(" to ", "Save frames dialog")));
     custom_range_HLayout->addWidget(mp_end_Spinbox);
     custom_range_HLayout->addStretch(0);
 
@@ -146,7 +146,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     save_range_VLayout->addLayout(save_all_HLayout);
     save_range_VLayout->addWidget(mp_selected_frames_Label, 0, Qt::AlignRight);
     
-    QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save"));
+    QGroupBox *save_optionsGBox = new QGroupBox(tr("Select frames to save", "Save frames dialog"));
     save_optionsGBox->setLayout(save_range_VLayout);
     save_optionsGBox->setMinimumWidth((save_optionsGBox->minimumSizeHint().width() * 5) / 4);
 
@@ -158,7 +158,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Frame Decimation
     //
-    QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every"));
+    QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every", "Save frames dialog"));
     frame_decimation_Label->setToolTip(tr("Reduce the number of saved frames by only saving 1 frame"
                                           " for every specified number of frames.") + "<b></b>");
 
@@ -177,7 +177,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     frame_decimation_HLayout->addWidget(mp_frame_decimation_SpinBox);
     frame_decimation_HLayout->addStretch();
 
-    mp_frame_decimation_GBox = new QGroupBox(tr("Enable Frame Decimation"));
+    mp_frame_decimation_GBox = new QGroupBox(tr("Enable Frame Decimation", "Save frames dialog"));
     mp_frame_decimation_GBox->setCheckable(true);
     mp_frame_decimation_GBox->setChecked(false);
     mp_frame_decimation_GBox->setLayout(frame_decimation_HLayout);
@@ -189,13 +189,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Sequence Direction
     //
-    mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards"));
+    mp_forwards_sequence_RButton = new QRadioButton(tr("Forwards", "Save frames dialog"));
     mp_forwards_sequence_RButton->setToolTip(tr("Save the frames in their forward order.") + "<b></b>");
 
-    mp_reverse_sequence_RButton = new QRadioButton(tr("Reverse"));
+    mp_reverse_sequence_RButton = new QRadioButton(tr("Reverse", "Save frames dialog"));
     mp_reverse_sequence_RButton->setToolTip(tr("Save the frames in their reverse order.") + "<b></b>");
 
-    mp_forwards_then_reverse_sequence_RButton = new QRadioButton(tr("Forwards Then Reverse"));
+    mp_forwards_then_reverse_sequence_RButton = new QRadioButton(tr("Forwards Then Reverse", "Save frames dialog"));
     mp_forwards_then_reverse_sequence_RButton->setToolTip(tr("Save the frames in their forward order"
                                                              " and then in their reverse order. "
                                                              "This will result in twice as many frames being saved.") + "<b></b>");
@@ -211,7 +211,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     sequence_direction_VLayout->addWidget(mp_reverse_sequence_RButton);
     sequence_direction_VLayout->addWidget(mp_forwards_then_reverse_sequence_RButton);
 
-    mp_sequence_direction_GBox = new QGroupBox(tr("Sequence Direction"));
+    mp_sequence_direction_GBox = new QGroupBox(tr("Sequence Direction", "Save frames dialog"));
     mp_sequence_direction_GBox->setLayout(sequence_direction_VLayout);
     mp_sequence_direction_GBox->setMinimumWidth((mp_sequence_direction_GBox->minimumSizeHint().width() * 5) / 4);
 
@@ -219,7 +219,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Image processing
     //
-    mp_processing_enable_CBox = new QCheckBox(tr("Apply Processing To Frames Before Saving"));
+    mp_processing_enable_CBox = new QCheckBox(tr("Apply Processing To Frames Before Saving", "Save frames dialog"));
     mp_processing_enable_CBox->setChecked(true);
 
     QVBoxLayout *processing_enable_VLayout = new QVBoxLayout;
@@ -227,7 +227,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     processing_enable_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     processing_enable_VLayout->addWidget(mp_processing_enable_CBox);
 
-    mp_processing_GBox = new QGroupBox(tr("Image Processing"));
+    mp_processing_GBox = new QGroupBox(tr("Image Processing", "Save frames dialog"));
     mp_processing_GBox->setLayout(processing_enable_VLayout);
     mp_processing_GBox->setToolTip(tr("This option controls whether active processing options are performed "
                                              "on the frames before saving.  If this option is disabled then "
@@ -246,14 +246,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                                   "or a simple sequential count appended to their filename in order to make the "
                                                   "image filenames unique.") + "<b></b>");
     if (ser_has_timestamps) {
-        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename"));
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename", "Save frames dialog"));
         mp_append_timestamp_CBox->setEnabled(true);
     } else {
-        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename") + " (" + tr("No Frame Timestamps In SER File") + ")");
+        mp_append_timestamp_CBox = new QCheckBox(tr("Append Frame Timestamp To Filename", "Save frames dialog") + " (" + tr("No Frame Timestamps In SER File", "Save frames dialog") + ")");
         mp_append_timestamp_CBox->setEnabled(false);
     }
 
-    mp_append_timestamp_CBox->setToolTip(tr("Append each image filename with its timestamp") + "<b></b>");
+    mp_append_timestamp_CBox->setToolTip(tr("Append each image filename with its timestamp", "Save frames dialog") + "<b></b>");
 
     QVBoxLayout *filename_generation_VLayout = new QVBoxLayout;
     filename_generation_VLayout->setMargin(INSIDE_GBOX_MARGIN);
@@ -261,7 +261,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     filename_generation_VLayout->addWidget(mp_use_framenumber_in_filename);
     filename_generation_VLayout->addWidget(mp_append_timestamp_CBox);
 
-    QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation"));
+    QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation", "Save frames dialog"));
     filename_generation_GBox->setLayout(filename_generation_VLayout);
     if (save_type == SAVE_SER) {
         filename_generation_GBox->hide();
@@ -272,10 +272,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // SER file saving specific options
     //
     if (ser_has_timestamps) {
-        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps"));
+        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps", "Save frames dialog"));
         mp_include_timestamps_CBox->setChecked(true);
     } else {
-        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps") + " (" + tr("No Frame Timestamps In Source SER File") + ")");
+        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps", "Save frames dialog") + " (" + tr("No Frame Timestamps In Source SER File", "Save frames dialog") + ")");
         mp_include_timestamps_CBox->setEnabled(false);
     }
 
@@ -301,14 +301,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_telescope_LEdit->setToolTip(tr("Set the text to be written to the 'Telescope' string in the generated SER file") + "<b></b>");
 
     QGridLayout *header_fields_GLayout = new QGridLayout;
-    header_fields_GLayout->addWidget(new QLabel(tr("Observer:")), 0, 0);
+    header_fields_GLayout->addWidget(new QLabel(tr("Observer:", "Save frames dialog")), 0, 0);
     header_fields_GLayout->addWidget(mp_observer_LEdit, 0, 1);
-    header_fields_GLayout->addWidget(new QLabel(tr("Instrument:")), 1, 0);
+    header_fields_GLayout->addWidget(new QLabel(tr("Instrument:", "Save frames dialog")), 1, 0);
     header_fields_GLayout->addWidget(mp_instrument_LEdit, 1, 1);
-    header_fields_GLayout->addWidget(new QLabel(tr("Telescope:")), 2, 0);
+    header_fields_GLayout->addWidget(new QLabel(tr("Telescope:", "Save frames dialog")), 2, 0);
     header_fields_GLayout->addWidget(mp_telescope_LEdit, 2, 1);
 
-    QGroupBox *header_fields_GBox = new QGroupBox("SER Header Information Fields");
+    QGroupBox *header_fields_GBox = new QGroupBox(tr("SER Header Information Fields", "Save frames dialog"));
     header_fields_GBox->setLayout(header_fields_GLayout);
 
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
@@ -317,7 +317,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     ser_file_options_VLayout->addWidget(mp_include_timestamps_CBox);
     ser_file_options_VLayout->addWidget(header_fields_GBox);
 
-    QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
+    QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options", "Save frames dialog"));
     ser_file_options_GBox->setLayout(ser_file_options_VLayout);
     // Hide save current frame button when this is a save as SER file dilalog
     if (save_type == SAVE_IMAGES) {
@@ -328,14 +328,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Frames to be saved label
     //
-    mp_total_frames_to_save_Label = new QLabel(tr("xxxx frames will be saved"));
+    mp_total_frames_to_save_Label = new QLabel(tr("xxxx frames will be saved", "Save frames dialog"));
 
 
     //
     // Dialog buttons
     //
-    QPushButton *cancel_PButton = new QPushButton(tr("Cancel"));
-    QPushButton *next_PButton = new QPushButton(tr("Next"));
+    QPushButton *cancel_PButton = new QPushButton(tr("Cancel", "Save frames dialog"));
+    QPushButton *next_PButton = new QPushButton(tr("Next", "Save frames dialog"));
     cancel_PButton->setAutoDefault(false);
     next_PButton->setAutoDefault(false);
     connect(cancel_PButton, SIGNAL(clicked()), this, SLOT(reject()));

@@ -40,7 +40,7 @@ c_save_frames_progress_dialog::c_save_frames_progress_dialog(QWidget *parent, in
     mp_progress_bar = new QProgressBar;
     mp_progress_bar->setRange(min_value, max_value);
 
-    mp_abort_cancel_button = new QPushButton(tr("Abort"));
+    mp_abort_cancel_button = new QPushButton(tr("Abort", "Save frames progress"));
     connect(mp_abort_cancel_button, SIGNAL(clicked()), this, SLOT(cancel_button_clicked_slot()));
     
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
@@ -68,8 +68,8 @@ void c_save_frames_progress_dialog::set_value(int value)
 void c_save_frames_progress_dialog::set_complete()
 {
     mp_progress_bar->setValue(mp_progress_bar->maximum());
-    mp_text_label->setText(mp_text_label->text() + ": " + tr("Complete"));
-    mp_abort_cancel_button->setText(tr("Close"));
+    mp_text_label->setText(mp_text_label->text() + ": " + tr("Complete", "Save frames progress"));
+    mp_abort_cancel_button->setText(tr("Close", "Save frames progress"));
 }
 
 

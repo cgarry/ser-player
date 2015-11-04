@@ -40,7 +40,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
       m_data_has_bayer_pattern(false),
       m_data_is_colour(false)
 {
-    setWindowTitle(tr("Processing Options"));
+    setWindowTitle(tr("Processing"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 

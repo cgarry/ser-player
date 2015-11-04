@@ -130,7 +130,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     QMenu *playback_menu = menuBar()->addMenu(tr("Playback", "Menu title"));
 
     const int zoom_levels[] = {25, 50, 75, 100, 125, 150, 200, 250, 300};
-    QMenu *zoom_Menu = playback_menu->addMenu(tr("Zoom", "Zoom menu"));
+    QMenu *zoom_Menu = playback_menu->addMenu(tr("Zoom", "Playback menu"));
     QActionGroup *zoom_ActGroup = new QActionGroup(zoom_Menu);
     QAction *zoom_action;
     for (int x = 0; x <  (int)(sizeof(zoom_levels) / sizeof(zoom_levels[0])); x++) {
@@ -143,7 +143,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
     playback_menu->addSeparator();
 
-    mp_framerate_Menu = playback_menu->addMenu(tr("Display Framerate"));
+    mp_framerate_Menu = playback_menu->addMenu(tr("Framerate", "Playback menu"));
     mp_framerate_Menu->setEnabled(false);
     QActionGroup *fps_ActGroup = new QActionGroup(mp_framerate_Menu);
     fps_ActGroup->setExclusive(true);
@@ -174,7 +174,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     QMenu *tools_menu = menuBar()->addMenu(tr("Tools", "Menu title"));
 
     // SER File Details
-    mp_header_details_Act = tools_menu->addAction(tr("SER File Details"));
+    mp_header_details_Act = tools_menu->addAction(tr("SER File Details", "Tools menu"));
     mp_header_details_Act->setEnabled(false);
     mp_header_details_Act->setCheckable(true);
     mp_header_details_Act->setChecked(false);
@@ -185,7 +185,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     // Histogram viewer
-    mp_histogram_viewer_Act = tools_menu->addAction(tr("Histogram Viewer"));
+    mp_histogram_viewer_Act = tools_menu->addAction(tr("Histogram", "Tools menu"));
     mp_histogram_viewer_Act->setEnabled(false);
     mp_histogram_viewer_Act->setCheckable(true);
     mp_histogram_viewer_Act->setChecked(c_persistent_data::m_histogram_enabled);
@@ -196,8 +196,8 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     tools_menu->addSeparator();
 
-    // Processing Options menu action
-    mp_processing_options_Act = tools_menu->addAction(tr("Processing Options"));
+    // Processing menu action
+    mp_processing_options_Act = tools_menu->addAction(tr("Processing", "Tools menu"));
     mp_processing_options_Act->setEnabled(false);
     mp_processing_options_Act->setCheckable(true);
     mp_processing_options_Act->setChecked(false);
@@ -216,7 +216,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
 
     // Markers Dialog action
-    mp_markers_dialog_Act = tools_menu->addAction(tr("Start/End Markers"));
+    mp_markers_dialog_Act = tools_menu->addAction(tr("Markers", "Tools menu"));
     mp_markers_dialog_Act->setEnabled(false);
     mp_markers_dialog_Act->setCheckable(true);
     mp_markers_dialog_Act->setChecked(false);
@@ -1855,7 +1855,6 @@ void c_ser_player::check_for_updates_slot(bool enabled)
 
 void c_ser_player::debayer_enable_slot(bool enabled)
 {
-    enabled = enabled;  // Remove compiler warning
     if (m_has_bayer_pattern) {
         frame_slider_changed_slot();
     }

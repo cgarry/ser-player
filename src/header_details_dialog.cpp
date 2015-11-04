@@ -32,9 +32,6 @@ c_header_details_dialog::c_header_details_dialog(QWidget *parent)
 
     mp_header_details_Tedit = new QTextEdit;
     mp_header_details_Tedit->setReadOnly(true);
-    QPalette p = mp_header_details_Tedit->palette();
-    p.setColor(QPalette::Base, QColor(255, 248, 220));
-    mp_header_details_Tedit->setPalette(p);
     mp_header_details_Tedit->setWordWrapMode(QTextOption::NoWrap);
     mp_header_details_Tedit->append("No file");
 

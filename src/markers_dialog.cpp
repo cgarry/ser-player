@@ -33,7 +33,7 @@
 c_markers_dialog::c_markers_dialog(QWidget *parent)
     : QDialog(parent)  //, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
 {
-    setWindowTitle(tr("Start/End Markers"));
+    setWindowTitle(tr("Markers"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     mp_start_market_Label = new QLabel(tr("Start Marker:"));
@@ -41,7 +41,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_start_marker_SpinBox->setRange(1, 1);
     connect(mp_start_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
-    QPushButton *start_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    QPushButton *start_marker_mode_Button = new QPushButton(tr("Move To Current Frame", "Move start marker to current frame"));
     start_marker_mode_Button->setAutoDefault(false);
     connect(start_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_start_marker_to_current()));
 
@@ -50,7 +50,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     mp_end_marker_SpinBox->setRange(1, 1);
     connect(mp_end_marker_SpinBox, SIGNAL(valueChanged(int)), this, SLOT(marker_changed_slot()));
 
-    QPushButton *end_marker_mode_Button = new QPushButton(tr("Move To Current Frame"));
+    QPushButton *end_marker_mode_Button = new QPushButton(tr("Move To Current Frame", "Moeve end marker to current frame"));
     end_marker_mode_Button->setAutoDefault(false);
     connect(end_marker_mode_Button, SIGNAL(clicked()), this, SIGNAL(set_end_marker_to_current()));
 
@@ -69,7 +69,7 @@ c_markers_dialog::c_markers_dialog(QWidget *parent)
     markers_GLayout->addWidget(mp_end_market_Label, 1, 0);
     markers_GLayout->addWidget(mp_end_marker_SpinBox, 1, 1);
     markers_GLayout->addWidget(end_marker_mode_Button, 1, 2);
-    markers_GLayout->addWidget(new QLabel(tr("Marked Frames:")), 2, 0);
+    markers_GLayout->addWidget(new QLabel(tr("Selected Frames:", "Number of frames selected by markers")), 2, 0);
     markers_GLayout->addWidget(mp_selected_count_Label, 2, 1);
     markers_GLayout->addWidget(reset_markers_Button, 2, 2);
 
