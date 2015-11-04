@@ -8,7 +8,7 @@ SER File Format Specification: [http://www.grischa-hahn.homepage.t-online.de/ast
 ###Project Goals
 Some simple goals that hopefully get accross my intentions for this project.
 * Produce a lightweight and intuative video player application for .ser files.
-* Avoid feature creep and over complication in order to keep SER Player distinct from [PIPP](https://sites.google.com/site/astropipp/).  New features may be added if they are not duplicating PIPP's functionality.
+* ~~Avoid feature creep and over complication in order to keep SER Player distinct from [PIPP](https://sites.google.com/site/astropipp/).  New features may be added if they are not duplicating PIPP's functionality.~~
 * SER Player must remain cross-platform and support at least Windows, OS X and Linux.
 
 ##Building SER Player for Windows
