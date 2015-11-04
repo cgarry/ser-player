@@ -1268,7 +1268,8 @@ void c_ser_player::estimate_colour_balance()
 
         if (ret >= 0) {
             // Debayer frame if required
-            if (c_persistent_data::m_enable_debayering) {
+
+            if (mp_processing_options_Dialog->get_debayer_enable()) {
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
         }
@@ -1348,9 +1349,7 @@ void c_ser_player::open_ser_file(const QString &filename)
     // Reset options before opening a new file
     mp_framerate_Menu->actions().at(0)->setChecked(true);
     fps_changed_slot(mp_framerate_Menu->actions().at(0));
-    mp_processing_options_Dialog->reset_gain_and_gamma_slot();
-    mp_processing_options_Dialog->reset_colour_saturation_slot();
-    mp_processing_options_Dialog->reset_colour_balance_slot();
+    mp_processing_options_Dialog->reset_all_slot();
 
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
@@ -1422,6 +1421,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_pixel_depth_Label->setText(m_pixel_depth_label_String
                                       .arg(mp_ser_file->get_pixel_depth()));
         m_is_colour = false;
+        m_has_bayer_pattern = false;
 
         // Update colour ID label
         switch (mp_ser_file->get_colour_id()) {
@@ -1468,14 +1468,9 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
         }
 
-        // Enable colour settings menu item if this is colour data
-        if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
-            // This is now a colour image, enable colour saturation menu
-//            mp_colour_settings_Act->setEnabled(true);
-        } else {
-//            mp_colour_settings_Act->setEnabled(false);
-//            mp_colour_settings_Dialog->hide();
-        }
+        // Inform processing dialog whether this data has a bayer pattern or not
+        mp_processing_options_Dialog->set_data_has_bayer_pattern(m_has_bayer_pattern);
+        mp_processing_options_Dialog->set_data_is_colour(m_is_colour);
 
         // Enable menu items that are only enabled when a SER file is open
         mp_save_frames_as_ser_Act->setEnabled(true);
@@ -1859,16 +1854,10 @@ void c_ser_player::check_for_updates_slot(bool enabled)
 
 void c_ser_player::debayer_enable_slot(bool enabled)
 {
-    c_persistent_data::m_enable_debayering = enabled;
-    if (m_is_colour || (m_has_bayer_pattern && c_persistent_data::m_enable_debayering)) {
-        // This is now a colour image, enable colour saturation menu
-//        mp_colour_settings_Act->setEnabled(true);
-    } else {
-//        mp_colour_settings_Act->setEnabled(false);
-//        mp_colour_settings_Dialog->reject();
+    enabled = enabled;  // Remove compiler warning
+    if (m_has_bayer_pattern) {
+        frame_slider_changed_slot();
     }
-
-    frame_slider_changed_slot();
 }
 
 
@@ -2091,7 +2080,7 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
 
         if (do_processing) {
             // Debayer frame if required
-            if (c_persistent_data::m_enable_debayering) {
+            if (mp_processing_options_Dialog->get_debayer_enable()) {
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
 

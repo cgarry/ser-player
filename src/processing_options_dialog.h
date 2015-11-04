@@ -37,6 +37,9 @@ class c_processing_options_dialog : public QDialog
 public:
     c_processing_options_dialog(QWidget *parent = 0);
     void set_colour_balance(double red, double green, double blue);
+    void set_data_has_bayer_pattern(bool bayer_pattern);
+    void set_data_is_colour(bool colour);
+    bool get_debayer_enable();
 
 
 signals:
@@ -54,6 +57,7 @@ public slots:
     void reset_gain_and_gamma_slot();
     void reset_colour_saturation_slot();
     void reset_colour_balance_slot();
+    void reset_all_slot();
 
     
 private slots:
@@ -72,11 +76,16 @@ private slots:
     void green_balance_spinbox_changed_slot();
     void blue_balance_spinbox_changed_slot();
 
+private:
+    void enable_and_disable_controls();
+
     
 private:
     //
     // Widgets
     //
+    c_icon_groupbox *mp_debayer_GroupBox;
+    QCheckBox *mp_debayer_CheckBox;
     QCheckBox *mp_invert_CheckBox;
     // Gain and Gamma
     QSlider *mp_gain_Slider;
@@ -98,6 +107,10 @@ private:
     QSpinBox *mp_red_balance_SpinBox;
     QSpinBox *mp_green_balance_SpinBox;
     QSpinBox *mp_blue_balance_SpinBox;
+
+    // Other
+    bool m_data_has_bayer_pattern;
+    bool m_data_is_colour;
 };
 
 #endif // PROCESSING_OPTIONS_H

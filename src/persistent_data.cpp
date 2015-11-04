@@ -46,7 +46,6 @@ QStringList c_persistent_data::m_recent_ser_files = QStringList();
 QStringList c_persistent_data::m_recent_save_folders = QStringList();
 
 bool c_persistent_data::m_check_for_updates = true;
-bool c_persistent_data::m_enable_debayering = true;
 bool c_persistent_data::m_repeat = false;
 int c_persistent_data::m_play_direction = 0;
 bool c_persistent_data::m_histogram_enabled = false;
@@ -87,10 +86,6 @@ void c_persistent_data::load()
         m_check_for_updates = settings.value("check_for_updates").toBool();
     }
 
-    if (settings.value("enable_debayering") != QVariant::Invalid) {
-        m_enable_debayering = settings.value("enable_debayering").toBool();
-    }
-
     if (settings.value("playback_repeat") != QVariant::Invalid) {
         m_repeat = settings.value("playback_repeat").toBool();
     }
@@ -123,7 +118,6 @@ void c_persistent_data::save()
     settings.setValue("recent_ser_files", m_recent_ser_files);
     settings.setValue("recent_save_folders", m_recent_save_folders);
     settings.setValue("check_for_updates", m_check_for_updates);
-    settings.setValue("enable_debayering", m_enable_debayering);
     settings.setValue("playback_repeat", m_repeat);
     settings.setValue("play_direction", m_play_direction);   
     settings.setValue("histogram_enabled", m_histogram_enabled);

@@ -12,7 +12,7 @@ public:
     explicit c_icon_groupbox(QWidget *parent = 0);
     ~c_icon_groupbox();
     void set_icon(const char *filename);
-    void setMainLayout(QLayout *layout);
+    void setLayout(QLayout *layout);
 
 private:
     QPixmap *mp_group_icon;

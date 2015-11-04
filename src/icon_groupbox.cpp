@@ -20,7 +20,7 @@ c_icon_groupbox::c_icon_groupbox(QWidget *parent) :
 
     mp_grid_Layout->addLayout(icon_hlayout, 0, 1, Qt::AlignRight | Qt::AlignTop);
 
-    this->setLayout(mp_grid_Layout);
+    QGroupBox::setLayout(mp_grid_Layout);
 }
 
 
@@ -40,6 +40,6 @@ void c_icon_groupbox::set_icon(const char *filename)
 }
 
 
-void c_icon_groupbox::setMainLayout(QLayout *layout) {
+void c_icon_groupbox::setLayout(QLayout *layout) {
     mp_grid_Layout->addLayout(layout, 0, 0);
 }

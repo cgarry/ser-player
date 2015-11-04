@@ -36,29 +36,31 @@
 
 
 c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent),
+      m_data_has_bayer_pattern(false),
+      m_data_is_colour(false)
 {
     setWindowTitle(tr("Processing Options"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 
     // Debayer checkbox
-    QCheckBox *mp_debayer_CheckBox = new QCheckBox(tr("Enable Debayering"));
-    mp_debayer_CheckBox->setChecked(c_persistent_data::m_enable_debayering);
+    mp_debayer_CheckBox = new QCheckBox(tr("Enable Debayering"));
+    mp_debayer_CheckBox->setChecked(true);
     connect(mp_debayer_CheckBox, SIGNAL(toggled(bool)), this, SLOT(debayer_enable_slot(bool)));
 
     QHBoxLayout *debayer_HLayout1 = new QHBoxLayout;
     debayer_HLayout1->setMargin(5);
     debayer_HLayout1->addWidget(mp_debayer_CheckBox);
 
-    c_icon_groupbox *debayer_GroupBox = new c_icon_groupbox(this);
-    debayer_GroupBox->setTitle(tr("Colour Debayer"));
-    debayer_GroupBox->set_icon(":/res/resources/debayer_icon.png");
-    debayer_GroupBox->setMainLayout(debayer_HLayout1);
+    mp_debayer_GroupBox = new c_icon_groupbox(this);
+    mp_debayer_GroupBox->setTitle(tr("Colour Debayer"));
+    mp_debayer_GroupBox->set_icon(":/res/resources/debayer_icon.png");
+    mp_debayer_GroupBox->setLayout(debayer_HLayout1);
 
 
     // Invert checkbox
-    QCheckBox *mp_invert_CheckBox = new QCheckBox(tr("Invert Frames"));
+    mp_invert_CheckBox = new QCheckBox(tr("Invert Frames"));
     mp_invert_CheckBox->setChecked(false);
     connect(mp_invert_CheckBox, SIGNAL(toggled(bool)), this, SIGNAL(invert_frames(bool)));
 
@@ -69,7 +71,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     c_icon_groupbox *invert_GroupBox = new c_icon_groupbox;
     invert_GroupBox->setTitle(tr("Frame Inversion"));
     invert_GroupBox->set_icon(":/res/resources/invert_icon.png");
-    invert_GroupBox->setMainLayout(invert_HLayout1);
+    invert_GroupBox->setLayout(invert_HLayout1);
 
 
     // Gain widgets
@@ -123,7 +125,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     c_icon_groupbox *gain_and_gammaGroupBox = new c_icon_groupbox;
     gain_and_gammaGroupBox->setTitle(tr("Gain and Gamma"));
     gain_and_gammaGroupBox->set_icon(":/res/resources/gain_icon.png");
-    gain_and_gammaGroupBox->setMainLayout(gain_and_gamma_Vlayout);
+    gain_and_gammaGroupBox->setLayout(gain_and_gamma_Vlayout);
 
 
     //
@@ -152,7 +154,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_monochrome_conversion_GroupBox->set_icon(":/res/resources/monochrome_conversion_icon.png");
     mp_monochrome_conversion_GroupBox->setCheckable(true);
     mp_monochrome_conversion_GroupBox->setChecked(false);
-    mp_monochrome_conversion_GroupBox->setMainLayout(monochrome_conversion_GroupBox_Hlayout);
+    mp_monochrome_conversion_GroupBox->setLayout(monochrome_conversion_GroupBox_Hlayout);
     connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(monochrome_conversion_changed_slot()));
     connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(colour_saturation_spinbox_changed_slot()));
     connect(mp_monochrome_conversion_GroupBox, SIGNAL(toggled(bool)), this, SLOT(red_balance_spinbox_changed_slot()));
@@ -193,7 +195,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_colour_saturation_GroupBox = new c_icon_groupbox;
     mp_colour_saturation_GroupBox->setTitle(tr("Colour Saturation"));
     mp_colour_saturation_GroupBox->set_icon(":/res/resources/saturation_icon.png");
-    mp_colour_saturation_GroupBox->setMainLayout(colsat_vlayout);
+    mp_colour_saturation_GroupBox->setLayout(colsat_vlayout);
 
 
     //
@@ -263,22 +265,22 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_colour_balance_GroupBox = new c_icon_groupbox;
     mp_colour_balance_GroupBox->setTitle(tr("Colour Balance"));
     mp_colour_balance_GroupBox->set_icon(":/res/resources/colour_balance_icon.png");
-    mp_colour_balance_GroupBox->setMainLayout(colour_balance_VLayout);
+    mp_colour_balance_GroupBox->setLayout(colour_balance_VLayout);
 
 
     QVBoxLayout *dialog_vlayout = new QVBoxLayout;
     dialog_vlayout->setMargin(10);
-    dialog_vlayout->setSpacing(0);
-    dialog_vlayout->addWidget(debayer_GroupBox);
-    dialog_vlayout->addSpacing(15);
+    dialog_vlayout->setSpacing(15);
+    dialog_vlayout->addWidget(mp_debayer_GroupBox);
+//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
-    dialog_vlayout->addSpacing(15);
+//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(invert_GroupBox);
-    dialog_vlayout->addSpacing(15);
+//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(gain_and_gammaGroupBox);
-    dialog_vlayout->addSpacing(15);
+//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_colour_saturation_GroupBox);
-    dialog_vlayout->addSpacing(15);
+//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_colour_balance_GroupBox);
 
     setLayout(dialog_vlayout);
@@ -288,8 +290,9 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 
 void c_processing_options_dialog::debayer_enable_slot(bool enable)
 {
-    c_persistent_data::m_enable_debayering = enable;
-    emit debayer_enable(enable);
+    bool bayer_enabled = m_data_has_bayer_pattern && enable;
+    enable_and_disable_controls();
+    emit debayer_enable(bayer_enabled);
 }
 
 
@@ -329,8 +332,7 @@ void c_processing_options_dialog::gamma_spinbox_changed_slot(double gamma)
 
 void c_processing_options_dialog::monochrome_conversion_changed_slot()
 {
-    mp_colour_saturation_GroupBox->setEnabled(!mp_monochrome_conversion_GroupBox->isChecked());
-    mp_colour_balance_GroupBox->setEnabled(!mp_monochrome_conversion_GroupBox->isChecked());
+    enable_and_disable_controls();
     emit monochrome_conversion_changed(mp_monochrome_conversion_GroupBox->isChecked(), mp_monochrome_conversion_Combobox->currentIndex());
 }
 
@@ -418,6 +420,18 @@ void c_processing_options_dialog::reset_colour_balance_slot()
 }
 
 
+void c_processing_options_dialog::reset_all_slot()
+{
+    mp_debayer_CheckBox->setChecked(true);
+    mp_invert_CheckBox->setChecked(false);
+    mp_monochrome_conversion_GroupBox->setChecked(false);
+    mp_monochrome_conversion_Combobox->setCurrentIndex(0);
+    reset_gain_and_gamma_slot();
+    reset_colour_saturation_slot();
+    reset_colour_balance_slot();
+}
+
+
 void c_processing_options_dialog::set_colour_balance(double red, double green, double blue)
 {
     int red_int = (red - 1.0) * 300;
@@ -470,4 +484,59 @@ void c_processing_options_dialog::set_colour_balance(double red, double green, d
     mp_red_balance_SpinBox->setValue(red_int);
     mp_green_balance_SpinBox->setValue(green_int);
     mp_blue_balance_SpinBox->setValue(blue_int);
+}
+
+
+void c_processing_options_dialog::set_data_has_bayer_pattern(bool bayer_pattern) {
+    m_data_has_bayer_pattern = bayer_pattern;
+    enable_and_disable_controls();
+}
+
+void c_processing_options_dialog::set_data_is_colour(bool colour) {
+    m_data_is_colour = colour;
+    enable_and_disable_controls();
+}
+
+
+bool c_processing_options_dialog::get_debayer_enable()
+{
+    return m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked();
+}
+
+
+void c_processing_options_dialog::enable_and_disable_controls()
+{
+    mp_debayer_CheckBox->setEnabled(m_data_has_bayer_pattern);
+    mp_debayer_GroupBox->setVisible(m_data_has_bayer_pattern);
+
+    bool enable_monochrome_conversion_control = false;
+    if (m_data_is_colour) {
+        // This is colour data
+        enable_monochrome_conversion_control = true;
+    } else if (m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked()) {
+        enable_monochrome_conversion_control = true;
+    }
+
+    mp_monochrome_conversion_GroupBox->setEnabled(enable_monochrome_conversion_control);
+    mp_monochrome_conversion_GroupBox->setVisible(enable_monochrome_conversion_control);
+
+    bool enable_colour_controls;
+    if (mp_monochrome_conversion_GroupBox->isChecked()) {
+        // The data must be monochrome if this control is checked
+        enable_colour_controls = false;
+    } else if (m_data_is_colour) {
+        // This is colour data
+        enable_colour_controls = true;
+    } else if (m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked()) {
+        // Debayered data with bayer pattern is colour data
+        enable_colour_controls = true;
+    } else {
+        // Otherwise this is monochrome data
+        enable_colour_controls = false;
+    }
+
+    mp_colour_saturation_GroupBox->setEnabled(enable_colour_controls);
+    mp_colour_saturation_GroupBox->setVisible(enable_colour_controls);
+    mp_colour_balance_GroupBox->setEnabled(enable_colour_controls);
+    mp_colour_balance_GroupBox->setVisible(enable_colour_controls);
 }
