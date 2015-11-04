@@ -286,6 +286,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_observer_LEdit = new QLineEdit;
     mp_observer_LEdit->setText(observer_string.trimmed());
     mp_observer_LEdit->setValidator(mp_utf8_validator);
+    mp_observer_LEdit->setMinimumWidth((2 * mp_observer_LEdit->sizeHint().width()));
     mp_observer_LEdit->setToolTip(tr("Set the text to be written to the 'Observer' string in the generated SER file") + "<b></b>");
 
     mp_instrument_LEdit = new QLineEdit;
@@ -298,7 +299,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_telescope_LEdit->setValidator(mp_utf8_validator);
     mp_telescope_LEdit->setToolTip(tr("Set the text to be written to the 'Telescope' string in the generated SER file") + "<b></b>");
 
-    QGridLayout  *header_fields_GLayout = new QGridLayout;
+    QGridLayout *header_fields_GLayout = new QGridLayout;
     header_fields_GLayout->addWidget(new QLabel(tr("Observer:")), 0, 0);
     header_fields_GLayout->addWidget(mp_observer_LEdit, 0, 1);
     header_fields_GLayout->addWidget(new QLabel(tr("Instrument:")), 1, 0);
@@ -306,11 +307,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     header_fields_GLayout->addWidget(new QLabel(tr("Telescope:")), 2, 0);
     header_fields_GLayout->addWidget(mp_telescope_LEdit, 2, 1);
 
+    QGroupBox *header_fields_GBox = new QGroupBox("SER Header Information Fields");
+    header_fields_GBox->setLayout(header_fields_GLayout);
+
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
     ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     ser_file_options_VLayout->addWidget(mp_include_timestamps);
-    ser_file_options_VLayout->addLayout(header_fields_GLayout);
+    ser_file_options_VLayout->addWidget(header_fields_GBox);
 
     QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
     ser_file_options_GBox->setLayout(ser_file_options_VLayout);
