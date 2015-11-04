@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.17"
+#define VERSION_STRING "v1.3.18"
 
 #include <Qt>
 #include <QApplication>
@@ -1491,6 +1491,9 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Force first frame to be played and update timestamp label
         frame_slider_changed_slot();
         resize_window_100_percent_slot();
+
+        // Move the application to the middle of the screen
+        move(QApplication::desktop()->screen()->rect().center() - rect().center());
 
         // Start playback
         play_button_pressed_slot();  // Start playing SER file

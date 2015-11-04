@@ -19,7 +19,6 @@ c_icon_groupbox::c_icon_groupbox(QWidget *parent) :
     icon_hlayout->addSpacing(5);
 
     mp_grid_Layout->addLayout(icon_hlayout, 0, 1, Qt::AlignRight | Qt::AlignTop);
-
     QGroupBox::setLayout(mp_grid_Layout);
 }
 
