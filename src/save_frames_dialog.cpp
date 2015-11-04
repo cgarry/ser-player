@@ -54,6 +54,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_marker_end_frame(marker_end_frame),
       m_start_frame(1),
       m_end_frame(total_frames),
+      m_ser_has_timestamps(ser_has_timestamps),
       m_spin_boxes_valid(true)
 {
     switch (save_type) {
@@ -271,14 +272,14 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // SER file saving specific options
     //
     if (ser_has_timestamps) {
-        mp_include_timestamps = new QCheckBox(tr("Include Frame Timestamps"));
-        mp_include_timestamps->setChecked(true);
+        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps"));
+        mp_include_timestamps_CBox->setChecked(true);
     } else {
-        mp_include_timestamps = new QCheckBox(tr("Include Frame Timestamps") + " (" + tr("No Frame Timestamps In Source SER File") + ")");
-        mp_include_timestamps->setEnabled(false);
+        mp_include_timestamps_CBox = new QCheckBox(tr("Include Frame Timestamps") + " (" + tr("No Frame Timestamps In Source SER File") + ")");
+        mp_include_timestamps_CBox->setEnabled(false);
     }
 
-    mp_include_timestamps->setToolTip(tr("Frame Timestamps are optional in SER Files."
+    mp_include_timestamps_CBox->setToolTip(tr("Frame Timestamps are optional in SER Files."
                                          "  This option controls whether or not timestamps are included in the generated SER file") + "<b></b>");
 
     mp_utf8_validator = new c_utf8_validator;
@@ -313,7 +314,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QVBoxLayout *ser_file_options_VLayout = new QVBoxLayout;
     ser_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     ser_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
-    ser_file_options_VLayout->addWidget(mp_include_timestamps);
+    ser_file_options_VLayout->addWidget(mp_include_timestamps_CBox);
     ser_file_options_VLayout->addWidget(header_fields_GBox);
 
     QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options"));
@@ -436,13 +437,18 @@ void c_save_frames_dialog::update_num_frames_slot()
         (!mp_sequence_direction_GBox->isEnabled() || mp_forwards_sequence_RButton->isChecked())) {
         // Use frame number rather than a sequential count in filename
         mp_use_framenumber_in_filename->setEnabled(true);
-        // Give option to include timestamps in SER file
-        mp_include_timestamps->setEnabled(true);
     } else {
         mp_use_framenumber_in_filename->setEnabled(false);
-        // Timestamps make to sense when frames are not in their natural order
-        mp_include_timestamps->setEnabled(false);
     }
+
+    if (!mp_sequence_direction_GBox->isEnabled() || mp_forwards_sequence_RButton->isChecked()) {
+        // Give option to include timestamps in SER file
+        mp_include_timestamps_CBox->setEnabled(m_ser_has_timestamps);
+    } else {
+        // Timestamps make no sense when frames are not in their natural order
+        mp_include_timestamps_CBox->setEnabled(false);
+    }
+
 
     if (get_frames_to_be_saved() == 1) {
         mp_total_frames_to_save_Label->setText(tr("1 frame will be saved"));
@@ -566,8 +572,8 @@ bool c_save_frames_dialog::get_use_framenumber_in_name()
 
 bool c_save_frames_dialog::get_include_timestamps_in_ser_file()
 {
-    bool include_timestamps_in_ser_file = mp_include_timestamps->isChecked();
-    if (!mp_include_timestamps->isEnabled()) {
+    bool include_timestamps_in_ser_file = mp_include_timestamps_CBox->isChecked();
+    if (!mp_include_timestamps_CBox->isEnabled()) {
         include_timestamps_in_ser_file = false;
     }
 

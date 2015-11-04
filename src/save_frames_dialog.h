@@ -111,7 +111,7 @@ private:
     QCheckBox *mp_use_framenumber_in_filename;
     QCheckBox *mp_append_timestamp_CBox;
 
-    QCheckBox *mp_include_timestamps;
+    QCheckBox *mp_include_timestamps_CBox;
     QLineEdit *mp_observer_LEdit;
     QLineEdit *mp_instrument_LEdit;
     QLineEdit *mp_telescope_LEdit;
@@ -123,6 +123,7 @@ private:
     int m_total_frames;
     int m_marker_start_frame;
     int m_marker_end_frame;
+    bool m_ser_has_timestamps;
     int m_start_frame;
     int m_end_frame;
     int m_total_selected_frames;
