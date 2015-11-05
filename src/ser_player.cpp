@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.3.18"
+#define VERSION_STRING "v1.3.19"
 
 #include <Qt>
 #include <QApplication>
@@ -857,8 +857,8 @@ void c_ser_player::save_frames_as_ser_slot()
 
         if (!filename.isEmpty()) {
             // Handle the case on Linux where an extension is not added by the save file dialog
-            if (!filename.endsWith(tr(".ser"), Qt::CaseInsensitive)) {
-                filename = filename + tr(".ser");
+            if (!filename.endsWith(".ser", Qt::CaseInsensitive)) {
+                filename = filename + ".ser";
             }
 
             int decimate_value = save_frames_Dialog->get_frame_decimation();
