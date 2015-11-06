@@ -68,14 +68,14 @@
         <location filename="../src/pipp_ser_write.cpp" line="167"/>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
-        <translation type="unfinished"></translation>
+        <translation>Erreur lors de l&apos;écriture du fichier SER</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser_write.cpp" line="256"/>
         <location filename="../src/pipp_ser_write.cpp" line="272"/>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
-        <translation type="unfinished"></translation>
+        <translation>Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
     </message>
 </context>
 <context>
@@ -91,17 +91,17 @@
     <message>
         <location filename="../src/frame_slider.cpp" line="326"/>
         <source>Move Start Marker To Current Frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacer le marqueur de début sur l&apos;image courante</translation>
     </message>
     <message>
         <location filename="../src/frame_slider.cpp" line="327"/>
         <source>Move End Marker To Current Frame</source>
-        <translation type="unfinished"></translation>
+        <translation>Déplacer le marqueur de fin sur l&apos;image courante</translation>
     </message>
     <message>
         <location filename="../src/frame_slider.cpp" line="328"/>
         <source>Reset Markers</source>
-        <translation>Supprimer sélection</translation>
+        <translation>Réinitialiser la sélection</translation>
     </message>
 </context>
 <context>
@@ -114,87 +114,87 @@
     <message>
         <location filename="../src/header_details_dialog.cpp" line="104"/>
         <source>Filename: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom du Fichier : %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="105"/>
         <source>Filesize: %1 bytes</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier : %1 bytes</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="107"/>
         <source>Header Details:</source>
-        <translation type="unfinished"></translation>
+        <translation>Détail de l&apos;entête :</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="108"/>
         <source> * FileId: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * FileId: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="109"/>
         <source> * LuID: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * LuID: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="110"/>
         <source> * ColorID: %1 (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation> * ColorID: %1 (%2)</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="111"/>
         <source> * LittleEndian: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * LittleEndian: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="112"/>
         <source> * ImageWidth: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * ImageWidth: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="113"/>
         <source> * ImageHeight: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * ImageHeight: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="114"/>
         <source> * PixelDepth: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * PixelDepth: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="115"/>
         <source> * FrameCount: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * FrameCount: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="116"/>
         <source> * Observer: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * Observer: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="117"/>
         <source> * Instrument: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * Instrument: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="118"/>
         <source> * Telescope: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * Telescope: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="119"/>
         <source> * DateTime: 0x%1</source>
-        <translation type="unfinished"></translation>
+        <translation> * DateTime: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="120"/>
         <source> * DateTime_UTC: 0x%1</source>
-        <translation type="unfinished"></translation>
+        <translation> * DateTime_UTC: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="122"/>
         <source>Timestamps:</source>
-        <translation type="unfinished"></translation>
+        <translation>Horodatage :</translation>
     </message>
 </context>
 <context>
@@ -210,46 +210,46 @@
     <message>
         <location filename="../src/markers_dialog.cpp" line="39"/>
         <source>Start Marker:</source>
-        <translation>Début:</translation>
+        <translation>Début :</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="36"/>
         <source>Markers</source>
-        <translation type="unfinished">Sélections</translation>
+        <translation>Sélections</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="44"/>
         <source>Move To Current Frame</source>
         <comment>Move start marker to current frame</comment>
-        <translation type="unfinished">Aller position actuelle</translation>
+        <translation>Aller à la position courante</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="48"/>
         <source>End Marker:</source>
-        <translation>Fin:</translation>
+        <translation>Fin :</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="53"/>
         <source>Move To Current Frame</source>
         <comment>Moeve end marker to current frame</comment>
-        <translation type="unfinished">Aller position actuelle</translation>
+        <translation>Aller à la position courante</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="59"/>
         <source>Reset</source>
         <comment>Reset Markers</comment>
-        <translation>Supprimer sélection</translation>
+        <translation>Supprimer la sélection</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="72"/>
         <source>Selected Frames:</source>
         <comment>Number of frames selected by markers</comment>
-        <translation type="unfinished"></translation>
+        <translation>Images sélectionnées :</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="81"/>
         <source>Enable Markers</source>
-        <translation>Autoriser sélections</translation>
+        <translation>Autoriser la sélection</translation>
     </message>
 </context>
 <context>
@@ -258,66 +258,66 @@
         <location filename="../src/pipp_ser.cpp" line="459"/>
         <source> * Timestamps are all identical
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Les horodatages sont tous identiques</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="461"/>
         <source> * Timestamps are all in order
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Les horodatages sont tous en ordre</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="464"/>
         <source> * Out of order timestamps detected
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Horodatage dans le désordre détecté</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="479"/>
         <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Horodatage min : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="498"/>
         <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Horodatage max : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="523"/>
         <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Différence de l&apos;horodatage min et max : %1 jours %2 heures %3 min %4 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="526"/>
         <source> * Min to Max timestamp difference: %1 hours %2 min %3 s
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Différence de l&apos;horodatage min et max : %1 heures %2 min %3 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="529"/>
         <source> * Min to Max timestamp difference: %1 min %2 s
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Différence de l&apos;horodatage min et max : %1 min %2 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="532"/>
         <source> * Min to Max timestamp difference: %2 s
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Différence de l&apos;horodatage min et max : %2 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="538"/>
         <source> * Average frames per second: %1</source>
-        <translation type="unfinished"></translation>
+        <translation> * Moyenne des images par seconde : %1</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="542"/>
         <source> * No Timestamps
 </source>
-        <translation type="unfinished"></translation>
+        <translation> * Aucun horodatage</translation>
     </message>
 </context>
 <context>
@@ -335,7 +335,7 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="57"/>
         <source>Colour Debayer</source>
-        <translation type="unfinished"></translation>
+        <translation>Dématriçage couleur</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="63"/>
@@ -372,83 +372,83 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="134"/>
         <source>Convert Colour To Monochrome Using: </source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir couleur en monochrome en utilisant :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="137"/>
         <source>RG &amp; B Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Canaux RVB</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="138"/>
         <source>R Channel Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Canal R seulement</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="139"/>
         <source>G Channel Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Canal VR seulement</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="140"/>
         <source>B Channel Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Canal B seulement</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="141"/>
         <source>R &amp; G Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Canaux R &amp; V</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="142"/>
         <source>R &amp; B Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Canaux R &amp; B</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="143"/>
         <source>G &amp; B Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Canaux V &amp; B</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="153"/>
         <source>Monochrome Conversion</source>
-        <translation type="unfinished"></translation>
+        <translation>Conversion monochrome</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="179"/>
         <source>Saturation</source>
-        <translation type="unfinished"></translation>
+        <translation>Saturation</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="196"/>
         <source>Colour Saturation</source>
-        <translation type="unfinished"></translation>
+        <translation>Saturation de la couleur</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="235"/>
         <source>Red</source>
-        <translation type="unfinished"></translation>
+        <translation>Rouge</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="238"/>
         <source>Green</source>
-        <translation type="unfinished"></translation>
+        <translation>Vert</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="241"/>
         <source>Blue</source>
-        <translation type="unfinished"></translation>
+        <translation>Bleu</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="248"/>
         <source>Estimate</source>
         <comment>Estimate Colour Balance Button</comment>
-        <translation type="unfinished"></translation>
+        <translation>Estimer</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="266"/>
         <source>Colour Balance</source>
-        <translation type="unfinished"></translation>
+        <translation>Balance des couleurs</translation>
     </message>
 </context>
 <context>
@@ -458,37 +458,37 @@
         <location filename="../src/save_frames_dialog.cpp" line="170"/>
         <location filename="../src/save_frames_dialog.cpp" line="186"/>
         <source>Reduce the number of saved frames by only saving 1 frame for every specified number of frames.</source>
-        <translation type="unfinished"></translation>
+        <translation>Réduire le nombre d&apos;images enregistrées en ne sauvegardant qu&apos;une image pour chaque nombre d&apos;images spécifiées.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="193"/>
         <source>Save the frames in their forward order.</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images dans leur ordre normal.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="196"/>
         <source>Save the frames in their reverse order.</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images dans leur ordre inversé.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="199"/>
         <source>Save the frames in their forward order and then in their reverse order. This will result in twice as many frames being saved.</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images dans leur ordre normal et dans leur ordre inverse. Deux fois plus d&apos;images seront ainsi enregistrées.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="232"/>
         <source>This option controls whether active processing options are performed on the frames before saving.  If this option is disabled then the frames saved will be the original frames from the source SER file.  If it is enabled then any processing options that are active, such as debayering, gamma, gain, colour saturation or colour balance, will be applied to the frames before saving.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cette option contrôle si les options de traitement actives sont effectuées sur les images avant de les enregistrer. Si cette option est désactivée, les images enregistrées seront les images du fichier SER original. Si elle est activée, toutes les options de traitement qui sont actives, tels que dématriçage, gamma, le gain, la saturation des couleurs ou de la balance des couleurs, seront appliquées aux images avant de les enregistrer.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="243"/>
         <source>Use Framenumber In Filename (Instead Of A Sequential Count)</source>
-        <translation type="unfinished"></translation>
+        <translation>Utiliser Framenumber dans le fichier (au lieu du comptage séquentiel)</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="245"/>
         <source>This option controls whether generated image files will have their frame number or a simple sequential count appended to their filename in order to make the image filenames unique.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cette option contrôle si les fichiers d&apos;images générées auront leur numéro d&apos;image ou un comptage séquentiel simple, joint à leur nom afin de rendre le nom de l&apos;image unique.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="62"/>
@@ -506,219 +506,219 @@
         <location filename="../src/save_frames_dialog.cpp" line="77"/>
         <source>Save Current Frame Only</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer l&apos;image courante seulement</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="79"/>
         <source>Save All %1 Frames</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer toutes les %1 images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="83"/>
         <source>Start/End Markers Disabled</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Marqueurs Début/Fin désactivés</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="86"/>
         <source>Save Frames Selected By Start/End Markers (%1 to %2)</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images contenues dans la sélection (%1 - %2)</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="92"/>
         <source>Save Frames From: </source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images à partir de :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="130"/>
         <source> to </source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>jusqu&apos;à</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="149"/>
         <source>Select frames to save</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionner les images à enregistrer</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="161"/>
         <source>Keep 1 frame in every</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Garder une image toutes les</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="180"/>
         <source>Enable Frame Decimation</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Activer la décimation des images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="192"/>
         <source>Forwards</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>En avant</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="195"/>
         <source>Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>En arrière</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="198"/>
         <source>Forwards Then Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>En avant puis en arrière</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="214"/>
         <source>Sequence Direction</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Direction de la séquence</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="222"/>
         <source>Apply Processing To Frames Before Saving</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Appliquer le traitement aux images avant d&apos;enregistrer</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="230"/>
         <source>Image Processing</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Traitement des images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="249"/>
         <location filename="../src/save_frames_dialog.cpp" line="252"/>
         <source>Append Frame Timestamp To Filename</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter l&apos;horodatage des images au nom de fichier</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="252"/>
         <source>No Frame Timestamps In SER File</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Aucun horodatage des images dans le fichier SER</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="256"/>
         <source>Append each image filename with its timestamp</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>AJouter leur propre horodatage à chaque image</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="264"/>
         <source>Filename Generation</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Génération du nom de fichier</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="275"/>
         <location filename="../src/save_frames_dialog.cpp" line="278"/>
         <source>Include Frame Timestamps</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Inclure l&apos;horodatage des images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="278"/>
         <source>No Frame Timestamps In Source SER File</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Aucun horodatage des images dans le fichier SER source</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="282"/>
         <source>Frame Timestamps are optional in SER Files.  This option controls whether or not timestamps are included in the generated SER file</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;horodatage des images est optionnel dans les fichiers SER. Cet option contrôle si un horodatage est inclus dans le fichier SER produit</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="291"/>
         <source>Set the text to be written to the &apos;Observer&apos; string in the generated SER file</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir le texte à écrire dans la chaîne &apos;Observer&apos; dans le fichier SER produit</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="296"/>
         <source>Set the text to be written to the &apos;Instrument&apos; string in the generated SER file</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir le texte à écrire dans la chaîne &apos;Instrument&apos; dans le fichier SER produit</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="301"/>
         <source>Set the text to be written to the &apos;Telescope&apos; string in the generated SER file</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir le texte à écrire dans la chaîne &apos;Telescope&apos; dans le fichier SER produit</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="304"/>
         <source>Observer:</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Observer :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="306"/>
         <source>Instrument:</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Instrument :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="308"/>
         <source>Telescope:</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Telescope :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="311"/>
         <source>SER Header Information Fields</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Champs des informations d&apos;entête du fichier SER</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="320"/>
         <source>SER File Options</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Opions du fichier SER</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="331"/>
         <source>xxxx frames will be saved</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>xxxx images vont être enregistrées</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="337"/>
         <source>Cancel</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Annuler</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="338"/>
         <source>Next</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Suivant</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="411"/>
         <source>1 frame selected</source>
-        <translation type="unfinished"></translation>
+        <translation>1 image sélectionnée</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="414"/>
         <location filename="../src/save_frames_dialog.cpp" line="417"/>
         <location filename="../src/save_frames_dialog.cpp" line="425"/>
         <source>%1 frames selected</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 images sélectionnées</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="454"/>
         <source>1 frame will be saved</source>
-        <translation type="unfinished"></translation>
+        <translation>1 image va être enregistrée</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="456"/>
         <source>%1 frames will be saved</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 images vont être enregistrées</translation>
     </message>
 </context>
 <context>
@@ -731,25 +731,25 @@
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="38"/>
         <source>Saving %1 frames</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer %1 images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="43"/>
         <source>Abort</source>
         <comment>Save frames progress</comment>
-        <translation type="unfinished"></translation>
+        <translation>Interrompre</translation>
     </message>
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="71"/>
         <source>Complete</source>
         <comment>Save frames progress</comment>
-        <translation type="unfinished"></translation>
+        <translation>Achevé</translation>
     </message>
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="72"/>
         <source>Close</source>
         <comment>Save frames progress</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fermer</translation>
     </message>
 </context>
 <context>
@@ -1037,7 +1037,7 @@
     <message>
         <location filename="../src/ser_player.cpp" line="1883"/>
         <source>A video player and processing utility for SER files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Un utilitaire de lecture et de traitement de vidéos SER.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="401"/>
@@ -1195,39 +1195,41 @@
         <source>Click to advance 1 frame
 Shift-Click to advance multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Cliquer pour avancer d&apos;une image
+Maj-click pour avancer de plusieurs images</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="395"/>
         <source>Click to go back 1 frame
 Shift-Click to go back multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Cliquer pour reculer d&apos;une image
+Maj-click pour reculer de plusieurs images</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="436"/>
         <source>Play Direction</source>
         <comment>Button Tool tip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Jouer dans la direction</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="662"/>
         <location filename="../src/ser_player.cpp" line="710"/>
         <source>Clear Recent</source>
         <comment>Save Folders menu entry</comment>
-        <translation type="unfinished"></translation>
+        <translation>Effacer récent</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="668"/>
         <source>No SER Files In List</source>
         <comment>Recent SER Files menu entry</comment>
-        <translation type="unfinished"></translation>
+        <translation>Aucun fichier SER dans la liste</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="716"/>
         <source>No Save Folders In List</source>
         <comment>Recent Save Folders menu entry</comment>
-        <translation type="unfinished"></translation>
+        <translation>Aucun dossier de sauvegarde dans la liste</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="852"/>
@@ -1244,30 +1246,30 @@ Shift-Click to go back multiple frames</source>
         <location filename="../src/ser_player.cpp" line="1139"/>
         <source>_no_timestamp</source>
         <comment>Appended to save filename when no timestamp is available</comment>
-        <translation type="unfinished"></translation>
+        <translation>_no_timestamp</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1205"/>
         <source>Cannot Open Last Save Folder</source>
         <comment>Message box title for canot open last save folder</comment>
-        <translation type="unfinished"></translation>
+        <translation>Impossible d&apos;ouvrir le dernier dossier de sauvegarde</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1206"/>
         <source>Folder Not Found:</source>
         <comment>Message box title for cannot open last save folder</comment>
-        <translation type="unfinished"></translation>
+        <translation>Dossier non trouvé :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1338"/>
         <source>Cannot Open SER File</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible d&apos;ouvrir le fichier SER</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1339"/>
         <source>File Not Found:</source>
         <comment>Message box title for cannot open SER file</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fichier non trouvé :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1362"/>
@@ -1447,12 +1449,12 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/ser_player.cpp" line="1896"/>
         <source>Credits:</source>
-        <translation type="unfinished"></translation>
+        <translation>Crédits :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1898"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
-        <translation type="unfinished"></translation>
+        <translation>Sylvain Weiller pour toutes ses suggestions, ses tests et ses retours.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1911"/>
