@@ -4,7 +4,6 @@
 #include <QCoreApplication>
 #include <QString>
 #include <cstdint>
-#include "pipp_buffer.h"
 
 
 // Codes for ColourID
@@ -56,7 +55,6 @@ class c_pipp_ser_write {
         bool m_colour;
         int32_t m_bytes_per_sample;
         int64_t m_date_time_utc;
-        c_pipp_buffer m_temp_buffer;
         QString m_error_string;
 
 
