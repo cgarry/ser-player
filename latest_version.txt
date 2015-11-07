@@ -1,8 +1,15 @@
-v1.3.0
+v1.4.0
 Bug Fixes:
-  * Fixed issues when zooming larger than screen allows.
+  * Minor bugfix and various updates release.
 
 Enhancements:
-  * Added French language translation.
-  * Limited Update checks to once per 12 hours.
-  * Added auto-playback when loading a SER file.
+  * Fixed playback of SER files with incorrectly set pixel_depth in header.
+  * Added controls to modify display colour saturation and colour balance.
+  * Added controls to modify gain and gamma.
+  * Added support for 'reverse' and 'forward + reverse' play.
+  * Added start and end markers to restrict frames that are played.
+  * Added support for saving multiple frames as images, including while playback is active.
+  * Added a histogram viewer.
+  * Added option to open recently used SER files.
+  * Added option to open folders recently used to save frames in.
+  * Added support for saving frames as a new SER file, with or without processing.
