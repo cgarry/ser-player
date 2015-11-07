@@ -228,7 +228,7 @@ int32_t c_pipp_ser_write::set_details(
 // ------------------------------------------
 int32_t c_pipp_ser_write::close()
 {
-    int32_t ret;
+    uint32_t ret;
 
     // Close index file which may be empty
     fclose(mp_ser_index_file);
@@ -254,7 +254,7 @@ int32_t c_pipp_ser_write::close()
         ret = fwrite (p_buffer, 1, (uint32_t)filesize, mp_ser_file);
         delete [] p_buffer;
 
-        if (ret != filesize) {
+        if (ret != (uint32_t)filesize) {
             m_error_string += QCoreApplication::tr("Error writing header to SER index file", "SER write file error message");
             m_error_string += "\n";
             return -1;

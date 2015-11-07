@@ -52,9 +52,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_total_frames(total_frames),
       m_marker_start_frame(marker_start_frame),
       m_marker_end_frame(marker_end_frame),
+      m_ser_has_timestamps(ser_has_timestamps),
       m_start_frame(1),
       m_end_frame(total_frames),
-      m_ser_has_timestamps(ser_has_timestamps),
       m_spin_boxes_valid(true)
 {
     switch (save_type) {
