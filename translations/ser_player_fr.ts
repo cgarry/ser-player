@@ -65,14 +65,14 @@
         <translation>Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="167"/>
+        <location filename="../src/pipp_ser_write.cpp" line="168"/>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
         <translation>Erreur lors de l&apos;écriture du fichier SER</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="256"/>
-        <location filename="../src/pipp_ser_write.cpp" line="272"/>
+        <location filename="../src/pipp_ser_write.cpp" line="258"/>
+        <location filename="../src/pipp_ser_write.cpp" line="274"/>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
         <translation>Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
@@ -256,56 +256,47 @@
     <name>c_pipp_ser</name>
     <message>
         <location filename="../src/pipp_ser.cpp" line="459"/>
-        <source> * Timestamps are all identical
-</source>
-        <translation> * Les horodatages sont tous identiques</translation>
+        <source> * Timestamps are all identical</source>
+        <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="461"/>
-        <source> * Timestamps are all in order
-</source>
+        <source> * Timestamps are all in order</source>
         <translation> * Les horodatages sont tous en ordre</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="464"/>
-        <source> * Out of order timestamps detected
-</source>
+        <source> * Out of order timestamps detected</source>
         <translation> * Horodatage dans le désordre détecté</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="479"/>
-        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT
-</source>
+        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation> * Horodatage min : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="498"/>
-        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT
-</source>
+        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation> * Horodatage max : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="523"/>
-        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s
-</source>
+        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 jours %2 heures %3 min %4 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="526"/>
-        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s
-</source>
+        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 heures %2 min %3 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="529"/>
-        <source> * Min to Max timestamp difference: %1 min %2 s
-</source>
+        <source> * Min to Max timestamp difference: %1 min %2 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 min %2 s</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="532"/>
-        <source> * Min to Max timestamp difference: %2 s
-</source>
+        <source> * Min to Max timestamp difference: %2 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %2 s</translation>
     </message>
     <message>
@@ -315,8 +306,7 @@
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="542"/>
-        <source> * No Timestamps
-</source>
+        <source> * No Timestamps</source>
         <translation> * Aucun horodatage</translation>
     </message>
 </context>

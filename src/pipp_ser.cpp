@@ -456,12 +456,12 @@ QString c_pipp_ser::get_timestamp_info()
 
         if (timestamps_in_order) {
             if (min_ts == max_ts) {
-                info_string += tr(" * Timestamps are all identical\n");
+                info_string += tr(" * Timestamps are all identical") + "\n";
             } else {
-                info_string += tr(" * Timestamps are all in order\n");
+                info_string += tr(" * Timestamps are all in order") + "\n";
             }
         } else {
-            info_string += tr(" * Out of order timestamps detected\n");
+            info_string += tr(" * Out of order timestamps detected") + "\n";
         }
 
         int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
@@ -476,14 +476,14 @@ QString c_pipp_ser::get_timestamp_info()
             &ts_second,
             &ts_microsec);
 
-        info_string += tr(" * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT\n")
+        info_string += tr(" * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT")
                        .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                        .arg(ts_month, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_day, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )) + "\n";
 
         c_pipp_timestamp::timestamp_to_date(
             max_ts,
@@ -495,14 +495,14 @@ QString c_pipp_ser::get_timestamp_info()
             &ts_second,
             &ts_microsec);
 
-        info_string += tr(" * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT\n")
+        info_string += tr(" * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT")
                        .arg(ts_year, 4, 10, QLatin1Char( '0' ))
                        .arg(ts_month, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_day, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' ));
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )) + "\n";
 
         // Calculate timestamp diff
         uint64_t ts_diff = max_ts - min_ts;
@@ -520,26 +520,26 @@ QString c_pipp_ser::get_timestamp_info()
         double d_secs = ((double)diff_microsecs / 1000000.0) + diff_seconds;
 
         if (diff_days != 0) {
-            info_string += tr(" * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s\n")
-                           .arg(diff_days).arg(diff_hours).arg(diff_minutes).arg(d_secs);
+            info_string += tr(" * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s")
+                           .arg(diff_days).arg(diff_hours).arg(diff_minutes).arg(d_secs) + "\n";
         } else if (diff_hours != 0) {
-            info_string += tr(" * Min to Max timestamp difference: %1 hours %2 min %3 s\n")
-                           .arg(diff_hours).arg(diff_minutes).arg(d_secs);
+            info_string += tr(" * Min to Max timestamp difference: %1 hours %2 min %3 s")
+                           .arg(diff_hours).arg(diff_minutes).arg(d_secs) + "\n";
         } else if (diff_minutes != 0) {
-            info_string += tr(" * Min to Max timestamp difference: %1 min %2 s\n")
-                           .arg(diff_minutes).arg(d_secs);
+            info_string += tr(" * Min to Max timestamp difference: %1 min %2 s")
+                           .arg(diff_minutes).arg(d_secs) + "\n";
         } else {
-            info_string += tr(" * Min to Max timestamp difference: %2 s\n")
-                           .arg(d_secs);
+            info_string += tr(" * Min to Max timestamp difference: %2 s")
+                           .arg(d_secs) + "\n";
         }
 
         if (ts_diff != 0 && m_header.frame_count > 1) {
             double d_fps = (double)(m_header.frame_count - 1) / ((double)ts_diff / (double)c_pipp_timestamp::C_SEPASECONDS_PER_SECOND);
             info_string += tr(" * Average frames per second: %1")
-                           .arg(d_fps);
+                           .arg(d_fps) + "\n";
         }
     } else {
-        info_string += tr(" * No Timestamps\n");
+        info_string += tr(" * No Timestamps") + "\n";
     }
 
     return info_string;

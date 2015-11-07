@@ -65,14 +65,14 @@
         <translation>Kan ikke åbne &apos;%1&apos; for skrivning</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="167"/>
+        <location filename="../src/pipp_ser_write.cpp" line="168"/>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
         <translation>Fejl ved skrivning af SER fil</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="256"/>
-        <location filename="../src/pipp_ser_write.cpp" line="272"/>
+        <location filename="../src/pipp_ser_write.cpp" line="258"/>
+        <location filename="../src/pipp_ser_write.cpp" line="274"/>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
         <translation>Fejl i skrivning af hoved til SER index fil</translation>
@@ -256,66 +256,48 @@
     <name>c_pipp_ser</name>
     <message>
         <location filename="../src/pipp_ser.cpp" line="459"/>
-        <source> * Timestamps are all identical
-</source>
-        <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens
-</translation>
+        <source> * Timestamps are all identical</source>
+        <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="461"/>
-        <source> * Timestamps are all in order
-</source>
-        <translation>&apos;*&apos; Billedernes tidsstempler er alle i stigende orden
-</translation>
+        <source> * Timestamps are all in order</source>
+        <translation>&apos;*&apos; Billedernes tidsstempler er alle i stigende orden</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="464"/>
-        <source> * Out of order timestamps detected
-</source>
-        <translation>&apos;*&apos; Billedernes tidstempler er ikke stigende
-</translation>
+        <source> * Out of order timestamps detected</source>
+        <translation> * Out of order timestamps detected</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="479"/>
-        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT
-</source>
-        <translation>&apos;*&apos; Laveste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT
-</translation>
+        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
+        <translation>&apos;*&apos; Laveste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="498"/>
-        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT
-</source>
-        <translation>&apos;*&apos; Højeste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT
-</translation>
+        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
+        <translation>&apos;*&apos; Højeste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="523"/>
-        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s
-</source>
-        <translation>&apos;*&apos; Laveste til højeste tids stempel forskel: %1 Dage %2 Timer %3 minutter %4 Sekunder
-</translation>
+        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s</source>
+        <translation>&apos;*&apos; Laveste til højeste tids stempel forskel: %1 Dage %2 Timer %3 minutter %4 Sekunder</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="526"/>
-        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s
-</source>
-        <translation>&apos;*&apos; Min til Max tids stempel forskel %1 Timer %2 Minutter %3 Sekunder
-</translation>
+        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s</source>
+        <translation>&apos;*&apos; Min til Max tids stempel forskel %1 Timer %2 Minutter %3 Sekunder</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="529"/>
-        <source> * Min to Max timestamp difference: %1 min %2 s
-</source>
-        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %1 Minutter %2 Sekund
-</translation>
+        <source> * Min to Max timestamp difference: %1 min %2 s</source>
+        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %1 Minutter %2 Sekund</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="532"/>
-        <source> * Min to Max timestamp difference: %2 s
-</source>
-        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %2 Sekund
-</translation>
+        <source> * Min to Max timestamp difference: %2 s</source>
+        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %2 Sekund</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="538"/>
@@ -324,10 +306,8 @@
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="542"/>
-        <source> * No Timestamps
-</source>
-        <translation>&apos;*&apos; Ingen tid stempel
-</translation>
+        <source> * No Timestamps</source>
+        <translation>&apos;*&apos; Ingen tid stempel</translation>
     </message>
 </context>
 <context>
