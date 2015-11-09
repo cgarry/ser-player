@@ -7,7 +7,7 @@
         <location filename="../src/pipp_ser.cpp" line="77"/>
         <source>Error: Could not open file &apos;%1&apos;</source>
         <comment>SER file error message</comment>
-        <translation>Fejl: Kunne ikke åbne fil &apos;%1&apos;</translation>
+        <translation>Fejl: Kunne ikke åbne filen &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="90"/>
@@ -19,7 +19,7 @@
         <location filename="../src/pipp_ser.cpp" line="108"/>
         <source>Error: File &apos;%1&apos; has an invalid frame count of %2</source>
         <comment>SER File error message</comment>
-        <translation>Fejl: Filen &apos;%1&apos; har et ugyldigt antal billeder af %2</translation>
+        <translation>Fejl: Filen &apos;%1&apos; har et ugyldigt antal frames af %2</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="117"/>
@@ -49,7 +49,7 @@
         <location filename="../src/pipp_ser.cpp" line="179"/>
         <source>Error: File &apos;%1&apos; is too short to hold all the frames</source>
         <comment>SER File error message</comment>
-        <translation>Fejl: Filen &apos;%1&apos; er for kort til at indeholde alle de bestilte billeder</translation>
+        <translation>Fejl: Filen &apos;%1&apos; er for kort til at indeholde alle de bestilte frames</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="221"/>
@@ -65,14 +65,14 @@
         <translation>Kan ikke åbne &apos;%1&apos; for skrivning</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="168"/>
+        <location filename="../src/pipp_ser_write.cpp" line="167"/>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
         <translation>Fejl ved skrivning af SER fil</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser_write.cpp" line="258"/>
-        <location filename="../src/pipp_ser_write.cpp" line="274"/>
+        <location filename="../src/pipp_ser_write.cpp" line="256"/>
+        <location filename="../src/pipp_ser_write.cpp" line="272"/>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
         <translation>Fejl i skrivning af hoved til SER index fil</translation>
@@ -83,7 +83,7 @@
     <message>
         <location filename="../src/application.cpp" line="36"/>
         <source>SER Player</source>
-        <translation>SER Afspiller</translation>
+        <translation>SER Player</translation>
     </message>
 </context>
 <context>
@@ -91,12 +91,12 @@
     <message>
         <location filename="../src/frame_slider.cpp" line="326"/>
         <source>Move Start Marker To Current Frame</source>
-        <translation>Flyt startmarkøren til viste billede</translation>
+        <translation>Flyt startmarkøren til viste frame</translation>
     </message>
     <message>
         <location filename="../src/frame_slider.cpp" line="327"/>
         <source>Move End Marker To Current Frame</source>
-        <translation>Flyt slut-markøren til viste billede</translation>
+        <translation>Flyt slut-markøren til viste frame</translation>
     </message>
     <message>
         <location filename="../src/frame_slider.cpp" line="328"/>
@@ -129,72 +129,72 @@
     <message>
         <location filename="../src/header_details_dialog.cpp" line="108"/>
         <source> * FileId: %1</source>
-        <translation>&apos;*&apos; Filens Id: %1</translation>
+        <translation> * Filens Id: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="109"/>
         <source> * LuID: %1</source>
-        <translation>&apos;*&apos; LuId: %1</translation>
+        <translation> * LuId: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="110"/>
         <source> * ColorID: %1 (%2)</source>
-        <translation>&apos;*&apos; FarveID: %1 (%2)</translation>
+        <translation> * FarveID: %1 (%2)</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="111"/>
         <source> * LittleEndian: %1</source>
-        <translation>&apos;*&apos; LittleEndian: %1</translation>
+        <translation> * LittleEndian: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="112"/>
         <source> * ImageWidth: %1</source>
-        <translation>&apos;*&apos; Billedes bredde: %1</translation>
+        <translation> * Billedes bredde: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="113"/>
         <source> * ImageHeight: %1</source>
-        <translation>&apos;*&apos; Billedets højde: %1</translation>
+        <translation> * Billedets højde: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="114"/>
         <source> * PixelDepth: %1</source>
-        <translation>&apos;*&apos; PixelDybte: %1</translation>
+        <translation> * PixelDybte: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="115"/>
         <source> * FrameCount: %1</source>
-        <translation>&apos;*&apos;BilledTæller: %1</translation>
+        <translation> * Antal frames: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="116"/>
         <source> * Observer: %1</source>
-        <translation>&apos;*&apos; Observatør: %1</translation>
+        <translation> * Observatør: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="117"/>
         <source> * Instrument: %1</source>
-        <translation>&apos;*&apos; Instrument: %1</translation>
+        <translation> * Instrument (kamera): %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="118"/>
         <source> * Telescope: %1</source>
-        <translation>&apos;*&apos; Teleskop: %1</translation>
+        <translation> * Teleskop: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="119"/>
         <source> * DateTime: 0x%1</source>
-        <translation type="unfinished">&apos;*&apos; Dato&amp;Tid: 0x%1</translation>
+        <translation> * Dato&amp;Tid: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="120"/>
         <source> * DateTime_UTC: 0x%1</source>
-        <translation type="unfinished">&apos;*&apos; Dato&amp;Tid_UTC: 0x%1</translation>
+        <translation> * Dato&amp;Tid_UTC: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="122"/>
         <source>Timestamps:</source>
-        <translation>Tiden hvor billedet er taget:</translation>
+        <translation>Tidstempel:</translation>
     </message>
 </context>
 <context>
@@ -221,7 +221,7 @@
         <location filename="../src/markers_dialog.cpp" line="44"/>
         <source>Move To Current Frame</source>
         <comment>Move start marker to current frame</comment>
-        <translation>Flyt til viste billede</translation>
+        <translation>Flyt til viste frame</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="48"/>
@@ -232,7 +232,7 @@
         <location filename="../src/markers_dialog.cpp" line="53"/>
         <source>Move To Current Frame</source>
         <comment>Moeve end marker to current frame</comment>
-        <translation>Flyt til viste billede</translation>
+        <translation>Flyt til viste frame</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="59"/>
@@ -244,7 +244,7 @@
         <location filename="../src/markers_dialog.cpp" line="72"/>
         <source>Selected Frames:</source>
         <comment>Number of frames selected by markers</comment>
-        <translation>Vælg billede:</translation>
+        <translation>Vælg frames:</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="81"/>
@@ -256,58 +256,78 @@
     <name>c_pipp_ser</name>
     <message>
         <location filename="../src/pipp_ser.cpp" line="459"/>
-        <source> * Timestamps are all identical</source>
-        <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens</translation>
+        <source> * Timestamps are all identical
+</source>
+        <translation> * Alle tidsangivelser på billederne er ens
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="461"/>
-        <source> * Timestamps are all in order</source>
-        <translation>&apos;*&apos; Billedernes tidsstempler er alle i stigende orden</translation>
+        <source> * Timestamps are all in order
+</source>
+        <translation> * Billedernes tidstempler er alle i stigende orden
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="464"/>
-        <source> * Out of order timestamps detected</source>
-        <translation> * Out of order timestamps detected</translation>
+        <source> * Out of order timestamps detected
+</source>
+        <translation> * Billedernes tidstempler er ikke stigende
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="479"/>
-        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
-        <translation>&apos;*&apos; Laveste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
+        <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT
+</source>
+        <translation> * Laveste tidstempel: %3/%2/%1 %4:%5:%6.%7 UT
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="498"/>
-        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
-        <translation>&apos;*&apos; Højeste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
+        <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT
+</source>
+        <translation> * Højeste tidstempel: %3/%2/%1 %4:%5:%6.%7 UT
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="523"/>
-        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s</source>
-        <translation>&apos;*&apos; Laveste til højeste tids stempel forskel: %1 Dage %2 Timer %3 minutter %4 Sekunder</translation>
+        <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s
+</source>
+        <translation> * Laveste til højeste tidstempel forskel: %1 Dage %2 Timer %3 minutter %4 Sekunder
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="526"/>
-        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s</source>
-        <translation>&apos;*&apos; Min til Max tids stempel forskel %1 Timer %2 Minutter %3 Sekunder</translation>
+        <source> * Min to Max timestamp difference: %1 hours %2 min %3 s
+</source>
+        <translation> * Min til Max tidstempel forskel %1 Timer %2 Minutter %3 Sekunder
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="529"/>
-        <source> * Min to Max timestamp difference: %1 min %2 s</source>
-        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %1 Minutter %2 Sekund</translation>
+        <source> * Min to Max timestamp difference: %1 min %2 s
+</source>
+        <translation> * Minimum til Maximum tidstempel forskel: %1 Minutter %2 Sekund
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="532"/>
-        <source> * Min to Max timestamp difference: %2 s</source>
-        <translation>&apos;*&apos; Minimum til Maximum tids stempel forskel: %2 Sekund</translation>
+        <source> * Min to Max timestamp difference: %2 s
+</source>
+        <translation> * Minimum til Maximum tidstempel forskel: %2 Sekund
+</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="538"/>
         <source> * Average frames per second: %1</source>
-        <translation>&apos;*&apos; Gennemsnit af billeder pr sekund: %1</translation>
+        <translation> * Gennemsnit af frames pr sekund: %1</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="542"/>
-        <source> * No Timestamps</source>
-        <translation>&apos;*&apos; Ingen tid stempel</translation>
+        <source> * No Timestamps
+</source>
+        <translation> * Ingen tidstempel
+</translation>
     </message>
 </context>
 <context>
@@ -325,22 +345,22 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="57"/>
         <source>Colour Debayer</source>
-        <translation>Farve maske</translation>
+        <translation>Farvemaske</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="63"/>
         <source>Invert Frames</source>
-        <translation>Inverter billeder</translation>
+        <translation>Inverter frames</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="72"/>
         <source>Frame Inversion</source>
-        <translation>Omvendte billeder</translation>
+        <translation>Inverterede frames</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="104"/>
         <source>Gain</source>
-        <translation>Forstærkning</translation>
+        <translation>Gain</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="107"/>
@@ -357,17 +377,17 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="126"/>
         <source>Gain and Gamma</source>
-        <translation>Forstærkning og gamma</translation>
+        <translation>Gain og gamma</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="134"/>
         <source>Convert Colour To Monochrome Using: </source>
-        <translation>Konverter farver til sort hvid med: </translation>
+        <translation>Konverter farver til sort/hvid med: </translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="137"/>
         <source>RG &amp; B Channels</source>
-        <translation>Med R G og B kanaler</translation>
+        <translation>R G og B kanaler</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="138"/>
@@ -387,17 +407,17 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="141"/>
         <source>R &amp; G Channels</source>
-        <translation>Med Rød og Grøn kanal</translation>
+        <translation>Rød og Grøn kanal</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="142"/>
         <source>R &amp; B Channels</source>
-        <translation>Med Rød og Blå kanal</translation>
+        <translation>Rød og Blå kanal</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="143"/>
         <source>G &amp; B Channels</source>
-        <translation>Med Grøn og Blå kanal</translation>
+        <translation>Grøn og Blå kanal</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="153"/>
@@ -407,12 +427,12 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="179"/>
         <source>Saturation</source>
-        <translation>Saturation</translation>
+        <translation>Farvemætning</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="196"/>
         <source>Colour Saturation</source>
-        <translation>Farvermætning</translation>
+        <translation>Farvemætning</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="235"/>
@@ -433,7 +453,7 @@
         <location filename="../src/processing_options_dialog.cpp" line="248"/>
         <source>Estimate</source>
         <comment>Estimate Colour Balance Button</comment>
-        <translation>Balangcer farverne</translation>
+        <translation>Balancer farverne</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="266"/>
@@ -449,65 +469,65 @@
         <location filename="../src/save_frames_dialog.cpp" line="186"/>
         <source>Reduce the number of saved frames by only saving 1 frame for every specified number of frames.</source>
         <translatorcomment>??? Den engelske tekst må kunne simpliseres !!!  </translatorcomment>
-        <translation>Reduser antal rammer i filen ved kun og gemme hver &apos;xxxx&apos; ramme.</translation>
+        <translation>Reduser antal frames i filen ved kun at gemme hver &apos;x&apos;ende frame.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="193"/>
         <source>Save the frames in their forward order.</source>
-        <translation>Gemmer rammerne i lav til høj orden.</translation>
+        <translation>Gemmer frames i lav til høj orden.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="196"/>
         <source>Save the frames in their reverse order.</source>
-        <translation>Gemmer rammerne i høj til lav orden.</translation>
+        <translation>Gemmer frames i høj til lav orden.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="199"/>
         <source>Save the frames in their forward order and then in their reverse order. This will result in twice as many frames being saved.</source>
-        <translation>Gem rammerne i lav til høj og høj til lav orden. Derved gemmes alle rammer to gange i samme fil.</translation>
+        <translation>Gem frames i lav til høj og høj til lav orden. Derved gemmes alle frames to gange i samme fil.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="232"/>
         <source>This option controls whether active processing options are performed on the frames before saving.  If this option is disabled then the frames saved will be the original frames from the source SER file.  If it is enabled then any processing options that are active, such as debayering, gamma, gain, colour saturation or colour balance, will be applied to the frames before saving.</source>
         <translatorcomment>??? Det er min simple udgave. Håber den holder.</translatorcomment>
-        <translation>Denne afkrydsning kontrollere om de nedenstående afkrydsninger skal udføres på rammerne før de gemmes. Hvis denne afkrydsning ikke er udført vil rammerne være urørt.</translation>
+        <translation>Denne afkrydsning kontrollere om de nedenstående afkrydsninger skal udføres på frames før de gemmes. Hvis denne afkrydsning ikke er udført vil frames være urørt.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="243"/>
         <source>Use Framenumber In Filename (Instead Of A Sequential Count)</source>
         <translatorcomment>??? Fordtår ikke rigtig meningen på teksten i parentesen.</translatorcomment>
-        <translation>Brug ramme nummer i filens navn</translation>
+        <translation>Brug frames antal i filens navn</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="245"/>
         <source>This option controls whether generated image files will have their frame number or a simple sequential count appended to their filename in order to make the image filenames unique.</source>
         <translatorcomment>??? </translatorcomment>
-        <translation>Denne afkrydsning kontrollerer om den genererede fils navn vil bestå af antal ramme numre eller en simpel sequential tæller sat til filnavnet for og lave unikke filnavne.</translation>
+        <translation>Denne afkrydsning kontrollerer om den genererede fils navn vil bestå af antal frames numre eller en simpel sequential tæller sat til filnavnet for og lave unikke filnavne.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="62"/>
         <source>Save Frames As Images</source>
         <comment>Save frames dialog</comment>
         <translatorcomment>??? Måske ikke helt forstået meningen med teksten.</translatorcomment>
-        <translation>Gem rammer som billeder</translation>
+        <translation>Gem frames som billeder</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="65"/>
         <source>Save Frames As SER File</source>
         <comment>Save frames dialog</comment>
-        <translation>Gem rammer som en SER fil</translation>
+        <translation>Gem frames som en SER fil</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="77"/>
         <source>Save Current Frame Only</source>
         <comment>Save frames dialog</comment>
-        <translation>Gem kun viste ramme</translation>
+        <translation>Gem kun viste frame</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="79"/>
         <source>Save All %1 Frames</source>
         <comment>Save frames dialog</comment>
-        <translation>Gemme alle %1 rammer</translation>
+        <translation>Gemme alle %1 frames</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="83"/>
@@ -519,13 +539,13 @@
         <location filename="../src/save_frames_dialog.cpp" line="86"/>
         <source>Save Frames Selected By Start/End Markers (%1 to %2)</source>
         <comment>Save frames dialog</comment>
-        <translation>Gem rammer mellem start/slut markørene (%1 til %2)</translation>
+        <translation>Gem frames mellem start/slut markørene (%1 til %2)</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="92"/>
         <source>Save Frames From: </source>
         <comment>Save frames dialog</comment>
-        <translation>Gemmer rammer fra:</translation>
+        <translation>Gemmer frames fra:</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="130"/>
@@ -537,37 +557,37 @@
         <location filename="../src/save_frames_dialog.cpp" line="149"/>
         <source>Select frames to save</source>
         <comment>Save frames dialog</comment>
-        <translation>Mærk rammer der skal gemmes</translation>
+        <translation>Mærk frames der skal gemmes</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="161"/>
         <source>Keep 1 frame in every</source>
         <comment>Save frames dialog</comment>
-        <translation>Behold en ramme for hver</translation>
+        <translation>Behold en frame for hver</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="180"/>
         <source>Enable Frame Decimation</source>
         <comment>Save frames dialog</comment>
-        <translation>Aktiver ramme reducering</translation>
+        <translation>Aktiver frame reducering</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="192"/>
         <source>Forwards</source>
         <comment>Save frames dialog</comment>
-        <translation>Fremaf</translation>
+        <translation>Frem</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="195"/>
         <source>Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation>Bagvendt</translation>
+        <translation>Omvendt</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="198"/>
         <source>Forwards Then Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation>Fremaf + baglæns</translation>
+        <translation>Frem + baglæns</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="214"/>
@@ -579,7 +599,7 @@
         <location filename="../src/save_frames_dialog.cpp" line="222"/>
         <source>Apply Processing To Frames Before Saving</source>
         <comment>Save frames dialog</comment>
-        <translation>Tilsæt mærkede operationer til rammernes indhold før de gemmers</translation>
+        <translation>Tilsæt mærkede operationer til frames indhold før de gemmers</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="230"/>
@@ -593,19 +613,19 @@
         <location filename="../src/save_frames_dialog.cpp" line="252"/>
         <source>Append Frame Timestamp To Filename</source>
         <comment>Save frames dialog</comment>
-        <translation>Tilsætter rammens tidstempler til filnavnet</translation>
+        <translation>Tilsætter frame tidstempel bagest i filnavnet</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="252"/>
         <source>No Frame Timestamps In SER File</source>
         <comment>Save frames dialog</comment>
-        <translation>Ingen ramme tidstempler i SER filen</translation>
+        <translation>Ingen frame tidstempler i SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="256"/>
         <source>Append each image filename with its timestamp</source>
         <comment>Save frames dialog</comment>
-        <translation>Tilføj hver filnavn med rammens tidsstempel</translation>
+        <translation>Tilføj hver filnavn med framens tidstempel</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="264"/>
@@ -618,33 +638,33 @@
         <location filename="../src/save_frames_dialog.cpp" line="278"/>
         <source>Include Frame Timestamps</source>
         <comment>Save frames dialog</comment>
-        <translation>Inkluder rammens tidsstempel</translation>
+        <translation>Inkluder frame tidstempel</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="278"/>
         <source>No Frame Timestamps In Source SER File</source>
         <comment>Save frames dialog</comment>
-        <translation>Ingen tidstempler ved rammerne i SER filen</translation>
+        <translation>Ingen tidstempler ved frames i SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="282"/>
         <source>Frame Timestamps are optional in SER Files.  This option controls whether or not timestamps are included in the generated SER file</source>
-        <translation>Rammernes tidstempler er valgfri i en SER fil. Denne afkrydsning bestemmer om tidspunktet rammerne er taget bliver gemt i SER filen</translation>
+        <translation>Frame tidstempler er valgfri i en SER fil. Denne afkrydsning bestemmer om tidstemplet bliver gemt i SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="291"/>
         <source>Set the text to be written to the &apos;Observer&apos; string in the generated SER file</source>
-        <translation>Indtast observatørnavn i SER filen</translation>
+        <translation>Indtast observatør til SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="296"/>
         <source>Set the text to be written to the &apos;Instrument&apos; string in the generated SER file</source>
-        <translation>Indtast instrument til SER filen</translation>
+        <translation>Indtast instrument (kamera) til SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="301"/>
         <source>Set the text to be written to the &apos;Telescope&apos; string in the generated SER file</source>
-        <translation>Indtast teleskop andvendt i SER filen</translation>
+        <translation>Indtast teleskop til SER filen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="304"/>
@@ -674,14 +694,13 @@
         <location filename="../src/save_frames_dialog.cpp" line="320"/>
         <source>SER File Options</source>
         <comment>Save frames dialog</comment>
-        <translatorcomment>??? Nok ikke forstået.</translatorcomment>
         <translation>SER filens valg</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="331"/>
         <source>xxxx frames will be saved</source>
         <comment>Save frames dialog</comment>
-        <translation>xxxx billeder vil blive gemt</translation>
+        <translation>xxxx frames vil blive gemt</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="337"/>
@@ -698,24 +717,24 @@
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="411"/>
         <source>1 frame selected</source>
-        <translation>Et ramme afkrydset</translation>
+        <translation>En frame er afkrydset</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="414"/>
         <location filename="../src/save_frames_dialog.cpp" line="417"/>
         <location filename="../src/save_frames_dialog.cpp" line="425"/>
         <source>%1 frames selected</source>
-        <translation>%1 rammer afkrydset</translation>
+        <translation>%1 frames er afkrydset</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="454"/>
         <source>1 frame will be saved</source>
-        <translation>1 ramme vil blive gemt</translation>
+        <translation>1 frame vil blive gemt</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="456"/>
         <source>%1 frames will be saved</source>
-        <translation>%1 rammer vil blive gemt</translation>
+        <translation>%1 frames vil blive gemt</translation>
     </message>
 </context>
 <context>
@@ -723,12 +742,12 @@
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="36"/>
         <source>Save Frames As Images</source>
-        <translation>Gem ramme som billede</translation>
+        <translation>Gem frames som billeder</translation>
     </message>
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="38"/>
         <source>Saving %1 frames</source>
-        <translation>Gemmer %1 rammer</translation>
+        <translation>Gemmer %1 frames</translation>
     </message>
     <message>
         <location filename="../src/save_frames_progress_dialog.cpp" line="43"/>
@@ -790,7 +809,7 @@
         <location filename="../src/ser_player.cpp" line="231"/>
         <source>Check For Updates On Startup</source>
         <comment>Help menu</comment>
-        <translation>Kik efter ny version under opstart</translation>
+        <translation>Se efter ny version af programmet under opstart</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="238"/>
@@ -849,7 +868,7 @@
         <location filename="../src/ser_player.cpp" line="152"/>
         <source>From Timestamps</source>
         <comment>Framerate menu</comment>
-        <translation>Fra rammens tidsstempel</translation>
+        <translation>Fra tidstempel</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="174"/>
@@ -1065,7 +1084,7 @@
         <location filename="../src/ser_player.cpp" line="360"/>
         <source>About SER Player</source>
         <comment>Help menu</comment>
-        <translation>Om SER afspilleren</translation>
+        <translation>Om SER Player</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="363"/>
@@ -1095,7 +1114,7 @@
         <location filename="../src/ser_player.cpp" line="442"/>
         <source>Frame number/Total Frames</source>
         <comment>Tool tip</comment>
-        <translation>Billed nummer/Total antal billeder</translation>
+        <translation>Frame nummer / Total antal frames</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="447"/>
@@ -1137,7 +1156,7 @@
         <location filename="../src/ser_player.cpp" line="471"/>
         <source>Frame timestamp</source>
         <comment>Tool tip</comment>
-        <translation>Rammens tidsangivelse</translation>
+        <translation>Frame tidsangivelse</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1307"/>
@@ -1180,13 +1199,13 @@
         <location filename="../src/ser_player.cpp" line="106"/>
         <source>Save Frames As SER File...</source>
         <comment>Menu title</comment>
-        <translation>Gemmer rammer som SER fil...</translation>
+        <translation>Gemmer frames som SER fil...</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="111"/>
         <source>Save Frames As Images...</source>
         <comment>Menu title</comment>
-        <translation>Gem ramme som billede...</translation>
+        <translation>Gem frames som billeder...</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="117"/>
@@ -1205,16 +1224,16 @@
         <source>Click to advance 1 frame
 Shift-Click to advance multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation>Klik for og gå en ramme frem
-Skift+klik for og gå flere rammer frem</translation>
+        <translation>Klik for og gå en frame frem
+Skift+klik for og gå flere frames frem</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="395"/>
         <source>Click to go back 1 frame
 Shift-Click to go back multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation>Klik for og gå en ramme tilbage
-Skift+klik for flererammer tilbage</translation>
+        <translation>Klik for og gå en frame tilbage
+Skift+klik for flere frames tilbage</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="436"/>
@@ -1251,18 +1270,18 @@ Skift+klik for flererammer tilbage</translation>
         <location filename="../src/ser_player.cpp" line="852"/>
         <location filename="../src/ser_player.cpp" line="880"/>
         <source>Save Frames As SER File</source>
-        <translation>Gem rammer som SER fil</translation>
+        <translation>Gem frames som SER fil</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1005"/>
         <source>Save Frames As Images</source>
-        <translation>Gem rammer som billeder</translation>
+        <translation>Gem frames som billeder</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1139"/>
         <source>_no_timestamp</source>
         <comment>Appended to save filename when no timestamp is available</comment>
-        <translation>Ingen tidsstempler fundet</translation>
+        <translation>Ingen tidstempler fundet</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1205"/>
@@ -1363,7 +1382,7 @@ Skift+klik for flererammer tilbage</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1883"/>
         <source>A video player and processing utility for SER files.</source>
-        <translation>En video afspiller og billedprocessing utility for SER format.</translation>
+        <translation>En video afspiller og billedprocessing utility for SER videoformat.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1896"/>
