@@ -12,6 +12,8 @@
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
+!include WinVer.nsh
+!include x64.nsh
 
 ; File association
 !include "FileAssociation.nsh"
@@ -60,6 +62,7 @@ Section "MainSection" SEC01
   
 ; Specify files that are to be installed
   File /r "..\bin\*"
+  File /r "..\platform-specific\windows\win*"
 SectionEnd
 
 Section -AdditionalIcons
@@ -86,6 +89,9 @@ FunctionEnd
 
 Function .onInstSuccess
   Call CreateSerFileAssication
+  ${If} ${AtLeastWinVista}
+  Call InstallSerThumbnailDll
+  ${EndIf}
 FunctionEnd
 
 Function un.onUninstSuccess
@@ -136,6 +142,25 @@ Function CreateSerFileAssication
   ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
   ${EndIf}
 FunctionEnd
+
+
+Function InstallSerThumbnailDll 
+  ${If} ${Cmd} 'MessageBox MB_YESNO "Install .ser Thumbnail Preview DLL?$\nThis allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
+      ${If} ${RunningX64}
+        # 64 bit code
+        ;Unregister previous version of SerThumbnailHandler.dll
+        ExecWait 'regsvr32.exe /s /u "$INSTDIR\win64\SerThumbnailHandler.dll"'
+        ;Register SerThumbnailHandler.dll
+        ExecWait 'regsvr32.exe /s "$INSTDIR\win64\SerThumbnailHandler.dll"'
+      ${Else}
+        # 32 bit code
+        ;Unregister previous version of SerThumbnailHandler.dll
+        ExecWait 'regsvr32.exe /s /u "$INSTDIR\win32\SerThumbnailHandler.dll"'
+        ;Register SerThumbnailHandler.dll
+        ExecWait 'regsvr32.exe /s "$INSTDIR\win32\SerThumbnailHandler.dll"'
+      ${EndIf}  
+  ${EndIf}
+FunctionEnd
  
  
 !macro _OpenURL URL
@@ -148,6 +173,15 @@ Call openLinkNewWindow
 
 Section Uninstall
   SetShellVarContext all
+  
+;Unregister SerThumbnailHandler.dll
+  ${If} ${RunningX64}
+    ; 64 bit code
+    ExecWait 'regsvr32.exe /s /u "$INSTDIR\win64\SerThumbnailHandler.dll"'
+  ${Else}
+    ; 32 bit code
+    ExecWait 'regsvr32.exe /s /u "$INSTDIR\win32\SerThumbnailHandler.dll"'
+  ${EndIf}  
   
 ;Remove the installation directory
   RMDir /r "$INSTDIR"
