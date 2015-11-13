@@ -89,9 +89,6 @@ FunctionEnd
 
 Function .onInstSuccess
   Call CreateSerFileAssication
-  ${If} ${AtLeastWinVista}
-  Call InstallSerThumbnailDll
-  ${EndIf}
 FunctionEnd
 
 Function un.onUninstSuccess
@@ -138,27 +135,24 @@ pop $R1
 
 
 Function CreateSerFileAssication
-  ${If} ${Cmd} 'MessageBox MB_YESNO "Associate .ser files with SER Player?$\nThis allows .ser files to be opened with SER Player by double-clicking on them." IDYES' 
-  ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
-  ${EndIf}
-FunctionEnd
-
-
-Function InstallSerThumbnailDll 
-  ${If} ${Cmd} 'MessageBox MB_YESNO "Install .ser Thumbnail Preview DLL?$\nThis allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
-      ${If} ${RunningX64}
-        # 64 bit code
-        ;Unregister previous version of SerThumbnailHandler.dll
-        ExecWait 'regsvr32.exe /s /u "$INSTDIR\win64\SerThumbnailHandler.dll"'
-        ;Register SerThumbnailHandler.dll
-        ExecWait 'regsvr32.exe /s "$INSTDIR\win64\SerThumbnailHandler.dll"'
-      ${Else}
-        # 32 bit code
-        ;Unregister previous version of SerThumbnailHandler.dll
-        ExecWait 'regsvr32.exe /s /u "$INSTDIR\win32\SerThumbnailHandler.dll"'
-        ;Register SerThumbnailHandler.dll
-        ExecWait 'regsvr32.exe /s "$INSTDIR\win32\SerThumbnailHandler.dll"'
-      ${EndIf}  
+  ${If} ${Cmd} 'MessageBox MB_YESNO "Associate .ser files and install .ser thumbnail preview DLL?$\nThis allows .ser files to be opened with SER Player by double-clicking on them and allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
+      ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
+      
+        ${If} ${AtLeastWinVista}
+              ${If} ${RunningX64}
+                # 64 bit code
+                ;Unregister previous version of SerThumbnailHandler.dll
+                ExecWait 'regsvr32.exe /s /u "$INSTDIR\win64\SerThumbnailHandler.dll"'
+                ;Register SerThumbnailHandler.dll
+                ExecWait 'regsvr32.exe /s "$INSTDIR\win64\SerThumbnailHandler.dll"'
+              ${Else}
+                # 32 bit code
+                ;Unregister previous version of SerThumbnailHandler.dll
+                ExecWait 'regsvr32.exe /s /u "$INSTDIR\win32\SerThumbnailHandler.dll"'
+                ;Register SerThumbnailHandler.dll
+                ExecWait 'regsvr32.exe  /s "$INSTDIR\win32\SerThumbnailHandler.dll"'
+              ${EndIf}  
+        ${EndIf}
   ${EndIf}
 FunctionEnd
  
