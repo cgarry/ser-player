@@ -160,11 +160,16 @@ class c_image
         void change_colour_saturation(
             double saturation);
 
+        bool resize_image(
+                int req_width,
+                int req_height);
+
         void conv_data_ready_for_qimage();
         
         
     private:
         void set_buffer_size(int32_t size);
+        void set_new_buffer(uint8_t *p_buffer, int32_t size);
         void setup_luts();
 
         template <typename T>
@@ -182,6 +187,20 @@ class c_image
         template <typename T>
         bool debayer_image_bilinear_int(
             int32_t colour_id);
+
+        template <typename T>
+        void resize_image_size_by_half();
+
+        template <typename T>
+        void resize_image_width_by_half();
+
+        template <typename T>
+        void resize_image_height_by_half();
+
+        template <typename T>
+        void resize_image_bilinear(
+                int req_width,
+                int req_height);
 };
 
     

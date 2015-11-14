@@ -902,6 +902,7 @@ void c_ser_player::save_frames_as_ser_slot()
                     bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
                                                              false,  // conv_to_8_bit
                                                              do_frame_processing);  // do_processing
+
                     if (valid_frame) {
                         // Get timestamp for frame if required
                         uint64_t timestamp = 0;
@@ -912,8 +913,8 @@ void c_ser_player::save_frames_as_ser_slot()
                         if (!ser_write_file.get_open()) {
                             // Create SER file - only done once
                             ser_write_file.create(filename, //  QString filename
-                                                  mp_ser_file->get_width(),  // int32_t  width
-                                                  mp_ser_file->get_height(), // int32_t  height
+                                                  mp_frame_image->get_width(),  // int32_t  width
+                                                  mp_frame_image->get_height(), // int32_t  height
                                                   mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
                                                   mp_frame_image->get_byte_depth());  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
                         }

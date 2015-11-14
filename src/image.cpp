@@ -782,6 +782,354 @@ void c_image::change_colour_saturation_int(
 }
 
 
+bool c_image::resize_image(
+        int req_width,
+        int req_height)
+{
+    // Initial rescale is done with bilinear rescale so that a sequence of divide by 2 scales can complete the scale
+
+    // Early return if image dimensions are larger than original
+    if (req_width > m_width || req_height > m_height) {
+        return false;
+    }
+
+    // Calculate size of initial rescale
+    int initial_width = req_width;
+    while (initial_width * 2 <= m_width) {
+        initial_width *= 2;
+    }
+
+    int initial_height = req_height;
+    while (initial_height * 2 <= m_height) {
+        initial_height *= 2;
+    }
+
+    // Do the initial (bilinear) rescale
+    if (m_byte_depth == 1) {
+        // 8-bit data
+        resize_image_bilinear <uint8_t> (initial_width, initial_height);
+    } else {
+        // 16-bit data
+        resize_image_bilinear <uint16_t> (initial_width, initial_height);
+    }
+
+    // The rest of the rescaling is done with a sequence of divide by 2 operations
+    while (m_width / 2 >= req_width && m_height / 2 > req_height) {
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            resize_image_size_by_half <uint8_t> ();
+        } else {
+            // 16-bit data
+            resize_image_size_by_half <uint16_t> ();
+        }
+    }
+
+    // Handle the situation where width is being shrunk more than height
+    while (m_width / 2 >= req_width) {
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            resize_image_width_by_half <uint8_t> ();
+        } else {
+            // 16-bit data
+            resize_image_width_by_half <uint16_t> ();
+        }
+    }
+
+    // Handle the situation where height is being shrunk more than width
+    while (m_height / 2 >= req_height) {
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            resize_image_height_by_half <uint8_t> ();
+        } else {
+            // 16-bit data
+            resize_image_height_by_half <uint16_t> ();
+        }
+    }
+
+    return true;
+}
+
+
+template <typename T>
+void c_image::resize_image_size_by_half()
+{
+    // Calculate new width and height - may lose an end row or column
+    int new_width = m_width / 2;
+    int new_height = m_height / 2;
+
+    if (m_colour) {
+        // Do the resize for colour data
+        const int read_line_length = m_width * 3;
+
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < new_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * 2 * read_line_length;
+            for (int x = 0; x < new_width; x++) {
+                // Blue
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + 3) +
+                               *(p_read_data + read_line_length)  + *(p_read_data + read_line_length + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 4);
+
+                // Green
+                pix = *(p_read_data + 0) + *(p_read_data + 3) +
+                               *(p_read_data + read_line_length)  + *(p_read_data + read_line_length + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 4);
+
+                // Red
+                pix = *(p_read_data + 0) + *(p_read_data + 3) +
+                               *(p_read_data + read_line_length)  + *(p_read_data + read_line_length + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 4);
+
+                p_read_data += 3;  // Skip next RGB value
+            }
+        }
+    } else {
+        // Do the resize for monochrome data
+        const int read_line_length = m_width;
+
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < new_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * 2 * read_line_length;
+            for (int x = 0; x < new_width; x++) {
+                // Monochrome
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + 1) +
+                               *(p_read_data + read_line_length)  + *(p_read_data + read_line_length + 1);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 4);
+
+                p_read_data++;  // Skip next monochrome value
+            }
+        }
+    }
+
+    // Update with and height
+    m_width = new_width;
+    m_height = new_height;
+}
+
+
+template <typename T>
+void c_image::resize_image_width_by_half()
+{
+    // Calculate new width - may lose an or column
+    int new_width = m_width / 2;
+
+    if (m_colour) {
+        // Do the resize for colour data
+        const int read_line_length = m_width * 3;
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < m_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * read_line_length;
+            for (int x = 0; x < new_width; x++) {
+                // Blue
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                // Green
+                pix = *(p_read_data + 0) + *(p_read_data + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                // Red
+                pix = *(p_read_data + 0) + *(p_read_data + 3);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                p_read_data += 3;  // Skip next RGB value
+            }
+        }
+    } else {
+        // Do the resize for monochrome data
+        const int read_line_length = m_width;
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < m_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * read_line_length;
+            for (int x = 0; x < new_width; x++) {
+                // Monochrome
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + 1);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                p_read_data++;  // Skip next RGB value
+            }
+        }
+    }
+
+    // Update with and height
+    m_width = new_width;
+}
+
+
+template <typename T>
+void c_image::resize_image_height_by_half()
+{
+    // Calculate new height - may lose an end row
+    int new_height = m_height / 2;
+
+    if (m_colour) {
+        // Do the resize for colour data
+        const int read_line_length = m_width * 3;
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < new_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * 2 * read_line_length;
+            for (int x = 0; x < m_width; x++) {
+                // Blue
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + read_line_length);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                // Green
+                pix = *(p_read_data + 0) + *(p_read_data + read_line_length);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+
+                // Red
+                pix = *(p_read_data + 0) + *(p_read_data + read_line_length);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+            }
+        }
+    } else {
+        // Do the resize for monochrome data
+        const int read_line_length = m_width;
+        T *p_write_data = (T *)mp_buffer;
+        for (int y = 0; y < new_height; y++) {
+            T *p_read_data = ((T *)mp_buffer) + y * 2 * read_line_length;
+            for (int x = 0; x < m_width; x++) {
+                // Monochrome
+                uint32_t pix = *(p_read_data + 0) + *(p_read_data + read_line_length);
+                p_read_data++;
+                *p_write_data++ = (T)(pix / 2);
+            }
+        }
+    }
+
+    // Update with and height
+    m_height = new_height;
+}
+
+
+template <typename T>
+void c_image::resize_image_bilinear(
+        int req_width,
+        int req_height)
+{
+    // Start by reducing the height
+    if (req_height < m_height) {
+        double y_spacing = (double)m_height / (double)req_height;
+        double y_start = (double(m_height-1) - double(req_height-1) * y_spacing) / 2;
+
+        if (m_colour) {
+            // Do reduction for colour data
+            T *p_write_data = (T *)mp_buffer;
+            const int read_line_length = m_width * 3;
+            for (int y = 0; y < req_height; y++) {
+                double new_y_pos = y_start + y_spacing * y;
+                int row = int(new_y_pos);  // Remove fractional part
+                double fraction_1 = new_y_pos - row;  // Keep just fractional part
+                double fraction_2 = 1 - fraction_1;
+                T *p_read_data = ((T *)mp_buffer) + row * 3 * m_width;
+                for (int x = 0; x < m_width; x++) {
+                    // Blue
+                    T pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + read_line_length)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+
+                    // Green
+                    pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + read_line_length)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+
+                    // Blue
+                    pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + read_line_length)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+                }
+            }
+        } else {
+            // Do reduction for monochrome data
+            T *p_write_data = (T *)mp_buffer;
+            const int read_line_length = m_width;
+            for (int y = 0; y < req_height; y++) {
+                double new_y_pos = y_start + y_spacing * y;
+                int row = int(new_y_pos);  // Remove fractional part
+                double fraction_1 = new_y_pos - row;  // Keep just fractional part
+                double fraction_2 = 1 - fraction_1;
+                T *p_read_data = ((T *)mp_buffer) + row * m_width;
+                for (int x = 0; x < m_width; x++) {
+                    // Monochrome
+                    T pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + read_line_length)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+                }
+            }
+        }
+
+        m_height = req_height;  // Height has been reduced
+    }
+
+    // Next reduce the width
+    if (req_width < m_width) {
+        double x_spacing = (double)m_width / (double)req_width;
+        double x_start = (double(m_width-1) - double(req_width-1) * x_spacing) / 2;
+
+        if (m_colour) {
+            // Do reduction for colour data
+            T *p_reduced_buffer = new T[req_width * req_height * 3];  // New (smaller) buffer
+            for (int x = 0; x < req_width; x++) {
+                double new_x_pos = x_start + x_spacing * x;
+                int col = int(new_x_pos);  // Remove fractional part
+                double fraction_1 = new_x_pos - col;  // Keep just fractional part
+                double fraction_2 = 1 - fraction_1;
+                for (int y = 0; y < req_height; y++) {
+                    T *p_read_data = ((T *)mp_buffer) + y * 3 * m_width + 3 * col;
+                    T *p_write_data = p_reduced_buffer + y * 3 * req_width + 3 * x;
+                    // Blue
+                    T pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + 3)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+
+                    // Green
+                    pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + 3)));
+                    *p_write_data++ = pix;
+                    p_read_data++;
+
+                    // Blue
+                    pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + 3)));
+                    *p_write_data++ = pix;
+                }
+            }
+
+            set_new_buffer((uint8_t *) p_reduced_buffer, req_width * req_height * 3 * sizeof(T));
+        } else {
+            // Do reduction for monochrome data
+            T *p_reduced_buffer = new T[req_width * req_height];  // New (smaller) buffer
+            for (int x = 0; x < req_width; x++) {
+                double new_x_pos = x_start + x_spacing * x;
+                int col = int(new_x_pos);  // Remove fractional part
+                double fraction_1 = new_x_pos - col;  // Keep just fractional part
+                double fraction_2 = 1 - fraction_1;
+                for (int y = 0; y < req_height; y++) {
+                    T *p_read_data = ((T *)mp_buffer) + y * m_width + col;
+                    T *p_write_data = p_reduced_buffer + y * req_width + x;
+                    // Monochrome
+                    T pix = (T)(fraction_2 * (*p_read_data) + fraction_1 * (*(p_read_data + 1)));
+                    *p_write_data++ = pix;
+                }
+            }
+
+            set_new_buffer((uint8_t *) p_reduced_buffer, req_width * req_height * sizeof(T));
+        }
+
+        m_width = req_width;  // Width has been reduced
+    }
+}
+
+
 void c_image::conv_data_ready_for_qimage()
 {
     // Create buffer for converted data
@@ -1030,4 +1378,12 @@ void c_image::set_buffer_size(int32_t size)
         mp_buffer = new uint8_t[size];
         m_buffer_size = size;
     }
+}
+
+
+void c_image::set_new_buffer(uint8_t *p_buffer, int32_t size)
+{
+    delete [] mp_buffer;
+    mp_buffer = p_buffer;
+    m_buffer_size = size;
 }
