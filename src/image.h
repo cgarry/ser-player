@@ -164,6 +164,10 @@ class c_image
                 int req_width,
                 int req_height);
 
+        void add_bars(
+                int total_width,
+                int total_height);
+
         void conv_data_ready_for_qimage();
         
         
@@ -187,6 +191,17 @@ class c_image
         template <typename T>
         bool debayer_image_bilinear_int(
             int32_t colour_id);
+
+        template <typename T>
+        void add_horizontal_bars(
+                int top_bar,
+                int bottom_bar);
+
+        template <typename T>
+        void add_vertical_bars(
+                int left_bar,
+                int right_bar);
+
 
         template <typename T>
         void resize_image_size_by_half();

@@ -850,6 +850,106 @@ bool c_image::resize_image(
 }
 
 
+void c_image::add_bars(
+        int total_width,
+        int total_height)
+{
+    if (total_width > m_width) {
+        // Add vertical bars to frame
+        int right_bar = (total_width - m_width) / 2;
+        int left_bar = total_width - m_width - right_bar;
+
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            add_vertical_bars <uint8_t> (left_bar, right_bar);
+        } else {
+            // 16-bit data
+            add_vertical_bars <uint16_t> (left_bar, right_bar);
+        }
+    }
+
+    if (total_height > m_height) {
+        // Add horizontal bars to frame
+        int top_bar = (total_height - m_height) / 2;
+        int bottom_bar = total_height - m_height - top_bar;
+
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            add_horizontal_bars <uint8_t> (top_bar, bottom_bar);
+        } else {
+            // 16-bit data
+            add_horizontal_bars <uint16_t> (top_bar, bottom_bar);
+        }
+    }
+}
+
+
+template <typename T>
+void c_image::add_horizontal_bars(int top_bar, int bottom_bar)
+{
+   int new_height =  m_height + top_bar + bottom_bar;
+   int line_length = m_width;
+   if (m_colour) {
+       line_length *= 3;
+   }
+
+   T *p_new_buffer = new T[line_length * new_height];
+   T *p_wr_data = p_new_buffer;
+
+   // Write bottom bar to buffer
+   memset(p_wr_data, 0, bottom_bar * line_length * sizeof(T));
+   p_wr_data += bottom_bar * line_length;
+
+   // Write image data to buffer
+   memcpy(p_wr_data, mp_buffer, line_length * m_height * sizeof(T));
+   p_wr_data += line_length * m_height;
+
+   // Write top bar to buffer
+   memset(p_wr_data, 0, top_bar * line_length * sizeof(T));
+   p_wr_data += top_bar * line_length;
+
+   set_new_buffer((uint8_t *)p_new_buffer, line_length * new_height * sizeof(T));
+   m_height = new_height;
+}
+
+
+template <typename T>
+void c_image::add_vertical_bars(
+        int left_bar,
+        int right_bar)
+{
+    int new_width =  m_width + left_bar + right_bar;
+    int line_length = m_width;
+    int new_line_length = new_width;
+    if (m_colour) {
+        line_length *= 3;
+        new_line_length *= 3;
+    }
+
+    T *p_new_buffer = new T[new_line_length * m_height];
+    T *p_wr_data = p_new_buffer;
+    T *p_rd_data = (T *)mp_buffer;
+
+    for (int line = 0; line < m_height; line ++) {
+        // Draw left border line
+        memset(p_wr_data, 0, left_bar * sizeof(T));
+        p_wr_data += left_bar;
+
+        // Draw active image line
+        memcpy(p_wr_data, p_rd_data, line_length * sizeof(T));
+        p_wr_data += line_length;
+        p_rd_data += line_length;
+
+        // Draw right border line
+        memset(p_wr_data, 0, right_bar * sizeof(T));
+        p_wr_data += right_bar;
+    }
+
+    set_new_buffer((uint8_t *)p_new_buffer, new_line_length * m_height * sizeof(T));
+    m_width = new_width;
+}
+
+
 template <typename T>
 void c_image::resize_image_size_by_half()
 {

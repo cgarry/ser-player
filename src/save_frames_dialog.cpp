@@ -19,6 +19,7 @@
 
 #include <Qt>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -40,6 +41,8 @@
 
 c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            e_save_type save_type,
+                                           int frame_width,
+                                           int frame_height,
                                            int total_frames,
                                            int marker_start_frame,
                                            int marker_end_frame,
@@ -49,6 +52,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            QString instrument_string,
                                            QString telescope_string)
     : QDialog(parent),
+      m_frame_width(frame_width),
+      m_frame_height(frame_height),
       m_total_frames(total_frames),
       m_marker_start_frame(marker_start_frame),
       m_marker_end_frame(marker_end_frame),
@@ -238,6 +243,57 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
 
     //
+    //  Resize Frame
+    //
+    mp_resize_width_Spinbox = new QSpinBox;
+    mp_resize_width_Spinbox->setRange(10, frame_width);
+    mp_resize_width_Spinbox->setValue(frame_width);
+
+    mp_resize_height_Spinbox = new QSpinBox;
+    mp_resize_height_Spinbox->setRange(10, frame_height);
+    mp_resize_height_Spinbox->setValue(frame_height);
+
+    mp_resize_units_ComboBox = new QComboBox;
+    mp_resize_units_ComboBox->addItem(tr("Pixels"));
+    mp_resize_units_ComboBox->addItem(tr("Percent"));
+
+    mp_resize_constrain_propotions_CBox = new QCheckBox(tr("Keep Original Aspect Ratio", "Resize Frames Control"));
+    mp_resize_constrain_propotions_CBox->setChecked(true);
+
+    mp_resize_add_black_bars_CBox = new QCheckBox(tr("Add Black Bars"));
+    mp_resize_add_black_bars_CBox->setChecked(false);
+
+    QGridLayout *resize_frame_GLayout = new QGridLayout;
+    resize_frame_GLayout->addWidget(new QLabel(tr("Width:", "Resize Frames Control")), 0, 0);
+    resize_frame_GLayout->addWidget(mp_resize_width_Spinbox, 0, 1);
+
+    resize_frame_GLayout->addWidget(new QLabel(tr("Height:", "Resize Frames Control")), 0, 2);
+    resize_frame_GLayout->addWidget(mp_resize_height_Spinbox, 0, 3);
+
+    resize_frame_GLayout->addWidget(new QLabel(" "), 0, 4);
+
+    resize_frame_GLayout->addWidget(mp_resize_units_ComboBox, 0, 5);
+
+    resize_frame_GLayout->addWidget(new QLabel(" "), 0, 6);
+    resize_frame_GLayout->setColumnStretch(6, 2);
+
+    resize_frame_GLayout->addWidget(mp_resize_constrain_propotions_CBox, 1, 0, 1, 6);
+
+    resize_frame_GLayout->addWidget(mp_resize_add_black_bars_CBox, 2, 0, 1, 6);
+
+    mp_resize_GBox = new QGroupBox(tr("Resize Frames"));
+    mp_resize_GBox->setCheckable(true);
+    mp_resize_GBox->setChecked(false);
+    mp_resize_GBox->setLayout(resize_frame_GLayout);
+
+    connect(mp_resize_constrain_propotions_CBox, SIGNAL(toggled(bool)), this, SLOT(resize_control_handler()));
+    connect(mp_resize_width_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(resize_control_handler()));
+    connect(mp_resize_height_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(resize_control_handler()));
+    connect(mp_resize_add_black_bars_CBox, SIGNAL(toggled(bool)), this, SLOT(resize_control_handler()));
+    connect(mp_resize_units_ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resize_control_handler()));
+
+
+    //
     // Filename Generation - Only for saving as image files
     //
     mp_use_framenumber_in_filename = new QCheckBox(tr("Use Framenumber In Filename (Instead Of A Sequential Count)"));
@@ -355,6 +411,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     dialog_VLayout->addWidget(mp_frame_decimation_GBox);
     dialog_VLayout->addWidget(mp_sequence_direction_GBox);
     dialog_VLayout->addWidget(mp_processing_GBox);
+    dialog_VLayout->addWidget(mp_resize_GBox);
     dialog_VLayout->addWidget(filename_generation_GBox);
     dialog_VLayout->addWidget(ser_file_options_GBox);
     dialog_VLayout->addSpacing(5);
@@ -477,6 +534,151 @@ void c_save_frames_dialog::next_button_clicked_slot()
     if (m_total_selected_frames > 0) {
         accept();
     }
+}
+
+
+void c_save_frames_dialog::resize_control_handler()
+{
+    if (mp_resize_units_ComboBox->hasFocus()) {
+        // User has changed pixels/percent selection
+        if (mp_resize_units_ComboBox->currentIndex() == 0 && mp_resize_width_Spinbox->minimum() != 10) {
+            // Selection changed from percent to pixels
+            int new_width = (m_frame_width * mp_resize_width_Spinbox->value()) / 100;
+            int new_height = (m_frame_height * mp_resize_height_Spinbox->value()) / 100;
+            mp_resize_width_Spinbox->setRange(10, m_frame_width);
+            mp_resize_height_Spinbox->setRange(10, m_frame_height);
+            mp_resize_width_Spinbox->setSuffix("");
+            mp_resize_height_Spinbox->setSuffix("");
+            mp_resize_width_Spinbox->setValue(new_width);
+            mp_resize_height_Spinbox->setValue(new_height);
+        } else if (mp_resize_units_ComboBox->currentIndex() == 1 && mp_resize_width_Spinbox->minimum() != 1) {
+            // Selection changed from pixels to percent
+            int new_width = (100 * mp_resize_width_Spinbox->value()) / m_frame_width;
+            int new_height = (100 * mp_resize_height_Spinbox->value()) / m_frame_height;
+            mp_resize_width_Spinbox->setRange(1, 100);
+            mp_resize_height_Spinbox->setRange(1, 100);
+            mp_resize_width_Spinbox->setSuffix("%");
+            mp_resize_height_Spinbox->setSuffix("%");
+            mp_resize_width_Spinbox->setValue(new_width);
+            mp_resize_height_Spinbox->setValue(new_height);
+        }
+    }
+
+    bool change_height_to_match_aspect_ratio = false;
+    bool percent_mode = mp_resize_units_ComboBox->currentIndex() == 1;
+
+    if (mp_resize_constrain_propotions_CBox->hasFocus()) {
+        // User has toggled mp_resize_constrain_propotions_CBox
+        mp_resize_add_black_bars_CBox->setEnabled(mp_resize_constrain_propotions_CBox->isChecked());
+        change_height_to_match_aspect_ratio = true;
+    }
+
+    if (mp_resize_add_black_bars_CBox->hasFocus()) {
+        // User has toggled mp_resize_add_black_bars_CBox
+        if (!mp_resize_add_black_bars_CBox->isChecked()) {
+            change_height_to_match_aspect_ratio = true;
+        }
+    }
+
+    if (mp_resize_width_Spinbox->hasFocus() || change_height_to_match_aspect_ratio) {
+        // User has changed mp_resize_width_Spinbox value
+        if (mp_resize_constrain_propotions_CBox->isChecked() && !mp_resize_add_black_bars_CBox->isChecked()) {
+            if (percent_mode) {
+                int new_height = mp_resize_width_Spinbox->value();
+                mp_resize_height_Spinbox->setValue(new_height);
+            } else {
+                // Keep aspect ratio constant
+                int new_height = (mp_resize_width_Spinbox->value() * m_frame_height) / m_frame_width;
+                mp_resize_height_Spinbox->setValue(new_height);
+            }
+        }
+    }
+
+    if (mp_resize_height_Spinbox->hasFocus()) {
+        // User has changed mp_resize_height_Spinbox value
+        if (mp_resize_constrain_propotions_CBox->isChecked() && !mp_resize_add_black_bars_CBox->isChecked()) {
+            if (percent_mode) {
+                int new_width = mp_resize_height_Spinbox->value();
+                mp_resize_width_Spinbox->setValue(new_width);
+            } else {
+                // Keep aspect ratio constant
+                int new_width = (mp_resize_height_Spinbox->value() * m_frame_width) / m_frame_height;
+                mp_resize_width_Spinbox->setValue(new_width);
+            }
+        }
+    }
+}
+
+
+int c_save_frames_dialog::get_active_width()
+{
+    int width = get_total_width();
+    if (mp_resize_add_black_bars_CBox->isEnabled() && mp_resize_add_black_bars_CBox->isChecked()) {
+        // Calculate width for current height
+        int calc_width = (m_frame_width * get_total_height()) / m_frame_height;
+        int calc_height = (m_frame_height * get_total_width()) / m_frame_width;
+        if (calc_width != width && calc_height != get_total_height()) {
+            if (width > calc_width) {
+                width = calc_width;
+            }
+        }
+    }
+
+    return width;
+}
+
+
+int c_save_frames_dialog::get_active_height()
+{
+    int height = get_total_height();
+    if (mp_resize_add_black_bars_CBox->isEnabled() && mp_resize_add_black_bars_CBox->isChecked()) {
+        // Calculate height for current width
+        int calc_width = (m_frame_width * get_total_height()) / m_frame_height;
+        int calc_height = (m_frame_height * get_total_width()) / m_frame_width;
+        if (calc_width != get_total_width() && calc_height != height) {
+            if (height > calc_height) {
+                height = calc_height;
+            }
+        }
+    }
+
+    return height;
+}
+
+
+int c_save_frames_dialog::get_total_width()
+{
+    int width = m_frame_width;  // No resize by default
+    if (mp_resize_GBox->isChecked()) {
+        // Resize frames enabled
+        if (mp_resize_units_ComboBox->currentIndex() == 0) {
+            // Spinbox values are pixels
+            width =  mp_resize_width_Spinbox->value();
+        } else {
+            // Spinbox values are percent
+            width =  (mp_resize_width_Spinbox->value() * m_frame_width) / 100;
+        }
+    }
+
+    return width;
+}
+
+
+int c_save_frames_dialog::get_total_height()
+{
+    int height = m_frame_height;  // No resize by default
+    if (mp_resize_GBox->isChecked()) {
+        // Resize frames enabled
+        if (mp_resize_units_ComboBox->currentIndex() == 0) {
+            // Spinbox values are pixels
+            height =  mp_resize_height_Spinbox->value();
+        } else {
+            // Spinbox values are percent
+            height =  (mp_resize_height_Spinbox->value() * m_frame_height) / 100;
+        }
+    }
+
+    return height;
 }
 
 

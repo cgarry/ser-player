@@ -36,6 +36,7 @@ class c_header_details_dialog;
 class c_histogram_dialog;
 class c_processing_options_dialog;
 class c_colour_dialog;
+class c_save_frames_dialog;
 class c_image_Widget;
 class c_image;
 class c_histogram_thread;
@@ -65,6 +66,8 @@ private:
     c_header_details_dialog *mp_header_details_dialog;
     c_processing_options_dialog *mp_processing_options_Dialog;
     c_histogram_dialog *mp_histogram_dialog;
+    c_save_frames_dialog *mp_save_frames_as_ser_Dialog;
+    c_save_frames_dialog *mp_save_frames_as_images_Dialog;
 
     // Threads
     c_histogram_thread *mp_histogram_thread;
@@ -145,7 +148,7 @@ public slots:
     void open_ser_file_slot();
     void open_ser_file_slot(QAction *action);
     void save_frames_as_ser_slot();
-    void save_frames_slot_as_images_slot();
+    void save_frames_as_images_slot();
     void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();
     void resize_timer_timeout_slot();

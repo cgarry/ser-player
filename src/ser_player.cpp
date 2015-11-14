@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.1"
+#define VERSION_STRING "v1.4.2"
 
 #include <Qt>
 #include <QApplication>
@@ -72,7 +72,9 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 
 
 c_ser_player::c_ser_player(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+      mp_save_frames_as_ser_Dialog(NULL),
+      mp_save_frames_as_images_Dialog(NULL)
 {
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
@@ -111,7 +113,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_save_frames_as_images_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
     mp_save_frames_as_images_Act->setEnabled(false);
     file_menu->addAction(mp_save_frames_as_images_Act);
-    connect(mp_save_frames_as_images_Act, SIGNAL(triggered()), this, SLOT(save_frames_slot_as_images_slot()));
+    connect(mp_save_frames_as_images_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_images_slot()));
 
 
     mp_recent_save_folders_Menu = file_menu->addMenu(tr("Recent Save Folders", "Menu title"));
@@ -807,26 +809,31 @@ void c_ser_player::save_frames_as_ser_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
-    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this,
-                                                                        c_save_frames_dialog::SAVE_SER,
-                                                                        m_total_frames,
-                                                                        mp_frame_Slider->get_start_frame(),
-                                                                        mp_frame_Slider->get_end_frame(),
-                                                                        mp_frame_Slider->get_markers_enable(),
-                                                                        mp_ser_file->has_timestamps(),
-                                                                        mp_ser_file->get_observer_string(),
-                                                                        mp_ser_file->get_instrument_string(),
-                                                                        mp_ser_file->get_telescope_string());
-    int ret = save_frames_Dialog->exec();
+    if (mp_save_frames_as_ser_Dialog == NULL) {
+        mp_save_frames_as_ser_Dialog = new c_save_frames_dialog(this,
+                                                                c_save_frames_dialog::SAVE_SER,
+                                                                mp_ser_file->get_width(),
+                                                                mp_ser_file->get_height(),
+                                                                m_total_frames,
+                                                                mp_frame_Slider->get_start_frame(),
+                                                                mp_frame_Slider->get_end_frame(),
+                                                                mp_frame_Slider->get_markers_enable(),
+                                                                mp_ser_file->has_timestamps(),
+                                                                mp_ser_file->get_observer_string(),
+                                                                mp_ser_file->get_instrument_string(),
+                                                                mp_ser_file->get_telescope_string());
+    }
+
+    int ret = mp_save_frames_as_ser_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
         m_current_state != STATE_NO_FILE &&
         m_current_state != STATE_PLAYING) {
 
-        int min_frame = save_frames_Dialog->get_start_frame();
-        int max_frame = save_frames_Dialog->get_end_frame();
+        int min_frame = mp_save_frames_as_ser_Dialog->get_start_frame();
+        int max_frame = mp_save_frames_as_ser_Dialog->get_end_frame();
         QString default_filename =  mp_ser_file->get_filename();
-        int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
+        int required_digits_for_number = mp_save_frames_as_ser_Dialog->get_required_digits_for_number();
 
         if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
             default_filename.insert(default_filename.length()-4,
@@ -860,11 +867,15 @@ void c_ser_player::save_frames_as_ser_slot()
                 filename = filename + ".ser";
             }
 
-            int decimate_value = save_frames_Dialog->get_frame_decimation();
-            int sequence_direction = save_frames_Dialog->get_sequence_direction();
-            int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
-            bool include_timestamps = save_frames_Dialog->get_include_timestamps_in_ser_file();
-            bool do_frame_processing = save_frames_Dialog->get_processing_enable();
+            int frame_active_width = mp_save_frames_as_ser_Dialog->get_active_width();
+            int frame_active_height = mp_save_frames_as_ser_Dialog->get_active_height();
+            int frame_total_width = mp_save_frames_as_ser_Dialog->get_total_width();
+            int frame_total_height = mp_save_frames_as_ser_Dialog->get_total_height();
+            int decimate_value = mp_save_frames_as_ser_Dialog->get_frame_decimation();
+            int sequence_direction = mp_save_frames_as_ser_Dialog->get_sequence_direction();
+            int frames_to_be_saved = mp_save_frames_as_ser_Dialog->get_frames_to_be_saved();
+            bool include_timestamps = mp_save_frames_as_ser_Dialog->get_include_timestamps_in_ser_file();
+            bool do_frame_processing = mp_save_frames_as_ser_Dialog->get_processing_enable();
 
             c_pipp_ser_write ser_write_file;
 
@@ -902,6 +913,9 @@ void c_ser_player::save_frames_as_ser_slot()
                     bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
                                                              false,  // conv_to_8_bit
                                                              do_frame_processing);  // do_processing
+
+                    mp_frame_image->resize_image(frame_active_width, frame_active_height);
+                    mp_frame_image->add_bars(frame_total_width, frame_total_height);
 
                     if (valid_frame) {
                         // Get timestamp for frame if required
@@ -943,9 +957,9 @@ void c_ser_player::save_frames_as_ser_slot()
                 0,                  // int32_t lu_id - always 0
                 mp_frame_image->get_colour_id(),  // int32_t colour_id,
                 utc_to_local_diff,  // int64_t utc_to_local_diff,
-                save_frames_Dialog->get_observer_string(),
-                save_frames_Dialog->get_instrument_string(),
-                save_frames_Dialog->get_telescope_string());
+                mp_save_frames_as_ser_Dialog->get_observer_string(),
+                mp_save_frames_as_ser_Dialog->get_instrument_string(),
+                mp_save_frames_as_ser_Dialog->get_telescope_string());
 
             // Write header and close SER file
             ser_write_file.close();
@@ -958,8 +972,6 @@ void c_ser_player::save_frames_as_ser_slot()
         }
     }
 
-    delete save_frames_Dialog;
-
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
         play_button_pressed_slot();
@@ -967,7 +979,7 @@ void c_ser_player::save_frames_as_ser_slot()
 }
 
 
-void c_ser_player::save_frames_slot_as_images_slot()
+void c_ser_player::save_frames_as_images_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
@@ -978,14 +990,19 @@ void c_ser_player::save_frames_slot_as_images_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
-    c_save_frames_dialog *save_frames_Dialog = new c_save_frames_dialog(this,
-                                                                        c_save_frames_dialog::SAVE_IMAGES,
-                                                                        m_total_frames,
-                                                                        mp_frame_Slider->get_start_frame(),
-                                                                        mp_frame_Slider->get_end_frame(),
-                                                                        mp_frame_Slider->get_markers_enable(),
-                                                                        mp_ser_file->has_timestamps());
-    int ret = save_frames_Dialog->exec();
+    if (mp_save_frames_as_images_Dialog == NULL) {
+        mp_save_frames_as_images_Dialog = new c_save_frames_dialog(this,
+                                                                   c_save_frames_dialog::SAVE_IMAGES,
+                                                                   mp_ser_file->get_width(),
+                                                                   mp_ser_file->get_height(),
+                                                                   m_total_frames,
+                                                                   mp_frame_Slider->get_start_frame(),
+                                                                   mp_frame_Slider->get_end_frame(),
+                                                                   mp_frame_Slider->get_markers_enable(),
+                                                                   mp_ser_file->has_timestamps());
+    }
+
+    int ret = mp_save_frames_as_images_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
         m_current_state != STATE_NO_FILE &&
@@ -1033,15 +1050,19 @@ void c_ser_player::save_frames_slot_as_images_slot()
                 filename = filename + selected_ext;
             }
 
-            int min_frame = save_frames_Dialog->get_start_frame();
-            int max_frame = save_frames_Dialog->get_end_frame();
-            int decimate_value = save_frames_Dialog->get_frame_decimation();
-            int sequence_direction = save_frames_Dialog->get_sequence_direction();
-            int frames_to_be_saved = save_frames_Dialog->get_frames_to_be_saved();
-            bool use_framenumber_in_name = save_frames_Dialog->get_use_framenumber_in_name();
-            bool append_timestamp_to_filename = save_frames_Dialog->get_append_timestamp_to_filename();
-            int required_digits_for_number = save_frames_Dialog->get_required_digits_for_number();
-            bool do_frame_processing = save_frames_Dialog->get_processing_enable();
+            int frame_active_width = mp_save_frames_as_images_Dialog->get_active_width();
+            int frame_active_height = mp_save_frames_as_images_Dialog->get_active_height();
+            int frame_total_width = mp_save_frames_as_images_Dialog->get_total_width();
+            int frame_total_height = mp_save_frames_as_images_Dialog->get_total_height();
+            int min_frame = mp_save_frames_as_images_Dialog->get_start_frame();
+            int max_frame = mp_save_frames_as_images_Dialog->get_end_frame();
+            int decimate_value = mp_save_frames_as_images_Dialog->get_frame_decimation();
+            int sequence_direction = mp_save_frames_as_images_Dialog->get_sequence_direction();
+            int frames_to_be_saved = mp_save_frames_as_images_Dialog->get_frames_to_be_saved();
+            bool use_framenumber_in_name = mp_save_frames_as_images_Dialog->get_use_framenumber_in_name();
+            bool append_timestamp_to_filename = mp_save_frames_as_images_Dialog->get_append_timestamp_to_filename();
+            int required_digits_for_number = mp_save_frames_as_images_Dialog->get_required_digits_for_number();
+            bool do_frame_processing = mp_save_frames_as_images_Dialog->get_processing_enable();
 
             // Keep list of last saved folders up to date
             add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
@@ -1058,6 +1079,8 @@ void c_ser_player::save_frames_slot_as_images_slot()
                                                        true,  // conv_to_8_bit
                                                        do_frame_processing);  // do_processing
                 if (valid_frame) {
+                    mp_frame_image->resize_image(frame_active_width, frame_active_height);
+                    mp_frame_image->add_bars(frame_total_width, frame_total_height);
                     mp_frame_image->conv_data_ready_for_qimage();
 
                     QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
@@ -1104,6 +1127,8 @@ void c_ser_player::save_frames_slot_as_images_slot()
                                                                true,  // conv_to_8_bit
                                                                do_frame_processing);  // do_processing
                         if (valid_frame) {
+                            mp_frame_image->resize_image(frame_active_width, frame_active_height);
+                            mp_frame_image->add_bars(frame_total_width, frame_total_height);
                             mp_frame_image->conv_data_ready_for_qimage();
 
                             QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
@@ -1177,8 +1202,6 @@ void c_ser_player::save_frames_slot_as_images_slot()
             }
         }
     }
-
-    delete save_frames_Dialog;
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
@@ -1364,6 +1387,12 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
     } else {
         // This is a valid SER file
+
+        // Delete previous save frames dialogs to remove remembered settings
+        delete mp_save_frames_as_ser_Dialog;
+        mp_save_frames_as_ser_Dialog = NULL;
+        delete mp_save_frames_as_images_Dialog;
+        mp_save_frames_as_images_Dialog = NULL;
 
         // Set SER file header details in header details dialog
         mp_header_details_dialog->set_details(

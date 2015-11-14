@@ -29,6 +29,7 @@ class QLabel;
 class QLineEdit;
 class QGroupBox;
 class QCheckBox;
+class QComboBox;
 class c_utf8_validator;
 
 
@@ -41,6 +42,8 @@ public:
 
     c_save_frames_dialog(QWidget *parent,
                          e_save_type save_type,
+                         int frame_width,
+                         int frame_height,
                          int total_frames,
                          int marker_start_frame,
                          int marker_end_frame,
@@ -51,6 +54,11 @@ public:
                          QString telescope_string = "");
 
     ~c_save_frames_dialog();
+
+    int get_active_width();
+    int get_active_height();
+    int get_total_width();
+    int get_total_height();
 
     int get_start_frame()
     {
@@ -82,6 +90,7 @@ private slots:
     void spinbox_changed_slot();
     void update_num_frames_slot();
     void next_button_clicked_slot();
+    void resize_control_handler();
 
     
 private:
@@ -108,6 +117,13 @@ private:
     QCheckBox *mp_processing_enable_CBox;
     QGroupBox *mp_processing_GBox;
 
+    QSpinBox *mp_resize_width_Spinbox;
+    QSpinBox *mp_resize_height_Spinbox;
+    QComboBox *mp_resize_units_ComboBox;
+    QCheckBox *mp_resize_constrain_propotions_CBox;
+    QCheckBox *mp_resize_add_black_bars_CBox;
+    QGroupBox *mp_resize_GBox;
+
     QCheckBox *mp_use_framenumber_in_filename;
     QCheckBox *mp_append_timestamp_CBox;
 
@@ -120,6 +136,8 @@ private:
 
     c_utf8_validator *mp_utf8_validator;
 
+    int m_frame_width;
+    int m_frame_height;
     int m_total_frames;
     int m_marker_start_frame;
     int m_marker_end_frame;
