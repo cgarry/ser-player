@@ -44,19 +44,17 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            int frame_width,
                                            int frame_height,
                                            int total_frames,
-                                           int marker_start_frame,
-                                           int marker_end_frame,
-                                           bool markers_enabled,
                                            bool ser_has_timestamps,
                                            QString observer_string,
                                            QString instrument_string,
                                            QString telescope_string)
     : QDialog(parent),
+      m_save_type(save_type),
       m_frame_width(frame_width),
       m_frame_height(frame_height),
       m_total_frames(total_frames),
-      m_marker_start_frame(marker_start_frame),
-      m_marker_end_frame(marker_end_frame),
+      m_marker_start_frame(0),
+      m_marker_end_frame(total_frames-1),
       m_ser_has_timestamps(ser_has_timestamps),
       m_start_frame(1),
       m_end_frame(total_frames),
@@ -78,21 +76,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Frames to save options
     //
-
     mp_save_current_frame_RButton = new QRadioButton(tr("Save Current Frame Only", "Save frames dialog"));
     connect(mp_save_current_frame_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
     mp_save_all_frames_RButton = new QRadioButton(tr("Save All %1 Frames", "Save frames dialog").arg(total_frames));
     connect(mp_save_all_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
-    if (!markers_enabled) {
-        // No markers enabled
-        mp_save_marked_frames_RButton = new QRadioButton(tr("Start/End Markers Disabled", "Save frames dialog"));
-        mp_save_marked_frames_RButton->setEnabled(false);
-    } else {
-        mp_save_marked_frames_RButton = new QRadioButton(tr("Save Frames Selected By Start/End Markers (%1 to %2)", "Save frames dialog")
-                                                         .arg(marker_start_frame).arg(marker_end_frame));
-        connect(mp_save_marked_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
-        // Markers are selected
-    }
+    mp_save_marked_frames_RButton = new QRadioButton(tr("Start/End Markers Disabled", "Save frames dialog"));
+    mp_save_marked_frames_RButton->setEnabled(false);
+    connect(mp_save_marked_frames_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
     mp_save_frame_range_RButton = new QRadioButton(tr("Save Frames From: ", "Save frames dialog"));
     connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
@@ -260,7 +250,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_resize_constrain_propotions_CBox = new QCheckBox(tr("Keep Original Aspect Ratio", "Resize Frames Control"));
     mp_resize_constrain_propotions_CBox->setChecked(true);
 
-    mp_resize_add_black_bars_CBox = new QCheckBox(tr("Add Black Bars"));
+    mp_resize_add_black_bars_CBox = new QCheckBox(tr("Add Black Bars To Keep Original Aspert Ratio"));
     mp_resize_add_black_bars_CBox->setChecked(false);
 
     QGridLayout *resize_frame_GLayout = new QGridLayout;
@@ -321,6 +311,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     filename_generation_GBox->setLayout(filename_generation_VLayout);
     if (save_type == SAVE_SER) {
         filename_generation_GBox->hide();
+        filename_generation_GBox->setFixedHeight(0);
     }
 
 
@@ -378,7 +369,19 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // Hide save current frame button when this is a save as SER file dilalog
     if (save_type == SAVE_IMAGES) {
         ser_file_options_GBox->hide();
+        ser_file_options_GBox->setFixedHeight(0);
     }
+
+
+    // List of group boxes to be displayed
+    QList<QGroupBox *> groupbox_list;
+    groupbox_list << save_optionsGBox;
+    groupbox_list << mp_frame_decimation_GBox;
+    groupbox_list << mp_sequence_direction_GBox;
+    groupbox_list << mp_processing_GBox;
+    groupbox_list << mp_resize_GBox;
+    groupbox_list << filename_generation_GBox;
+    groupbox_list << ser_file_options_GBox;
 
 
     //
@@ -400,39 +403,65 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QHBoxLayout *buttons_HLayout = new QHBoxLayout;
     buttons_HLayout->addStretch();
     buttons_HLayout->setSpacing(0);
+    buttons_HLayout->addWidget(mp_total_frames_to_save_Label);
+    buttons_HLayout->addSpacing(10);
     buttons_HLayout->addWidget(next_PButton);
     buttons_HLayout->addSpacing(10);
     buttons_HLayout->addWidget(cancel_PButton);
+
+    QVBoxLayout *lhs_VLayout = new QVBoxLayout;
+    lhs_VLayout->setMargin(0);
+    lhs_VLayout->setSpacing(10);
+
+    QVBoxLayout *rhs_VLayout = new QVBoxLayout;
+    rhs_VLayout->setMargin(0);
+    rhs_VLayout->setSpacing(lhs_VLayout->spacing());
+
+    // Add groupboxes to left and right columns, roughly half the height to each
+    int total_gbox_height = 0;
+    for (int i = 0; i < groupbox_list.size(); i++) {
+        if (groupbox_list.at(i)->height() != 0) {
+            total_gbox_height += groupbox_list.at(i)->sizeHint().height() + lhs_VLayout->spacing();
+        }
+    }
+
+    int current_gbox_height = 0;
+    for (int i = 0; i < groupbox_list.size(); i++) {
+        if (current_gbox_height < total_gbox_height / 2) {
+            lhs_VLayout->addWidget(groupbox_list.at(i));
+        } else {
+            rhs_VLayout->addWidget(groupbox_list.at(i));
+        }
+
+        if (groupbox_list.at(i)->height() != 0) {
+            current_gbox_height += groupbox_list.at(i)->sizeHint().height();
+        }
+    }
+
+    lhs_VLayout->addStretch();
+    rhs_VLayout->addStretch();
+
+    QHBoxLayout *lhs_rhs_HLayout = new QHBoxLayout;
+    lhs_rhs_HLayout->setMargin(0);
+    lhs_rhs_HLayout->setSpacing(10);
+    lhs_rhs_HLayout->addLayout(lhs_VLayout);
+    lhs_rhs_HLayout->addLayout(rhs_VLayout);
     
     QVBoxLayout *dialog_VLayout = new QVBoxLayout;
     dialog_VLayout->setMargin(10);
     dialog_VLayout->setSpacing(10);
-    dialog_VLayout->addWidget(save_optionsGBox);
-    dialog_VLayout->addWidget(mp_frame_decimation_GBox);
-    dialog_VLayout->addWidget(mp_sequence_direction_GBox);
-    dialog_VLayout->addWidget(mp_processing_GBox);
-    dialog_VLayout->addWidget(mp_resize_GBox);
-    dialog_VLayout->addWidget(filename_generation_GBox);
-    dialog_VLayout->addWidget(ser_file_options_GBox);
-    dialog_VLayout->addSpacing(5);
-    dialog_VLayout->addWidget(mp_total_frames_to_save_Label, 0, Qt::AlignRight);
-    dialog_VLayout->addSpacing(5);
+    dialog_VLayout->addLayout(lhs_rhs_HLayout);
     dialog_VLayout->addStretch();
     dialog_VLayout->addLayout(buttons_HLayout);
-    
+
     setLayout(dialog_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     // Ensure mp_num_frames_Label is set and
-    // Select the default frame selection option depending on whether of not the markers are enabled
-    if (markers_enabled) {
-        mp_save_marked_frames_RButton->click();
+    if (save_type == SAVE_IMAGES) {
+        mp_save_current_frame_RButton->click();
     } else {
-        if (save_type == SAVE_IMAGES) {
-            mp_save_current_frame_RButton->click();
-        } else {
-            mp_save_all_frames_RButton->click();
-        }
+        mp_save_all_frames_RButton->click();
     }
 }
 
@@ -440,6 +469,32 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 c_save_frames_dialog::~c_save_frames_dialog()
 {
     delete mp_utf8_validator;
+}
+
+
+void c_save_frames_dialog::set_markers(int marker_start_frame,
+                 int marker_end_frame,
+                 bool markers_enabled)
+{
+    m_marker_start_frame = marker_start_frame;
+    m_marker_end_frame = marker_end_frame;
+
+    if (markers_enabled) {
+        // Markers are selected
+        mp_save_marked_frames_RButton->setText(tr("Save Frames Selected By Start/End Markers (%1 to %2)", "Save frames dialog")
+                                                  .arg(marker_start_frame).arg(marker_end_frame));
+        mp_save_marked_frames_RButton->setEnabled(true);
+        mp_save_marked_frames_RButton->click();
+    } else {
+        // No markers enabled
+        mp_save_marked_frames_RButton->setText(tr("Start/End Markers Disabled", "Save frames dialog"));
+        mp_save_marked_frames_RButton->setEnabled(false);
+        if (m_save_type == SAVE_IMAGES) {
+            mp_save_current_frame_RButton->click();
+        } else {
+            mp_save_all_frames_RButton->click();
+        }
+    }
 }
 
 

@@ -815,14 +815,15 @@ void c_ser_player::save_frames_as_ser_slot()
                                                                 mp_ser_file->get_width(),
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
-                                                                mp_frame_Slider->get_start_frame(),
-                                                                mp_frame_Slider->get_end_frame(),
-                                                                mp_frame_Slider->get_markers_enable(),
                                                                 mp_ser_file->has_timestamps(),
                                                                 mp_ser_file->get_observer_string(),
                                                                 mp_ser_file->get_instrument_string(),
                                                                 mp_ser_file->get_telescope_string());
     }
+
+    mp_save_frames_as_ser_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
+                                              mp_frame_Slider->get_end_frame(),
+                                              mp_frame_Slider->get_markers_enable());
 
     int ret = mp_save_frames_as_ser_Dialog->exec();
 
@@ -996,11 +997,12 @@ void c_ser_player::save_frames_as_images_slot()
                                                                    mp_ser_file->get_width(),
                                                                    mp_ser_file->get_height(),
                                                                    m_total_frames,
-                                                                   mp_frame_Slider->get_start_frame(),
-                                                                   mp_frame_Slider->get_end_frame(),
-                                                                   mp_frame_Slider->get_markers_enable(),
                                                                    mp_ser_file->has_timestamps());
     }
+
+    mp_save_frames_as_images_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
+                                              mp_frame_Slider->get_end_frame(),
+                                              mp_frame_Slider->get_markers_enable());
 
     int ret = mp_save_frames_as_images_Dialog->exec();
 

@@ -45,15 +45,16 @@ public:
                          int frame_width,
                          int frame_height,
                          int total_frames,
-                         int marker_start_frame,
-                         int marker_end_frame,
-                         bool markers_enabled,
                          bool ser_has_timestamps,
                          QString observer_string = "",
                          QString instrument_string = "",
                          QString telescope_string = "");
 
     ~c_save_frames_dialog();
+
+    void set_markers(int marker_start_frame,
+                     int marker_end_frame,
+                     bool markers_enabled);
 
     int get_active_width();
     int get_active_height();
@@ -136,6 +137,7 @@ private:
 
     c_utf8_validator *mp_utf8_validator;
 
+    e_save_type m_save_type;
     int m_frame_width;
     int m_frame_height;
     int m_total_frames;
