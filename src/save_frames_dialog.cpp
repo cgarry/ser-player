@@ -463,6 +463,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     } else {
         mp_save_all_frames_RButton->click();
     }
+
+    resize_control_handler();
 }
 
 
@@ -594,7 +596,14 @@ void c_save_frames_dialog::next_button_clicked_slot()
 
 void c_save_frames_dialog::resize_control_handler()
 {
-    if (mp_resize_units_ComboBox->hasFocus()) {
+    static int resize_units_ComboBox = -1;
+    static bool resize_constrain_propotions = false;
+    static bool resize_add_black_bars = false;
+    static int resize_width = 0;
+    static int resize_height = 0;
+
+    if (resize_units_ComboBox !=  mp_resize_units_ComboBox->currentIndex()) {
+        resize_units_ComboBox = mp_resize_units_ComboBox->currentIndex();
         // User has changed pixels/percent selection
         if (mp_resize_units_ComboBox->currentIndex() == 0 && mp_resize_width_Spinbox->minimum() != 10) {
             // Selection changed from percent to pixels
@@ -622,42 +631,50 @@ void c_save_frames_dialog::resize_control_handler()
     bool change_height_to_match_aspect_ratio = false;
     bool percent_mode = mp_resize_units_ComboBox->currentIndex() == 1;
 
-    if (mp_resize_constrain_propotions_CBox->hasFocus()) {
+    if (resize_constrain_propotions != mp_resize_constrain_propotions_CBox->isChecked()) {
+        resize_constrain_propotions = mp_resize_constrain_propotions_CBox->isChecked();
         // User has toggled mp_resize_constrain_propotions_CBox
         mp_resize_add_black_bars_CBox->setEnabled(mp_resize_constrain_propotions_CBox->isChecked());
         change_height_to_match_aspect_ratio = true;
     }
 
-    if (mp_resize_add_black_bars_CBox->hasFocus()) {
+    if (resize_add_black_bars !=  mp_resize_add_black_bars_CBox->isChecked()) {
+        resize_add_black_bars = mp_resize_add_black_bars_CBox->isChecked();
         // User has toggled mp_resize_add_black_bars_CBox
         if (!mp_resize_add_black_bars_CBox->isChecked()) {
             change_height_to_match_aspect_ratio = true;
         }
     }
 
-    if (mp_resize_width_Spinbox->hasFocus() || change_height_to_match_aspect_ratio) {
+    if ((resize_width != mp_resize_width_Spinbox->value()) || change_height_to_match_aspect_ratio) {
+        resize_width = mp_resize_width_Spinbox->value();
         // User has changed mp_resize_width_Spinbox value
         if (mp_resize_constrain_propotions_CBox->isChecked() && !mp_resize_add_black_bars_CBox->isChecked()) {
             if (percent_mode) {
                 int new_height = mp_resize_width_Spinbox->value();
+                resize_height = new_height;
                 mp_resize_height_Spinbox->setValue(new_height);
             } else {
                 // Keep aspect ratio constant
                 int new_height = (mp_resize_width_Spinbox->value() * m_frame_height) / m_frame_width;
+                resize_height = new_height;
                 mp_resize_height_Spinbox->setValue(new_height);
             }
         }
     }
 
-    if (mp_resize_height_Spinbox->hasFocus()) {
+    if (resize_height != mp_resize_height_Spinbox->value()) {
+        resize_height = mp_resize_height_Spinbox->value();
         // User has changed mp_resize_height_Spinbox value
         if (mp_resize_constrain_propotions_CBox->isChecked() && !mp_resize_add_black_bars_CBox->isChecked()) {
             if (percent_mode) {
                 int new_width = mp_resize_height_Spinbox->value();
+                resize_width = new_width;
                 mp_resize_width_Spinbox->setValue(new_width);
             } else {
                 // Keep aspect ratio constant
                 int new_width = (mp_resize_height_Spinbox->value() * m_frame_width) / m_frame_height;
+                resize_width = new_width;
                 mp_resize_width_Spinbox->setValue(new_width);
             }
         }
