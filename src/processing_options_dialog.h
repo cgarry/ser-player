@@ -51,12 +51,14 @@ signals:
     void colour_saturation_changed(double saturation);
     void colour_balance_changed(double red, double green, double blue);
     void estimate_colour_balance();
+    void colour_align_changed(int red_align_x, int red_align_y, int blue_align_x, int blus_align_y);
 
 
 public slots:
     void reset_gain_and_gamma_slot();
     void reset_colour_saturation_slot();
     void reset_colour_balance_slot();
+    void reset_colour_align_slot();
     void reset_all_slot();
 
     
@@ -75,6 +77,7 @@ private slots:
     void red_balance_spinbox_changed_slot();
     void green_balance_spinbox_changed_slot();
     void blue_balance_spinbox_changed_slot();
+    void colour_align_changed_slot();
 
 private:
     void enable_and_disable_controls();
@@ -107,6 +110,11 @@ private:
     QSpinBox *mp_red_balance_SpinBox;
     QSpinBox *mp_green_balance_SpinBox;
     QSpinBox *mp_blue_balance_SpinBox;
+    // Colour Channel Align
+    QSpinBox *mp_blue_x_Spinbox;
+    QSpinBox *mp_blue_y_Spinbox;
+    QSpinBox *mp_red_x_Spinbox;
+    QSpinBox *mp_red_y_Spinbox;
 
     // Other
     bool m_data_has_bayer_pattern;

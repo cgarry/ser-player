@@ -161,6 +161,39 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 
 
     //
+    // Colour channel align
+    //
+    mp_blue_x_Spinbox = new QSpinBox;
+    mp_blue_x_Spinbox->setRange(-255, +255);
+
+    mp_blue_y_Spinbox = new QSpinBox;
+    mp_blue_y_Spinbox->setRange(-255, +255);
+
+    mp_red_x_Spinbox = new QSpinBox;
+    mp_red_x_Spinbox->setRange(-255, +255);
+
+    mp_red_y_Spinbox = new QSpinBox;
+    mp_red_y_Spinbox->setRange(-255, +255);
+
+    QHBoxLayout *colour_align_HLayout = new QHBoxLayout;
+    colour_align_HLayout->addWidget(mp_blue_x_Spinbox);
+    colour_align_HLayout->addWidget(mp_blue_y_Spinbox);
+    colour_align_HLayout->addWidget(mp_red_x_Spinbox);
+    colour_align_HLayout->addWidget(mp_red_y_Spinbox);
+
+    c_icon_groupbox *p_colour_align_GroupBox = new c_icon_groupbox;
+    p_colour_align_GroupBox->setTitle(tr("Colour Channel Align"));
+    p_colour_align_GroupBox->set_icon(":/res/resources/colour_align.png");
+    p_colour_align_GroupBox->setLayout(colour_align_HLayout);
+
+    connect(mp_blue_x_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
+    connect(mp_blue_y_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
+    connect(mp_red_x_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
+    connect(mp_red_y_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
+
+
+
+    //
     // Colour Saturation
     //
     mp_colsat_Slider = new QSlider(Qt::Horizontal);
@@ -272,15 +305,11 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     dialog_vlayout->setMargin(10);
     dialog_vlayout->setSpacing(15);
     dialog_vlayout->addWidget(mp_debayer_GroupBox);
-//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
-//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(invert_GroupBox);
-//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(gain_and_gammaGroupBox);
-//    dialog_vlayout->addSpacing(15);
+    dialog_vlayout->addWidget(p_colour_align_GroupBox);
     dialog_vlayout->addWidget(mp_colour_saturation_GroupBox);
-//    dialog_vlayout->addSpacing(15);
     dialog_vlayout->addWidget(mp_colour_balance_GroupBox);
 
     setLayout(dialog_vlayout);
@@ -406,6 +435,15 @@ void c_processing_options_dialog::blue_balance_spinbox_changed_slot()
 }
 
 
+void c_processing_options_dialog::colour_align_changed_slot()
+{
+    emit colour_align_changed(mp_red_x_Spinbox->value(),
+                              mp_red_y_Spinbox->value(),
+                              mp_blue_x_Spinbox->value(),
+                              mp_blue_y_Spinbox->value());
+}
+
+
 void c_processing_options_dialog::reset_colour_saturation_slot()
 {
     mp_colsat_DSpinbox->setValue(1.0);
@@ -419,6 +457,14 @@ void c_processing_options_dialog::reset_colour_balance_slot()
     mp_blue_balance_SpinBox->setValue(0);
 }
 
+void c_processing_options_dialog::reset_colour_align_slot()
+{
+    mp_blue_x_Spinbox->setValue(0);
+    mp_blue_y_Spinbox->setValue(0);
+    mp_red_x_Spinbox->setValue(0);
+    mp_red_y_Spinbox->setValue(0);
+}
+
 
 void c_processing_options_dialog::reset_all_slot()
 {
@@ -429,6 +475,7 @@ void c_processing_options_dialog::reset_all_slot()
     reset_gain_and_gamma_slot();
     reset_colour_saturation_slot();
     reset_colour_balance_slot();
+    reset_colour_align_slot();
 }
 
 

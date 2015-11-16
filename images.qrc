@@ -22,5 +22,6 @@
         <file>resources/invert_icon.png</file>
         <file>resources/monochrome_conversion_icon.png</file>
         <file>resources/saturation_icon.png</file>
+        <file>resources/colour_align.png</file>
     </qresource>
 </RCC>

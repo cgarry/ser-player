@@ -46,6 +46,11 @@ class c_image
         double m_blue_gain;
         double m_gain;
         double m_gamma;
+        bool m_rgb_align_enabled;
+        int m_red_align_x;
+        int m_red_align_y;
+        int m_blue_align_x;
+        int m_blue_align_y;
 
 
     // ------------------------------------------
@@ -70,7 +75,12 @@ class c_image
             m_green_gain(1.0),
             m_blue_gain(1.0),
             m_gain(1.0),
-            m_gamma(1.0)
+            m_gamma(1.0),
+            m_rgb_align_enabled(true),
+            m_red_align_x(1),
+            m_red_align_y(-1),
+            m_blue_align_x(-2),
+            m_blue_align_y(2)
         {
         }
 
@@ -153,6 +163,12 @@ class c_image
             double green_gain,
             double blue_gain);
 
+        void set_colour_align(
+            int red_align_x,
+            int red_align_y,
+            int blue_align_x,
+            int blue_align_y);
+
 
         void do_lut_based_processing();
 
@@ -160,11 +176,7 @@ class c_image
         void change_colour_saturation(
             double saturation);
 
-        void align_colour_channels(
-                int x_blue,
-                int y_blue,
-                int x_red,
-                int y_red);
+        void align_colour_channels();
 
         bool resize_image(
                 int req_width,
@@ -187,11 +199,7 @@ class c_image
             double saturation);
 
         template <typename T>
-        void align_colour_channels_int(
-                int x_blue,
-                int y_blue,
-                int x_red,
-                int y_red);
+        void align_colour_channels_int();
 
         template <typename T>
         void debayer_pixel_bilinear(

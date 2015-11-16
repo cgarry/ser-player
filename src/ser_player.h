@@ -143,6 +143,7 @@ public slots:
     void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
+    void colour_align_changed_slot(int red_align_x, int red_align_y, int blue_align_x, int blue_align_y);
     void zoom_changed_slot(QAction *);
     void language_changed_slot(QAction *);
     void open_ser_file_slot();

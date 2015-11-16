@@ -448,6 +448,25 @@ void c_image::set_colour_balance(
 }
 
 
+void c_image::set_colour_align(
+        int red_align_x,
+        int red_align_y,
+        int blue_align_x,
+        int blue_align_y)
+{
+    m_red_align_x = red_align_x;
+    m_red_align_y = red_align_y;
+    m_blue_align_x = blue_align_x;
+    m_blue_align_y = blue_align_y;
+    if (red_align_x == 0 && red_align_y == 0 &&
+        blue_align_x == 0 && blue_align_y == 0) {
+        m_rgb_align_enabled = false;
+    } else {
+        m_rgb_align_enabled = true;
+    }
+}
+
+
 void c_image::setup_luts()
 {
     for (int x = 0; x < 256; x++) {
@@ -737,31 +756,20 @@ void c_image::change_colour_saturation(
 }
 
 
-void c_image::align_colour_channels(
-        int x_blue,
-        int y_blue,
-        int x_red,
-        int y_red)
+void c_image::align_colour_channels()
 {
-    if (m_colour) {
-        // Only process colour images
-        if ((x_blue != 0) || (y_blue != 0) || (x_red != 0) | (y_red != 0)) {
-            if (m_byte_depth == 1) {
-                align_colour_channels_int <uint8_t> (x_blue, y_blue, x_red, y_red);
-            } else {
-                align_colour_channels_int <uint16_t> (x_blue, y_blue, x_red, y_red);
-            }
+    if (m_colour && m_rgb_align_enabled) {
+        if (m_byte_depth == 1) {
+            align_colour_channels_int <uint8_t> ();
+        } else {
+            align_colour_channels_int <uint16_t> ();
         }
     }
 }
 
 
 template <typename T>
-void c_image::align_colour_channels_int(
-        int x_blue,
-        int y_blue,
-        int x_red,
-        int y_red)
+void c_image::align_colour_channels_int()
 {
     T *p_new_buffer = new T[m_width * m_height * 3];  // Create new buffer
     memcpy(p_new_buffer, mp_buffer, m_width * m_height * 3 * sizeof(T));  // Copy current data into new buffer
@@ -770,12 +778,12 @@ void c_image::align_colour_channels_int(
     //
     // Blue channel
     //
-    if (x_blue != 0 || y_blue != 0) {
+    if (m_blue_align_x != 0 || m_blue_align_y != 0) {
         T *p_wr_data = p_new_buffer;
-        int blue_active_y_start = (y_blue < 0) ? 0 : y_blue;
-        int blue_active_y_end = (y_blue > 0) ? m_height - 1 : m_height - 1 + y_blue;
-        int blue_active_x_start = (x_blue < 0) ? 0 : x_blue;
-        int blue_active_x_end = (x_blue > 0) ? m_width - 1: m_width - 1 + x_blue;
+        int blue_active_y_start = (m_blue_align_y < 0) ? 0 : m_blue_align_y;
+        int blue_active_y_end = (m_blue_align_y > 0) ? m_height - 1 : m_height - 1 + m_blue_align_y;
+        int blue_active_x_start = (m_blue_align_x < 0) ? 0 : m_blue_align_x;
+        int blue_active_x_end = (m_blue_align_x > 0) ? m_width - 1: m_width - 1 + m_blue_align_x;
 
         // Copy blue channel to new buffer
         int y;
@@ -797,7 +805,7 @@ void c_image::align_colour_channels_int(
             }
 
             // Write active pixels to new buffer
-            T *p_blue_rd_data = ((T *)mp_buffer) + (y - y_blue) * m_width * 3 + (x - x_blue)* 3;
+            T *p_blue_rd_data = ((T *)mp_buffer) + (y - m_blue_align_y) * m_width * 3 + (x - m_blue_align_x)* 3;
             for ( ; x < blue_active_x_end; x++) {
                 *p_wr_data = *p_blue_rd_data;
                 p_blue_rd_data += 3;
@@ -824,12 +832,12 @@ void c_image::align_colour_channels_int(
     //
     // Red channel
     //
-    if (x_red != 0 || y_red != 0) {
+    if (m_red_align_x != 0 || m_red_align_y != 0) {
         T *p_wr_data = p_new_buffer + 2;
-        int red_active_y_start = (y_red < 0) ? 0 : y_red;
-        int red_active_y_end = (y_red > 0) ? m_height - 1 : m_height - 1 + y_red;
-        int red_active_x_start = (x_red < 0) ? 0 : x_red;
-        int red_active_x_end = (x_red > 0) ? m_width - 1: m_width - 1 + x_red;
+        int red_active_y_start = (m_red_align_y < 0) ? 0 : m_red_align_y;
+        int red_active_y_end = (m_red_align_y > 0) ? m_height - 1 : m_height - 1 + m_red_align_y;
+        int red_active_x_start = (m_red_align_x < 0) ? 0 : m_red_align_x;
+        int red_active_x_end = (m_red_align_x > 0) ? m_width - 1: m_width - 1 + m_red_align_x;
 
         // Copy blue channel to new buffer
         int y;
@@ -851,7 +859,7 @@ void c_image::align_colour_channels_int(
             }
 
             // Write active pixels to new buffer
-            T *p_red_rd_data = ((T *)mp_buffer) + (y - y_red) * m_width * 3 + (x - x_red)* 3 + 2;
+            T *p_red_rd_data = ((T *)mp_buffer) + (y - m_red_align_y) * m_width * 3 + (x - m_red_align_x)* 3 + 2;
             for ( ; x < red_active_x_end; x++) {
                 *p_wr_data = *p_red_rd_data;
                 p_red_rd_data += 3;

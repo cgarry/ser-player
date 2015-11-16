@@ -214,6 +214,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
     connect(mp_processing_options_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_processing_options_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
+    connect(mp_processing_options_Dialog, SIGNAL(colour_align_changed(int,int,int,int)), this, SLOT(colour_align_changed_slot(int,int,int,int)));
     connect(mp_processing_options_Dialog, SIGNAL(rejected()), this, SLOT(processor_options_closed_slot()));
 
 
@@ -1271,6 +1272,17 @@ void c_ser_player::colour_balance_changed_slot(double red, double green, double 
 }
 
 
+void c_ser_player::colour_align_changed_slot(
+        int red_align_x,
+        int red_align_y,
+        int blue_align_x,
+        int blue_align_y)
+{
+    mp_frame_image->set_colour_align(red_align_x, red_align_y, blue_align_x, blue_align_y);
+    frame_slider_changed_slot();
+}
+
+
 void c_ser_player::estimate_colour_balance()
 {
     if (m_current_state != STATE_NO_FILE) {
@@ -2120,7 +2132,7 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
 
-            mp_frame_image->align_colour_channels(0, 0, 0, 0);  // Placeholder until controls are in place
+            mp_frame_image->align_colour_channels();
 
             if (m_monochrome_conversion_enable) {
                 mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);
