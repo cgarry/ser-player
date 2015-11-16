@@ -247,7 +247,7 @@ int32_t c_pipp_timestamp::filepath_to_timestamp(
 
     // Split complete filename into filepath and filename
     char *char_ptr = strrchr(temp, '/');
-    if (char_ptr == NULL) {
+    if (char_ptr == nullptr) {
         // There is no '/' in string so assume no path
         char_ptr = temp;
     } else {

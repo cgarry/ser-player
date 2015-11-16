@@ -62,7 +62,7 @@ int32_t c_pipp_ser::open(
     m_timestamp_correction_value = 0L;
 
     // Ensure no previous file is still open
-    if (mp_ser_file != NULL) {
+    if (mp_ser_file != nullptr) {
         fclose(mp_ser_file);  // Close file
     }
 
@@ -90,7 +90,7 @@ int32_t c_pipp_ser::open(
         m_error_string += QCoreApplication::tr("Error: File '%1' is too short to contain SER header", "SER File error message")
                           .arg(filename);
         m_error_string += '\n';
-        mp_ser_file = NULL;
+        mp_ser_file = nullptr;
         return 0;
     }
 
@@ -286,11 +286,11 @@ int32_t c_pipp_ser::open(
             }
         } else {
             // Timestamps should be present but are not
-            mp_timestamp = NULL;
+            mp_timestamp = nullptr;
         }
     } else {
         // No timestamps present
-        mp_timestamp = NULL;
+        mp_timestamp = nullptr;
     }
 
     // Code to check m_header.pixel_depth since many software packages seem to set this incorrectly
@@ -426,7 +426,7 @@ QString c_pipp_ser::get_timestamp_info()
 {
     QString info_string;
 
-    if (mp_timestamp != NULL) {
+    if (mp_timestamp != nullptr) {
         //mp_timestamp = (uint64_t *)(m_timestamp_buffer.get_buffer_ptr() + (8 * m_current_frame));
         uint64_t *timestamp_ptr = (uint64_t *)m_timestamp_buffer.get_buffer_ptr();
         bool timestamps_in_order = true;
@@ -550,9 +550,9 @@ QString c_pipp_ser::get_timestamp_info()
 // Close file
 // ------------------------------------------
 int32_t c_pipp_ser::close() {
-    if (mp_ser_file != NULL) {
+    if (mp_ser_file != nullptr) {
         fclose(mp_ser_file);
-        mp_ser_file = NULL;
+        mp_ser_file = nullptr;
     }
 
     m_error_string.clear();
@@ -589,7 +589,7 @@ int32_t c_pipp_ser::get_frame (
         fseek64(mp_ser_file, offset, SEEK_SET);
 
         // Update timestamp pointer
-        if (mp_timestamp != NULL) {
+        if (mp_timestamp != nullptr) {
             mp_timestamp = (uint64_t *)(m_timestamp_buffer.get_buffer_ptr() + (8 * m_current_frame));
         }
     }
@@ -615,7 +615,7 @@ int32_t c_pipp_ser::get_frame (
 
      // Handle timestamps
     // Todo - ensure we have not gone past the end of the timestamp buffer
-    if (mp_timestamp == NULL) {
+    if (mp_timestamp == nullptr) {
         m_timestamp = 0L;
     } else {
         m_timestamp = *mp_timestamp++;
@@ -627,7 +627,7 @@ int32_t c_pipp_ser::get_frame (
             // Colour RGB data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 6 ,SEEK_CUR);
                 return 0;
             }
@@ -721,7 +721,7 @@ int32_t c_pipp_ser::get_frame (
             // Colour BGR data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 6 ,SEEK_CUR);
                 return 0;
             }
@@ -814,7 +814,7 @@ int32_t c_pipp_ser::get_frame (
             // Mono data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 2 ,SEEK_CUR);
                 return 0;
             }
@@ -884,7 +884,7 @@ int32_t c_pipp_ser::get_frame (
             // 24-bit RGB data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 3, SEEK_CUR);
                 return 0;
             }
@@ -911,7 +911,7 @@ int32_t c_pipp_ser::get_frame (
             // 24-bit BGR data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 3, SEEK_CUR);
                 return 0;
             }
@@ -933,7 +933,7 @@ int32_t c_pipp_ser::get_frame (
             // 8-bit mono data
 
             // Skip frame if required
-            if (buffer == NULL) {
+            if (buffer == nullptr) {
                 fseek64(mp_ser_file, m_header.image_width * m_header.image_height, SEEK_CUR);
                 return 0;
             }

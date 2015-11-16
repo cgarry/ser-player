@@ -29,7 +29,7 @@ using namespace std;
 // Constructor
 // ------------------------------------------
 c_pipp_ser_write::c_pipp_ser_write() :
-    mp_ser_file(NULL),
+    mp_ser_file(nullptr),
     m_open(false),
     m_error_string("")
 {
@@ -280,7 +280,7 @@ int32_t c_pipp_ser_write::close()
     m_open = false;
 
     fclose(mp_ser_file);
-    mp_ser_file = NULL;
+    mp_ser_file = nullptr;
 
     // Release filename memory
     delete[] mp_index_filename;

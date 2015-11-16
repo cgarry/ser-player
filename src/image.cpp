@@ -737,6 +737,148 @@ void c_image::change_colour_saturation(
 }
 
 
+void c_image::align_colour_channels(
+        int x_blue,
+        int y_blue,
+        int x_red,
+        int y_red)
+{
+    if (m_colour) {
+        // Only process colour images
+        if ((x_blue != 0) || (y_blue != 0) || (x_red != 0) | (y_red != 0)) {
+            if (m_byte_depth == 1) {
+                align_colour_channels_int <uint8_t> (x_blue, y_blue, x_red, y_red);
+            } else {
+                align_colour_channels_int <uint16_t> (x_blue, y_blue, x_red, y_red);
+            }
+        }
+    }
+}
+
+
+template <typename T>
+void c_image::align_colour_channels_int(
+        int x_blue,
+        int y_blue,
+        int x_red,
+        int y_red)
+{
+    T *p_new_buffer = new T[m_width * m_height * 3];  // Create new buffer
+    memcpy(p_new_buffer, mp_buffer, m_width * m_height * 3 * sizeof(T));  // Copy current data into new buffer
+
+
+    //
+    // Blue channel
+    //
+    if (x_blue != 0 || y_blue != 0) {
+        T *p_wr_data = p_new_buffer;
+        int blue_active_y_start = (y_blue < 0) ? 0 : y_blue;
+        int blue_active_y_end = (y_blue > 0) ? m_height - 1 : m_height - 1 + y_blue;
+        int blue_active_x_start = (x_blue < 0) ? 0 : x_blue;
+        int blue_active_x_end = (x_blue > 0) ? m_width - 1: m_width - 1 + x_blue;
+
+        // Copy blue channel to new buffer
+        int y;
+        for (y = 0; y < blue_active_y_start; y++) {
+            // Write inital blank lines to new buffer (if any)
+            for (int x = 0; x < m_width; x++) {
+                *p_wr_data = 0;  // Blue data
+                p_wr_data += 3;
+            }
+        }
+
+        // Active lines
+        for ( ; y < blue_active_y_end; y++) {
+            // Write inital blank pixels at start of the line (if any)
+            int x;
+            for (x = 0; x < blue_active_x_start; x++) {
+                *p_wr_data = 0;  // Blue data
+                p_wr_data += 3;
+            }
+
+            // Write active pixels to new buffer
+            T *p_blue_rd_data = ((T *)mp_buffer) + (y - y_blue) * m_width * 3 + (x - x_blue)* 3;
+            for ( ; x < blue_active_x_end; x++) {
+                *p_wr_data = *p_blue_rd_data;
+                p_blue_rd_data += 3;
+                p_wr_data += 3;
+            }
+
+            // Write final blank pixels at end of line (if any)
+            for ( ; x < m_width; x++) {
+                *p_wr_data = 0;  // Blue data
+                p_wr_data += 3;
+            }
+
+        }
+
+        // Copy final blank lines to new buffer (if any)
+        for ( ; y < m_height; y++) {
+            for (int x = 0; x < m_width; x++) {
+                *p_wr_data = 0;  // Blue data
+                p_wr_data += 3;
+            }
+        }
+    }
+
+    //
+    // Red channel
+    //
+    if (x_red != 0 || y_red != 0) {
+        T *p_wr_data = p_new_buffer + 2;
+        int red_active_y_start = (y_red < 0) ? 0 : y_red;
+        int red_active_y_end = (y_red > 0) ? m_height - 1 : m_height - 1 + y_red;
+        int red_active_x_start = (x_red < 0) ? 0 : x_red;
+        int red_active_x_end = (x_red > 0) ? m_width - 1: m_width - 1 + x_red;
+
+        // Copy blue channel to new buffer
+        int y;
+        for (y = 0; y < red_active_y_start; y++) {
+            // Write inital blank lines to new buffer (if any)
+            for (int x = 0; x < m_width; x++) {
+                *p_wr_data = 0;  // Red data
+                p_wr_data += 3;
+            }
+        }
+
+        // Active lines
+        for ( ; y < red_active_y_end; y++) {
+            // Write inital blank pixels at start of the line (if any)
+            int x;
+            for (x = 0; x < red_active_x_start; x++) {
+                *p_wr_data = 0;  // Red data
+                p_wr_data += 3;
+            }
+
+            // Write active pixels to new buffer
+            T *p_red_rd_data = ((T *)mp_buffer) + (y - y_red) * m_width * 3 + (x - x_red)* 3 + 2;
+            for ( ; x < red_active_x_end; x++) {
+                *p_wr_data = *p_red_rd_data;
+                p_red_rd_data += 3;
+                p_wr_data += 3;
+            }
+
+            // Write final blank pixels at end of line (if any)
+            for ( ; x < m_width; x++) {
+                *p_wr_data = 0;  // Red data
+                p_wr_data += 3;
+            }
+
+        }
+
+        // Copy final blank lines to new buffer (if any)
+        for ( ; y < m_height; y++) {
+            for (int x = 0; x < m_width; x++) {
+                *p_wr_data = 0;  // Red data
+                p_wr_data += 3;
+            }
+        }
+    }
+
+    set_new_buffer((uint8_t *)p_new_buffer, m_width * m_height * 3 * sizeof(T));
+}
+
+
 template <typename T>
 void c_image::change_colour_saturation_int(
     double saturation)

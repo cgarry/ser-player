@@ -138,12 +138,12 @@ const char *pipp_get_filename_from_filepath(
     // Find last occurance of '/'
     const char *name = strrchr(path.c_str(), '/');
 
-    if (name == NULL) {
+    if (name == nullptr) {
         // '/' was not found, look for '\\' instead
         name = strrchr(path.c_str(), '\\');
     }
 
-    if (name == NULL) {
+    if (name == nullptr) {
         // Neither '/' or '\\' was found - there is no path to remove
         name = path.c_str();
     }

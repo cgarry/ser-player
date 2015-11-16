@@ -4,7 +4,7 @@
 
 c_icon_groupbox::c_icon_groupbox(QWidget *parent) :
     QGroupBox(parent),
-    mp_group_icon(NULL)
+    mp_group_icon(nullptr)
 {
     mp_grid_Layout = new QGridLayout;
     mp_grid_Layout->setMargin(0);
@@ -25,7 +25,7 @@ c_icon_groupbox::c_icon_groupbox(QWidget *parent) :
 
 c_icon_groupbox::~c_icon_groupbox()
 {
-    if (mp_group_icon != NULL)
+    if (mp_group_icon != nullptr)
     {
         delete mp_group_icon;
     }

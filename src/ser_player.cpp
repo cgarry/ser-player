@@ -73,8 +73,8 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent),
-      mp_save_frames_as_ser_Dialog(NULL),
-      mp_save_frames_as_images_Dialog(NULL)
+      mp_save_frames_as_ser_Dialog(nullptr),
+      mp_save_frames_as_images_Dialog(nullptr)
 {
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
@@ -735,7 +735,7 @@ void c_ser_player::handle_arguments()
 
 void c_ser_player::fps_changed_slot(QAction *action)
 {
-    if (action != NULL) {
+    if (action != nullptr) {
         m_display_framerate = action->data().toInt();
         mp_framerate_Menu->setTitle(tr("Display Framerate"));
         calculate_display_framerate();
@@ -809,7 +809,7 @@ void c_ser_player::save_frames_as_ser_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
-    if (mp_save_frames_as_ser_Dialog == NULL) {
+    if (mp_save_frames_as_ser_Dialog == nullptr) {
         mp_save_frames_as_ser_Dialog = new c_save_frames_dialog(this,
                                                                 c_save_frames_dialog::SAVE_SER,
                                                                 mp_ser_file->get_width(),
@@ -991,7 +991,7 @@ void c_ser_player::save_frames_as_images_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
-    if (mp_save_frames_as_images_Dialog == NULL) {
+    if (mp_save_frames_as_images_Dialog == nullptr) {
         mp_save_frames_as_images_Dialog = new c_save_frames_dialog(this,
                                                                    c_save_frames_dialog::SAVE_IMAGES,
                                                                    mp_ser_file->get_width(),
@@ -1025,7 +1025,7 @@ void c_ser_player::save_frames_as_images_slot()
                                    m_ser_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
                                    &selected_filter);
-        const char *p_format = NULL;
+        const char *p_format = nullptr;
         if (!filename.isEmpty() && !selected_filter.isEmpty()) {
             if (selected_filter == jpg_filter) {
                 p_format = "JPG";
@@ -1214,7 +1214,7 @@ void c_ser_player::save_frames_as_images_slot()
 
 void c_ser_player::open_save_folder_slot(QAction *action)
 {
-    if (action != NULL) {
+    if (action != nullptr) {
         // Open folder
         QString dir = action->data().toString();
         if (dir.isEmpty()) {
@@ -1226,7 +1226,7 @@ void c_ser_player::open_save_folder_slot(QAction *action)
             QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
         } else {
             // Folder does not exist
-            QMessageBox::warning(NULL,
+            QMessageBox::warning(nullptr,
                                  tr("Cannot Open Last Save Folder", "Message box title for canot open last save folder"),
                                  tr("Folder Not Found:", "Message box title for cannot open last save folder") + "\n" + dir);
             c_persistent_data::m_recent_save_folders.removeAll(dir);
@@ -1313,7 +1313,7 @@ void c_ser_player::estimate_colour_balance()
 
 void c_ser_player::zoom_changed_slot(QAction *action)
 {
-    if (action != NULL) {
+    if (action != nullptr) {
         resize_window_with_zoom(action->data().toInt());
     }
 }
@@ -1321,7 +1321,7 @@ void c_ser_player::zoom_changed_slot(QAction *action)
 
 void c_ser_player::language_changed_slot(QAction *action)
 {
-    if (action != NULL) {
+    if (action != nullptr) {
         c_persistent_data::m_selected_language = action->data().toString();
     }
 }
@@ -1329,7 +1329,7 @@ void c_ser_player::language_changed_slot(QAction *action)
 
 void c_ser_player::about_qt()
 {
-    QMessageBox::aboutQt(NULL, tr("About Qt", "Message box title"));
+    QMessageBox::aboutQt(nullptr, tr("About Qt", "Message box title"));
 }
 
 
@@ -1348,7 +1348,7 @@ void c_ser_player::open_ser_file_slot()
 
 void c_ser_player::open_ser_file_slot(QAction *action)
 {
-    if (action != NULL) {
+    if (action != nullptr) {
         QString filename = action->data().toString();
         if (filename.isEmpty()) {
             // Clear list
@@ -1359,7 +1359,7 @@ void c_ser_player::open_ser_file_slot(QAction *action)
             open_ser_file(filename);
         } else {
             // File does not exist
-            QMessageBox::warning(NULL,
+            QMessageBox::warning(nullptr,
                                  tr("Cannot Open SER File"),
                                  tr("File Not Found:", "Message box title for cannot open SER file") + "\n" + filename);
             c_persistent_data::m_recent_ser_files.removeAll(filename);
@@ -1383,7 +1383,7 @@ void c_ser_player::open_ser_file(const QString &filename)
     if (m_total_frames <= 0) {
         // Invalid SER file
         if (mp_ser_file->get_error_string().length() > 0) {
-            QMessageBox::warning(NULL,
+            QMessageBox::warning(nullptr,
                                  tr("Invalid SER File", "Message box title for invalid SER file"),
                                  mp_ser_file->get_error_string());
         }
@@ -1392,9 +1392,9 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Delete previous save frames dialogs to remove remembered settings
         delete mp_save_frames_as_ser_Dialog;
-        mp_save_frames_as_ser_Dialog = NULL;
+        mp_save_frames_as_ser_Dialog = nullptr;
         delete mp_save_frames_as_images_Dialog;
-        mp_save_frames_as_images_Dialog = NULL;
+        mp_save_frames_as_images_Dialog = nullptr;
 
         // Set SER file header details in header details dialog
         mp_header_details_dialog->set_details(
@@ -2119,6 +2119,8 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
             if (mp_processing_options_Dialog->get_debayer_enable()) {
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
+
+            mp_frame_image->align_colour_channels(0, 0, 0, 0);  // Placeholder until controls are in place
 
             if (m_monochrome_conversion_enable) {
                 mp_frame_image->monochrome_conversion(m_monochrome_conversion_type);

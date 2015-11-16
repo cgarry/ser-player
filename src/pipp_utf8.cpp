@@ -183,7 +183,7 @@ bool create_directories_utf8(
 
     int ret = CreateDirectoryW(
       w_path,
-      NULL
+      nullptr
     );
 
     delete [] w_path;

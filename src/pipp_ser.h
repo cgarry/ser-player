@@ -93,11 +93,11 @@ class c_pipp_ser {
         // Constructor
         // ------------------------------------------
         c_pipp_ser() :
-            mp_ser_file(NULL),
+            mp_ser_file(nullptr),
             m_filesize(0),
             m_bytes_depth(0),
             m_colour(0),
-            mp_timestamp(NULL),
+            mp_timestamp(nullptr),
             m_error_string("") {}
 
 
@@ -292,7 +292,7 @@ class c_pipp_ser {
         // Return is SER file has timestamps
         //
         bool has_timestamps() {
-            return mp_timestamp != NULL;
+            return mp_timestamp != nullptr;
         }
 
 

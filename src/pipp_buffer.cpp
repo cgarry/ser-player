@@ -81,6 +81,6 @@ uint8_t *c_pipp_buffer::get_zero_buffer(
 // ------------------------------------------
 void c_pipp_buffer::delete_buffer() {
     delete [] mp_buffer;
-    mp_buffer = NULL;
+    mp_buffer = nullptr;
     m_buffer_size = 0;
 }

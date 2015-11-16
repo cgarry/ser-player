@@ -62,7 +62,7 @@ class c_image
             m_byte_depth(1),
             m_colour_id(0),
             m_colour(false),
-            mp_buffer(NULL),
+            mp_buffer(nullptr),
             m_buffer_size(0),
             m_invert(false),
             m_colour_balance_enabled(false),
@@ -160,6 +160,12 @@ class c_image
         void change_colour_saturation(
             double saturation);
 
+        void align_colour_channels(
+                int x_blue,
+                int y_blue,
+                int x_red,
+                int y_red);
+
         bool resize_image(
                 int req_width,
                 int req_height);
@@ -179,6 +185,13 @@ class c_image
         template <typename T>
         void change_colour_saturation_int(
             double saturation);
+
+        template <typename T>
+        void align_colour_channels_int(
+                int x_blue,
+                int y_blue,
+                int x_red,
+                int y_red);
 
         template <typename T>
         void debayer_pixel_bilinear(

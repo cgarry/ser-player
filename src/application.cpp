@@ -30,7 +30,7 @@
 
 c_application::c_application(int &argc, char **argv)
     : QApplication(argc, argv),
-      mp_win(NULL)
+      mp_win(nullptr)
 {
     setOrganizationName("PIPP");
     setApplicationName(tr("SER Player"));
