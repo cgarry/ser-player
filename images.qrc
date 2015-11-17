@@ -23,5 +23,7 @@
         <file>resources/monochrome_conversion_icon.png</file>
         <file>resources/saturation_icon.png</file>
         <file>resources/colour_align.png</file>
+        <file>resources/down_button.png</file>
+        <file>resources/up_button.png</file>
     </qresource>
 </RCC>

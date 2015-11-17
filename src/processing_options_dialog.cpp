@@ -21,6 +21,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -175,16 +176,138 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_red_y_Spinbox = new QSpinBox;
     mp_red_y_Spinbox->setRange(-255, +255);
 
+    QPushButton *red_left_PushButton = new QPushButton;
+    QPixmap left_Pixmap = QPixmap(":/res/resources/back_button.png");
+    red_left_PushButton->setIcon(left_Pixmap);
+    red_left_PushButton->setIconSize(left_Pixmap.size());
+    red_left_PushButton->setFixedSize(left_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *red_right_PushButton = new QPushButton;
+    QPixmap right_Pixmap = QPixmap(":/res/resources/forward_button.png");
+    red_right_PushButton->setIcon(right_Pixmap);
+    red_right_PushButton->setIconSize(right_Pixmap.size());
+    red_right_PushButton->setFixedSize(right_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *red_up_PushButton = new QPushButton;
+    QPixmap up_Pixmap = QPixmap(":/res/resources/up_button.png");
+    red_up_PushButton->setIcon(up_Pixmap);
+    red_up_PushButton->setIconSize(up_Pixmap.size());
+    red_up_PushButton->setFixedSize(up_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *red_down_PushButton = new QPushButton;
+    QPixmap down_Pixmap = QPixmap(":/res/resources/down_button.png");
+    red_down_PushButton->setIcon(down_Pixmap);
+    red_down_PushButton->setIconSize(down_Pixmap.size());
+    red_down_PushButton->setFixedSize(down_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QGridLayout *red_buttons_GLayout = new QGridLayout;
+    red_buttons_GLayout->setVerticalSpacing(0);
+    red_buttons_GLayout->setHorizontalSpacing(0);
+    red_buttons_GLayout->setMargin(0);
+    red_buttons_GLayout->addWidget(red_up_PushButton, 0, 1);
+    red_buttons_GLayout->addWidget(red_left_PushButton, 1, 0);
+    red_buttons_GLayout->addWidget(red_right_PushButton, 1, 2);
+    red_buttons_GLayout->addWidget(red_down_PushButton, 2, 1);
+
+    QFormLayout *red_spinboxes_FLayout = new QFormLayout;
+    red_spinboxes_FLayout->setMargin(0);
+    red_spinboxes_FLayout->setSpacing(5);
+    red_spinboxes_FLayout->addRow("x:", mp_red_x_Spinbox);
+    red_spinboxes_FLayout->addRow("y:", mp_red_y_Spinbox);
+
+    QVBoxLayout *red_spinboxes_VLayout = new QVBoxLayout;
+    red_spinboxes_VLayout->setMargin(0);
+    red_spinboxes_VLayout->setSpacing(0);
+    red_spinboxes_VLayout->addStretch();
+    red_spinboxes_VLayout->addLayout(red_spinboxes_FLayout);
+    red_spinboxes_VLayout->addStretch();
+
+    QHBoxLayout *red_controls_HLayout = new QHBoxLayout;
+    red_controls_HLayout->setMargin(5);
+    red_controls_HLayout->addLayout(red_buttons_GLayout);
+    red_controls_HLayout->addLayout(red_spinboxes_VLayout);
+
+    QGroupBox *red_align_GBox = new QGroupBox(tr("Red Channel"));
+    red_align_GBox->setLayout(red_controls_HLayout);
+
+    QPushButton *blue_left_PushButton = new QPushButton;
+    blue_left_PushButton->setIcon(left_Pixmap);
+    blue_left_PushButton->setIconSize(left_Pixmap.size());
+    blue_left_PushButton->setFixedSize(left_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *blue_right_PushButton = new QPushButton;
+    blue_right_PushButton->setIcon(right_Pixmap);
+    blue_right_PushButton->setIconSize(right_Pixmap.size());
+    blue_right_PushButton->setFixedSize(right_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *blue_up_PushButton = new QPushButton;
+    blue_up_PushButton->setIcon(up_Pixmap);
+    blue_up_PushButton->setIconSize(up_Pixmap.size());
+    blue_up_PushButton->setFixedSize(up_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QPushButton *blue_down_PushButton = new QPushButton;
+    blue_down_PushButton->setIcon(down_Pixmap);
+    blue_down_PushButton->setIconSize(down_Pixmap.size());
+    blue_down_PushButton->setFixedSize(down_Pixmap.size() + QSize(10, 10));  // Nice and small
+
+    QGridLayout *blue_buttons_GLayout = new QGridLayout;
+    blue_buttons_GLayout->setVerticalSpacing(0);
+    blue_buttons_GLayout->setHorizontalSpacing(0);
+    blue_buttons_GLayout->setMargin(0);
+    blue_buttons_GLayout->addWidget(blue_up_PushButton, 0, 1);
+    blue_buttons_GLayout->addWidget(blue_left_PushButton, 1, 0);
+    blue_buttons_GLayout->addWidget(blue_right_PushButton, 1, 2);
+    blue_buttons_GLayout->addWidget(blue_down_PushButton, 2, 1);
+
+    QFormLayout *blue_spinboxes_FLayout = new QFormLayout;
+    blue_spinboxes_FLayout->setMargin(0);
+    blue_spinboxes_FLayout->setSpacing(5);
+    blue_spinboxes_FLayout->addRow("x:", mp_blue_x_Spinbox);
+    blue_spinboxes_FLayout->addRow("y:", mp_blue_y_Spinbox);
+
+    QVBoxLayout *blue_spinboxes_VLayout = new QVBoxLayout;
+    blue_spinboxes_VLayout->setMargin(0);
+    blue_spinboxes_VLayout->setSpacing(0);
+    blue_spinboxes_VLayout->addStretch();
+    blue_spinboxes_VLayout->addLayout(blue_spinboxes_FLayout);
+    blue_spinboxes_VLayout->addStretch();
+
+    QHBoxLayout *blue_controls_HLayout = new QHBoxLayout;
+    blue_controls_HLayout->setMargin(5);
+    blue_controls_HLayout->addLayout(blue_buttons_GLayout);
+    blue_controls_HLayout->addLayout(blue_spinboxes_VLayout);
+
+    QGroupBox *blue_align_GBox = new QGroupBox(tr("Blue Channel"));
+    blue_align_GBox->setLayout(blue_controls_HLayout);
+
     QHBoxLayout *colour_align_HLayout = new QHBoxLayout;
-    colour_align_HLayout->addWidget(mp_blue_x_Spinbox);
-    colour_align_HLayout->addWidget(mp_blue_y_Spinbox);
-    colour_align_HLayout->addWidget(mp_red_x_Spinbox);
-    colour_align_HLayout->addWidget(mp_red_y_Spinbox);
+    colour_align_HLayout->addWidget(red_align_GBox);
+    colour_align_HLayout->addWidget(blue_align_GBox);
+
+    QPushButton *colour_align_reset_Button = new QPushButton(tr("Reset"));
+
+    QVBoxLayout *colour_align_VLayout = new QVBoxLayout;
+    colour_align_VLayout->setMargin(5);
+    colour_align_VLayout->setSpacing(5);
+    colour_align_VLayout->addLayout(colour_align_HLayout);
+    colour_align_VLayout->addWidget(colour_align_reset_Button, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
     c_icon_groupbox *p_colour_align_GroupBox = new c_icon_groupbox;
     p_colour_align_GroupBox->setTitle(tr("Colour Channel Align"));
     p_colour_align_GroupBox->set_icon(":/res/resources/colour_align.png");
-    p_colour_align_GroupBox->setLayout(colour_align_HLayout);
+    p_colour_align_GroupBox->setLayout(colour_align_VLayout);
+
+    connect(red_left_PushButton, SIGNAL(pressed()), mp_red_x_Spinbox, SLOT(stepDown()));
+    connect(red_right_PushButton, SIGNAL(pressed()), mp_red_x_Spinbox, SLOT(stepUp()));
+    connect(red_down_PushButton, SIGNAL(pressed()), mp_red_y_Spinbox, SLOT(stepDown()));
+    connect(red_up_PushButton, SIGNAL(pressed()), mp_red_y_Spinbox, SLOT(stepUp()));
+
+    connect(blue_left_PushButton, SIGNAL(pressed()), mp_blue_x_Spinbox, SLOT(stepDown()));
+    connect(blue_right_PushButton, SIGNAL(pressed()), mp_blue_x_Spinbox, SLOT(stepUp()));
+    connect(blue_down_PushButton, SIGNAL(pressed()), mp_blue_y_Spinbox, SLOT(stepDown()));
+    connect(blue_up_PushButton, SIGNAL(pressed()), mp_blue_y_Spinbox, SLOT(stepUp()));
+
+    connect(colour_align_reset_Button, SIGNAL(pressed()), this, SLOT(reset_colour_align_slot()));
 
     connect(mp_blue_x_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
     connect(mp_blue_y_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
