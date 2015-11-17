@@ -201,8 +201,13 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     red_down_PushButton->setFixedSize(down_Pixmap.size() + QSize(10, 10));  // Nice and small
 
     QGridLayout *red_buttons_GLayout = new QGridLayout;
+#ifdef __APPLE__
+    red_buttons_GLayout->setVerticalSpacing(12);
+    red_buttons_GLayout->setHorizontalSpacing(12);
+#else
     red_buttons_GLayout->setVerticalSpacing(0);
     red_buttons_GLayout->setHorizontalSpacing(0);
+#endif
     red_buttons_GLayout->setMargin(0);
     red_buttons_GLayout->addWidget(red_up_PushButton, 0, 1);
     red_buttons_GLayout->addWidget(red_left_PushButton, 1, 0);
@@ -251,8 +256,13 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     blue_down_PushButton->setFixedSize(down_Pixmap.size() + QSize(10, 10));  // Nice and small
 
     QGridLayout *blue_buttons_GLayout = new QGridLayout;
+#ifdef __APPLE__
+    blue_buttons_GLayout->setVerticalSpacing(12);
+    blue_buttons_GLayout->setHorizontalSpacing(12);
+#else
     blue_buttons_GLayout->setVerticalSpacing(0);
     blue_buttons_GLayout->setHorizontalSpacing(0);
+#endif
     blue_buttons_GLayout->setMargin(0);
     blue_buttons_GLayout->addWidget(blue_up_PushButton, 0, 1);
     blue_buttons_GLayout->addWidget(blue_left_PushButton, 1, 0);
