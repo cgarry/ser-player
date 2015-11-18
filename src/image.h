@@ -76,11 +76,11 @@ class c_image
             m_blue_gain(1.0),
             m_gain(1.0),
             m_gamma(1.0),
-            m_rgb_align_enabled(true),
-            m_red_align_x(1),
-            m_red_align_y(-1),
-            m_blue_align_x(-2),
-            m_blue_align_y(2)
+            m_rgb_align_enabled(false),
+            m_red_align_x(0),
+            m_red_align_y(0),
+            m_blue_align_x(0),
+            m_blue_align_y(0)
         {
         }
 
