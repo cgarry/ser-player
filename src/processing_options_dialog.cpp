@@ -132,7 +132,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     //
     // Monochrome Conversion
     //
-    QLabel *monochrome_conversion_Label = new QLabel(tr("Convert Colour To Monochrome Using: "));
+    QLabel *monochrome_conversion_Label = new QLabel(tr("Convert To Monochrome Using: "));
 
     mp_monochrome_conversion_Combobox = new QComboBox;
     mp_monochrome_conversion_Combobox->addItem(tr("RG & B Channels"));
