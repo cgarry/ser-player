@@ -292,10 +292,10 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     colour_align_VLayout->addLayout(colour_align_HLayout);
     colour_align_VLayout->addWidget(colour_align_reset_Button, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
-    c_icon_groupbox *p_colour_align_GroupBox = new c_icon_groupbox;
-    p_colour_align_GroupBox->setTitle(tr("Colour Channel Align"));
-    p_colour_align_GroupBox->set_icon(":/res/resources/colour_align.png");
-    p_colour_align_GroupBox->setLayout(colour_align_VLayout);
+    mp_colour_align_GroupBox = new c_icon_groupbox;
+    mp_colour_align_GroupBox->setTitle(tr("Colour Channel Align"));
+    mp_colour_align_GroupBox->set_icon(":/res/resources/colour_align.png");
+    mp_colour_align_GroupBox->setLayout(colour_align_VLayout);
 
     connect(red_left_PushButton, SIGNAL(pressed()), mp_red_x_Spinbox, SLOT(stepDown()));
     connect(red_right_PushButton, SIGNAL(pressed()), mp_red_x_Spinbox, SLOT(stepUp()));
@@ -423,19 +423,31 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_colour_balance_GroupBox->set_icon(":/res/resources/colour_balance_icon.png");
     mp_colour_balance_GroupBox->setLayout(colour_balance_VLayout);
 
+    QVBoxLayout *dialog_lhs_vlayout = new QVBoxLayout;
+    dialog_lhs_vlayout->setMargin(0);
+    dialog_lhs_vlayout->setSpacing(10);
+    dialog_lhs_vlayout->addWidget(mp_debayer_GroupBox);
+    dialog_lhs_vlayout->addWidget(invert_GroupBox);
+    dialog_lhs_vlayout->addWidget(gain_and_gammaGroupBox);
+    dialog_lhs_vlayout->addWidget(mp_colour_align_GroupBox);
+    dialog_lhs_vlayout->addStretch();
 
-    QVBoxLayout *dialog_vlayout = new QVBoxLayout;
-    dialog_vlayout->setMargin(10);
-    dialog_vlayout->setSpacing(15);
-    dialog_vlayout->addWidget(mp_debayer_GroupBox);
-    dialog_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
-    dialog_vlayout->addWidget(invert_GroupBox);
-    dialog_vlayout->addWidget(gain_and_gammaGroupBox);
-    dialog_vlayout->addWidget(p_colour_align_GroupBox);
-    dialog_vlayout->addWidget(mp_colour_saturation_GroupBox);
-    dialog_vlayout->addWidget(mp_colour_balance_GroupBox);
+    QVBoxLayout *dialog_rhs_vlayout = new QVBoxLayout;
+    dialog_rhs_vlayout->setMargin(0);
+    dialog_rhs_vlayout->setSpacing(10);
 
-    setLayout(dialog_vlayout);
+    dialog_rhs_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
+    dialog_rhs_vlayout->addWidget(mp_colour_saturation_GroupBox);
+    dialog_rhs_vlayout->addWidget(mp_colour_balance_GroupBox);
+    dialog_rhs_vlayout->addStretch();
+
+    QHBoxLayout *dialog_hlayout = new QHBoxLayout;
+    dialog_hlayout->setMargin(10);
+    dialog_hlayout->setSpacing(10);
+    dialog_hlayout->addLayout(dialog_lhs_vlayout);
+    dialog_hlayout->addLayout(dialog_rhs_vlayout);
+
+    setLayout(dialog_hlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
@@ -686,6 +698,8 @@ void c_processing_options_dialog::enable_and_disable_controls()
     } else if (m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked()) {
         enable_monochrome_conversion_control = true;
     }
+
+    mp_colour_align_GroupBox->setVisible(enable_monochrome_conversion_control);
 
     mp_monochrome_conversion_GroupBox->setEnabled(enable_monochrome_conversion_control);
     mp_monochrome_conversion_GroupBox->setVisible(enable_monochrome_conversion_control);

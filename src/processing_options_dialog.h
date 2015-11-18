@@ -95,6 +95,8 @@ private:
     QDoubleSpinBox *mp_gain_DSpinbox;
     QSlider *mp_gamma_Slider;
     QDoubleSpinBox *mp_gamma_DSpinbox;
+    // Colour align
+    c_icon_groupbox *mp_colour_align_GroupBox;
     // Monochrome Conversion
     QComboBox *mp_monochrome_conversion_Combobox;
     c_icon_groupbox *mp_monochrome_conversion_GroupBox;
