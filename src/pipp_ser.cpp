@@ -54,7 +54,6 @@ int32_t c_pipp_ser::open(
     int32_t quiet)
 {
     (void)quiet;  // Remove unused parameter warning
-    int32_t ret;
     m_current_frame = 0;
     m_fps_rate = 0;
     m_fps_scale = 1;
@@ -96,12 +95,12 @@ int32_t c_pipp_ser::open(
 
     // Read File ID
     char file_id[15];
-    ret = fread(file_id, 1, 14, mp_ser_file);
+    size_t read_ret = fread(file_id, 1, 14, mp_ser_file);
     file_id[14] = 0;
     m_file_id = file_id;
 
     // Read the rest of the header
-    ret = fread(&m_header, 1, sizeof(m_header), mp_ser_file);
+    read_ret = fread(&m_header, 1, sizeof(m_header), mp_ser_file);
 
     if (m_header.frame_count <= 0) {
         // Invalid frame count
@@ -205,7 +204,7 @@ int32_t c_pipp_ser::open(
             uint64_t start_of_image_data_pos = ftell64(mp_ser_file);
 
             // Seek to start of timestamps
-            ret = fseek64(
+            read_ret = fseek64(
                 mp_ser_file,
                 (int64_t)m_header.frame_count * m_header.image_height * m_header.image_width * total_bytes_per_sample,
                 SEEK_CUR);
@@ -214,10 +213,10 @@ int32_t c_pipp_ser::open(
             mp_timestamp = (uint64_t *)m_timestamp_buffer.get_buffer(8 * m_header.frame_count);
 
             // Load timestamp data into buffer
-            ret = fread(mp_timestamp, 1, 8 * m_header.frame_count, mp_ser_file);
+            read_ret = fread(mp_timestamp, 1, 8 * m_header.frame_count, mp_ser_file);
 
             // Debug Start
-            if (ret != 8 * m_header.frame_count) {
+            if (read_ret != 8 * m_header.frame_count) {
                 m_error_string += QCoreApplication::tr("Error: SER timestamp read failed for file '%1'", "SER File error message")
                                   .arg(filename);
                 m_error_string += "\n";

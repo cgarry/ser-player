@@ -109,7 +109,7 @@ int32_t c_pipp_ser_write::write_frame(
     uint8_t *data,
     uint64_t timestamp)
 {
-    int32_t ret;
+    size_t ret;
 
     // Grab first timestamp
     if (m_header.frame_count == 0) {
@@ -228,7 +228,7 @@ int32_t c_pipp_ser_write::set_details(
 // ------------------------------------------
 int32_t c_pipp_ser_write::close()
 {
-    uint32_t ret;
+    size_t ret;
 
     // Close index file which may be empty
     fclose(mp_ser_index_file);

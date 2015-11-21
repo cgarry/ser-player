@@ -43,8 +43,8 @@
 
 ; MUI end ------
 
-Name "${PRODUCT_NAME} v${PRODUCT_VERSION}"
-OutFile "ser_player_install.exe"
+Name "${PRODUCT_NAME} v${PRODUCT_VERSION} (64-bit)"
+OutFile "ser_player_install_x64.exe"
 RequestExecutionLevel admin
 InstallDir "$PROGRAMFILES\SER Player"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
@@ -61,7 +61,7 @@ Section "MainSection" SEC01
   Delete "$INSTDIR\*.dll"
   
 ; Specify files that are to be installed
-  File /r "..\bin\*"
+  File /r "..\bin64\*"
   File /r "..\platform-specific\windows\win*"
 SectionEnd
 
@@ -85,6 +85,24 @@ Section -Post
 SectionEnd
 
 Function .onInit
+  ; Ensure this is a 64-bit machine
+  ${If} ${RunningX64}
+    ; Check for current 32-bit installation
+    IfFileExists "$PROGRAMFILES\SER Player\uninst.exe" Uninstall32Exists PastUninstall32Check
+    Uninstall32Exists:
+      ${If} ${Cmd} 'MessageBox MB_YESNO "A 32-bit version of SER Player is already installed.  It is recommended that this version is uninstalled before installing the 64-bit version of SER Player.$\nUninstall now?" IDYES' 
+        ExecWait '"$PROGRAMFILES\SER Player\uninst.exe" /S _?=$INSTDIR'
+        RMDir /r "$INSTDIR"
+    ${EndIf}
+
+    PastUninstall32Check:
+    SetRegView 64
+    StrCpy $InstDir "$PROGRAMFILES64\SER Player"
+  ${Else}
+    ; This is a 32-bit machine
+    MessageBox MB_OK "Cannot install the 64-bit version of SER Player on 32-bit Windows"
+    Quit
+  ${EndIf}
 FunctionEnd
 
 Function .onInstSuccess
@@ -135,25 +153,25 @@ pop $R1
 
 
 Function CreateSerFileAssication
-  ${If} ${Cmd} 'MessageBox MB_YESNO "Associate .ser files and install .ser thumbnail preview DLL?$\nThis allows .ser files to be opened with SER Player by double-clicking on them and allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
-      ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
-      
+    ${If} ${Cmd} 'MessageBox MB_YESNO "Associate .ser files and install .ser thumbnail preview DLL?$\nThis allows .ser files to be opened with SER Player by double-clicking on them and allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
+        ${unregisterExtension} ".ser" "SER File"
+        ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
         ${If} ${AtLeastWinVista}
-              ${If} ${RunningX64}
+            ${If} ${RunningX64}
                 # 64 bit code
                 ;Unregister previous version of SerThumbnailHandler.dll
                 ExecWait 'regsvr32.exe /s /u "$INSTDIR\win64\SerThumbnailHandler.dll"'
                 ;Register SerThumbnailHandler.dll
                 ExecWait 'regsvr32.exe /s "$INSTDIR\win64\SerThumbnailHandler.dll"'
-              ${Else}
+            ${Else}
                 # 32 bit code
                 ;Unregister previous version of SerThumbnailHandler.dll
                 ExecWait 'regsvr32.exe /s /u "$INSTDIR\win32\SerThumbnailHandler.dll"'
                 ;Register SerThumbnailHandler.dll
                 ExecWait 'regsvr32.exe  /s "$INSTDIR\win32\SerThumbnailHandler.dll"'
-              ${EndIf}  
+            ${EndIf}  
         ${EndIf}
-  ${EndIf}
+    ${EndIf}
 FunctionEnd
  
  

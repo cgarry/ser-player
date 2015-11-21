@@ -79,12 +79,19 @@ HEADERS  += src/ser_player.h \
     src/icon_groupbox.h
 
 # Build directories
-DESTDIR = $$PWD/bin
+contains(QT_ARCH, i386) {
+    win32:OBJECTS_DIR = $$PWD/build/o/win32
+    DESTDIR = $$PWD/bin32
+} else {
+    win32:OBJECTS_DIR = $$PWD/build/o/win64
+    DESTDIR = $$PWD/bin64
+}
+
 MOC_DIR = $$PWD/build/moc
 RCC_DIR = $$PWD/build/rcc
 UI_DIR = $$PWD/build/ui
+!win32:DESTDIR = $$PWD/bin
 unix:!macx:OBJECTS_DIR = $$PWD/build/o/unix
-win32:OBJECTS_DIR = $$PWD/build/o/win32
 macx:OBJECTS_DIR = $$PWD/build/o/mac
 macx:PRO_FILE_DIR = $$PWD
 
