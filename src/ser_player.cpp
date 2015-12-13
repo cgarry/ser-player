@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.2"
+#define VERSION_STRING "v1.4.4"
 
 #include <Qt>
 #include <QApplication>
@@ -46,6 +46,7 @@
 
 #include <cmath>
 
+#include "gif_write.h"
 #include "histogram_thread.h"
 #include "histogram_dialog.h"
 #include "image.h"
@@ -74,8 +75,14 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent),
       mp_save_frames_as_ser_Dialog(nullptr),
+      mp_save_frames_as_avi_Dialog(nullptr),
+      mp_save_frames_as_gif_Dialog(nullptr),
       mp_save_frames_as_images_Dialog(nullptr)
 {
+    // debug
+    c_gif_write test;
+    // debug
+
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
     m_is_colour = false;
@@ -109,6 +116,16 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_save_frames_as_ser_Act->setEnabled(false);
     file_menu->addAction(mp_save_frames_as_ser_Act);
     connect(mp_save_frames_as_ser_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_ser_slot()));
+
+    mp_save_frames_as_avi_Act = new QAction(tr("Save Frames As AVI File...", "Menu title"), this);
+    mp_save_frames_as_avi_Act->setEnabled(false);
+    file_menu->addAction(mp_save_frames_as_avi_Act);
+    connect(mp_save_frames_as_avi_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_avi_slot()));
+
+    mp_save_frames_as_gif_Act = new QAction(tr("Save Frames As Animated GIF...", "Menu title"), this);
+    mp_save_frames_as_gif_Act->setEnabled(false);
+    file_menu->addAction(mp_save_frames_as_gif_Act);
+    connect(mp_save_frames_as_gif_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_gif_slot()));
 
     mp_save_frames_as_images_Act = new QAction(tr("Save Frames As Images...", "Menu title"), this);
     mp_save_frames_as_images_Act->setEnabled(false);
@@ -981,6 +998,187 @@ void c_ser_player::save_frames_as_ser_slot()
 }
 
 
+void c_ser_player::save_frames_as_avi_slot()
+{
+}
+
+
+void c_ser_player::save_frames_as_gif_slot()
+{
+    // Pause playback if currently playing
+    bool restart_playing = false;
+    if (m_current_state == STATE_PLAYING) {
+        // Pause playing while frame is saved
+        restart_playing = true;
+        play_button_pressed_slot();
+    }
+
+    // Use save_frames dialog to get range of frames to be saved
+    if (mp_save_frames_as_gif_Dialog == nullptr) {
+        mp_save_frames_as_gif_Dialog = new c_save_frames_dialog(this,
+                                                                c_save_frames_dialog::SAVE_GIF,
+                                                                mp_ser_file->get_width(),
+                                                                mp_ser_file->get_height(),
+                                                                m_total_frames,
+                                                                mp_ser_file->has_timestamps(),
+                                                                mp_ser_file->get_observer_string(),
+                                                                mp_ser_file->get_instrument_string(),
+                                                                mp_ser_file->get_telescope_string());
+
+        double gif_frame_time;
+        if (mp_ser_file->get_fps_rate() > 0) {
+            gif_frame_time = (double)mp_ser_file->get_fps_scale() / mp_ser_file->get_fps_rate();
+        } else {
+            gif_frame_time = 0.2;
+        }
+
+        mp_save_frames_as_gif_Dialog->set_gif_frametime(gif_frame_time);
+    }
+
+    mp_save_frames_as_gif_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
+                                              mp_frame_Slider->get_end_frame(),
+                                              mp_frame_Slider->get_markers_enable());
+
+    int ret = mp_save_frames_as_gif_Dialog->exec();
+
+    if (ret != QDialog::Rejected &&
+        m_current_state != STATE_NO_FILE &&
+        m_current_state != STATE_PLAYING) {
+
+        int min_frame = mp_save_frames_as_gif_Dialog->get_start_frame();
+        int max_frame = mp_save_frames_as_gif_Dialog->get_end_frame();
+        QString default_filename =  mp_ser_file->get_filename();
+        int required_digits_for_number = mp_save_frames_as_gif_Dialog->get_required_digits_for_number();
+
+        if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
+            // Remove .ser extension
+            default_filename.chop(4);
+        }
+
+        // Add frame details
+        default_filename.append(QString("_F%1-%2")
+                                .arg(min_frame, required_digits_for_number, 10, QChar('0'))
+                                .arg(max_frame, required_digits_for_number, 10, QChar('0')));
+
+        // Add file extension
+        default_filename.append(".gif");
+
+        QString selected_filter;
+        QFileDialog::Options save_dialog_options = 0;
+        #ifdef __APPLE__
+        // The native save file dialog on OS X does not fill out a default filename
+        // so we use QT's save file dialog instead
+        save_dialog_options |= QFileDialog::DontUseNativeDialog;
+        #endif
+
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Animated GIF"),
+                                   default_filename,
+                                   tr("GIF Files (*.gif)", "Filetype filter"),
+                                   &selected_filter,
+                                   save_dialog_options);
+
+        if (!filename.isEmpty()) {
+            c_gif_write gif_write_file;
+            // Handle the case on Linux where an extension is not added by the save file dialog
+            if (!filename.endsWith(".gif", Qt::CaseInsensitive)) {
+                filename = filename + ".gif";
+            }
+
+            bool do_frame_processing = mp_save_frames_as_gif_Dialog->get_processing_enable();
+            int frames_to_be_saved = mp_save_frames_as_gif_Dialog->get_frames_to_be_saved();
+            int frame_active_width = mp_save_frames_as_gif_Dialog->get_active_width();
+            int frame_active_height = mp_save_frames_as_gif_Dialog->get_active_height();
+            int frame_total_width = mp_save_frames_as_gif_Dialog->get_total_width();
+            int frame_total_height = mp_save_frames_as_gif_Dialog->get_total_height();
+            int sequence_direction = mp_save_frames_as_gif_Dialog->get_sequence_direction();
+            int decimate_value = mp_save_frames_as_gif_Dialog->get_frame_decimation();
+            bool dither = mp_save_frames_as_gif_Dialog->get_gif_dither();
+            int frametime = 100 * mp_save_frames_as_gif_Dialog->get_gif_frametime();
+            int final_frametime = 100 * mp_save_frames_as_gif_Dialog->get_gif_final_frametime();
+
+            // Keep list of last saved folders up to date
+            add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
+
+            // Update Save Folders Menu
+            update_recent_save_folders_menu();
+
+            bool res = gif_write_file.create(
+                    filename,  // const QString &filename
+                    frame_total_width,  // int width
+                    frame_total_height,  // int height
+                    1, // int byte_depth
+                    false, // bool colour
+                    0);  // int repeat_count
+
+            // Setup progress dialog
+            c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
+            save_progress_dialog.setWindowTitle(tr("Save Frames As Animated GIF"));
+            save_progress_dialog.show();
+
+            int saved_frames = 0;
+
+            // Direction loop
+            int start_dir = (sequence_direction == 1) ? 1 : 0;
+            int end_dir = (sequence_direction == 0) ? 0 : 1;
+            for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                int start_frame = min_frame;
+                int end_frame = max_frame;
+                if (current_dir == 1) {  // Reverse direction - count backwards
+                    // Use negative numbers so for loop works counting up or down
+                    start_frame = -max_frame;
+                    end_frame = -min_frame;
+                }
+
+                for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                    // Update progress bar
+                    saved_frames++;
+                    save_progress_dialog.set_value(saved_frames);
+
+                    // Get frame from SER file
+                    bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
+                                                             false,  // conv_to_8_bit
+                                                             do_frame_processing);  // do_processing
+
+                    if (valid_frame) {
+                        mp_frame_image->resize_image(frame_active_width, frame_active_height);
+                        mp_frame_image->add_bars(frame_total_width, frame_total_height);
+                        mp_frame_image->conv_data_gready_for_gif();
+
+                        if (saved_frames == frames_to_be_saved) {
+                            // Use final frame time for last frame
+                            frametime = final_frametime;
+                        }
+
+                        res = gif_write_file.write_frame(
+                                  mp_frame_image->get_p_buffer(),  // uint8_t  *p_data
+                                  frametime);  // uint16_t display_time
+                    }
+
+                    if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                        // Abort frame saving
+                        break;
+                    }
+                }
+            }
+
+            // Close file
+            gif_write_file.close();
+
+            // Processing has completed
+            save_progress_dialog.set_complete();
+            while (!save_progress_dialog.was_cancelled()) {
+                  // Wait
+            }
+        }
+    }
+
+    // Restart playing if it was playing to start with
+    if (restart_playing == true) {
+        play_button_pressed_slot();
+    }
+}
+
+
 void c_ser_player::save_frames_as_images_slot()
 {
     // Pause playback if currently playing
@@ -1405,6 +1603,10 @@ void c_ser_player::open_ser_file(const QString &filename)
         // Delete previous save frames dialogs to remove remembered settings
         delete mp_save_frames_as_ser_Dialog;
         mp_save_frames_as_ser_Dialog = nullptr;
+        delete mp_save_frames_as_avi_Dialog;
+        mp_save_frames_as_avi_Dialog = nullptr;
+        delete mp_save_frames_as_gif_Dialog;
+        mp_save_frames_as_gif_Dialog = nullptr;
         delete mp_save_frames_as_images_Dialog;
         mp_save_frames_as_images_Dialog = nullptr;
 
@@ -1515,6 +1717,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         // Enable menu items that are only enabled when a SER file is open
         mp_save_frames_as_ser_Act->setEnabled(true);
+        mp_save_frames_as_avi_Act->setEnabled(true);
+        mp_save_frames_as_gif_Act->setEnabled(true);
         mp_save_frames_as_images_Act->setEnabled(true);
         mp_framerate_Menu->setEnabled(true);
         mp_header_details_Act->setEnabled(true);

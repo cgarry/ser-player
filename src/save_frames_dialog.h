@@ -24,6 +24,7 @@
 
 
 class QRadioButton;
+class QDoubleSpinBox;
 class QSpinBox;
 class QLabel;
 class QLineEdit;
@@ -38,7 +39,7 @@ class c_save_frames_dialog : public QDialog
     Q_OBJECT
 
 public:
-    enum e_save_type {SAVE_IMAGES, SAVE_SER};
+    enum e_save_type {SAVE_IMAGES, SAVE_SER, SAVE_AVI, SAVE_GIF};
 
     c_save_frames_dialog(QWidget *parent,
                          e_save_type save_type,
@@ -56,10 +57,15 @@ public:
                      int marker_end_frame,
                      bool markers_enabled);
 
+    void set_gif_frametime(double frametime);
+
     int get_active_width();
     int get_active_height();
     int get_total_width();
     int get_total_height();
+    double get_gif_frametime();
+    double get_gif_final_frametime();
+    bool get_gif_dither();
 
     int get_start_frame()
     {
@@ -82,6 +88,11 @@ public:
     QString get_observer_string();
     QString get_instrument_string();
     QString get_telescope_string();
+
+    // AVI file options
+    double get_avi_framerate();
+    bool get_avi_old_format();
+    int get_avi_max_size();
 
 
 signals:
@@ -132,6 +143,16 @@ private:
     QLineEdit *mp_observer_LEdit;
     QLineEdit *mp_instrument_LEdit;
     QLineEdit *mp_telescope_LEdit;
+
+    // AVI Options
+    QCheckBox *mp_avi_old_format_CBox;
+    QComboBox *mp_avi_max_size_Combox;
+    QDoubleSpinBox *mp_avi_framerate_DSpinbox;
+
+    // Animated GIF options
+    QDoubleSpinBox *mp_gif_frame_delay_DSpinBox;
+    QDoubleSpinBox *mp_gif_final_frame_delay_DSpinBox;
+    QCheckBox *mp_gif_dither_CBox;
 
     QLabel *mp_total_frames_to_save_Label;
 

@@ -28,7 +28,6 @@
 #include <QPixmap>
 #include <QPushButton>
 #include <QSlider>
-#include <QDoubleSpinBox>
 #include <QVBoxLayout>
 
 #include "processing_options_dialog.h"

@@ -1380,6 +1380,71 @@ void c_image::resize_image_bilinear(
 }
 
 
+void c_image::conv_data_gready_for_gif()
+{
+    int buffer_size = m_width * m_height;
+    buffer_size = (m_colour) ? 3 * buffer_size : buffer_size;
+    uint8_t *p_output_buffer = new uint8_t [buffer_size];
+    if (m_colour) {
+        // Colour data
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            uint8_t *p_write_data = p_output_buffer;
+            for (int y = m_height-1; y >= 0; y--) {
+                uint8_t *p_read_data = mp_buffer + y * m_width * 3;
+                for (int x = 0; x < m_width; x++) {
+                    uint8_t b = (*p_read_data++);
+                    uint8_t g = (*p_read_data++);
+                    uint8_t r = (*p_read_data++);
+                    *p_write_data++ = r;  // R
+                    *p_write_data++ = g;  // G
+                    *p_write_data++ = b;  // B
+                }
+            }
+        } else {
+            // 16-bit data
+            uint8_t *p_write_data = p_output_buffer;
+            for (int y = m_height-1; y >= 0; y--) {
+                uint16_t *p_read_data = ((uint16_t *)mp_buffer) + y * m_width * 3;
+                for (int x = 0; x < m_width; x++) {
+                    uint8_t b = (uint8_t)(*p_read_data++ >> 8);
+                    uint8_t g = (uint8_t)(*p_read_data++ >> 8);
+                    uint8_t r = (uint8_t)(*p_read_data++ >> 8);
+                    *p_write_data++ = r;  // R
+                    *p_write_data++ = g;  // G
+                    *p_write_data++ = b;  // B
+                }
+            }
+        }
+    } else {
+        // Monochrome data
+        if (m_byte_depth == 1) {
+            // 8-bit data
+            uint8_t *p_write_data = p_output_buffer;
+            for (int y = m_height-1; y >= 0; y--) {
+                uint8_t *p_read_data = mp_buffer + y * m_width;
+                for (int x = 0; x < m_width; x++) {
+                    *p_write_data++ = (*p_read_data++);
+                }
+            }
+        } else {
+            // 16-bit data
+            uint8_t *p_write_data = p_output_buffer;
+            for (int y = m_height-1; y >= 0; y--) {
+                uint16_t *p_read_data = ((uint16_t *)mp_buffer) + y * m_width;
+                for (int x = 0; x < m_width ; x++) {
+                    *p_write_data++ = (uint8_t)(*p_read_data++ >> 8);
+                }
+            }
+        }
+    }
+
+    delete[] mp_buffer;  // Free input buffer
+    mp_buffer = p_output_buffer;  // Update pointer to output buffer
+    m_buffer_size = buffer_size;
+}
+
+
 void c_image::conv_data_ready_for_qimage()
 {
     // Create buffer for converted data

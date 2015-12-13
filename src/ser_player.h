@@ -52,6 +52,8 @@ private:
     // Menus
     QAction *mp_save_frames_as_images_Act;
     QAction *mp_save_frames_as_ser_Act;
+    QAction *mp_save_frames_as_avi_Act;
+    QAction *mp_save_frames_as_gif_Act;
     QMenu *mp_recent_ser_files_Menu;
     QActionGroup *mp_recent_ser_files_ActGroup;
     QMenu *mp_recent_save_folders_Menu;
@@ -67,6 +69,8 @@ private:
     c_processing_options_dialog *mp_processing_options_Dialog;
     c_histogram_dialog *mp_histogram_dialog;
     c_save_frames_dialog *mp_save_frames_as_ser_Dialog;
+    c_save_frames_dialog *mp_save_frames_as_avi_Dialog;
+    c_save_frames_dialog *mp_save_frames_as_gif_Dialog;
     c_save_frames_dialog *mp_save_frames_as_images_Dialog;
 
     // Threads
@@ -149,6 +153,8 @@ public slots:
     void open_ser_file_slot();
     void open_ser_file_slot(QAction *action);
     void save_frames_as_ser_slot();
+    void save_frames_as_avi_slot();
+    void save_frames_as_gif_slot();
     void save_frames_as_images_slot();
     void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();

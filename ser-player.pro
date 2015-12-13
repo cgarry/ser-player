@@ -48,7 +48,9 @@ SOURCES += src/main.cpp\
     src/header_details_dialog.cpp \
     src/utf8_validator.cpp \
     src/processing_options_dialog.cpp \
-    src/icon_groupbox.cpp
+    src/icon_groupbox.cpp \
+    src/gif_write.cpp \
+    src/lzw_compressor.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -76,7 +78,9 @@ HEADERS  += src/ser_player.h \
     src/header_details_dialog.h \
     src/utf8_validator.h \
     src/processing_options_dialog.h \
-    src/icon_groupbox.h
+    src/icon_groupbox.h \
+    src/gif_write.h \
+    src/lzw_compressor.h
 
 # Build directories
 contains(QT_ARCH, i386) {

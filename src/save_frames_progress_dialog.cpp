@@ -38,7 +38,7 @@ c_save_frames_progress_dialog::c_save_frames_progress_dialog(QWidget *parent, in
     mp_text_label = new QLabel(tr("Saving %1 frames").arg(max_value - min_value + 1));
     mp_text_label->setMinimumWidth(mp_text_label->sizeHint().width() * 3);
     mp_progress_bar = new QProgressBar;
-    mp_progress_bar->setRange(min_value, max_value);
+    mp_progress_bar->setRange(min_value-1, max_value);
 
     mp_abort_cancel_button = new QPushButton(tr("Abort", "Save frames progress"));
     connect(mp_abort_cancel_button, SIGNAL(clicked()), this, SLOT(cancel_button_clicked_slot()));

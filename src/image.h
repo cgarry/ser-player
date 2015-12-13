@@ -187,6 +187,8 @@ class c_image
                 int total_height);
 
         void conv_data_ready_for_qimage();
+
+        void conv_data_gready_for_gif();
         
         
     private:

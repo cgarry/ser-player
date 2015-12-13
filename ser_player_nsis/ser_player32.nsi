@@ -3,7 +3,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "SER Player"
-!define PRODUCT_VERSION "1.4.2"
+!define PRODUCT_VERSION "1.4.3"
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"
@@ -85,6 +85,18 @@ Section -Post
 SectionEnd
 
 Function .onInit
+  ; Check if VC++ 2010 Redistributable is installed
+  ;ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\10.0\VC\VCRedist\x86" "Installed"
+  StrCmp $1 1 installed
+  
+  ; VC++ 2010 Redistributable is not installed
+  ;MessageBox MB_OK "VC++ 2010 Redistributable is not installed"
+  ;ExecWait 'MyPathWhereInstallerIs\vc++2010setup.exe'
+  
+  installed:
+  ; VC++ 2010 Redistributable is already installed
+  ;MessageBox MB_OK "VC++ 2010 Redistributable is installed"
+  
   StrCpy $InstDir "$PROGRAMFILES\SER Player"
 FunctionEnd
 

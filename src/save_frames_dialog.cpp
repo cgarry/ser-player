@@ -67,6 +67,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     case SAVE_SER:
         setWindowTitle(tr("Save Frames As SER File", "Save frames dialog"));
         break;
+    case SAVE_AVI:
+        setWindowTitle(tr("Save Frames As AVI File", "Save frames dialog"));
+        break;
+    case SAVE_GIF:
+        setWindowTitle(tr("Save Frames As Animated GIF", "Save frames dialog"));
+        break;
     }
 
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -88,7 +94,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     connect(mp_save_frame_range_RButton, SIGNAL(clicked()), this, SLOT(update_num_frames_slot()));
 
     // Hide save current frame button when this is a save as SER file dilalog
-    if (save_type == SAVE_SER) {
+    if (save_type != SAVE_IMAGES) {
         mp_save_current_frame_RButton->hide();
     }
 
@@ -309,7 +315,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
     QGroupBox *filename_generation_GBox = new QGroupBox(tr("Filename Generation", "Save frames dialog"));
     filename_generation_GBox->setLayout(filename_generation_VLayout);
-    if (save_type == SAVE_SER) {
+    if (save_type != SAVE_IMAGES) {
         filename_generation_GBox->hide();
         filename_generation_GBox->setFixedHeight(0);
     }
@@ -367,9 +373,89 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     QGroupBox *ser_file_options_GBox = new QGroupBox(tr("SER File Options", "Save frames dialog"));
     ser_file_options_GBox->setLayout(ser_file_options_VLayout);
     // Hide save current frame button when this is a save as SER file dilalog
-    if (save_type == SAVE_IMAGES) {
+    if (save_type != SAVE_SER) {
         ser_file_options_GBox->hide();
         ser_file_options_GBox->setFixedHeight(0);
+    }
+
+
+    //
+    // AVI file saving specific options
+    //
+    mp_avi_framerate_DSpinbox = new QDoubleSpinBox;
+    mp_avi_framerate_DSpinbox->setSingleStep(1.0);
+    mp_avi_framerate_DSpinbox->setValue(24);
+    mp_avi_framerate_DSpinbox->setRange(0.01, 1000.0);
+
+    QHBoxLayout *avi_framerate_HLayout = new QHBoxLayout;
+    avi_framerate_HLayout->setMargin(0);
+    avi_framerate_HLayout->addWidget(new QLabel(tr("AVI Framerate:")));
+    avi_framerate_HLayout->addWidget(mp_avi_framerate_DSpinbox);
+    avi_framerate_HLayout->addStretch();
+
+    mp_avi_old_format_CBox = new QCheckBox(tr("Old Format AVI File"));
+    mp_avi_max_size_Combox = new QComboBox;
+    mp_avi_max_size_Combox->addItem(tr("4GB Maximum Size"), 4);
+    mp_avi_max_size_Combox->addItem(tr("2GB Maximum Size"), 2);
+    mp_avi_max_size_Combox->setEnabled(mp_avi_old_format_CBox->isChecked());
+    connect(mp_avi_old_format_CBox, SIGNAL(clicked(bool)), mp_avi_max_size_Combox, SLOT(setEnabled(bool)));
+
+    QHBoxLayout *avi_old_format_HLayout = new QHBoxLayout;
+    avi_old_format_HLayout->setMargin(0);
+    avi_old_format_HLayout->addWidget(mp_avi_old_format_CBox);
+    avi_old_format_HLayout->addWidget(mp_avi_max_size_Combox);
+    avi_old_format_HLayout->addStretch();
+
+    QVBoxLayout *avi_file_options_VLayout = new QVBoxLayout;
+    avi_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    avi_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    avi_file_options_VLayout->addLayout(avi_framerate_HLayout);
+    avi_file_options_VLayout->addLayout(avi_old_format_HLayout);
+    QGroupBox *avi_file_options_GBox = new QGroupBox(tr("AVI File Options", "Save frames dialog"));
+    avi_file_options_GBox->setLayout(avi_file_options_VLayout);
+    if (save_type != SAVE_AVI) {
+        avi_file_options_GBox->hide();
+        avi_file_options_GBox->setFixedHeight(0);
+    }
+
+
+    //
+    // Animated GIF saving specific options
+    //
+    mp_gif_frame_delay_DSpinBox = new QDoubleSpinBox;
+    mp_gif_frame_delay_DSpinBox->setRange(0.01, 655.35);
+    mp_gif_frame_delay_DSpinBox->setSuffix(tr(" s", "seconds"));
+    mp_gif_frame_delay_DSpinBox->setValue(0.1);
+
+    mp_gif_final_frame_delay_DSpinBox = new QDoubleSpinBox;
+    mp_gif_final_frame_delay_DSpinBox->setRange(0.01, 655.35);
+    mp_gif_final_frame_delay_DSpinBox->setSuffix(tr(" s", "seconds"));
+    mp_gif_final_frame_delay_DSpinBox->setValue(0.5);
+    QFormLayout *gif_file_options_FLayout = new QFormLayout;
+    gif_file_options_FLayout->setHorizontalSpacing(10);
+    gif_file_options_FLayout->setVerticalSpacing(5);
+    gif_file_options_FLayout->addRow(tr("Frame Delay:"), mp_gif_frame_delay_DSpinBox);
+    gif_file_options_FLayout->addRow(tr("Final Frame Delay:"), mp_gif_final_frame_delay_DSpinBox);
+
+    mp_gif_dither_CBox = new QCheckBox(tr("Enable Dithering"));
+
+    QHBoxLayout *gif_file_options_HLayout = new QHBoxLayout;
+    gif_file_options_HLayout->setMargin(0);
+    gif_file_options_HLayout->setSpacing(0);
+    gif_file_options_HLayout->addLayout(gif_file_options_FLayout);
+    gif_file_options_HLayout->addStretch();
+
+    QVBoxLayout *gif_file_options_VLayout = new QVBoxLayout;
+    gif_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    gif_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    gif_file_options_VLayout->addLayout(gif_file_options_HLayout);
+    gif_file_options_VLayout->addWidget(mp_gif_dither_CBox);
+
+    QGroupBox *gif_file_options_GBox = new QGroupBox(tr("Animated GIF Options", "Save frames dialog"));
+    gif_file_options_GBox->setLayout(gif_file_options_VLayout);
+    if (save_type != SAVE_GIF) {
+        gif_file_options_GBox->hide();
+        gif_file_options_GBox->setFixedHeight(0);
     }
 
 
@@ -382,6 +468,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     groupbox_list << mp_resize_GBox;
     groupbox_list << filename_generation_GBox;
     groupbox_list << ser_file_options_GBox;
+    groupbox_list << avi_file_options_GBox;
+    groupbox_list << gif_file_options_GBox;
 
 
     //
@@ -434,7 +522,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         }
 
         if (groupbox_list.at(i)->height() != 0) {
-            current_gbox_height += groupbox_list.at(i)->sizeHint().height();
+            current_gbox_height += groupbox_list.at(i)->sizeHint().height() + lhs_VLayout->spacing();
         }
     }
 
@@ -497,6 +585,17 @@ void c_save_frames_dialog::set_markers(int marker_start_frame,
             mp_save_all_frames_RButton->click();
         }
     }
+}
+
+
+void c_save_frames_dialog::set_gif_frametime(double frametime)
+{
+    if (frametime < 0.01) {
+        frametime = 0.01;
+    }
+
+    mp_gif_frame_delay_DSpinBox->setValue(frametime);
+    mp_gif_final_frame_delay_DSpinBox->setValue(frametime);
 }
 
 
@@ -754,6 +853,24 @@ int c_save_frames_dialog::get_total_height()
 }
 
 
+double c_save_frames_dialog::get_gif_frametime()
+{
+    return mp_gif_frame_delay_DSpinBox->value();
+}
+
+
+double c_save_frames_dialog::get_gif_final_frametime()
+{
+    return mp_gif_final_frame_delay_DSpinBox->value();
+}
+
+
+bool c_save_frames_dialog::get_gif_dither()
+{
+    return mp_gif_dither_CBox->isChecked();
+}
+
+
 int c_save_frames_dialog::get_frame_decimation()
 {
     int decimate_value = 1;
@@ -871,3 +988,18 @@ QString c_save_frames_dialog::get_telescope_string()
     return mp_telescope_LEdit->text();
 }
 
+// AVI file options
+double c_save_frames_dialog::get_avi_framerate()
+{
+    return mp_avi_framerate_DSpinbox->value();
+}
+
+bool c_save_frames_dialog::get_avi_old_format()
+{
+    return mp_avi_old_format_CBox;
+}
+
+int c_save_frames_dialog::get_avi_max_size()
+{
+    return mp_avi_max_size_Combox->currentData().toInt();
+}
