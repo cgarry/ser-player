@@ -19,6 +19,9 @@
 #include "lzw_compressor.h"
 #include <QDebug>
 
+#define LOSSY_LZW_SUPPORT 1
+
+
 // ------------------------------------------
 // Constructor
 // ------------------------------------------
@@ -30,7 +33,8 @@ c_lzw_compressor::c_lzw_compressor(
         uint16_t y_start,
         uint16_t y_end,
         uint8_t bit_depth,
-        uint8_t *p_image_data) :
+        uint8_t *p_image_data,
+        int lossy_compression_level) :
     m_width(width),
     m_height(height),
     m_x_start(x_start),
@@ -38,7 +42,8 @@ c_lzw_compressor::c_lzw_compressor(
     m_y_start(y_start),
     m_y_end(y_end),
     m_bit_depth(bit_depth),
-    mp_image_data(p_image_data)
+    mp_image_data(p_image_data),
+    m_lossy_compression_level(lossy_compression_level)
 {
     // Special codes
     m_clear_code = 1 << m_bit_depth;
@@ -93,20 +98,36 @@ bool c_lzw_compressor::compress_data(
     uint8_t *p_data_ptr = mp_image_data + m_input_y * m_width + m_input_x;
 
     while ((m_output_bit < 256 * 8) && !complete) {
-        uint8_t next_code = *p_data_ptr++;
+        uint8_t next_code = *p_data_ptr;
+
+#ifdef LOSSY_LZW_SUPPORT
+        // Lossy LZW experimental code - start
+        if (m_current_code != 0xFFFF && mp_lzw_tree->m_current[m_current_code].m_next[next_code] == 0) {
+            for (int i = 1; i <= m_lossy_compression_level; i++) {
+                if (next_code > i && mp_lzw_tree->m_current[m_current_code].m_next[next_code-i] != 0) {
+                    next_code -= i;
+                    *(p_data_ptr) = next_code;
+                    break;
+                }
+
+                if (next_code > 0 && next_code < (256-i) && mp_lzw_tree->m_current[m_current_code].m_next[next_code+i] != 0) {
+                    next_code += i;
+                    *(p_data_ptr) = next_code;
+                    break;
+                }
+            }
+        }
+        // Lossy LZW experimental code - end
+#endif
 
         if (m_current_code == 0xFFFF) {
             // First pixel - do nothing but save next_code as current_code
             m_current_code = next_code;
             output_code_to_buffer(m_clear_code, m_code_length, p_output_buffer);
-        }
-        else if (mp_lzw_tree->m_current[m_current_code].m_next[next_code] != 0)
-        {
+        } else if (mp_lzw_tree->m_current[m_current_code].m_next[next_code] != 0) {
             // Current run is already in the dictionary tree
             m_current_code = mp_lzw_tree->m_current[m_current_code].m_next[next_code];
-        }
-        else  // Finish current run
-        {
+        } else { // Finish current run
             // Write current code out
             output_code_to_buffer(m_current_code, m_code_length, p_output_buffer);
 
@@ -121,7 +142,7 @@ bool c_lzw_compressor::compress_data(
 
             m_next_free_code++;  // Update to next free code at this one has been written to the dictionary
 
-            if(m_next_free_code == 4096)
+            if (m_next_free_code == 4096)
             {
                 // Dictionary full, delete it and start again
                 output_code_to_buffer(m_clear_code, m_code_length, p_output_buffer);
@@ -146,6 +167,8 @@ bool c_lzw_compressor::compress_data(
             }
 
             p_data_ptr = mp_image_data + m_input_y * m_width + m_input_x;
+        } else {
+            p_data_ptr++;
         }
     }
 

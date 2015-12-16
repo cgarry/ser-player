@@ -65,7 +65,9 @@ public:
     int get_total_height();
     double get_gif_frametime();
     double get_gif_final_frametime();
-    bool get_gif_dither();
+    int get_gif_unchanged_border_tolerance();
+    int get_gif_transparent_tolerance();
+    int get_gif_lossy_compression_level();
 
     int get_start_frame()
     {
@@ -152,7 +154,9 @@ private:
     // Animated GIF options
     QDoubleSpinBox *mp_gif_frame_delay_DSpinBox;
     QDoubleSpinBox *mp_gif_final_frame_delay_DSpinBox;
-    QCheckBox *mp_gif_dither_CBox;
+    QSpinBox *mp_gif_unchanged_border_tolerance_SpinBox;
+    QSpinBox *mp_gif_transparent_tolerance_SpinBox;
+    QSpinBox *mp_gif_lossy_compression_level_SpinBox;
 
     QLabel *mp_total_frames_to_save_Label;
 

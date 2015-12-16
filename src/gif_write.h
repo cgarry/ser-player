@@ -39,7 +39,10 @@ class c_gif_write {
                 int height,
                 int byte_depth,
                 bool colour,
-                int repeat_count);
+                int repeat_count,
+                int unchanged_border_tolerance,
+                int transparent_tolerence,
+                int lossy_compression_level);
 
 
         // ------------------------------------------
@@ -128,6 +131,11 @@ class c_gif_write {
         int m_height;
         bool m_colour;
         int m_bytes_per_sample;
+
+        // Encoding details
+        int m_unchanged_border_tolerance;
+        int m_transparent_tolerence;
+        int m_lossy_compression_level;
 
         // Other
         QString m_error_string;

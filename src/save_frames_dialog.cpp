@@ -437,19 +437,43 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     gif_file_options_FLayout->addRow(tr("Frame Delay:"), mp_gif_frame_delay_DSpinBox);
     gif_file_options_FLayout->addRow(tr("Final Frame Delay:"), mp_gif_final_frame_delay_DSpinBox);
 
-    mp_gif_dither_CBox = new QCheckBox(tr("Enable Dithering"));
-
     QHBoxLayout *gif_file_options_HLayout = new QHBoxLayout;
     gif_file_options_HLayout->setMargin(0);
     gif_file_options_HLayout->setSpacing(0);
     gif_file_options_HLayout->addLayout(gif_file_options_FLayout);
     gif_file_options_HLayout->addStretch();
 
+    mp_gif_unchanged_border_tolerance_SpinBox = new QSpinBox;
+    mp_gif_unchanged_border_tolerance_SpinBox->setRange(0, 20);
+    mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+    mp_gif_transparent_tolerance_SpinBox = new QSpinBox;
+    mp_gif_transparent_tolerance_SpinBox->setRange(0, 20);
+    mp_gif_transparent_tolerance_SpinBox->setValue(5);
+    mp_gif_lossy_compression_level_SpinBox = new QSpinBox;
+    mp_gif_lossy_compression_level_SpinBox->setRange(0, 20);
+    mp_gif_lossy_compression_level_SpinBox->setValue(10);
+
+    QFormLayout *gif_advanced_options_FLayout = new QFormLayout;
+    gif_advanced_options_FLayout->setHorizontalSpacing(10);
+    gif_advanced_options_FLayout->setVerticalSpacing(5);
+    gif_advanced_options_FLayout->addRow(tr("Unchanged Border Tolerance:"), mp_gif_unchanged_border_tolerance_SpinBox);
+    gif_advanced_options_FLayout->addRow(tr("Transparent Pixel Tolerance:"), mp_gif_transparent_tolerance_SpinBox);
+    gif_advanced_options_FLayout->addRow(tr("Lossy Compression Level:"), mp_gif_lossy_compression_level_SpinBox);
+
+    QHBoxLayout *gif_advanced_options_HLayout = new QHBoxLayout;
+    gif_advanced_options_HLayout->setMargin(10);
+    gif_advanced_options_HLayout->setSpacing(0);
+    gif_advanced_options_HLayout->addLayout(gif_advanced_options_FLayout);
+    gif_advanced_options_HLayout->addStretch();
+
+    QGroupBox *gif_advanced_options_GBox = new QGroupBox(tr("Advanced Options", "Save frames dialog"));
+    gif_advanced_options_GBox->setLayout(gif_advanced_options_HLayout);
+
     QVBoxLayout *gif_file_options_VLayout = new QVBoxLayout;
     gif_file_options_VLayout->setMargin(INSIDE_GBOX_MARGIN);
     gif_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     gif_file_options_VLayout->addLayout(gif_file_options_HLayout);
-    gif_file_options_VLayout->addWidget(mp_gif_dither_CBox);
+    gif_file_options_VLayout->addWidget(gif_advanced_options_GBox);
 
     QGroupBox *gif_file_options_GBox = new QGroupBox(tr("Animated GIF Options", "Save frames dialog"));
     gif_file_options_GBox->setLayout(gif_file_options_VLayout);
@@ -457,7 +481,6 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         gif_file_options_GBox->hide();
         gif_file_options_GBox->setFixedHeight(0);
     }
-
 
     // List of group boxes to be displayed
     QList<QGroupBox *> groupbox_list;
@@ -865,9 +888,21 @@ double c_save_frames_dialog::get_gif_final_frametime()
 }
 
 
-bool c_save_frames_dialog::get_gif_dither()
+int c_save_frames_dialog::get_gif_unchanged_border_tolerance()
 {
-    return mp_gif_dither_CBox->isChecked();
+    return mp_gif_unchanged_border_tolerance_SpinBox->value();
+}
+
+
+int c_save_frames_dialog::get_gif_transparent_tolerance()
+{
+    return mp_gif_transparent_tolerance_SpinBox->value();
+}
+
+
+int c_save_frames_dialog::get_gif_lossy_compression_level()
+{
+    return mp_gif_lossy_compression_level_SpinBox->value();
 }
 
 

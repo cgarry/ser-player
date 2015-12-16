@@ -1092,9 +1092,11 @@ void c_ser_player::save_frames_as_gif_slot()
             int frame_total_height = mp_save_frames_as_gif_Dialog->get_total_height();
             int sequence_direction = mp_save_frames_as_gif_Dialog->get_sequence_direction();
             int decimate_value = mp_save_frames_as_gif_Dialog->get_frame_decimation();
-            bool dither = mp_save_frames_as_gif_Dialog->get_gif_dither();
             int frametime = 100 * mp_save_frames_as_gif_Dialog->get_gif_frametime();
             int final_frametime = 100 * mp_save_frames_as_gif_Dialog->get_gif_final_frametime();
+            int unchanged_border_tolerance = mp_save_frames_as_gif_Dialog->get_gif_unchanged_border_tolerance();
+            int transparent_tolerence = mp_save_frames_as_gif_Dialog->get_gif_transparent_tolerance();
+            int lossy_compression_level = mp_save_frames_as_gif_Dialog->get_gif_lossy_compression_level();
 
             // Keep list of last saved folders up to date
             add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
@@ -1108,7 +1110,10 @@ void c_ser_player::save_frames_as_gif_slot()
                     frame_total_height,  // int height
                     1, // int byte_depth
                     false, // bool colour
-                    0);  // int repeat_count
+                    0,  // int repeat_count
+                    unchanged_border_tolerance, // int unchanged_border_tolerance
+                    transparent_tolerence, // int transparent_tolerence
+                    lossy_compression_level);  // int lossy_compression_level
 
             // Setup progress dialog
             c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);

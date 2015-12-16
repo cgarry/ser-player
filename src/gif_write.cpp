@@ -23,6 +23,8 @@
 #include <QCoreApplication>
 #include <QDebug>
 
+#define USE_TRANSPARENT_PIXELS 1
+
 
 c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
@@ -75,7 +77,6 @@ c_gif_write::c_gif_write() :
     m_comment_extension.m_block_terminator = 0x00;
 #endif
 
-
     // Header structure variable fields
     m_gif_header.m_logical_screen_width[0] = 0;
     m_gif_header.m_logical_screen_width[1] = 0;
@@ -121,7 +122,10 @@ bool c_gif_write::create(
         int height,
         int byte_depth,
         bool colour,
-        int repeat_count)
+        int repeat_count,
+        int unchanged_border_tolerance,
+        int transparent_tolerence,
+        int lossy_compression_level)
 {
     // Check for unsupported arguments and do early return if required
     if (colour) {
@@ -156,6 +160,10 @@ bool c_gif_write::create(
     if (colour) {
         m_bytes_per_sample *= 3;
     }
+
+    m_unchanged_border_tolerance = unchanged_border_tolerance;
+    m_transparent_tolerence = transparent_tolerence;
+    m_lossy_compression_level = lossy_compression_level;
 
     // Open new GIF file
     mp_gif_file = fopen_utf8(filename.toUtf8().data(), "wb+");
@@ -236,7 +244,6 @@ bool c_gif_write::write_frame(
     uint16_t y_start = 0;
     uint16_t y_end = m_height-1;
 
-    int bg_tolerance = 5;
     if (p_last_image != nullptr) {
         uint8_t *p_last_data = p_last_image;
         uint8_t *p_current_data = p_data;
@@ -244,7 +251,7 @@ bool c_gif_write::write_frame(
         bool mismatch = false;
         for (y_start = 0; y_start <= y_end; y_start++) {
             for (int x = 0; x < m_width; x++) {
-                mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > bg_tolerance;
+                mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > m_unchanged_border_tolerance;
             }
 
             // Break out of loop on mismatch
@@ -267,7 +274,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_end * m_width;
                 p_current_data = p_data + y_end * m_width;
                 for (int x = 0; x < m_width; x++) {
-                    mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > bg_tolerance;
+                    mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > m_unchanged_border_tolerance;
                 }
 
                 // Break out of look on mismatch
@@ -282,7 +289,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_start * m_width + x_start;
                 p_current_data = p_data + y_start * m_width + x_start;
                 for (int y = y_start; y <= y_end; y++) {
-                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > bg_tolerance;
+                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > m_unchanged_border_tolerance;
                     p_current_data += m_width;
                     p_last_data += m_width;
                 }
@@ -299,7 +306,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_start * m_width + x_end;
                 p_current_data = p_data + y_start * m_width + x_end;
                 for (int y = y_start; y <= y_end; y++) {
-                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > bg_tolerance;
+                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > m_unchanged_border_tolerance;
                     p_current_data += m_width;
                     p_last_data += m_width;
                 }
@@ -315,15 +322,83 @@ bool c_gif_write::write_frame(
         // an unchanged border for this frame
     }
 
-//    qDebug() << "(" << x_start << ", " << y_start << ") - (" << x_end << ", " << y_end << ")";
+
+    //
+    // Support for transpartent pixels
+    //
+    int transparent_index = 0x01;
+#ifdef USE_TRANSPARENT_PIXELS
+    if (p_last_image != nullptr) {
+        transparent_index = -1;
+
+        // Find an unused pixel value if there is one
+        if (m_lossy_compression_level == 0) {
+            bool value_used[256] = {false};
+            for (int y = y_start; y <= y_end; y++) {
+                uint8_t *p_current_data = p_data + y * m_width + x_start;
+                for (int x = x_start; x <= x_end; x++) {
+                    value_used[*p_current_data++] = true;
+                }
+            }
+
+            for (int i = 0; i < 256; i++) {
+                if (!value_used[i]) {
+                    transparent_index = i;
+                    break;
+                }
+            }
+        }
+
+        // If there is no unused pixel value create one by changing all 0x00s to 0x01
+        if (transparent_index == -1) {
+            transparent_index = 0x00;
+            for (int y = y_start; y <= y_end; y++) {
+                uint8_t *p_current_data = p_data + y * m_width + x_start;
+                for (int x = x_start; x <= x_end; x++) {
+                    // Change all 0x00 values to 0x01
+                    if (*p_current_data == 0x00) {
+                        *p_current_data = 0x01;
+                    }
+
+                    p_current_data++;
+                }
+            }
+        }
+
+        // Replace unchanged pixels with transparent pixels ready for compression
+        // Update last image with changed pixels
+        for (int y = y_start; y <= y_end; y++) {
+            uint8_t *p_last_data = p_last_image + y * m_width + x_start;
+            uint8_t *p_current_data = p_data + y * m_width + x_start;
+            for (int x = x_start; x <= x_end; x++) {
+                //if (*p_current_data == *p_last_data) {
+                if (abs((int)(*p_current_data) - (int)(*p_last_data)) <= m_transparent_tolerence) {
+                    // The pixels are the same, use transparent pixel
+                    *p_current_data = (uint8_t)transparent_index;
+                } else {
+                    // The pixels are different, update pixel in last image buffer for next time
+                    *p_last_data = *p_current_data;
+                }
+
+                p_current_data++;
+                p_last_data++;
+            }
+        }
+    }
+#endif
+
 
     // Update graphic control extension structure variables fields
     m_graphic_control_extension.m_packed_field  = 0 << 2;  // Disposal method: None specified
     m_graphic_control_extension.m_packed_field |= 0 << 1;  // User Input Flag: No user input expected
-    m_graphic_control_extension.m_packed_field |= 0 << 0;  // Transparent colour flag: No transparent index is given
+#ifdef USE_TRANSPARENT_PIXELS
+    if (p_last_image != nullptr) {
+        m_graphic_control_extension.m_packed_field |= 1 << 0;  // Transparent colour flag
+    }
+#endif
     m_graphic_control_extension.m_delay_time[0] = display_time & 0xFF;
     m_graphic_control_extension.m_delay_time[1] = display_time >> 8;
-    m_graphic_control_extension.m_transparent_colour_index = 0;
+    m_graphic_control_extension.m_transparent_colour_index = (uint8_t)transparent_index;
 
     // Write graphic control extension to the file
     fwrite(&m_graphic_control_extension, 1, sizeof(m_graphic_control_extension), mp_gif_file);
@@ -369,7 +444,9 @@ bool c_gif_write::write_frame(
                 y_start,
                 y_end,
                 8,
-                p_data);
+                p_data,
+                m_lossy_compression_level);
+
     uint8_t *p_compress_buffer = new uint8_t[260];
     while (!all_compressed) {
         // Compress up to 255 byte block of data (256 with byte count header)
@@ -386,10 +463,15 @@ bool c_gif_write::write_frame(
     if (p_last_image == nullptr) {
         // Create buffer if required
         p_last_image = new uint8_t[m_width * m_height];
-    }
 
-    // Copy image data into last frame buffer
-    std::copy(p_data, p_data + m_width * m_height, p_last_image);
+        // Copy image data into last frame buffer
+        std::copy(p_data, p_data + m_width * m_height, p_last_image);
+    } else {
+#ifndef USE_TRANSPARENT_PIXELS
+        // Copy image data into last frame buffer
+        std::copy(p_data, p_data + m_width * m_height, p_last_image);
+#endif
+    }
 
     // Write block terminator to file
     fputc(0x00, mp_gif_file);
