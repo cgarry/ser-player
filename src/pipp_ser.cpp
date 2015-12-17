@@ -217,71 +217,79 @@ int32_t c_pipp_ser::open(
 
             // Debug Start
             if (read_ret != 8 * m_header.frame_count) {
-                m_error_string += QCoreApplication::tr("Error: SER timestamp read failed for file '%1'", "SER File error message")
-                                  .arg(filename);
-                m_error_string += "\n";
-                return 0;
+//                m_error_string += QCoreApplication::tr("Error: SER timestamp read failed for file '%1'", "SER File error message")
+//                                  .arg(filename);
+//                m_error_string += "\n";
+//                return 0;
+                // Timestamps did not read correctly
+                m_header.date_time[1] = 0;
+                m_header.date_time[0] = 0;
             }
 
             // Seek back to start of image data
             fseek64(mp_ser_file, start_of_image_data_pos, SEEK_SET);
 
-            // Analyse timestamps to ensure that they are all increasing and in order
-            // Plus get earliest ts
-            uint64_t first_ts = *mp_timestamp;
-            uint64_t min_ts = *mp_timestamp;
-            uint64_t last_ts = *(mp_timestamp + (m_header.frame_count - 1));
+            if (m_header.date_time[1] != 0 || m_header.date_time[0] != 0) {
+                // Analyse timestamps to ensure that they are all increasing and in order
+                // Plus get earliest ts
+                uint64_t first_ts = *mp_timestamp;
+                uint64_t min_ts = *mp_timestamp;
+                uint64_t last_ts = *(mp_timestamp + (m_header.frame_count - 1));
 
-            uint64_t last_current_ts = 0;
-            for (int32_t ts_count = 0; ts_count < m_header.frame_count; ts_count++) {
-                uint64_t current_ts = *(mp_timestamp + ts_count);
+                uint64_t last_current_ts = 0;
+                for (int32_t ts_count = 0; ts_count < m_header.frame_count; ts_count++) {
+                    uint64_t current_ts = *(mp_timestamp + ts_count);
 
-                if (current_ts < min_ts) {
-                    min_ts = current_ts;  // Get earliest timestamp
+                    if (current_ts < min_ts) {
+                        min_ts = current_ts;  // Get earliest timestamp
+                    }
+
+                    if (current_ts < last_current_ts) {
+                        last_ts = first_ts;  // Out of order
+                    }
+
+                    last_current_ts = current_ts;  // This is not the last timestamp
                 }
 
-                if (current_ts < last_current_ts) {
-                    last_ts = first_ts;  // Out of order
+                // Check if timestamps are local time instead as universal time
+                int64_t start_time_uct_minus_min_ts = (uint64_t)(m_header.date_time_utc[1]) << 32 | m_header.date_time_utc[0];
+                int64_t start_time_minus_min_ts = (uint64_t)(m_header.date_time[1]) << 32 | m_header.date_time[0];
+                m_utc_to_local_offset = start_time_uct_minus_min_ts - start_time_minus_min_ts;
+
+                start_time_uct_minus_min_ts -= min_ts;
+                if (start_time_uct_minus_min_ts < 0) {
+                    start_time_uct_minus_min_ts *= -1L;
                 }
 
-                last_current_ts = current_ts;  // This is not the last timestamp
-            }
+                start_time_minus_min_ts -= min_ts;
+                if (start_time_minus_min_ts < 0) {
+                    start_time_minus_min_ts *= -1L;
+                }
 
-            // Check if timestamps are local time instead as universal time
-            int64_t start_time_uct_minus_min_ts = (uint64_t)(m_header.date_time_utc[1]) << 32 | m_header.date_time_utc[0];
-            int64_t start_time_minus_min_ts = (uint64_t)(m_header.date_time[1]) << 32 | m_header.date_time[0];
-            m_utc_to_local_offset = start_time_uct_minus_min_ts - start_time_minus_min_ts;
+                if (start_time_uct_minus_min_ts <= start_time_minus_min_ts) {
+                    // Timestamps are in universal time
+                    m_timestamp_correction_value = 0L;
+                } else {
+                    m_timestamp_correction_value = m_utc_to_local_offset;
+                }
 
-            start_time_uct_minus_min_ts -= min_ts;
-            if (start_time_uct_minus_min_ts < 0) {
-                start_time_uct_minus_min_ts *= -1L;
-            }
+                uint64_t diff_ts = (last_ts - first_ts) / 1000;  // Now in units of 100 us
 
-            start_time_minus_min_ts -= min_ts;
-            if (start_time_minus_min_ts < 0) {
-                start_time_minus_min_ts *= -1L;
-            }
-
-            if (start_time_uct_minus_min_ts <= start_time_minus_min_ts) {
-                // Timestamps are in universal time
-                m_timestamp_correction_value = 0L;
+                if (diff_ts > 0) {
+                    // There is a positive time difference between first and last timestamps
+                    // We can calculate a frames per second value
+                    double d_fps = ((double)(m_header.frame_count - 1) * 10000) / (double)diff_ts;
+                    m_fps_rate = (int32_t)(d_fps * 1000.0);
+                    m_fps_scale = 1000;
+                } else {
+                    // The time difference between first and last timestamps is 0 or -ve
+                    // No valid frames per second value can be calculated
+                    m_fps_rate = -1;
+                    m_fps_scale = 1;
+                }
             } else {
-                m_timestamp_correction_value = m_utc_to_local_offset;
-            }
-
-            uint64_t diff_ts = (last_ts - first_ts) / 1000;  // Now in units of 100 us
-
-            if (diff_ts > 0) {
-                // There is a positive time difference between first and last timestamps
-                // We can calculate a frames per second value
-                double d_fps = ((double)(m_header.frame_count - 1) * 10000) / (double)diff_ts;
-                m_fps_rate = (int32_t)(d_fps * 1000.0);
-                m_fps_scale = 1000;
-            } else {
-                // The time difference between first and last timestamps is 0 or -ve
-                // No valid frames per second value can be calculated
-                m_fps_rate = -1;
-                m_fps_scale = 1;
+                // Timestamp read failed
+                mp_timestamp = nullptr;
             }
         } else {
             // Timestamps should be present but are not

@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.4"
+#define VERSION_STRING "v1.4.5"
 
 #include <Qt>
 #include <QApplication>
@@ -121,6 +121,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_save_frames_as_avi_Act->setEnabled(false);
     file_menu->addAction(mp_save_frames_as_avi_Act);
     connect(mp_save_frames_as_avi_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_avi_slot()));
+    mp_save_frames_as_avi_Act->setVisible(false);
 
     mp_save_frames_as_gif_Act = new QAction(tr("Save Frames As Animated GIF...", "Menu title"), this);
     mp_save_frames_as_gif_Act->setEnabled(false);
