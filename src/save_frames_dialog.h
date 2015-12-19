@@ -66,7 +66,9 @@ public:
     double get_gif_frametime();
     double get_gif_final_frametime();
     int get_gif_unchanged_border_tolerance();
-    int get_gif_transparent_tolerance();
+    bool get_gif_transparent_pixel_enable();
+    int get_gif_transparent_pixel_tolerance();
+    int get_gif_pixel_bit_depth();
     int get_gif_lossy_compression_level();
 
     int get_start_frame()
@@ -105,6 +107,8 @@ private slots:
     void update_num_frames_slot();
     void next_button_clicked_slot();
     void resize_control_handler();
+    void gif_apply_preset_options();
+    void gif_unchanged_border_tolerance_changed_slot();
 
     
 private:
@@ -154,9 +158,16 @@ private:
     // Animated GIF options
     QDoubleSpinBox *mp_gif_frame_delay_DSpinBox;
     QDoubleSpinBox *mp_gif_final_frame_delay_DSpinBox;
+    QComboBox *mp_gif_preset_options_ComboBox;
+    QCheckBox *mp_gif_unchanged_border_tolerance_CBox;
     QSpinBox *mp_gif_unchanged_border_tolerance_SpinBox;
+    QCheckBox *mp_gif_transparent_tolerance_CBox;
     QSpinBox *mp_gif_transparent_tolerance_SpinBox;
+    QCheckBox *mp_gif_lossy_compression_level_CBox;
     QSpinBox *mp_gif_lossy_compression_level_SpinBox;
+    QCheckBox *mp_gif_reduce_pixel_depth_CBox;
+    QSpinBox *mp_gif_reduce_pixel_depth_SpinBox;
+
 
     QLabel *mp_total_frames_to_save_Label;
 

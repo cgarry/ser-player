@@ -34,7 +34,10 @@ c_lzw_compressor::c_lzw_compressor(
         uint16_t y_end,
         uint8_t bit_depth,
         uint8_t *p_image_data,
-        int lossy_compression_level) :
+        int lossy_compression_level,
+        uint8_t *p_index_lut,
+        uint8_t *p_rev_index_lut,
+        int transparent_index) :
     m_width(width),
     m_height(height),
     m_x_start(x_start),
@@ -43,7 +46,10 @@ c_lzw_compressor::c_lzw_compressor(
     m_y_end(y_end),
     m_bit_depth(bit_depth),
     mp_image_data(p_image_data),
-    m_lossy_compression_level(lossy_compression_level)
+    m_lossy_compression_level(lossy_compression_level),
+    mp_index_lut(p_index_lut),
+    mp_rev_index_lut(p_rev_index_lut),
+    m_transparent_index(transparent_index)
 {
     // Special codes
     m_clear_code = 1 << m_bit_depth;
@@ -102,18 +108,24 @@ bool c_lzw_compressor::compress_data(
 
 #ifdef LOSSY_LZW_SUPPORT
         // Lossy LZW experimental code - start
-        if (m_current_code != 0xFFFF && mp_lzw_tree->m_current[m_current_code].m_next[next_code] == 0) {
-            for (int i = 1; i <= m_lossy_compression_level; i++) {
-                if (next_code > i && mp_lzw_tree->m_current[m_current_code].m_next[next_code-i] != 0) {
-                    next_code -= i;
-                    *(p_data_ptr) = next_code;
-                    break;
-                }
+        if (mp_index_lut != nullptr && next_code != m_transparent_index) {
+            if (m_current_code != 0xFFFF && mp_lzw_tree->m_current[m_current_code].m_next[next_code] == 0) {
+                for (int i = 1; i <= m_lossy_compression_level; i++) {
+                    uint8_t next_pixel_value = mp_index_lut[next_code];  // Convert index code to pixel value
+                    uint8_t next_code_minus_i = mp_rev_index_lut[next_pixel_value - i];  // Get index code for pixel value - i
+                    //if ((next_code > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code-i] != 0)) {
+                    if ((next_pixel_value > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0)) {
+                        next_code = next_code_minus_i;
+                        *(p_data_ptr) = next_code;
+                        break;
+                    }
 
-                if (next_code > 0 && next_code < (256-i) && mp_lzw_tree->m_current[m_current_code].m_next[next_code+i] != 0) {
-                    next_code += i;
-                    *(p_data_ptr) = next_code;
-                    break;
+                    uint8_t next_code_plus_i = mp_rev_index_lut[next_pixel_value + i];  // Get index code for pixel value + i
+                    if ((next_pixel_value < (256-i)) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0)) {
+                        next_code = next_code_plus_i;
+                        *(p_data_ptr) = next_code;
+                        break;
+                    }
                 }
             }
         }

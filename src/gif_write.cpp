@@ -23,13 +23,13 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-#define USE_TRANSPARENT_PIXELS 1
-
 
 c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
     p_last_image(nullptr),
-    mp_colour_table(nullptr)
+    mp_colour_table(nullptr),
+    mp_mono_table(nullptr),
+    mp_rev_mono_table(nullptr)
 {
     // Header structure fixed fields
     m_gif_header.m_signature[0] = 'G';
@@ -105,11 +105,6 @@ c_gif_write::c_gif_write() :
     m_image_descriptor.m_image_height[0] = 0;
     m_image_descriptor.m_image_height[1] = 0;
     m_image_descriptor.m_packed_fields = 0;
-
-    union u_test{
-        uint8_t m_uint8[2];
-        uint16_t m_uint16;
-    };
 }
 
 
@@ -124,8 +119,10 @@ bool c_gif_write::create(
         bool colour,
         int repeat_count,
         int unchanged_border_tolerance,
+        bool use_transparent_pixels,
         int transparent_tolerence,
-        int lossy_compression_level)
+        int lossy_compression_level,
+        int bit_depth)
 {
     // Check for unsupported arguments and do early return if required
     if (colour) {
@@ -161,9 +158,12 @@ bool c_gif_write::create(
         m_bytes_per_sample *= 3;
     }
 
+    m_use_transparent_pixels = use_transparent_pixels;
+    m_transparent_index = (use_transparent_pixels) ? 0 : -1;
     m_unchanged_border_tolerance = unchanged_border_tolerance;
     m_transparent_tolerence = transparent_tolerence;
     m_lossy_compression_level = lossy_compression_level;
+    m_bit_depth = bit_depth;
 
     // Open new GIF file
     mp_gif_file = fopen_utf8(filename.toUtf8().data(), "wb+");
@@ -188,7 +188,7 @@ bool c_gif_write::create(
         m_gif_header.m_packed_fields  = 1 << 7;  // Global Color Table Flag
         m_gif_header.m_packed_fields |= 0x7 << 4;  // Color Resolution: 8-bits per pixel
         m_gif_header.m_packed_fields |= 0 << 3;  // Sort Flag: Not sorted
-        m_gif_header.m_packed_fields |= 0x7 << 0;  // Size of Global Color Table: 256 entries
+        m_gif_header.m_packed_fields |= (m_bit_depth - 1) << 0;  // Size of Global Color Table: 256 entries
     }
 
     m_gif_header.m_background_colour_index = 0;  // We do not use background colour pixels as yet
@@ -197,16 +197,59 @@ bool c_gif_write::create(
     fwrite(&m_gif_header, 1, sizeof(m_gif_header), mp_gif_file);
 
     if (!m_colour) {
+        const int colour_table_entries = 1 << m_bit_depth;
+
         // Create global colour table and write to the file
-        mp_colour_table = new uint8_t[256 * 3];
-        for (int i = 0; i < 256; i++) {
-            mp_colour_table[i*3 + 0] = i;
-            mp_colour_table[i*3 + 1] = i;
-            mp_colour_table[i*3 + 2] = i;
+        mp_colour_table = new uint8_t[colour_table_entries * 3];
+        mp_mono_table = new uint8_t[colour_table_entries];
+
+        // Create LUT
+        for (int i = 0; i < colour_table_entries; i++) {
+            uint8_t table_value = (i << (8 - m_bit_depth)) | (i >> m_bit_depth);
+            mp_colour_table[i*3 + 0] = table_value;
+            mp_colour_table[i*3 + 1] = table_value;
+            mp_colour_table[i*3 + 2] = table_value;
+            mp_mono_table[i] = table_value;
         }
 
-        fwrite(mp_colour_table, 1, 256 * 3, mp_gif_file);
+        if (m_use_transparent_pixels) {
+            // Make entry [1] == entry [0] to free entry 0 for transparency
+            mp_colour_table[3 + 0] = mp_mono_table[0];
+            mp_colour_table[3 + 1] = mp_mono_table[0];
+            mp_colour_table[3 + 2] = mp_mono_table[0];
+            mp_mono_table[1] = mp_mono_table[0];
+        }
+
+        fwrite(mp_colour_table, 1, colour_table_entries * 3, mp_gif_file);
         delete [] mp_colour_table;  // Only global colour table used for monochrome data
+
+        // Create a reverse LUT from LUT
+        mp_rev_mono_table = new uint8_t[256];
+        for (int i = 0; i < 256; i++) {
+            int best_error = 255;
+            uint8_t best_index = 0;
+            for (int j = 0; j < colour_table_entries; j++) {
+                if (j == m_transparent_index) {
+                    // Do not reverse look up to trnasparent index
+                    continue;
+                }
+
+                int new_error = abs(i - mp_mono_table[j]);
+                if (new_error == 0) {
+                    // An exact match
+                    best_index = j;
+                    break;
+                }
+
+                if (new_error < best_error) {
+                    // Best match so far
+                    best_error = new_error;
+                    best_index = j;
+                }
+            }
+
+            mp_rev_mono_table[i] = best_index;
+        }
     }
 
     // Update Netscape extension and write to file
@@ -237,6 +280,13 @@ bool c_gif_write::write_frame(
         return false;
     }
 
+    // Convert values to indexed values
+    uint8_t *p_current_data = p_data;
+    for (int x = 0; x < m_width * m_height; x++) {
+        *p_current_data = mp_rev_mono_table[*p_current_data];
+        p_current_data++;
+    }
+
     // Scan top/bottom lines and left/right columns to check for lines/columns identical to previous frame
     // These areas do not need to be encoded.
     uint16_t x_start = 0;
@@ -251,7 +301,7 @@ bool c_gif_write::write_frame(
         bool mismatch = false;
         for (y_start = 0; y_start <= y_end; y_start++) {
             for (int x = 0; x < m_width; x++) {
-                mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > m_unchanged_border_tolerance;
+                mismatch |= abs((int)(mp_mono_table[*p_current_data++]) - (int)(mp_mono_table[*p_last_data++])) > m_unchanged_border_tolerance;
             }
 
             // Break out of loop on mismatch
@@ -274,7 +324,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_end * m_width;
                 p_current_data = p_data + y_end * m_width;
                 for (int x = 0; x < m_width; x++) {
-                    mismatch |= abs((int)(*p_current_data++) - (int)(*p_last_data++)) > m_unchanged_border_tolerance;
+                    mismatch |= abs((int)(mp_mono_table[*p_current_data++]) - (int)(mp_mono_table[*p_last_data++])) > m_unchanged_border_tolerance;
                 }
 
                 // Break out of look on mismatch
@@ -289,7 +339,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_start * m_width + x_start;
                 p_current_data = p_data + y_start * m_width + x_start;
                 for (int y = y_start; y <= y_end; y++) {
-                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > m_unchanged_border_tolerance;
+                    mismatch |= abs((int)(mp_mono_table[*p_current_data]) - (int)(mp_mono_table[*p_last_data])) > m_unchanged_border_tolerance;
                     p_current_data += m_width;
                     p_last_data += m_width;
                 }
@@ -306,7 +356,7 @@ bool c_gif_write::write_frame(
                 p_last_data = p_last_image + y_start * m_width + x_end;
                 p_current_data = p_data + y_start * m_width + x_end;
                 for (int y = y_start; y <= y_end; y++) {
-                    mismatch |= abs((int)(*p_current_data) - (int)(*p_last_data)) > m_unchanged_border_tolerance;
+                    mismatch |= abs((int)(mp_mono_table[*p_current_data]) - (int)(mp_mono_table[*p_last_data])) > m_unchanged_border_tolerance;
                     p_current_data += m_width;
                     p_last_data += m_width;
                 }
@@ -324,81 +374,43 @@ bool c_gif_write::write_frame(
 
 
     //
-    // Support for transpartent pixels
+    // Support for transparent pixels
     //
-    int transparent_index = 0x01;
-#ifdef USE_TRANSPARENT_PIXELS
-    if (p_last_image != nullptr) {
-        transparent_index = -1;
-
-        // Find an unused pixel value if there is one
-        if (m_lossy_compression_level == 0) {
-            bool value_used[256] = {false};
+    if (m_use_transparent_pixels) {
+        if (p_last_image != nullptr) {
+            // Replace unchanged pixels with transparent pixels ready for compression
+            // Update last image with changed pixels
             for (int y = y_start; y <= y_end; y++) {
+                uint8_t *p_last_data = p_last_image + y * m_width + x_start;
                 uint8_t *p_current_data = p_data + y * m_width + x_start;
                 for (int x = x_start; x <= x_end; x++) {
-                    value_used[*p_current_data++] = true;
-                }
-            }
-
-            for (int i = 0; i < 256; i++) {
-                if (!value_used[i]) {
-                    transparent_index = i;
-                    break;
-                }
-            }
-        }
-
-        // If there is no unused pixel value create one by changing all 0x00s to 0x01
-        if (transparent_index == -1) {
-            transparent_index = 0x00;
-            for (int y = y_start; y <= y_end; y++) {
-                uint8_t *p_current_data = p_data + y * m_width + x_start;
-                for (int x = x_start; x <= x_end; x++) {
-                    // Change all 0x00 values to 0x01
-                    if (*p_current_data == 0x00) {
-                        *p_current_data = 0x01;
+                    //if (*p_current_data == *p_last_data) {
+                    if (abs((int)(mp_mono_table[*p_current_data]) - (int)(mp_mono_table[*p_last_data])) <= m_transparent_tolerence) {
+                        // The pixels are the same or close enough, use transparent pixel
+                        *p_current_data = (uint8_t)m_transparent_index;
+                    } else {
+                        // The pixels are different, update pixel in last image buffer for next time
+                        *p_last_data = *p_current_data;
                     }
 
                     p_current_data++;
+                    p_last_data++;
                 }
-            }
-        }
-
-        // Replace unchanged pixels with transparent pixels ready for compression
-        // Update last image with changed pixels
-        for (int y = y_start; y <= y_end; y++) {
-            uint8_t *p_last_data = p_last_image + y * m_width + x_start;
-            uint8_t *p_current_data = p_data + y * m_width + x_start;
-            for (int x = x_start; x <= x_end; x++) {
-                //if (*p_current_data == *p_last_data) {
-                if (abs((int)(*p_current_data) - (int)(*p_last_data)) <= m_transparent_tolerence) {
-                    // The pixels are the same, use transparent pixel
-                    *p_current_data = (uint8_t)transparent_index;
-                } else {
-                    // The pixels are different, update pixel in last image buffer for next time
-                    *p_last_data = *p_current_data;
-                }
-
-                p_current_data++;
-                p_last_data++;
             }
         }
     }
-#endif
-
 
     // Update graphic control extension structure variables fields
     m_graphic_control_extension.m_packed_field  = 0 << 2;  // Disposal method: None specified
     m_graphic_control_extension.m_packed_field |= 0 << 1;  // User Input Flag: No user input expected
-#ifdef USE_TRANSPARENT_PIXELS
-    if (p_last_image != nullptr) {
+
+    if (m_use_transparent_pixels && p_last_image != nullptr) {
         m_graphic_control_extension.m_packed_field |= 1 << 0;  // Transparent colour flag
     }
-#endif
+
     m_graphic_control_extension.m_delay_time[0] = display_time & 0xFF;
     m_graphic_control_extension.m_delay_time[1] = display_time >> 8;
-    m_graphic_control_extension.m_transparent_colour_index = (uint8_t)transparent_index;
+    m_graphic_control_extension.m_transparent_colour_index = (uint8_t)m_transparent_index;
 
     // Write graphic control extension to the file
     fwrite(&m_graphic_control_extension, 1, sizeof(m_graphic_control_extension), mp_gif_file);
@@ -432,10 +444,11 @@ bool c_gif_write::write_frame(
     }
 
     // Write LZW minimum code size to file
-    fputc(0x08, mp_gif_file);
+    fputc(m_bit_depth, mp_gif_file);
 
     // Compress image data and write to file
     bool all_compressed = false;
+
     c_lzw_compressor lzw_compressor(
                 m_width,
                 m_height,
@@ -443,9 +456,12 @@ bool c_gif_write::write_frame(
                 x_end,
                 y_start,
                 y_end,
-                8,
+                m_bit_depth,
                 p_data,
-                m_lossy_compression_level);
+                m_lossy_compression_level,
+                mp_mono_table,
+                mp_rev_mono_table,
+                m_transparent_index);
 
     uint8_t *p_compress_buffer = new uint8_t[260];
     while (!all_compressed) {
@@ -466,11 +482,9 @@ bool c_gif_write::write_frame(
 
         // Copy image data into last frame buffer
         std::copy(p_data, p_data + m_width * m_height, p_last_image);
-    } else {
-#ifndef USE_TRANSPARENT_PIXELS
+    } else if (!m_use_transparent_pixels) {
         // Copy image data into last frame buffer
         std::copy(p_data, p_data + m_width * m_height, p_last_image);
-#endif
     }
 
     // Write block terminator to file
@@ -493,6 +507,16 @@ bool c_gif_write::close()
     if (p_last_image != nullptr) {
         delete [] p_last_image;
         p_last_image = nullptr;
+    }
+
+    if (mp_mono_table != nullptr) {
+        delete [] mp_mono_table;
+        mp_mono_table = nullptr;
+    }
+
+    if (mp_rev_mono_table != nullptr) {
+        delete [] mp_rev_mono_table;
+        mp_rev_mono_table = nullptr;
     }
 
     if (mp_gif_file != nullptr) {

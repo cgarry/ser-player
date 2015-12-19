@@ -40,7 +40,10 @@ class c_lzw_compressor {
                 uint16_t y_end,
                 uint8_t bit_depth,
                 uint8_t *p_image_data,
-                int lossy_compression_level);
+                int lossy_compression_level,
+                uint8_t *p_index_lut,
+                uint8_t *p_rev_index_lut,
+                int transparent_index);
 
 
         // ------------------------------------------
@@ -96,6 +99,9 @@ class c_lzw_compressor {
         uint8_t m_bit_depth;
         uint8_t *mp_image_data;
         int m_lossy_compression_level;
+        uint8_t *mp_index_lut;
+        uint8_t *mp_rev_index_lut;
+        int m_transparent_index;
 
         // Special codes
         uint32_t m_clear_code;

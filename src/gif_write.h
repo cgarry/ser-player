@@ -41,8 +41,10 @@ class c_gif_write {
                 bool colour,
                 int repeat_count,
                 int unchanged_border_tolerance,
+                bool use_transparent_pixels,
                 int transparent_tolerence,
-                int lossy_compression_level);
+                int lossy_compression_level,
+                int bit_depth);
 
 
         // ------------------------------------------
@@ -134,8 +136,16 @@ class c_gif_write {
 
         // Encoding details
         int m_unchanged_border_tolerance;
+        bool m_use_transparent_pixels;
+        int m_transparent_index;
         int m_transparent_tolerence;
         int m_lossy_compression_level;
+        int m_bit_depth;
+
+        // LUTs
+        uint8_t *mp_colour_table;
+        uint8_t *mp_mono_table;
+        uint8_t *mp_rev_mono_table;
 
         // Other
         QString m_error_string;
@@ -149,7 +159,6 @@ class c_gif_write {
         s_image_descriptor m_image_descriptor;
 #ifdef GIF_COMMENT_STRING
         s_comment_extension m_comment_extension;
-        uint8_t *mp_colour_table;
 #endif
 };
 

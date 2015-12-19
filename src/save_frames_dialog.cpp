@@ -431,11 +431,26 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_gif_final_frame_delay_DSpinBox->setRange(0.01, 655.35);
     mp_gif_final_frame_delay_DSpinBox->setSuffix(tr(" s", "seconds"));
     mp_gif_final_frame_delay_DSpinBox->setValue(0.5);
+
+    mp_gif_preset_options_ComboBox = new QComboBox;
+    mp_gif_preset_options_ComboBox->addItem(tr("1. Maximum Quality", "GIF preset options"));
+    mp_gif_preset_options_ComboBox->addItem(tr("2. Good Quality", "GIF preset options"));
+    mp_gif_preset_options_ComboBox->addItem(tr("3. Medium Quality", "GIF preset options"));
+    mp_gif_preset_options_ComboBox->addItem(tr("4. Small File Size", "GIF preset options"));
+    mp_gif_preset_options_ComboBox->addItem(tr("5. Smaller File Size", "GIF preset options"));
+    mp_gif_preset_options_ComboBox->setCurrentIndex(1);
+
+    connect(mp_gif_preset_options_ComboBox,
+            SIGNAL(currentIndexChanged(int)),
+            this,
+            SLOT(gif_apply_preset_options()));
+
     QFormLayout *gif_file_options_FLayout = new QFormLayout;
     gif_file_options_FLayout->setHorizontalSpacing(10);
     gif_file_options_FLayout->setVerticalSpacing(5);
     gif_file_options_FLayout->addRow(tr("Frame Delay:"), mp_gif_frame_delay_DSpinBox);
     gif_file_options_FLayout->addRow(tr("Final Frame Delay:"), mp_gif_final_frame_delay_DSpinBox);
+    gif_file_options_FLayout->addRow(tr("Preset Advanced Options:"), mp_gif_preset_options_ComboBox);
 
     QHBoxLayout *gif_file_options_HLayout = new QHBoxLayout;
     gif_file_options_HLayout->setMargin(0);
@@ -443,22 +458,54 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     gif_file_options_HLayout->addLayout(gif_file_options_FLayout);
     gif_file_options_HLayout->addStretch();
 
+    mp_gif_unchanged_border_tolerance_CBox = new QCheckBox(tr("Unchanged Border Tolerance:"));
     mp_gif_unchanged_border_tolerance_SpinBox = new QSpinBox;
     mp_gif_unchanged_border_tolerance_SpinBox->setRange(0, 20);
     mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+    connect(mp_gif_unchanged_border_tolerance_CBox,
+            SIGNAL(toggled(bool)),
+            this,
+            SLOT(gif_unchanged_border_tolerance_changed_slot()));
+    mp_gif_unchanged_border_tolerance_CBox->setChecked(true);
+
+    mp_gif_transparent_tolerance_CBox = new QCheckBox(tr("Transparent Pixel Tolerance:"));
     mp_gif_transparent_tolerance_SpinBox = new QSpinBox;
     mp_gif_transparent_tolerance_SpinBox->setRange(0, 20);
     mp_gif_transparent_tolerance_SpinBox->setValue(5);
+    connect(mp_gif_transparent_tolerance_CBox,
+            SIGNAL(toggled(bool)),
+            mp_gif_transparent_tolerance_SpinBox,
+            SLOT(setEnabled(bool)));
+    mp_gif_transparent_tolerance_CBox->setChecked(true);
+
+    mp_gif_reduce_pixel_depth_CBox = new QCheckBox(tr("Reduce Pixel Bit Depth:"));
+    mp_gif_reduce_pixel_depth_SpinBox = new QSpinBox;
+    mp_gif_reduce_pixel_depth_SpinBox->setRange(4, 7);
+    mp_gif_reduce_pixel_depth_SpinBox->setValue(7);
+    mp_gif_reduce_pixel_depth_SpinBox->setEnabled(false);
+    connect(mp_gif_reduce_pixel_depth_CBox,
+            SIGNAL(toggled(bool)),
+            mp_gif_reduce_pixel_depth_SpinBox,
+            SLOT(setEnabled(bool)));
+    mp_gif_reduce_pixel_depth_CBox->setChecked(false);
+
+    mp_gif_lossy_compression_level_CBox = new QCheckBox(tr("Lossy Compression Level:"));
     mp_gif_lossy_compression_level_SpinBox = new QSpinBox;
-    mp_gif_lossy_compression_level_SpinBox->setRange(0, 20);
-    mp_gif_lossy_compression_level_SpinBox->setValue(10);
+    mp_gif_lossy_compression_level_SpinBox->setRange(1, 20);
+    mp_gif_lossy_compression_level_SpinBox->setValue(8);
+    connect(mp_gif_lossy_compression_level_CBox,
+            SIGNAL(toggled(bool)),
+            mp_gif_lossy_compression_level_SpinBox,
+            SLOT(setEnabled(bool)));
+    mp_gif_lossy_compression_level_CBox->setChecked(true);
 
     QFormLayout *gif_advanced_options_FLayout = new QFormLayout;
     gif_advanced_options_FLayout->setHorizontalSpacing(10);
     gif_advanced_options_FLayout->setVerticalSpacing(5);
-    gif_advanced_options_FLayout->addRow(tr("Unchanged Border Tolerance:"), mp_gif_unchanged_border_tolerance_SpinBox);
-    gif_advanced_options_FLayout->addRow(tr("Transparent Pixel Tolerance:"), mp_gif_transparent_tolerance_SpinBox);
-    gif_advanced_options_FLayout->addRow(tr("Lossy Compression Level:"), mp_gif_lossy_compression_level_SpinBox);
+    gif_advanced_options_FLayout->addRow(mp_gif_unchanged_border_tolerance_CBox, mp_gif_unchanged_border_tolerance_SpinBox);
+    gif_advanced_options_FLayout->addRow(mp_gif_transparent_tolerance_CBox, mp_gif_transparent_tolerance_SpinBox);
+    gif_advanced_options_FLayout->addRow(mp_gif_reduce_pixel_depth_CBox, mp_gif_reduce_pixel_depth_SpinBox);
+    gif_advanced_options_FLayout->addRow(mp_gif_lossy_compression_level_CBox, mp_gif_lossy_compression_level_SpinBox);
 
     QHBoxLayout *gif_advanced_options_HLayout = new QHBoxLayout;
     gif_advanced_options_HLayout->setMargin(10);
@@ -481,6 +528,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         gif_file_options_GBox->hide();
         gif_file_options_GBox->setFixedHeight(0);
     }
+
+    gif_apply_preset_options();  // Apply preset GIF advanced options
+
 
     // List of group boxes to be displayed
     QList<QGroupBox *> groupbox_list;
@@ -637,6 +687,74 @@ void c_save_frames_dialog::spinbox_changed_slot()
     mp_start_Spinbox->setPalette(text_Palette);
     mp_end_Spinbox->setPalette(text_Palette);
     update_num_frames_slot();
+}
+
+
+void c_save_frames_dialog::gif_apply_preset_options()
+{
+    switch (mp_gif_preset_options_ComboBox->currentIndex()) {
+    case 0:  // Maximum quality
+        mp_gif_unchanged_border_tolerance_SpinBox->setValue(0);
+        mp_gif_transparent_tolerance_CBox->setChecked(true);
+        mp_gif_transparent_tolerance_SpinBox->setValue(0);
+        mp_gif_lossy_compression_level_CBox->setChecked(false);
+        mp_gif_reduce_pixel_depth_CBox->setChecked(false);
+        break;
+    case 1:  // Good Quality
+        mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+        mp_gif_transparent_tolerance_CBox->setChecked(true);
+        mp_gif_transparent_tolerance_SpinBox->setValue(5);
+        mp_gif_lossy_compression_level_CBox->setChecked(false);
+        mp_gif_reduce_pixel_depth_CBox->setChecked(false);
+        break;
+    case 2:  // Medium quality
+        mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+        mp_gif_transparent_tolerance_CBox->setChecked(true);
+        mp_gif_transparent_tolerance_SpinBox->setValue(5);
+        mp_gif_lossy_compression_level_CBox->setChecked(true);
+        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_reduce_pixel_depth_CBox->setChecked(false);
+        break;
+    case 3:  // Small file size
+        mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+        mp_gif_transparent_tolerance_CBox->setChecked(true);
+        mp_gif_transparent_tolerance_SpinBox->setValue(5);
+        mp_gif_lossy_compression_level_CBox->setChecked(true);
+        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_reduce_pixel_depth_CBox->setChecked(true);
+        mp_gif_reduce_pixel_depth_SpinBox->setValue(7);
+        break;
+    case 4:  // Smaller file size
+        mp_gif_unchanged_border_tolerance_SpinBox->setValue(5);
+        mp_gif_transparent_tolerance_CBox->setChecked(true);
+        mp_gif_transparent_tolerance_SpinBox->setValue(5);
+        mp_gif_lossy_compression_level_CBox->setChecked(true);
+        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_reduce_pixel_depth_CBox->setChecked(true);
+        mp_gif_reduce_pixel_depth_SpinBox->setValue(6);
+        break;
+    }
+
+
+/*
+    QCheckBox *mp_gif_unchanged_border_tolerance_CBox;
+    QSpinBox *mp_gif_unchanged_border_tolerance_SpinBox;
+    QCheckBox *mp_gif_transparent_tolerance_CBox;
+    QSpinBox *mp_gif_transparent_tolerance_SpinBox;
+    QCheckBox *mp_gif_lossy_compression_level_CBox;
+    QSpinBox *mp_gif_lossy_compression_level_SpinBox;
+    QCheckBox *mp_gif_reduce_pixel_depth_CBox;
+    QSpinBox *mp_gif_reduce_pixel_depth_SpinBox;
+*/
+}
+
+
+void c_save_frames_dialog::gif_unchanged_border_tolerance_changed_slot()
+{
+    // Keep Checkbox checked
+    if (!mp_gif_unchanged_border_tolerance_CBox->isChecked()) {
+        mp_gif_unchanged_border_tolerance_CBox->setChecked(true);
+    }
 }
 
 
@@ -890,19 +1008,49 @@ double c_save_frames_dialog::get_gif_final_frametime()
 
 int c_save_frames_dialog::get_gif_unchanged_border_tolerance()
 {
-    return mp_gif_unchanged_border_tolerance_SpinBox->value();
+    int tolerance;
+    if (mp_gif_unchanged_border_tolerance_CBox->isChecked()) {
+        tolerance = mp_gif_unchanged_border_tolerance_SpinBox->value();
+    } else {
+        tolerance = 0;
+    }
+
+    return tolerance;
+}
+
+bool c_save_frames_dialog::get_gif_transparent_pixel_enable()
+{
+    return mp_gif_transparent_tolerance_CBox->isChecked();
 }
 
 
-int c_save_frames_dialog::get_gif_transparent_tolerance()
+int c_save_frames_dialog::get_gif_transparent_pixel_tolerance()
 {
     return mp_gif_transparent_tolerance_SpinBox->value();
 }
 
 
+int c_save_frames_dialog::get_gif_pixel_bit_depth()
+{
+    int pixel_depth = 8;
+    if (mp_gif_reduce_pixel_depth_CBox->isChecked()) {
+        pixel_depth = mp_gif_reduce_pixel_depth_SpinBox->value();
+    }
+
+    return pixel_depth;
+}
+
+
 int c_save_frames_dialog::get_gif_lossy_compression_level()
 {
-    return mp_gif_lossy_compression_level_SpinBox->value();
+    int compression;
+    if (mp_gif_lossy_compression_level_CBox->isChecked()) {
+        compression = mp_gif_lossy_compression_level_SpinBox->value();
+    } else {
+        compression = 0;
+    }
+
+    return compression;
 }
 
 
