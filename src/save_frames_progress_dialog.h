@@ -51,7 +51,7 @@ private:
     // Widgets
     QLabel *mp_text_label;
     QProgressBar *mp_progress_bar;
-    QPushButton *mp_abort_cancel_button;
+    QPushButton *mp_abort_close_button;
 
     int m_cancelled;
     int m_total_frames;

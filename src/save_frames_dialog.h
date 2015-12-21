@@ -70,6 +70,10 @@ public:
     int get_gif_transparent_pixel_tolerance();
     int get_gif_pixel_bit_depth();
     int get_gif_lossy_compression_level();
+    bool get_gif_test_run()
+    {
+        return m_test_run;
+    }
 
     int get_start_frame()
     {
@@ -109,6 +113,7 @@ private slots:
     void resize_control_handler();
     void gif_apply_preset_options();
     void gif_unchanged_border_tolerance_changed_slot();
+    void gif_test_options_button_pressed_slot();
 
     
 private:
@@ -184,6 +189,7 @@ private:
     int m_end_frame;
     int m_total_selected_frames;
     bool m_spin_boxes_valid;
+    bool m_test_run;
 };
 
 #endif // SAVE_FRAMES_DIALOG_H

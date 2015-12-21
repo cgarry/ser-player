@@ -445,12 +445,21 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
             this,
             SLOT(gif_apply_preset_options()));
 
-    QFormLayout *gif_file_options_FLayout = new QFormLayout;
+    QPushButton *p_gif_test_options_PButton = new QPushButton(tr("Review Animated GIF In Browser"));
+    connect(p_gif_test_options_PButton,
+            SIGNAL(clicked(bool)),
+            this,
+            SLOT(gif_test_options_button_pressed_slot()));
+
+    QGridLayout *gif_file_options_FLayout = new QGridLayout;
     gif_file_options_FLayout->setHorizontalSpacing(10);
     gif_file_options_FLayout->setVerticalSpacing(5);
-    gif_file_options_FLayout->addRow(tr("Frame Delay:"), mp_gif_frame_delay_DSpinBox);
-    gif_file_options_FLayout->addRow(tr("Final Frame Delay:"), mp_gif_final_frame_delay_DSpinBox);
-    gif_file_options_FLayout->addRow(tr("Preset Advanced Options:"), mp_gif_preset_options_ComboBox);
+    gif_file_options_FLayout->addWidget(new QLabel(tr("Frame Delay:")), 0, 0);
+    gif_file_options_FLayout->addWidget(mp_gif_frame_delay_DSpinBox, 0, 1);
+    gif_file_options_FLayout->addWidget(new QLabel(tr("Final Frame Delay:")), 1, 0);
+    gif_file_options_FLayout->addWidget(mp_gif_final_frame_delay_DSpinBox, 1, 1);
+    gif_file_options_FLayout->addWidget(new QLabel(tr("Preset Advanced Options:")), 2, 0);
+    gif_file_options_FLayout->addWidget(mp_gif_preset_options_ComboBox, 2, 1);
 
     QHBoxLayout *gif_file_options_HLayout = new QHBoxLayout;
     gif_file_options_HLayout->setMargin(0);
@@ -478,7 +487,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
             SLOT(setEnabled(bool)));
     mp_gif_transparent_tolerance_CBox->setChecked(true);
 
-    mp_gif_reduce_pixel_depth_CBox = new QCheckBox(tr("Reduce Pixel Bit Depth:"));
+    mp_gif_reduce_pixel_depth_CBox = new QCheckBox(tr("Reduced Pixel Bit Depth:"));
     mp_gif_reduce_pixel_depth_SpinBox = new QSpinBox;
     mp_gif_reduce_pixel_depth_SpinBox->setRange(4, 7);
     mp_gif_reduce_pixel_depth_SpinBox->setValue(7);
@@ -521,6 +530,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     gif_file_options_VLayout->setSpacing(INSIDE_GBOX_SPACING);
     gif_file_options_VLayout->addLayout(gif_file_options_HLayout);
     gif_file_options_VLayout->addWidget(gif_advanced_options_GBox);
+    gif_file_options_VLayout->addWidget(p_gif_test_options_PButton);
 
     QGroupBox *gif_file_options_GBox = new QGroupBox(tr("Animated GIF Options", "Save frames dialog"));
     gif_file_options_GBox->setLayout(gif_file_options_VLayout);
@@ -758,6 +768,29 @@ void c_save_frames_dialog::gif_unchanged_border_tolerance_changed_slot()
 }
 
 
+void c_save_frames_dialog::gif_test_options_button_pressed_slot()
+{
+    if (mp_save_current_frame_RButton->isChecked()) {
+        m_start_frame = -1;
+        m_end_frame = -1;
+    } else if (mp_save_all_frames_RButton->isChecked()) {
+        m_start_frame = 1;
+        m_end_frame = m_total_frames;
+    } else if (mp_save_marked_frames_RButton->isChecked()) {
+        m_start_frame = m_marker_start_frame;
+        m_end_frame = m_marker_end_frame;
+    } else { // mp_save_frame_range_RButton
+        m_start_frame = mp_start_Spinbox->value();
+        m_end_frame = mp_end_Spinbox->value();
+    }
+
+    if (m_total_selected_frames > 0) {
+        m_test_run = true;
+        accept();
+    }
+}
+
+
 void c_save_frames_dialog::update_num_frames_slot()
 {
     if (mp_save_current_frame_RButton->isChecked()) {
@@ -829,6 +862,7 @@ void c_save_frames_dialog::next_button_clicked_slot()
     }
 
     if (m_total_selected_frames > 0) {
+        m_test_run = false;
         accept();
     }
 }
