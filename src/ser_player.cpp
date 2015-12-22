@@ -1221,11 +1221,11 @@ void c_ser_player::save_frames_as_gif_slot()
 
                     if (filesize > 1024 * 1024) {
                         double filesize_mb = (double)filesize / (1024 * 1024);
-                        filesize_mb = (abs(filesize_mb * 100)) / 100;  // Round to 2 decimal places
+                        filesize_mb = (floor(filesize_mb * 100)) / 100;  // Round to 2 decimal places
                         stream << "Filesize: " << filesize_mb << " MB (" << filesize << " Bytes)" << "<br>" << endl;
                     } else if (filesize > 1024) {
                        double filesize_kb = (double)filesize / 1024;
-                       filesize_kb = (abs(filesize_kb * 100)) / 100;  // Round to 2 decimal places
+                       filesize_kb = (floor(filesize_kb * 100)) / 100;  // Round to 2 decimal places
                        stream << "Filesize: " << filesize_kb << " KB (" << filesize << " Bytes)" << "<br>" << endl;
                     } else {
                         stream << "Filesize: " << filesize << " Bytes" << "<br>" << endl;
