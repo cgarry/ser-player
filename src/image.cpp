@@ -314,6 +314,24 @@ void c_image::convert_image_to_8bit()
 }
 
 
+void c_image::convert_data_to_5_bit()
+{
+    uint8_t *p_read_data = mp_buffer;
+    uint8_t *p_write_data = mp_buffer;
+    int pixel_count = m_width * m_height;
+    if (m_colour) {
+        pixel_count *= 3;
+    }
+
+    for (int pixel = 0; pixel < pixel_count; pixel++) {
+        uint8_t pixel_data = *p_read_data++;
+        pixel_data &= 0xF8;  // Clear bottom 3 bits
+        pixel_data |= (pixel_data >> 5);  // Copy top 3 bits to bottom 3 bits
+        *p_write_data++ = pixel_data;
+    }
+}
+
+
 void c_image::estimate_colour_balance(
     double &red_gain,
     double &green_gain,
@@ -1380,7 +1398,7 @@ void c_image::resize_image_bilinear(
 }
 
 
-void c_image::conv_data_gready_for_gif()
+void c_image::conv_data_ready_for_gif()
 {
     int buffer_size = m_width * m_height;
     buffer_size = (m_colour) ? 3 * buffer_size : buffer_size;
@@ -1396,9 +1414,9 @@ void c_image::conv_data_gready_for_gif()
                     uint8_t b = (*p_read_data++);
                     uint8_t g = (*p_read_data++);
                     uint8_t r = (*p_read_data++);
-                    *p_write_data++ = r;  // R
+                    *p_write_data++ = b;  // R
                     *p_write_data++ = g;  // G
-                    *p_write_data++ = b;  // B
+                    *p_write_data++ = r;  // B
                 }
             }
         } else {
@@ -1410,9 +1428,9 @@ void c_image::conv_data_gready_for_gif()
                     uint8_t b = (uint8_t)(*p_read_data++ >> 8);
                     uint8_t g = (uint8_t)(*p_read_data++ >> 8);
                     uint8_t r = (uint8_t)(*p_read_data++ >> 8);
-                    *p_write_data++ = r;  // R
+                    *p_write_data++ = b;  // R
                     *p_write_data++ = g;  // G
-                    *p_write_data++ = b;  // B
+                    *p_write_data++ = r;  // B
                 }
             }
         }

@@ -81,10 +81,6 @@ c_ser_player::c_ser_player(QWidget *parent)
       mp_save_frames_as_gif_Dialog(nullptr),
       mp_save_frames_as_images_Dialog(nullptr)
 {
-    // debug
-    c_gif_write test;
-    // debug
-
     mp_frame_image = new c_image;
     m_current_state = STATE_NO_FILE;
     m_is_colour = false;
@@ -1128,18 +1124,7 @@ void c_ser_player::save_frames_as_gif_slot()
                 // Update Save Folders Menu
                 update_recent_save_folders_menu();
 
-                bool res = gif_write_file.create(
-                        gif_filename,  // const QString &filename
-                        frame_total_width,  // int width
-                        frame_total_height,  // int height
-                        1, // int byte_depth
-                        false, // bool colour
-                        0,  // int repeat_count
-                        unchanged_border_tolerance, // int unchanged_border_tolerance
-                        transparent_pixel_enable,  // bool use_transparent_pixels
-                        transparent_pixel_tolerence, // int transparent_tolerence
-                        lossy_compression_level,  // int lossy_compression_level
-                        pixel_depth);  // int bit_depth
+                bool res;
 
                 // Setup progress dialog
                 c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
@@ -1151,7 +1136,7 @@ void c_ser_player::save_frames_as_gif_slot()
                 // Direction loop
                 int start_dir = (sequence_direction == 1) ? 1 : 0;
                 int end_dir = (sequence_direction == 0) ? 0 : 1;
-                for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                for (int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
                     int start_frame = min_frame;
                     int end_frame = max_frame;
                     if (current_dir == 1) {  // Reverse direction - count backwards
@@ -1173,7 +1158,22 @@ void c_ser_player::save_frames_as_gif_slot()
                         if (valid_frame) {
                             mp_frame_image->resize_image(frame_active_width, frame_active_height);
                             mp_frame_image->add_bars(frame_total_width, frame_total_height);
-                            mp_frame_image->conv_data_gready_for_gif();
+                            mp_frame_image->conv_data_ready_for_gif();
+
+                            if (!gif_write_file.is_open()) {
+                                res = gif_write_file.create(
+                                        gif_filename,  // const QString &filename
+                                        frame_total_width,  // int width
+                                        frame_total_height,  // int height
+                                        mp_frame_image->get_byte_depth(), // int byte_depth
+                                        mp_frame_image->get_colour(), // bool colour
+                                        0,  // int repeat_count
+                                        unchanged_border_tolerance, // int unchanged_border_tolerance
+                                        transparent_pixel_enable,  // bool use_transparent_pixels
+                                        transparent_pixel_tolerence, // int transparent_tolerence
+                                        lossy_compression_level,  // int lossy_compression_level
+                                        pixel_depth);  // int bit_depth
+                            }
 
                             if (saved_frames == frames_to_be_saved) {
                                 // Use final frame time for last frame

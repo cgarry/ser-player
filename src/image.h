@@ -137,6 +137,8 @@ class c_image
         
         void convert_image_to_8bit();
 
+        void convert_data_to_5_bit();
+
         bool debayer_image_bilinear(int32_t colour_id);
         
         void estimate_colour_balance(
@@ -188,7 +190,7 @@ class c_image
 
         void conv_data_ready_for_qimage();
 
-        void conv_data_gready_for_gif();
+        void conv_data_ready_for_gif();
         
         
     private:
