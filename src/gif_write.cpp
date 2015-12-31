@@ -300,13 +300,7 @@ bool c_gif_write::write_frame(
     uint16_t y_end = m_height-1;
 
     if (!m_colour) {
-        // Monochorome data - convert values to indexed values
-        uint8_t *p_current_data = p_data;
-        for (int x = 0; x < m_width * m_height; x++) {
-            *p_current_data = mp_rev_mono_table[*p_current_data];
-            p_current_data++;
-        }
-
+        // Monochorome data
         detect_unchanged_border(
             p_data,  // const uint8_t *p_this_image
             mp_last_image,  //const uint8_t *p_last_image
@@ -314,6 +308,54 @@ bool c_gif_write::write_frame(
             x_end,  // uint16_t &x_end
             y_start,  // uint16_t &y_start
             y_end);  // uint16_t &y_end
+
+        // Buffer to keep image data for processing the next frame
+        bool first_frame = false;
+        if (mp_last_image == nullptr) {
+            // Create buffer if required
+            mp_last_image = new uint8_t[m_width * m_height];
+            first_frame = true;
+        }
+
+        //
+        // Create an indexed version of the image including transparent pixels if required
+        //
+        // Create a buffer for the indexed image
+        uint8_t *p_write_data = p_index_image;
+        for (int y = y_start; y <= y_end; y++) {
+            int x = x_start;
+            uint8_t *p_current_data = p_data + (y * m_width + x);
+            uint8_t *p_last_data = mp_last_image + (y * m_width + x);
+            for ( ; x <= x_end; x++) {
+                if (m_use_transparent_pixels && !first_frame) {
+                    uint8_t mono = *p_current_data++;
+                    int diff = abs(mono - *p_last_data);
+
+                    if (diff <= m_transparent_tolerence) {
+                        // This pixel is close enough to the previous pixel to be transparent
+                        // Use transparent pixel index
+                        *p_write_data++ = m_transparent_index;
+                        // The last image pixel value is left unchanged
+                        p_last_data++;
+                    } else {
+                        // This pixel is not transparent
+                        // Write indexed data to buffer ready for compression
+                        *p_write_data++ = mp_rev_mono_table[mono];
+
+                        // Update last image pixel for comparison with the next frame
+                        *p_last_data++ = mono;
+                    }
+                } else {  // Not using transparent pixels or first frame
+                    uint8_t mono = *p_current_data++;
+
+                    // Write indexed data to buffer ready for compression
+                    *p_write_data++ = mp_rev_mono_table[mono];
+
+                    // Write these pixels to last image buffer
+                    *p_last_data++ = mono;
+                }
+            }
+        }
     } else {
         // Colour data
         detect_unchanged_border(
@@ -360,22 +402,25 @@ bool c_gif_write::write_frame(
             for ( ; x <= x_end; x++) {
                 if (m_use_transparent_pixels && !first_frame) {
                     uint8_t b = *p_current_data++;
-                    int diff = abs(b - (*p_last_data++));
+                    int b_diff = abs(b - (*p_last_data++));
+                    bool not_transparent = b_diff > m_transparent_tolerence;
                     uint8_t g = *p_current_data++;
-                    diff += abs(g - (*p_last_data++));
+                    int g_diff = abs(g - (*p_last_data++));
+                    not_transparent |= g_diff > m_transparent_tolerence;
                     uint8_t r = *p_current_data++;
-                    diff += abs(r - (*p_last_data++));
-                    if (diff <= m_transparent_tolerence) {
-                        // This pixel is close enough to the previous pixel to be transparent
-                        *p_write_data++ = m_transparent_index;
-                        // Note that the last image pixel value is left unchanged
-                    } else {
+                    int r_diff = abs(r - (*p_last_data++));
+                    not_transparent |= r_diff > m_transparent_tolerence;
+                    if (not_transparent) {
                         // This pixel is not transparent
                         *p_write_data++ = mp_rev_colour_table->r[r >> 3].g[g >> 3].b[b >> 3];
                         // Update last image pixel for comparison with the next frame
                         *(p_last_data - 3) = b;
                         *(p_last_data - 2) = g;
                         *(p_last_data - 1) = r;
+                    } else {
+                        // This pixel is close enough to the previous pixel to be transparent
+                        *p_write_data++ = m_transparent_index;
+                        // Note that the last image pixel value is left unchanged
                     }
                 } else {  // Not using transparent pixels or first frame
                     uint8_t b = *p_current_data++;
@@ -396,7 +441,7 @@ bool c_gif_write::write_frame(
 
     printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
 
-
+/*
     //
     // Support for transparent pixels
     //
@@ -423,6 +468,7 @@ bool c_gif_write::write_frame(
             }
         }
     }
+*/
 
     // Update graphic control extension structure variables fields
     m_graphic_control_extension.m_packed_field  = 0 << 2;  // Disposal method: None specified
@@ -451,12 +497,14 @@ bool c_gif_write::write_frame(
     m_image_descriptor.m_image_height[0] = (uint8_t)(active_height & 0xFF);
     m_image_descriptor.m_image_height[1] = (uint8_t)(active_height >> 8);
     if (!m_colour) {
+        // Monochrome data
         // Image descriptor packed fields byte for monochrome encoding
         m_image_descriptor.m_packed_fields  = 0 << 7;  // Local Color Table Flag - No local colour table for monochrome
         m_image_descriptor.m_packed_fields |= 0 << 6;  // Interlace flag - No interlacing
         m_image_descriptor.m_packed_fields |= 0 << 5;  // Sort flag - Colour table is not sorted
         m_image_descriptor.m_packed_fields |= 0 << 0;  // Size of local colour table
     } else {
+        // Colour data
         // Image descriptor packed fields byte for colour encoding
         m_image_descriptor.m_packed_fields  = 1 << 7;  // Local Color Table Flag - Use local colour table for colour
         m_image_descriptor.m_packed_fields |= 0 << 6;  // Interlace flag - No interlacing
@@ -479,18 +527,23 @@ bool c_gif_write::write_frame(
     bool all_compressed = false;
 
     c_lzw_compressor lzw_compressor(
-                x_end - x_start + 1,  // m_width,
-                y_end - y_start + 1,  // m_height
-                0,  // x_start,
-                x_end - x_start,  // x_end,
-                0,  // y_start,
-                y_end - y_start,  // y_end,
-                m_bit_depth,
-                p_index_image,
-                m_lossy_compression_level,
-                mp_mono_table,
-                mp_rev_mono_table,
-                m_transparent_index);
+        x_end - x_start + 1,  // m_width,
+        y_end - y_start + 1,  // m_height
+        0,  // x_start,
+        x_end - x_start,  // x_end,
+        0,  // y_start,
+        y_end - y_start,  // y_end,
+        m_bit_depth,
+        p_index_image);
+
+
+    lzw_compressor.set_lossy_details(
+        m_lossy_compression_level,  // int lossy_compression_level
+        m_colour,  // bool colour
+        mp_mono_table,  // uint8_t *p_index_lut
+        mp_rev_mono_table,  // uint8_t *p_rev_index_lut
+        m_transparent_index);  // int transparent_index
+
 
     uint8_t *p_compress_buffer = new uint8_t[260];
     while (!all_compressed) {
@@ -504,21 +557,6 @@ bool c_gif_write::write_frame(
     // Data for this frame has been written to the file, free buffers
     delete [] p_index_image;
     delete [] p_compress_buffer;
-
-
-    // Keep this image data for processing the next frame
-    if (!m_colour) {
-        if (mp_last_image == nullptr) {
-            // Create buffer if required
-            mp_last_image = new uint8_t[m_width * m_height];
-
-            // Copy image data into last frame buffer
-            std::copy(p_data, p_data + m_width * m_height, mp_last_image);
-        } else if (!m_use_transparent_pixels) {
-            // Copy image data into last frame buffer
-            std::copy(p_data, p_data + m_width * m_height, mp_last_image);
-        }
-    }
 
     // Write block terminator to file
     fputc(0x00, mp_gif_file);
@@ -624,8 +662,12 @@ void c_gif_write::quantize_colours(
         }
     } while (did_swap);
 
-    // Delete histogram table as only the index table is required from here
-    delete [] p_histogram_lut;
+    // Count humber of pixels in histogram table
+    uint64_t total_pixels_in_hist_table = 0;
+    for (int i = 0; i < number_of_hist_entries; i++) {
+        total_pixels_in_hist_table += p_histogram_lut[i];
+    }
+
 
     // Create colour table and reverse colour table
     uint8_t *p_colour_r_palette = new uint8_t[256];
@@ -633,65 +675,141 @@ void c_gif_write::quantize_colours(
     uint8_t *p_colour_b_palette = new uint8_t[256];
     mp_rev_colour_table = new s_rev_colour_index;
 
-    int number_of_palette_colours = 0;
+    int number_of_palette_colours;
     bool colour_found = false;
 
     // Scan through index table
+    //
+    // Approaches:
+    // 1. If number of histogram entries <= number_of_colours then do not combine any colours
+    // 2. If histogram colours combine (diff <= 1) to give <= number_of_colours then scan from bottom
+    //    of the histogram and stop combining when enough colours have been combined to fit histogram
+    //    colours into colour palette.
+    // 3. If combining histogram colours (top to bottom) results in number_of_colours palette entries then match remaining
+    //    histogram entries to nearest palette colours.
+    // 4. If combining colours does not result in reduction large enough reduction of colours then try
+    //    again using (diff <= 2).
+    bool palette_created = false;
+    int attempt = 1;
     int hist_entry;
-    int colour_found_count = 0;
-    for (hist_entry = 0; hist_entry < number_of_hist_entries; hist_entry++) {
-        // Extract 5-bit RGB values from index table
-        uint32_t temp = p_index_lut[hist_entry];
-        uint8_t b = temp & 0x1F;
-        temp >>= 5;
-        uint8_t g = temp & 0x1F;
-        temp >>= 5;
-        uint8_t r = temp;
+    int colour_found_count;
+    uint64_t pixels_in_colour_table;
+    while (!palette_created) {
+        pixels_in_colour_table = 0;
+        number_of_palette_colours = 0;
+        colour_found_count = 0;
+        for (hist_entry = 0; hist_entry < number_of_hist_entries; hist_entry++) {
+            // Extract 5-bit RGB values from index table
+            uint32_t temp;
+            if (attempt == 1 || attempt == 3) {
+                // Examine colours from least numerous to most numerous
+                temp = p_index_lut[number_of_hist_entries - hist_entry - 1];
+                pixels_in_colour_table += p_histogram_lut[number_of_hist_entries - hist_entry - 1];
+            } else {
+                // Examine colours from most numerous to least numerous
+                temp = p_index_lut[hist_entry];
+                pixels_in_colour_table += p_histogram_lut[hist_entry];
+            }
 
-        // Check if this colour or a similar one is already in the colour palette
-        // Similar means total difference in colours <= 2
-        colour_found = false;
-        int palette_entry;
-        for (palette_entry = 0; palette_entry < number_of_palette_colours; palette_entry++) {
-            int diff = abs((int)r - p_colour_r_palette[palette_entry]);
-            diff += abs((int)g - p_colour_g_palette[palette_entry]);
-            diff += abs((int)b - p_colour_b_palette[palette_entry]);
+            uint8_t b = temp & 0x1F;
+            temp >>= 5;
+            uint8_t g = temp & 0x1F;
+            temp >>= 5;
+            uint8_t r = temp;
 
-            if (diff <= 1) {
-                // Close enough colour found in colour palette
-                colour_found = true;
-                break;
+            // Check if this colour or a similar one is already in the colour palette
+            // Similar means total difference in colours <= 2
+            colour_found = false;
+            int palette_entry = 0;
+            int free_palette_colours = number_of_colours - number_of_palette_colours;
+            int remaining_hist_entries = number_of_hist_entries - hist_entry;
+
+            int max_difference = 1;
+            if (attempt == 3 || attempt == 4) {
+                max_difference = 2;
+            }
+
+            if (remaining_hist_entries > free_palette_colours) {
+                // There are more remaining histogram entries than there are remaining palette entries
+                // Look for close colours to combine to reduce the number of colours
+                for ( ; palette_entry < number_of_palette_colours; palette_entry++) {
+                    int diff = abs((int)r - p_colour_r_palette[palette_entry]);
+                    diff += abs((int)g - p_colour_g_palette[palette_entry]);
+                    diff += abs((int)b - p_colour_b_palette[palette_entry]);
+
+                    if (diff <= max_difference) {
+                        // Close enough colour found in colour palette
+                        colour_found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (colour_found) {
+                // There was a similar colour already in the colour palette
+                // Update the colour to index LUT for this colour
+                mp_rev_colour_table->r[r].g[g].b[b] = (uint8_t)palette_entry;
+                colour_found_count++;  // debug
+            } else {
+                // No similar colour was found in the colour palette
+                // Add this colour to the colour palette
+                p_colour_r_palette[number_of_palette_colours] = r;
+                p_colour_g_palette[number_of_palette_colours] = g;
+                p_colour_b_palette[number_of_palette_colours] = b;
+
+                // Also update the colour to index LUT for this colour
+                mp_rev_colour_table->r[r].g[g].b[b] = (uint8_t)number_of_palette_colours;
+
+                // Increase palette colour count
+                number_of_palette_colours++;
+
+                if (number_of_palette_colours == number_of_colours) {
+                    // The maximum number of colours has been added to the colour palette
+                    // exit the loop
+                    hist_entry++;
+                    break;
+                }
             }
         }
 
-        if (colour_found) {
-            // There was a similar colour already in the colour palette
-            // Update the colour to index LUT for this colour
-            mp_rev_colour_table->r[r].g[g].b[b] = (uint8_t)palette_entry;
-            colour_found_count++;  // debug
+        if (attempt == 1) {
+            // Check that all histogram entries have been processed
+            if (hist_entry == number_of_hist_entries) {
+                // All histogram entries have been processed
+                palette_created = true;
+            } else {
+                // This attempt failed, try the next attempt
+                attempt = 2;
+            }
+        } else if (attempt == 2) {
+            // Check that more than 80% of pixels are represented by colour table so far
+            if ((pixels_in_colour_table * 100) / total_pixels_in_hist_table > 80) {
+                // 80% or more of all pixels are represented by colour table
+                palette_created = true;
+            } else {
+                // Not enough pixels are represented by the colour table, try next attempt
+                attempt = 3;
+            }
+        } else if (attempt == 3) {
+            // Check that all histogram entries have been processed
+            if (hist_entry == number_of_hist_entries) {
+                // All histogram entries have been processed
+                palette_created = true;
+            } else {
+                // This attempt failed, try the next attempt
+                attempt = 4;
+            }
         } else {
-            // No similar colour was found in the colour palette
-            // Add this colour to the colour palette
-            p_colour_r_palette[number_of_palette_colours] = r;
-            p_colour_g_palette[number_of_palette_colours] = g;
-            p_colour_b_palette[number_of_palette_colours] = b;
-
-            // Also update the colour to index LUT for this colour
-            mp_rev_colour_table->r[r].g[g].b[b] = (uint8_t)number_of_palette_colours;
-
-            // Increase palette colour count
-            number_of_palette_colours++;
-
-            if (number_of_palette_colours == number_of_colours) {
-                // The maximum number of colours has been added to the colour palette
-                // exit the loop
-                hist_entry++;
-                break;
-            }
+            palette_created = true;
         }
-
     }
 
+    // Delete histogram table as only the index table is required from here
+    delete [] p_histogram_lut;
+
+    printf("attempt: %d\n", attempt);
+    printf("pixels_in_colour_table: %I64d, total_pixels_in_hist_table: %I64d\n", pixels_in_colour_table, total_pixels_in_hist_table);
+    printf("Percent of pixels in colour table: %f\n", (double)(pixels_in_colour_table * 100) / total_pixels_in_hist_table);
     printf("colour_found_count: %d\n", colour_found_count);
     printf("number_of_palette_colours: %d\n", number_of_palette_colours);
     printf("Remaining histogram entries: %d\n", number_of_hist_entries - hist_entry);
@@ -776,7 +894,7 @@ void c_gif_write::detect_unchanged_border(
             bool mismatch = false;
             for (y_start = 0; y_start <= y_end; y_start++) {
                 for (int x = 0; x < m_width; x++) {
-                    mismatch |= abs((int)(mp_mono_table[*p_current_data++]) - (int)(mp_mono_table[*p_last_data++])) > m_unchanged_border_tolerance;
+                    mismatch |= abs((int)(*p_current_data++) - (*p_last_data++)) > m_unchanged_border_tolerance;
                 }
 
                 // Break out of loop on mismatch
@@ -799,7 +917,7 @@ void c_gif_write::detect_unchanged_border(
                     p_last_data = p_last_image + y_end * m_width;
                     p_current_data = p_this_image + y_end * m_width;
                     for (int x = 0; x < m_width; x++) {
-                        mismatch |= abs((int)(mp_mono_table[*p_current_data++]) - (int)(mp_mono_table[*p_last_data++])) > m_unchanged_border_tolerance;
+                        mismatch |= abs((int)(*p_current_data++) - (*p_last_data++)) > m_unchanged_border_tolerance;
                     }
 
                     // Break out of look on mismatch
@@ -814,7 +932,7 @@ void c_gif_write::detect_unchanged_border(
                     p_last_data = p_last_image + y_start * m_width + x_start;
                     p_current_data = p_this_image + y_start * m_width + x_start;
                     for (int y = y_start; y <= y_end; y++) {
-                        mismatch |= abs((int)(mp_mono_table[*p_current_data]) - (int)(mp_mono_table[*p_last_data])) > m_unchanged_border_tolerance;
+                        mismatch |= abs((int)(*p_current_data) - (*p_last_data)) > m_unchanged_border_tolerance;
                         p_current_data += m_width;
                         p_last_data += m_width;
                     }
@@ -831,7 +949,7 @@ void c_gif_write::detect_unchanged_border(
                     p_last_data = p_last_image + y_start * m_width + x_end;
                     p_current_data = p_this_image + y_start * m_width + x_end;
                     for (int y = y_start; y <= y_end; y++) {
-                        mismatch |= abs((int)(mp_mono_table[*p_current_data]) - (int)(mp_mono_table[*p_last_data])) > m_unchanged_border_tolerance;
+                        mismatch |= abs((int)(*p_current_data) - (*p_last_data)) > m_unchanged_border_tolerance;
                         p_current_data += m_width;
                         p_last_data += m_width;
                     }

@@ -33,11 +33,7 @@ c_lzw_compressor::c_lzw_compressor(
         uint16_t y_start,
         uint16_t y_end,
         uint8_t bit_depth,
-        uint8_t *p_image_data,
-        int lossy_compression_level,
-        uint8_t *p_index_lut,
-        uint8_t *p_rev_index_lut,
-        int transparent_index) :
+        uint8_t *p_image_data) :
     m_width(width),
     m_height(height),
     m_x_start(x_start),
@@ -46,10 +42,10 @@ c_lzw_compressor::c_lzw_compressor(
     m_y_end(y_end),
     m_bit_depth(bit_depth),
     mp_image_data(p_image_data),
-    m_lossy_compression_level(lossy_compression_level),
-    mp_index_lut(p_index_lut),
-    mp_rev_index_lut(p_rev_index_lut),
-    m_transparent_index(transparent_index)
+    m_lossy_compression_level(0),
+    mp_index_lut(nullptr),
+    mp_rev_index_lut(nullptr),
+    m_transparent_index(0)
 {
     // Special codes
     m_clear_code = 1 << m_bit_depth;
@@ -74,6 +70,21 @@ c_lzw_compressor::c_lzw_compressor(
 c_lzw_compressor::~c_lzw_compressor()
 {
     delete mp_lzw_tree;
+}
+
+
+void c_lzw_compressor::set_lossy_details(
+        int lossy_compression_level,
+        bool colour,
+        uint8_t *p_index_lut,
+        uint8_t *p_rev_index_lut,
+        int transparent_index)
+{
+    m_lossy_compression_level = lossy_compression_level;
+    m_colour = colour;
+    mp_index_lut = p_index_lut;
+    mp_rev_index_lut = p_rev_index_lut;
+    m_transparent_index = transparent_index;
 }
 
 

@@ -722,7 +722,7 @@ void c_save_frames_dialog::gif_apply_preset_options()
         mp_gif_transparent_tolerance_CBox->setChecked(true);
         mp_gif_transparent_tolerance_SpinBox->setValue(5);
         mp_gif_lossy_compression_level_CBox->setChecked(true);
-        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_lossy_compression_level_SpinBox->setValue(5);
         mp_gif_reduce_pixel_depth_CBox->setChecked(false);
         break;
     case 3:  // Small file size
@@ -730,7 +730,7 @@ void c_save_frames_dialog::gif_apply_preset_options()
         mp_gif_transparent_tolerance_CBox->setChecked(true);
         mp_gif_transparent_tolerance_SpinBox->setValue(5);
         mp_gif_lossy_compression_level_CBox->setChecked(true);
-        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_lossy_compression_level_SpinBox->setValue(5);
         mp_gif_reduce_pixel_depth_CBox->setChecked(true);
         mp_gif_reduce_pixel_depth_SpinBox->setValue(7);
         break;
@@ -739,23 +739,11 @@ void c_save_frames_dialog::gif_apply_preset_options()
         mp_gif_transparent_tolerance_CBox->setChecked(true);
         mp_gif_transparent_tolerance_SpinBox->setValue(5);
         mp_gif_lossy_compression_level_CBox->setChecked(true);
-        mp_gif_lossy_compression_level_SpinBox->setValue(8);
+        mp_gif_lossy_compression_level_SpinBox->setValue(5);
         mp_gif_reduce_pixel_depth_CBox->setChecked(true);
         mp_gif_reduce_pixel_depth_SpinBox->setValue(6);
         break;
     }
-
-
-/*
-    QCheckBox *mp_gif_unchanged_border_tolerance_CBox;
-    QSpinBox *mp_gif_unchanged_border_tolerance_SpinBox;
-    QCheckBox *mp_gif_transparent_tolerance_CBox;
-    QSpinBox *mp_gif_transparent_tolerance_SpinBox;
-    QCheckBox *mp_gif_lossy_compression_level_CBox;
-    QSpinBox *mp_gif_lossy_compression_level_SpinBox;
-    QCheckBox *mp_gif_reduce_pixel_depth_CBox;
-    QSpinBox *mp_gif_reduce_pixel_depth_SpinBox;
-*/
 }
 
 

@@ -1118,11 +1118,13 @@ void c_ser_player::save_frames_as_gif_slot()
                 lossy_compression_level = mp_save_frames_as_gif_Dialog->get_gif_lossy_compression_level();
                 pixel_depth = mp_save_frames_as_gif_Dialog->get_gif_pixel_bit_depth();
 
-                // Keep list of last saved folders up to date
-                add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(gif_filename).absolutePath());
+                if (!is_test_run) {
+                    // Keep list of last saved folders up to date if this is not a test run
+                    add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(gif_filename).absolutePath());
 
-                // Update Save Folders Menu
-                update_recent_save_folders_menu();
+                    // Update Save Folders Menu
+                    update_recent_save_folders_menu();
+                }
 
                 bool res;
 
