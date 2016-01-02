@@ -64,12 +64,16 @@ c_lzw_compressor::c_lzw_compressor(
 
     // Reset output byte and bit
     m_output_bit = 8;
+
+    // Buffer for compressed data
+    p_compressed_data_buffer = new uint8_t[262];
 }
 
 
 c_lzw_compressor::~c_lzw_compressor()
 {
     delete mp_lzw_tree;
+    delete [] p_compressed_data_buffer;
 }
 
 
@@ -91,24 +95,23 @@ void c_lzw_compressor::set_lossy_details(
 // ------------------------------------------
 // Compress data
 // ------------------------------------------
-bool c_lzw_compressor::compress_data(
-        uint8_t *p_output_buffer)
+bool c_lzw_compressor::compress_data()
 {
     bool complete = (m_input_y > m_y_end) ? true : false;
 
     if (m_output_bit <= 256 * 8) {
         // No code bits from the previous block needs to be written
-        *(p_output_buffer + 1) = 0;  // Clear 1st data entry of output buffer
+        *(p_compressed_data_buffer + 1) = 0;  // Clear 1st data entry of output buffer
         m_output_bit = 8;  // Reset output bit count
     } else {
         // There is code data from the previous block, copy it to start of buffer
         int bits_from_last_block = m_output_bit - 256 * 8;
         int bytes_from_last_block = (bits_from_last_block + 7) / 8;
-        std::copy(p_output_buffer + 256,
-                  p_output_buffer + 256 + bytes_from_last_block,
-                  p_output_buffer + 1);
+        std::copy(p_compressed_data_buffer + 256,
+                  p_compressed_data_buffer + 256 + bytes_from_last_block,
+                  p_compressed_data_buffer + 1);
 
-        *(p_output_buffer + 1 + bytes_from_last_block) = 0;  // Clear next data entry of output buffer
+        *(p_compressed_data_buffer + 1 + bytes_from_last_block) = 0;  // Clear next data entry of output buffer
         m_output_bit = 8 + bits_from_last_block;  // Update output bit count
     }
 
@@ -121,21 +124,91 @@ bool c_lzw_compressor::compress_data(
         // Lossy LZW experimental code - start
         if (mp_index_lut != nullptr && next_code != m_transparent_index) {
             if (m_current_code != 0xFFFF && mp_lzw_tree->m_current[m_current_code].m_next[next_code] == 0) {
-                for (int i = 1; i <= m_lossy_compression_level; i++) {
+                if (!m_colour) {
+                    // Lossy code for monochrome data
                     uint8_t next_pixel_value = mp_index_lut[next_code];  // Convert index code to pixel value
-                    uint8_t next_code_minus_i = mp_rev_index_lut[next_pixel_value - i];  // Get index code for pixel value - i
-                    //if ((next_code > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code-i] != 0)) {
-                    if ((next_pixel_value > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0)) {
-                        next_code = next_code_minus_i;
-                        *(p_data_ptr) = next_code;
-                        break;
-                    }
+                    for (int i = 1; i <= m_lossy_compression_level; i++) {
+                        uint8_t next_code_minus_i = mp_rev_index_lut[next_pixel_value - i];  // Get index code for pixel value - i
+                        if ((next_pixel_value > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0)) {
+                            next_code = next_code_minus_i;
+                            *(p_data_ptr) = next_code;
+                            break;
+                        }
 
-                    uint8_t next_code_plus_i = mp_rev_index_lut[next_pixel_value + i];  // Get index code for pixel value + i
-                    if ((next_pixel_value < (256-i)) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0)) {
-                        next_code = next_code_plus_i;
-                        *(p_data_ptr) = next_code;
-                        break;
+                        uint8_t next_code_plus_i = mp_rev_index_lut[next_pixel_value + i];  // Get index code for pixel value + i
+                        if ((next_pixel_value < (256-i)) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0)) {
+                            next_code = next_code_plus_i;
+                            *(p_data_ptr) = next_code;
+                            break;
+                        }
+                    }
+                } else {
+                    // Lossy code for colour data
+                    int lut_index = next_code * 3;
+                    uint8_t next_r_value = mp_index_lut[lut_index++];  // Convert index code to pixel value
+                    uint8_t next_g_value = mp_index_lut[lut_index++];
+                    uint8_t next_b_value = mp_index_lut[lut_index];
+                    for (int i = 1; i <= m_lossy_compression_level; i++) {
+                        if (next_r_value > i) {
+                            uint8_t temp = next_r_value - i;
+                            uint8_t next_code_minus_i = mp_rev_index_lut[(temp >> 2) << 12 | (next_g_value >> 2) << 6 | (next_b_value >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
+                                next_code = next_code_minus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
+                        if (next_g_value > i) {
+                            uint8_t temp = next_g_value - i;
+                            uint8_t next_code_minus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (temp >> 2) << 6 | (next_b_value >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
+                                next_code = next_code_minus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
+                        if (next_b_value > i) {
+                            uint8_t temp = next_b_value - i;
+                            uint8_t next_code_minus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (next_g_value >> 2) << 6 | (temp >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
+                                next_code = next_code_minus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
+                        if (next_r_value < (256-i)) {
+                            uint8_t temp = next_r_value + i;
+                            uint8_t next_code_plus_i = mp_rev_index_lut[(temp >> 2) << 12 | (next_g_value >> 2) << 6 | (next_b_value >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
+                                next_code = next_code_plus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
+                        if (next_g_value < (256-i)) {
+                            uint8_t temp = next_g_value + i;
+                            uint8_t next_code_plus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (temp >> 2) << 6 | (next_b_value >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
+                                next_code = next_code_plus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
+                        if (next_b_value < (256-i)) {
+                            uint8_t temp = next_b_value + i;
+                            uint8_t next_code_plus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (next_g_value >> 2) << 6 | (temp >> 2)];
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
+                                next_code = next_code_plus_i;
+                                *(p_data_ptr) = next_code;
+                                break;
+                            }
+                        }
+
                     }
                 }
             }
@@ -146,13 +219,13 @@ bool c_lzw_compressor::compress_data(
         if (m_current_code == 0xFFFF) {
             // First pixel - do nothing but save next_code as current_code
             m_current_code = next_code;
-            output_code_to_buffer(m_clear_code, m_code_length, p_output_buffer);
+            output_code_to_buffer(m_clear_code, m_code_length, p_compressed_data_buffer);
         } else if (mp_lzw_tree->m_current[m_current_code].m_next[next_code] != 0) {
             // Current run is already in the dictionary tree
             m_current_code = mp_lzw_tree->m_current[m_current_code].m_next[next_code];
         } else { // Finish current run
             // Write current code out
-            output_code_to_buffer(m_current_code, m_code_length, p_output_buffer);
+            output_code_to_buffer(m_current_code, m_code_length, p_compressed_data_buffer);
 
             // Add new run into the dictionary tree
             mp_lzw_tree->m_current[m_current_code].m_next[next_code] = m_next_free_code;
@@ -168,7 +241,7 @@ bool c_lzw_compressor::compress_data(
             if (m_next_free_code == 4096)
             {
                 // Dictionary full, delete it and start again
-                output_code_to_buffer(m_clear_code, m_code_length, p_output_buffer);
+                output_code_to_buffer(m_clear_code, m_code_length, p_compressed_data_buffer);
                 delete mp_lzw_tree;
                 mp_lzw_tree = new s_lzw_tree();
                 m_code_length = m_bit_depth + 1;
@@ -185,7 +258,8 @@ bool c_lzw_compressor::compress_data(
             m_input_y++;
             if (m_input_y > m_y_end) {
                 complete = true;
-                output_code_to_buffer(m_current_code, m_code_length, p_output_buffer);  // Output final code
+                output_code_to_buffer(m_current_code, m_code_length, p_compressed_data_buffer);  // Output final code
+                output_code_to_buffer(m_end_of_information_code, m_code_length, p_compressed_data_buffer);  // Output end of information code
                 break;  // Exit loop
             }
 
@@ -202,7 +276,7 @@ bool c_lzw_compressor::compress_data(
         complete = false;  // Cannot be complete if more than 255 bytes have been accumulated
     }
 
-    *p_output_buffer = bytes;
+    *p_compressed_data_buffer = bytes;  // Write byte count to start of buffer
     return complete;
 }
 

@@ -70,7 +70,7 @@ class c_gif_write {
         }
 
 
-        void quantize_colours(
+        void quantise_colours(
                 uint8_t *p_data,
                 uint16_t x_start,
                 uint16_t x_end,
@@ -151,21 +151,19 @@ class c_gif_write {
 
         struct s_b_rev_colour_index
         {
-            uint8_t b[32];
+            uint8_t b[1 << 6];
         };
 
         struct s_g_rev_colour_index
         {
-            struct s_b_rev_colour_index g[32];
+            struct s_b_rev_colour_index g[1 << 6];
         };
 
         struct s_rev_colour_index
         {
-            struct s_g_rev_colour_index r[32];
+            struct s_g_rev_colour_index r[1 << 6];
         };
 
-
-        typedef uint8_t t_rev_colour_table[1 << 5][1 << 5][1 << 5];
 
         //
         // Private member variables
@@ -189,7 +187,7 @@ class c_gif_write {
         uint8_t *mp_colour_table;
         uint8_t *mp_mono_table;
         uint8_t *mp_rev_mono_table;
-        s_rev_colour_index *mp_rev_colour_table;
+        uint8_t *mp_rev_colour_table;
 
         // Other
         QString m_error_string;

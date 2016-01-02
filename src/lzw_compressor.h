@@ -62,8 +62,15 @@ class c_lzw_compressor {
         // ------------------------------------------
         // compress data
         // ------------------------------------------
-        bool compress_data(
-                uint8_t *p_output_buffer);
+        bool compress_data();
+
+
+        // ------------------------------------------
+        // Get compressed data pointer
+        // ------------------------------------------
+        uint8_t *get_compressed_data_ptr() {
+            return p_compressed_data_buffer;
+        }
 
 
     private:
@@ -110,6 +117,7 @@ class c_lzw_compressor {
         uint8_t *mp_index_lut;
         uint8_t *mp_rev_index_lut;
         int m_transparent_index;
+        uint8_t *p_compressed_data_buffer;
 
         // Special codes
         uint32_t m_clear_code;

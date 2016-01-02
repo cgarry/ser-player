@@ -487,7 +487,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
             SLOT(setEnabled(bool)));
     mp_gif_transparent_tolerance_CBox->setChecked(true);
 
-    mp_gif_reduce_pixel_depth_CBox = new QCheckBox(tr("Reduced Pixel Bit Depth:"));
+    mp_gif_reduce_pixel_depth_CBox = new QCheckBox(tr("Reduced Colour Table Bit Depth:"));
     mp_gif_reduce_pixel_depth_SpinBox = new QSpinBox;
     mp_gif_reduce_pixel_depth_SpinBox->setRange(4, 7);
     mp_gif_reduce_pixel_depth_SpinBox->setValue(7);
@@ -501,7 +501,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_gif_lossy_compression_level_CBox = new QCheckBox(tr("Lossy Compression Level:"));
     mp_gif_lossy_compression_level_SpinBox = new QSpinBox;
     mp_gif_lossy_compression_level_SpinBox->setRange(1, 20);
-    mp_gif_lossy_compression_level_SpinBox->setValue(8);
+    mp_gif_lossy_compression_level_SpinBox->setValue(5);
     connect(mp_gif_lossy_compression_level_CBox,
             SIGNAL(toggled(bool)),
             mp_gif_lossy_compression_level_SpinBox,

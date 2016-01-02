@@ -833,9 +833,9 @@ void c_ser_player::save_frames_as_ser_slot()
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
                                                                 mp_ser_file->has_timestamps(),
-                                                                mp_ser_file->get_observer_string(),
-                                                                mp_ser_file->get_instrument_string(),
-                                                                mp_ser_file->get_telescope_string());
+                                                                QString::fromStdString(mp_ser_file->get_observer_string()),
+                                                                QString::fromStdString(mp_ser_file->get_instrument_string()),
+                                                                QString::fromStdString(mp_ser_file->get_telescope_string()));
     }
 
     mp_save_frames_as_ser_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
@@ -850,7 +850,7 @@ void c_ser_player::save_frames_as_ser_slot()
 
         int min_frame = mp_save_frames_as_ser_Dialog->get_start_frame();
         int max_frame = mp_save_frames_as_ser_Dialog->get_end_frame();
-        QString default_filename =  mp_ser_file->get_filename();
+        QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
         int required_digits_for_number = mp_save_frames_as_ser_Dialog->get_required_digits_for_number();
 
         if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
@@ -1020,9 +1020,9 @@ void c_ser_player::save_frames_as_gif_slot()
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
                                                                 mp_ser_file->has_timestamps(),
-                                                                mp_ser_file->get_observer_string(),
-                                                                mp_ser_file->get_instrument_string(),
-                                                                mp_ser_file->get_telescope_string());
+                                                                QString::fromStdString(mp_ser_file->get_observer_string()),
+                                                                QString::fromStdString(mp_ser_file->get_instrument_string()),
+                                                                QString::fromStdString(mp_ser_file->get_telescope_string()));
 
         double gif_frame_time;
         if (mp_ser_file->get_fps_rate() > 0) {
@@ -1059,7 +1059,7 @@ void c_ser_player::save_frames_as_gif_slot()
 
             int min_frame = mp_save_frames_as_gif_Dialog->get_start_frame();
             int max_frame = mp_save_frames_as_gif_Dialog->get_end_frame();
-            QString default_filename =  mp_ser_file->get_filename();
+            QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
             int required_digits_for_number = mp_save_frames_as_gif_Dialog->get_required_digits_for_number();
 
             if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
@@ -1098,9 +1098,9 @@ void c_ser_player::save_frames_as_gif_slot()
             if (!gif_filename.isEmpty()) {
                 c_gif_write gif_write_file;
                 // Handle the case on Linux where an extension is not added by the save file dialog
-//                if (!filename.endsWith(".gif", Qt::CaseInsensitive)) {
-//                    filename = filename + ".gif";
-//                }
+                if (!gif_filename.endsWith(".gif", Qt::CaseInsensitive)) {
+                    gif_filename += ".gif";
+                }
 
                 bool do_frame_processing = mp_save_frames_as_gif_Dialog->get_processing_enable();
                 int frames_to_be_saved = mp_save_frames_as_gif_Dialog->get_frames_to_be_saved();
@@ -1206,57 +1206,66 @@ void c_ser_player::save_frames_as_gif_slot()
                           // Wait
                     }
                 }
-            }
 
-            if (is_test_run) {
-                // Create an HTML file with animated GIF and options details
-                if (temp_html_file.open()) {
-                    temp_html_file.resize(0);  // Clear any file contents
-                    QTextStream stream(&temp_html_file);
-                    stream << "<!DOCTYPE html>" << endl;
-                    stream << "<html>" << endl;
-                    stream << "<body>" << endl;
-                    stream << "<p>" << endl;
-                    stream << "<b><big>SER Player Animated GIF Review</big></b><br>" << endl;
-                    stream << "<b>(Close browser when reviewing is complete)</b><br>" << endl;
-                    int filesize = QFileInfo(temp_gif_filename).size();
+                if (is_test_run) {
+                    // Create an HTML file with animated GIF and options details
+                    if (temp_html_file.open()) {
+                        temp_html_file.resize(0);  // Clear any file contents
+                        QTextStream stream(&temp_html_file);
+                        stream << "<!DOCTYPE html>" << endl;
+                        stream << "<html>" << endl;
+                        stream << "<body>" << endl;
+                        stream << "<p>" << endl;
+                        stream << "<b><big>" << tr("SER Player Animated GIF Review") << "</big></b><br>" << endl;
+                        stream << "<b>" << tr("(Close browser when reviewing is complete)") << " </b><br>" << endl;
 
-                    if (filesize > 1024 * 1024) {
-                        double filesize_mb = (double)filesize / (1024 * 1024);
-                        filesize_mb = (floor(filesize_mb * 100)) / 100;  // Round to 2 decimal places
-                        stream << "Filesize: " << filesize_mb << " MB (" << filesize << " Bytes)" << "<br>" << endl;
-                    } else if (filesize > 1024) {
-                       double filesize_kb = (double)filesize / 1024;
-                       filesize_kb = (floor(filesize_kb * 100)) / 100;  // Round to 2 decimal places
-                       stream << "Filesize: " << filesize_kb << " KB (" << filesize << " Bytes)" << "<br>" << endl;
-                    } else {
-                        stream << "Filesize: " << filesize << " Bytes" << "<br>" << endl;
+                        stream << tr("Frame Delay: ") << mp_save_frames_as_gif_Dialog->get_gif_frametime() << " s<br>" << endl;
+                        stream << tr("Final Frame Delay: ") << mp_save_frames_as_gif_Dialog->get_gif_final_frametime() << " s<br>" << endl;
+
+                        stream << tr("Unchanged Border Tolerance: ") << unchanged_border_tolerance << "<br>" << endl;
+
+                        if (transparent_pixel_enable) {
+                            stream << tr("Transperant Pixel Tolerance: ") << transparent_pixel_tolerence << "<br>" << endl;
+                        } else {
+                            stream << tr("Transperant Pixel Tolerance: Disabled") << "<br>" << endl;
+                        }
+
+                        if (pixel_depth < 8) {
+                            stream << tr("Reduced Pixel Depth: ") << pixel_depth << "<br>" << endl;
+                        } else {
+                            stream << tr("Reduced Pixel Depth: Disabled") << "<br>" << endl;
+                        }
+
+                        if (lossy_compression_level > 0) {
+                            stream << tr("Lossy Compression Level: ") << lossy_compression_level << "<br>" << endl;
+                        } else {
+                            stream << tr("Lossy Compression Level: Disabled") << "<br>" << endl;
+                        }
+
+                        int filesize = QFileInfo(temp_gif_filename).size();
+
+                        if (filesize > 1024 * 1024) {
+                            double filesize_mb = (double)filesize / (1024 * 1024);
+                            filesize_mb = (floor(filesize_mb * 100)) / 100;  // Round to 2 decimal places
+                            stream << "<b>" << tr("Filesize: %1 MB (%2 Bytes)").arg(filesize_mb).arg(filesize) << "</b><br>" << endl;
+                        } else if (filesize > 1024) {
+                           double filesize_kb = (double)filesize / 1024;
+                           filesize_kb = (floor(filesize_kb * 100)) / 100;  // Round to 2 decimal places
+                           stream << "<b>" << tr("Filesize: %1 KB (%2 Bytes)").arg(filesize_kb).arg(filesize) << "</b><br>" << endl;
+                        } else {
+                            stream << "<b>" << tr("Filesize: %1 Bytes").arg(filesize) << "</b><br>" << endl;
+                        }
+
+                        stream << "</p>" << endl;
+                        stream << "<img src=\"file:///" << temp_gif_filename << "\">" << endl;
+
+                        stream << "</body>" << endl;
+                        stream << "</html>" << endl;
+                        temp_html_file.close();
                     }
 
-                    stream << "Unchanged Border Tolerance: " << unchanged_border_tolerance << "<br>" << endl;
-
-                    if (transparent_pixel_enable) {
-                        stream << "Transperant Pixel Tolerance: " << transparent_pixel_tolerence << "<br>" << endl;
-                    } else {
-                        stream << "Transperant Pixel Tolerance: Disabled<br>" << endl;
-                    }
-
-                    if (pixel_depth < 8) {
-                        stream << "Reduced Pixel Depth: " << pixel_depth << "<br>" << endl;
-                    } else {
-                        stream << "Reduced Pixel Depth: Disabled<br>" << endl;
-                    }
-
-                    stream << "Lossy Compression Level: " << lossy_compression_level << "<br>" << endl;
-                    stream << "</p>" << endl;
-                    stream << "<img src=\"file:///" << temp_gif_filename << "\">" << endl;
-
-                    stream << "</body>" << endl;
-                    stream << "</html>" << endl;
-                    temp_html_file.close();
+                    QDesktopServices::openUrl(QUrl::fromLocalFile(temp_html_file.fileName()));
                 }
-
-                QDesktopServices::openUrl(QUrl::fromLocalFile(temp_html_file.fileName()));
             }
         }
     } while (is_test_run && save_frames_dialog_ret != QDialog::Rejected);
@@ -1682,14 +1691,14 @@ void c_ser_player::open_ser_file(const QString &filename)
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
 
     mp_ser_file->close();
-    m_total_frames = mp_ser_file->open(filename, 0, 0);
+    m_total_frames = mp_ser_file->open(filename.toUtf8().constData(), 0, 0);
 
     if (m_total_frames <= 0) {
         // Invalid SER file
         if (mp_ser_file->get_error_string().length() > 0) {
             QMessageBox::warning(nullptr,
                                  tr("Invalid SER File", "Message box title for invalid SER file"),
-                                 mp_ser_file->get_error_string());
+                                 mp_ser_file->get_error_string().c_str());
         }
     } else {
         // This is a valid SER file
@@ -1708,7 +1717,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         mp_header_details_dialog->set_details(
                 filename,
                 QFileInfo(filename).size(),  // int filesize,
-                mp_ser_file->get_file_id(), // QString file_id,
+                QString::fromStdString(mp_ser_file->get_file_id()), // QString file_id,
                 mp_ser_file->get_lu_id(),  // int lu_id,
                 mp_ser_file->get_colour_id(),  // int colour_id,
                 mp_ser_file->get_little_endian(),  // int little_endian,
@@ -1716,12 +1725,12 @@ void c_ser_player::open_ser_file(const QString &filename)
                 mp_ser_file->get_height(),  // int image_height,
                 mp_ser_file->get_pixel_depth(),  // int pixel_depth,
                 m_total_frames,  // int frame_count,
-                mp_ser_file->get_observer_string(),  // QString observer,
-                mp_ser_file->get_instrument_string(),  // QString instrument,
-                mp_ser_file->get_telescope_string(),  // QString telescope,
+                QString::fromStdString(mp_ser_file->get_observer_string()),  // QString observer,
+                QString::fromStdString(mp_ser_file->get_instrument_string()),  // QString instrument,
+                QString::fromStdString(mp_ser_file->get_telescope_string()),  // QString telescope,
                 mp_ser_file->get_data_time(),  // uint64_t date_time,
                 mp_ser_file->get_data_time_utc(),  // uint64_t date_time_utc)
-                mp_ser_file->get_timestamp_info());  // QString timestamp_info
+                QString::fromStdString(mp_ser_file->get_timestamp_info()));  // QString timestamp_info
 
 
 

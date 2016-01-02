@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 
-#include <QDebug>
 
 #include <cstdlib>
 #include <cstdint>
@@ -49,7 +48,7 @@ using namespace std;
 // Open SER file
 // ------------------------------------------
 int32_t c_pipp_ser::open(
-    const QString &filename,
+    const std::string &filename_utf8,
     int32_t bpp,
     int32_t quiet)
 {
@@ -66,15 +65,15 @@ int32_t c_pipp_ser::open(
     }
 
     // Remember filename
-    m_filename = filename;
+    m_filename = filename_utf8;
 
     // Open SER file
-    mp_ser_file = fopen_utf8(filename.toUtf8().constData(), "rb");
+    mp_ser_file = fopen_utf8(filename_utf8.c_str(), "rb");
 
     // Return if file did not open
     if (!mp_ser_file) {
         m_error_string += QCoreApplication::tr("Error: Could not open file '%1'", "SER file error message")
-                          .arg(filename);
+                          .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += '\n';
         return 0;
     }
@@ -87,7 +86,7 @@ int32_t c_pipp_ser::open(
     if (m_filesize < (int64_t)(14 + sizeof(m_header))) {
         // File is too short to contain File ID and header
         m_error_string += QCoreApplication::tr("Error: File '%1' is too short to contain SER header", "SER File error message")
-                          .arg(filename);
+                          .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += '\n';
         mp_ser_file = nullptr;
         return 0;
@@ -105,8 +104,8 @@ int32_t c_pipp_ser::open(
     if (m_header.frame_count <= 0) {
         // Invalid frame count
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid frame count of %2", "SER File error message")
-                          .arg(filename)
-                          .arg(m_header.frame_count);
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.frame_count).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -114,8 +113,8 @@ int32_t c_pipp_ser::open(
     if (m_header.little_endian < 0 || m_header.little_endian > 1) {
         // Invalid little endian
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid little endian value of %2", "SER File error message")
-                          .arg(filename)
-                          .arg(m_header.little_endian);
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.little_endian).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -123,8 +122,8 @@ int32_t c_pipp_ser::open(
     if (m_header.image_width <= 0) {
         // Invalid image width
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid image width of %2", "SER File error message")
-                          .arg(filename)
-                          .arg(m_header.image_width);
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.image_width).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -132,8 +131,8 @@ int32_t c_pipp_ser::open(
     if (m_header.image_height <= 0) {
         // Invalid image height
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid height width of %2", "SER File error message")
-                          .arg(filename)
-                          .arg(m_header.image_height);
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.image_height).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -141,8 +140,8 @@ int32_t c_pipp_ser::open(
     if (m_header.pixel_depth < 1 || m_header.pixel_depth > 16) {
         // Invalid pixel depth
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid pixel depth of %2", "SER File error message")
-                          .arg(filename)
-                          .arg(m_header.pixel_depth);
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.pixel_depth).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -176,7 +175,7 @@ int32_t c_pipp_ser::open(
     // Check that the file is large enough to hold all the frames
     if (m_filesize < (m_header.frame_count * m_header.image_height * m_header.image_width * total_bytes_per_sample + 178)) {
         m_error_string += QCoreApplication::tr("Error: File '%1' is too short to hold all the frames", "SER File error message")
-                          .arg(filename);
+                          .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += "\n";
         return 0;
     }
@@ -384,9 +383,9 @@ int32_t c_pipp_ser::get_buffer_size()
 // ------------------------------------------
 // Get observer string
 // ------------------------------------------
-QString c_pipp_ser::get_observer_string()
+std::string c_pipp_ser::get_observer_string()
 {
-    QString observer_string;
+    std::string observer_string;
     char temp[41];
     memcpy(temp, m_header.observer, 40);
     temp[40] = 0;
@@ -399,9 +398,9 @@ QString c_pipp_ser::get_observer_string()
 // ------------------------------------------
 // Get instrument string
 // ------------------------------------------
-QString c_pipp_ser::get_instrument_string()
+std::string c_pipp_ser::get_instrument_string()
 {
-    QString instrument_string;
+    std::string instrument_string;
     char temp[41];
     memcpy(temp, m_header.instrument, 40);
     temp[40] = 0;
@@ -414,9 +413,9 @@ QString c_pipp_ser::get_instrument_string()
 // ------------------------------------------
 // Get telescope string
 // ------------------------------------------
-QString c_pipp_ser::get_telescope_string()
+std::string c_pipp_ser::get_telescope_string()
 {
-    QString telescope_string;
+    std::string telescope_string;
     char temp[41];
     memcpy(temp, m_header.telescope, 40);
     temp[40] = 0;
@@ -429,9 +428,9 @@ QString c_pipp_ser::get_telescope_string()
 // ------------------------------------------
 // Get information about timestamps
 // ------------------------------------------
-QString c_pipp_ser::get_timestamp_info()
+std::string c_pipp_ser::get_timestamp_info()
 {
-    QString info_string;
+    std::string info_string;
 
     if (mp_timestamp != nullptr) {
         //mp_timestamp = (uint64_t *)(m_timestamp_buffer.get_buffer_ptr() + (8 * m_current_frame));
@@ -463,14 +462,15 @@ QString c_pipp_ser::get_timestamp_info()
 
         if (timestamps_in_order) {
             if (min_ts == max_ts) {
-                info_string += tr(" * Timestamps are all identical") + "\n";
+                info_string += tr(" * Timestamps are all identical").toUtf8().constData();
             } else {
-                info_string += tr(" * Timestamps are all in order") + "\n";
+                info_string += tr(" * Timestamps are all in order").toUtf8().constData();
             }
         } else {
-            info_string += tr(" * Out of order timestamps detected") + "\n";
+            info_string += tr(" * Out of order timestamps detected").toUtf8().constData();
         }
 
+        info_string += "\n";
         int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
 
         c_pipp_timestamp::timestamp_to_date(
@@ -490,7 +490,8 @@ QString c_pipp_ser::get_timestamp_info()
                        .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )) + "\n";
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )).toUtf8().constData();
+        info_string += "\n";
 
         c_pipp_timestamp::timestamp_to_date(
             max_ts,
@@ -509,7 +510,8 @@ QString c_pipp_ser::get_timestamp_info()
                        .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                        .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )) + "\n";
+                       .arg(ts_microsec, 6, 10, QLatin1Char( '0' )).toUtf8().constData();
+        info_string += "\n";
 
         // Calculate timestamp diff
         uint64_t ts_diff = max_ts - min_ts;
@@ -528,25 +530,29 @@ QString c_pipp_ser::get_timestamp_info()
 
         if (diff_days != 0) {
             info_string += tr(" * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s")
-                           .arg(diff_days).arg(diff_hours).arg(diff_minutes).arg(d_secs) + "\n";
+                           .arg(diff_days).arg(diff_hours).arg(diff_minutes).arg(d_secs).toUtf8().constData();
         } else if (diff_hours != 0) {
             info_string += tr(" * Min to Max timestamp difference: %1 hours %2 min %3 s")
-                           .arg(diff_hours).arg(diff_minutes).arg(d_secs) + "\n";
+                           .arg(diff_hours).arg(diff_minutes).arg(d_secs).toUtf8().constData();
         } else if (diff_minutes != 0) {
             info_string += tr(" * Min to Max timestamp difference: %1 min %2 s")
-                           .arg(diff_minutes).arg(d_secs) + "\n";
+                           .arg(diff_minutes).arg(d_secs).toUtf8().constData();
         } else {
             info_string += tr(" * Min to Max timestamp difference: %2 s")
-                           .arg(d_secs) + "\n";
+                           .arg(d_secs).toUtf8().constData();
         }
+
+        info_string += "\n";
 
         if (ts_diff != 0 && m_header.frame_count > 1) {
             double d_fps = (double)(m_header.frame_count - 1) / ((double)ts_diff / (double)c_pipp_timestamp::C_SEPASECONDS_PER_SECOND);
             info_string += tr(" * Average frames per second: %1")
-                           .arg(d_fps) + "\n";
+                           .arg(d_fps).toUtf8().constData();
+            info_string += "\n";
         }
     } else {
-        info_string += tr(" * No Timestamps") + "\n";
+        info_string += tr(" * No Timestamps").toUtf8().constData();
+        info_string += "\n";
     }
 
     return info_string;
@@ -571,7 +577,7 @@ int32_t c_pipp_ser::close() {
 // ------------------------------------------
 // Get error string
 // ------------------------------------------
-QString& c_pipp_ser::get_error_string()
+std::string c_pipp_ser::get_error_string()
 {
     return m_error_string;
 }

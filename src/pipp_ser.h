@@ -20,7 +20,6 @@
 #define PIPP_SER_H
 
 #include <QCoreApplication>
-#include <QString>
 #include <stdint.h>
 #include "pipp_buffer.h"
 
@@ -63,7 +62,7 @@ class c_pipp_ser {
 
 
         // Member variables
-        QString m_filename;
+        std::string m_filename;
         FILE *mp_ser_file;
         int64_t m_filesize;
         uint32_t m_framesize;
@@ -80,8 +79,8 @@ class c_pipp_ser {
         uint64_t *mp_timestamp;
         int64_t m_timestamp_correction_value;
         int64_t m_utc_to_local_offset;
-        QString m_error_string;
-        QString m_file_id;
+        std::string m_error_string;
+        std::string m_file_id;
 
 
     // ------------------------------------------
@@ -112,7 +111,7 @@ class c_pipp_ser {
         // Open SER file
         // ------------------------------------------
         int32_t open(
-            const QString &filename,
+            const std::string &filename_utf8,
             int32_t bpp,
             int32_t quiet);
 
@@ -126,7 +125,7 @@ class c_pipp_ser {
         // ------------------------------------------
         // Get filename
         // ------------------------------------------
-        QString get_filename(){
+        std::string get_filename(){
             return m_filename;
         }
 
@@ -181,7 +180,7 @@ class c_pipp_ser {
         // ------------------------------------------
         // Get file_id
         // ------------------------------------------
-        QString get_file_id() {
+        std::string get_file_id() {
             return m_file_id;
         }
 
@@ -229,25 +228,25 @@ class c_pipp_ser {
         // ------------------------------------------
         // Get observer strings
         // ------------------------------------------
-        QString get_observer_string();
+        std::string get_observer_string();
 
 
         // ------------------------------------------
         // Get instrument strings
         // ------------------------------------------
-        QString get_instrument_string();
+        std::string get_instrument_string();
 
 
         // ------------------------------------------
         // Get telescope strings
         // ------------------------------------------
-        QString get_telescope_string();
+        std::string get_telescope_string();
 
 
         // ------------------------------------------
         // Get information about timestamps
         // ------------------------------------------
-        QString get_timestamp_info();
+        std::string get_timestamp_info();
 
 
         // ------------------------------------------
@@ -271,7 +270,7 @@ class c_pipp_ser {
         // ------------------------------------------
         // Get error string
         // ------------------------------------------
-        QString& get_error_string();
+        std::string get_error_string();
 
 
         // ------------------------------------------
