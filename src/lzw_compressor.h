@@ -56,6 +56,7 @@ class c_lzw_compressor {
                 bool colour,
                 uint8_t *p_index_lut,
                 uint8_t *p_rev_index_lut,
+                uint8_t *p_index_to_index_colour_difference_lut,
                 int transparent_index);
 
 
@@ -116,6 +117,7 @@ class c_lzw_compressor {
         bool m_colour;
         uint8_t *mp_index_lut;
         uint8_t *mp_rev_index_lut;
+        uint8_t *mp_index_to_index_colour_difference_lut;
         int m_transparent_index;
         uint8_t *p_compressed_data_buffer;
 

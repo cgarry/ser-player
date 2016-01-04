@@ -45,6 +45,7 @@ c_lzw_compressor::c_lzw_compressor(
     m_lossy_compression_level(0),
     mp_index_lut(nullptr),
     mp_rev_index_lut(nullptr),
+    mp_index_to_index_colour_difference_lut(nullptr),
     m_transparent_index(0)
 {
     // Special codes
@@ -82,12 +83,14 @@ void c_lzw_compressor::set_lossy_details(
         bool colour,
         uint8_t *p_index_lut,
         uint8_t *p_rev_index_lut,
+        uint8_t *p_index_to_index_colour_difference_lut,
         int transparent_index)
 {
     m_lossy_compression_level = lossy_compression_level;
     m_colour = colour;
     mp_index_lut = p_index_lut;
     mp_rev_index_lut = p_rev_index_lut;
+    mp_index_to_index_colour_difference_lut = p_index_to_index_colour_difference_lut;
     m_transparent_index = transparent_index;
 }
 
@@ -144,71 +147,24 @@ bool c_lzw_compressor::compress_data()
                     }
                 } else {
                     // Lossy code for colour data
-                    int lut_index = next_code * 3;
-                    uint8_t next_r_value = mp_index_lut[lut_index++];  // Convert index code to pixel value
-                    uint8_t next_g_value = mp_index_lut[lut_index++];
-                    uint8_t next_b_value = mp_index_lut[lut_index];
-                    for (int i = 1; i <= m_lossy_compression_level; i++) {
-                        if (next_r_value > i) {
-                            uint8_t temp = next_r_value - i;
-                            uint8_t next_code_minus_i = mp_rev_index_lut[(temp >> 2) << 12 | (next_g_value >> 2) << 6 | (next_b_value >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
-                                next_code = next_code_minus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
+                    bool match_found = false;
+                    for (int compress_level = 1; compress_level <= (m_lossy_compression_level); compress_level++) {
+                        int index = next_code << 8;
+                        for (int compare_index = 0; compare_index < (1 << m_bit_depth); compare_index++) {
+                            uint8_t colour_diff = mp_index_to_index_colour_difference_lut[index | compare_index];
+                            if (colour_diff == compress_level) {
+                                if (mp_lzw_tree->m_current[m_current_code].m_next[compare_index] != 0) {
+                                    next_code = compare_index;
+                                    *(p_data_ptr) = next_code;
+                                    match_found = true;
+                                    break;
+                                }
                             }
                         }
 
-                        if (next_g_value > i) {
-                            uint8_t temp = next_g_value - i;
-                            uint8_t next_code_minus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (temp >> 2) << 6 | (next_b_value >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
-                                next_code = next_code_minus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
-                            }
+                        if (match_found) {
+                            break;
                         }
-
-                        if (next_b_value > i) {
-                            uint8_t temp = next_b_value - i;
-                            uint8_t next_code_minus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (next_g_value >> 2) << 6 | (temp >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0) {
-                                next_code = next_code_minus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
-                            }
-                        }
-
-                        if (next_r_value < (256-i)) {
-                            uint8_t temp = next_r_value + i;
-                            uint8_t next_code_plus_i = mp_rev_index_lut[(temp >> 2) << 12 | (next_g_value >> 2) << 6 | (next_b_value >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
-                                next_code = next_code_plus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
-                            }
-                        }
-
-                        if (next_g_value < (256-i)) {
-                            uint8_t temp = next_g_value + i;
-                            uint8_t next_code_plus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (temp >> 2) << 6 | (next_b_value >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
-                                next_code = next_code_plus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
-                            }
-                        }
-
-                        if (next_b_value < (256-i)) {
-                            uint8_t temp = next_b_value + i;
-                            uint8_t next_code_plus_i = mp_rev_index_lut[(next_r_value >> 2) << 12 | (next_g_value >> 2) << 6 | (temp >> 2)];
-                            if (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0) {
-                                next_code = next_code_plus_i;
-                                *(p_data_ptr) = next_code;
-                                break;
-                            }
-                        }
-
                     }
                 }
             }

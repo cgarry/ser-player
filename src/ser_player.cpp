@@ -1042,6 +1042,9 @@ void c_ser_player::save_frames_as_gif_slot()
     int save_frames_dialog_ret = QDialog::Rejected;
     QTemporaryFile temp_html_file(QDir::tempPath() + "//XXXXXX.html");
     QString temp_gif_filename = QDir::tempPath() + "//ser_player_review.gif";
+    uint64_t filesize_after_first_frame = 0;
+    uint64_t final_filesize = 0;
+    uint32_t written_framecount = 0;
     do {  // Loop for doing GIF animation test runs
         save_frames_dialog_ret = mp_save_frames_as_gif_Dialog->exec();  // Show dialog
 
@@ -1175,6 +1178,9 @@ void c_ser_player::save_frames_as_gif_slot()
                                         transparent_pixel_tolerence, // int transparent_tolerence
                                         lossy_compression_level,  // int lossy_compression_level
                                         pixel_depth);  // int bit_depth
+
+                                filesize_after_first_frame = 0;
+                                written_framecount = 0;
                             }
 
                             if (saved_frames == frames_to_be_saved) {
@@ -1182,9 +1188,14 @@ void c_ser_player::save_frames_as_gif_slot()
                                 frametime = final_frametime;
                             }
 
+                            written_framecount++;
                             res = gif_write_file.write_frame(
                                       mp_frame_image->get_p_buffer(),  // uint8_t  *p_data
                                       frametime);  // uint16_t display_time
+
+                            if (filesize_after_first_frame == 0) {
+                                filesize_after_first_frame = gif_write_file.get_current_filesize();
+                            }
                         }
 
                         if (save_progress_dialog.was_cancelled() || !valid_frame) {
@@ -1195,7 +1206,7 @@ void c_ser_player::save_frames_as_gif_slot()
                 }
 
                 // Close file
-                gif_write_file.close();
+                final_filesize = gif_write_file.close();
 
                 // Processing has completed
                 save_progress_dialog.set_complete();
@@ -1242,18 +1253,39 @@ void c_ser_player::save_frames_as_gif_slot()
                             stream << tr("Lossy Compression Level: Disabled") << "<br>" << endl;
                         }
 
-                        int filesize = QFileInfo(temp_gif_filename).size();
+                        int filesize2 = QFileInfo(temp_gif_filename).size();
+                        uint32_t filesize;
+                        if (written_framecount < frames_to_be_saved) {
+                            uint32_t temp = (uint32_t)(final_filesize - filesize_after_first_frame);
+                            temp /= (written_framecount - 1);
+                            filesize = filesize_after_first_frame + temp  * (frames_to_be_saved - 1);
+                        } else {
+                            filesize = (uint32_t)final_filesize;
+                        }
 
                         if (filesize > 1024 * 1024) {
                             double filesize_mb = (double)filesize / (1024 * 1024);
                             filesize_mb = (floor(filesize_mb * 100)) / 100;  // Round to 2 decimal places
-                            stream << "<b>" << tr("Filesize: %1 MB (%2 Bytes)").arg(filesize_mb).arg(filesize) << "</b><br>" << endl;
+                            if (written_framecount < frames_to_be_saved) {
+                                stream << "<b>" << tr("Estimated Filesize: %1 MB (%2 Bytes)").arg(filesize_mb).arg(filesize) << "</b><br>" << endl;
+                            } else {
+
+                                stream << "<b>" << tr("Filesize: %1 MB (%2 Bytes)").arg(filesize_mb).arg(filesize) << "</b><br>" << endl;
+                            }
                         } else if (filesize > 1024) {
                            double filesize_kb = (double)filesize / 1024;
                            filesize_kb = (floor(filesize_kb * 100)) / 100;  // Round to 2 decimal places
-                           stream << "<b>" << tr("Filesize: %1 KB (%2 Bytes)").arg(filesize_kb).arg(filesize) << "</b><br>" << endl;
+                           if (written_framecount < frames_to_be_saved) {
+                               stream << "<b>" << tr("Estimated Filesize: %1 KB (%2 Bytes)").arg(filesize_kb).arg(filesize) << "</b><br>" << endl;
+                           } else {
+                               stream << "<b>" << tr("Filesize: %1 KB (%2 Bytes)").arg(filesize_kb).arg(filesize) << "</b><br>" << endl;
+                           }
                         } else {
-                            stream << "<b>" << tr("Filesize: %1 Bytes").arg(filesize) << "</b><br>" << endl;
+                            if (written_framecount < frames_to_be_saved) {
+                                stream << "<b>" << tr("Estimated Filesize: %1 Bytes").arg(filesize) << "</b><br>" << endl;
+                            } else {
+                                stream << "<b>" << tr("Filesize: %1 Bytes").arg(filesize) << "</b><br>" << endl;
+                            }
                         }
 
                         stream << "</p>" << endl;

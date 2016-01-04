@@ -58,7 +58,7 @@ class c_gif_write {
         // ------------------------------------------
         // Finish and close GIF file
         // ------------------------------------------
-        bool close();
+        uint64_t close();
 
 
         // ------------------------------------------
@@ -70,13 +70,20 @@ class c_gif_write {
         }
 
 
+        // ------------------------------------------
+        // Get the current filesize
+        // ------------------------------------------
+        uint64_t get_current_filesize();
+
+
         void quantise_colours(
                 uint8_t *p_data,
                 uint16_t x_start,
                 uint16_t x_end,
                 uint16_t y_start,
                 uint16_t y_end,
-                int number_of_colours);
+                int number_of_colours,
+                uint8_t *p_index_to_index_colour_difference);
 
 
     private:
