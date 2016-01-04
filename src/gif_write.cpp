@@ -381,7 +381,7 @@ bool c_gif_write::write_frame(
             y_end);  // uint16_t &y_end
 
         int num_colours = 1 << m_bit_depth;
-        if (m_use_transparent_pixels || m_lossy_compression_level > 0) {
+        if (m_use_transparent_pixels) {
             m_transparent_index = num_colours - 1;
             num_colours--;
         }

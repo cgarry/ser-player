@@ -1044,7 +1044,7 @@ void c_ser_player::save_frames_as_gif_slot()
     QString temp_gif_filename = QDir::tempPath() + "//ser_player_review.gif";
     uint64_t filesize_after_first_frame = 0;
     uint64_t final_filesize = 0;
-    uint32_t written_framecount = 0;
+    int written_framecount = 0;
     do {  // Loop for doing GIF animation test runs
         save_frames_dialog_ret = mp_save_frames_as_gif_Dialog->exec();  // Show dialog
 
@@ -1253,7 +1253,6 @@ void c_ser_player::save_frames_as_gif_slot()
                             stream << tr("Lossy Compression Level: Disabled") << "<br>" << endl;
                         }
 
-                        int filesize2 = QFileInfo(temp_gif_filename).size();
                         uint32_t filesize;
                         if (written_framecount < frames_to_be_saved) {
                             uint32_t temp = (uint32_t)(final_filesize - filesize_after_first_frame);
