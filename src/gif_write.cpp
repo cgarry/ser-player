@@ -42,9 +42,9 @@ c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
     m_open(false),
     mp_colour_table(nullptr),
-    mp_mono_table(nullptr),
     mp_rev_mono_table(nullptr),
     mp_rev_colour_table(nullptr),
+    mp_index_to_index_colour_difference_lut(nullptr),
     mp_last_image(nullptr)
 {
     // Header structure fixed fields
@@ -218,11 +218,7 @@ bool c_gif_write::create(
 
         // Create global colour table and write to the file
         uint8_t *p_global_colour_table = new uint8_t[colour_table_entries * 3];
-        if (mp_mono_table != nullptr) {
-            delete [] mp_mono_table;
-        }
-
-        mp_mono_table = new uint8_t[colour_table_entries];
+        uint8_t *p_mono_table = new uint8_t[colour_table_entries];
 
         // Create monochrome LUT
         for (int i = 0; i < colour_table_entries; i++) {
@@ -230,15 +226,15 @@ bool c_gif_write::create(
             p_global_colour_table[i*3 + 0] = table_value;
             p_global_colour_table[i*3 + 1] = table_value;
             p_global_colour_table[i*3 + 2] = table_value;
-            mp_mono_table[i] = table_value;
+            p_mono_table[i] = table_value;
         }
 
         if (m_use_transparent_pixels) {
             // Make entry [1] == entry [0] to free entry 0 for transparency
-            p_global_colour_table[3 + 0] = mp_mono_table[0];
-            p_global_colour_table[3 + 1] = mp_mono_table[0];
-            p_global_colour_table[3 + 2] = mp_mono_table[0];
-            mp_mono_table[1] = mp_mono_table[0];
+            p_global_colour_table[3 + 0] = p_mono_table[0];
+            p_global_colour_table[3 + 1] = p_mono_table[0];
+            p_global_colour_table[3 + 2] = p_mono_table[0];
+            p_mono_table[1] = p_mono_table[0];
         }
 
         fwrite(p_global_colour_table, 1, colour_table_entries * 3, mp_gif_file);
@@ -255,7 +251,7 @@ bool c_gif_write::create(
                     continue;
                 }
 
-                int new_error = abs(i - mp_mono_table[j]);
+                int new_error = abs(i - p_mono_table[j]);
                 if (new_error == 0) {
                     // An exact match
                     best_index = j;
@@ -271,6 +267,32 @@ bool c_gif_write::create(
 
             mp_rev_mono_table[i] = best_index;
         }
+
+        // Create index to index colour difference (well mono difference in this case) table
+        // This is used by the lossy compression code
+        if (mp_index_to_index_colour_difference_lut != nullptr) {
+            delete [] mp_index_to_index_colour_difference_lut;  // This should never happen
+        }
+
+        mp_index_to_index_colour_difference_lut = new uint8_t[256 * 256];
+        for (int i = 0; i < (1 << m_bit_depth); i++) {
+            int index = i << 8;
+            for (int j = 0; j < (1 << m_bit_depth); j++) {
+                // Calculate difference between colours at indexex i and j
+                int diff = abs((int)p_mono_table[i] - p_mono_table[j]);
+
+                // Clip values at 255 and handle case when i == j
+                if (diff > 255 || i == j ||
+                    i >= colour_table_entries || j >= colour_table_entries ||
+                    i == m_transparent_index || j == m_transparent_index) {
+                    diff = 255;
+                }
+
+                mp_index_to_index_colour_difference_lut[index | j] = diff;
+            }
+        }
+
+        delete [] p_mono_table;
     }
 
     // Update Netscape extension and write to file
@@ -311,7 +333,6 @@ bool c_gif_write::write_frame(
     uint16_t x_end = m_width-1;
     uint16_t y_start = 0;
     uint16_t y_end = m_height-1;
-    uint8_t *p_index_to_index_colour_difference_lut = nullptr;
 
     if (!m_colour) {
         // Monochorome data
@@ -387,7 +408,7 @@ bool c_gif_write::write_frame(
         }
 
         if (m_lossy_compression_level > 0) {
-            p_index_to_index_colour_difference_lut = new uint8_t[256 * 256];
+            mp_index_to_index_colour_difference_lut = new uint8_t[256 * 256];
         }
 
         // Colour data - convert values to indexed values
@@ -398,7 +419,7 @@ bool c_gif_write::write_frame(
             y_start,  // uint16_t y_start,
             y_end,  // uint16_t y_end,
             num_colours,  // int number_of_colours
-            p_index_to_index_colour_difference_lut);  // uint8_t *p_index_to_index_colour_difference
+            mp_index_to_index_colour_difference_lut);  // uint8_t *p_index_to_index_colour_difference
 
 
         // Buffer to keep image data for processing the next frame
@@ -456,6 +477,9 @@ bool c_gif_write::write_frame(
                 }
             }
         }
+
+        delete [] mp_rev_colour_table;
+        mp_rev_colour_table = nullptr;
     }
 
 //    printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
@@ -508,6 +532,10 @@ bool c_gif_write::write_frame(
     if (m_colour) {
         // Write local colour table to file
         fwrite(mp_colour_table, 1, (1 << m_bit_depth) * 3, mp_gif_file);
+
+        // Delete colour table as it is no longer required
+        delete [] mp_colour_table;
+        mp_colour_table = nullptr;
     }
 
     // Write LZW minimum code size to file
@@ -528,18 +556,12 @@ bool c_gif_write::write_frame(
     if (!m_colour) {
         lzw_compressor.set_lossy_details(
             m_lossy_compression_level,  // int lossy_compression_level
-            m_colour,  // bool colour
-            mp_mono_table,  // uint8_t *p_index_lut
-            mp_rev_mono_table,  // uint8_t *p_rev_index_lut
-            p_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
+            mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
             m_transparent_index);  // int transparent_index
     } else {
         lzw_compressor.set_lossy_details(
             m_lossy_compression_level,  // int lossy_compression_level
-            m_colour,  // bool colour
-            mp_colour_table,  // uint8_t *p_index_lut
-            mp_rev_colour_table,  // uint8_t *p_rev_index_lut
-            p_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
+            mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
             m_transparent_index);  // int transparent_index
     }
 
@@ -557,8 +579,9 @@ bool c_gif_write::write_frame(
     delete [] p_index_image;
 
     // Delete index to index colour difference table if one was used
-    if (p_index_to_index_colour_difference_lut != nullptr) {
-        delete [] p_index_to_index_colour_difference_lut;
+    if (m_colour && mp_index_to_index_colour_difference_lut != nullptr) {
+        delete [] mp_index_to_index_colour_difference_lut;
+        mp_index_to_index_colour_difference_lut = nullptr;
     }
 
 
@@ -575,10 +598,6 @@ bool c_gif_write::write_frame(
 uint64_t c_gif_write::close()
 {
     uint64_t filesize = 0;
-    if (mp_mono_table != nullptr) {
-        delete [] mp_mono_table;
-        mp_mono_table = nullptr;
-    }
 
     if (mp_colour_table != nullptr) {
         delete [] mp_colour_table;
@@ -593,6 +612,11 @@ uint64_t c_gif_write::close()
     if (mp_rev_colour_table != nullptr) {
         delete [] mp_rev_colour_table;
         mp_rev_colour_table = nullptr;
+    }
+
+    if (mp_index_to_index_colour_difference_lut != nullptr) {
+        delete [] mp_index_to_index_colour_difference_lut;
+        mp_index_to_index_colour_difference_lut = nullptr;
     }
 
     if (mp_last_image != nullptr) {

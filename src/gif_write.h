@@ -192,9 +192,9 @@ class c_gif_write {
 
         // LUTs
         uint8_t *mp_colour_table;
-        uint8_t *mp_mono_table;
         uint8_t *mp_rev_mono_table;
         uint8_t *mp_rev_colour_table;
+        uint8_t *mp_index_to_index_colour_difference_lut;
 
         // Other
         QString m_error_string;

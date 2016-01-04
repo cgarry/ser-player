@@ -43,8 +43,6 @@ c_lzw_compressor::c_lzw_compressor(
     m_bit_depth(bit_depth),
     mp_image_data(p_image_data),
     m_lossy_compression_level(0),
-    mp_index_lut(nullptr),
-    mp_rev_index_lut(nullptr),
     mp_index_to_index_colour_difference_lut(nullptr),
     m_transparent_index(0)
 {
@@ -80,16 +78,10 @@ c_lzw_compressor::~c_lzw_compressor()
 
 void c_lzw_compressor::set_lossy_details(
         int lossy_compression_level,
-        bool colour,
-        uint8_t *p_index_lut,
-        uint8_t *p_rev_index_lut,
         uint8_t *p_index_to_index_colour_difference_lut,
         int transparent_index)
 {
     m_lossy_compression_level = lossy_compression_level;
-    m_colour = colour;
-    mp_index_lut = p_index_lut;
-    mp_rev_index_lut = p_rev_index_lut;
     mp_index_to_index_colour_difference_lut = p_index_to_index_colour_difference_lut;
     m_transparent_index = transparent_index;
 }
@@ -125,46 +117,26 @@ bool c_lzw_compressor::compress_data()
 
 #ifdef LOSSY_LZW_SUPPORT
         // Lossy LZW experimental code - start
-        if (mp_index_lut != nullptr && next_code != m_transparent_index) {
+        if (/*mp_index_lut != nullptr && */  next_code != m_transparent_index) {
             if (m_current_code != 0xFFFF && mp_lzw_tree->m_current[m_current_code].m_next[next_code] == 0) {
-                if (!m_colour) {
-                    // Lossy code for monochrome data
-                    uint8_t next_pixel_value = mp_index_lut[next_code];  // Convert index code to pixel value
-                    for (int i = 1; i <= m_lossy_compression_level; i++) {
-                        uint8_t next_code_minus_i = mp_rev_index_lut[next_pixel_value - i];  // Get index code for pixel value - i
-                        if ((next_pixel_value > i) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_minus_i] != 0)) {
-                            next_code = next_code_minus_i;
-                            *(p_data_ptr) = next_code;
-                            break;
-                        }
-
-                        uint8_t next_code_plus_i = mp_rev_index_lut[next_pixel_value + i];  // Get index code for pixel value + i
-                        if ((next_pixel_value < (256-i)) && (mp_lzw_tree->m_current[m_current_code].m_next[next_code_plus_i] != 0)) {
-                            next_code = next_code_plus_i;
-                            *(p_data_ptr) = next_code;
-                            break;
-                        }
-                    }
-                } else {
-                    // Lossy code for colour data
-                    bool match_found = false;
-                    for (int compress_level = 1; compress_level <= (m_lossy_compression_level); compress_level++) {
-                        int index = next_code << 8;
-                        for (int compare_index = 0; compare_index < (1 << m_bit_depth); compare_index++) {
-                            uint8_t colour_diff = mp_index_to_index_colour_difference_lut[index | compare_index];
-                            if (colour_diff == compress_level) {
-                                if (mp_lzw_tree->m_current[m_current_code].m_next[compare_index] != 0) {
-                                    next_code = compare_index;
-                                    *(p_data_ptr) = next_code;
-                                    match_found = true;
-                                    break;
-                                }
+                // Lossy compression code
+                bool match_found = false;
+                for (int compress_level = 1; compress_level <= (m_lossy_compression_level); compress_level++) {
+                    int index = next_code << 8;
+                    for (int compare_index = 0; compare_index < (1 << m_bit_depth); compare_index++) {
+                        uint8_t colour_diff = mp_index_to_index_colour_difference_lut[index | compare_index];
+                        if (colour_diff == compress_level) {
+                            if (mp_lzw_tree->m_current[m_current_code].m_next[compare_index] != 0) {
+                                next_code = compare_index;
+                                *(p_data_ptr) = next_code;
+                                match_found = true;
+                                break;
                             }
                         }
+                    }
 
-                        if (match_found) {
-                            break;
-                        }
+                    if (match_found) {
+                        break;
                     }
                 }
             }
