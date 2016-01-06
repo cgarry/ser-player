@@ -23,6 +23,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <cmath>
+#include <cassert>
 
 
 // 64-bit fseek for various platforms
@@ -41,9 +42,7 @@
 c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
     m_open(false),
-    mp_colour_table(nullptr),
     mp_rev_mono_table(nullptr),
-    mp_rev_colour_table(nullptr),
     mp_index_to_index_colour_difference_lut(nullptr),
     mp_last_image(nullptr)
 {
@@ -313,6 +312,8 @@ bool c_gif_write::write_frame(
         uint8_t *p_data,
         uint16_t display_time)
 {
+    assert(p_data != nullptr);
+
     // Early return checks
     if (mp_gif_file == nullptr) {
         // No GIF file open
@@ -326,6 +327,7 @@ bool c_gif_write::write_frame(
 
     //  Create buffer for indexed pixels image
     uint8_t *p_index_image = new uint8_t[m_width * m_height];
+    uint8_t *p_colour_table = nullptr;  // Colour table buffer for local colour tables
 
     // Scan top/bottom lines and left/right columns to check for lines/columns identical to previous frame
     // These areas do not need to be encoded.
@@ -412,6 +414,8 @@ bool c_gif_write::write_frame(
         }
 
         // Colour data - convert values to indexed values
+        p_colour_table = new uint8_t[3 * (1 << m_bit_depth)];
+        uint8_t *p_rev_colour_table = new uint8_t[1 << (3 * 6)];
         quantise_colours(
             p_data,  // uint8_t *p_data
             x_start,  // uint16_t x_start,
@@ -419,8 +423,9 @@ bool c_gif_write::write_frame(
             y_start,  // uint16_t y_start,
             y_end,  // uint16_t y_end,
             num_colours,  // int number_of_colours
-            mp_index_to_index_colour_difference_lut);  // uint8_t *p_index_to_index_colour_difference
-
+            p_colour_table,
+            p_rev_colour_table,
+            mp_index_to_index_colour_difference_lut); // uint8_t *p_index_to_index_colour_difference
 
         // Buffer to keep image data for processing the next frame
         bool first_frame = false;
@@ -452,7 +457,7 @@ bool c_gif_write::write_frame(
                     not_transparent |= r_diff > m_transparent_tolerence;
                     if (not_transparent) {
                         // This pixel is not transparent
-                        *p_write_data++ = mp_rev_colour_table[(r >> 2) << 12 | (g >> 2) << 6 | (b >> 2)];
+                        *p_write_data++ = p_rev_colour_table[(r >> 2) << 12 | (g >> 2) << 6 | (b >> 2)];
                         // Update last image pixel for comparison with the next frame
                         *(p_last_data - 3) = b;
                         *(p_last_data - 2) = g;
@@ -468,7 +473,7 @@ bool c_gif_write::write_frame(
                     uint8_t r = *p_current_data++;
 
                     // Write indexed data to buffer ready for compression
-                    *p_write_data++ = mp_rev_colour_table[(r >> 2) << 12 | (g >> 2) << 6 | (b >> 2)];
+                    *p_write_data++ = p_rev_colour_table[(r >> 2) << 12 | (g >> 2) << 6 | (b >> 2)];
 
                     // Write these pixels to last image buffer
                     *p_last_data++ = b;
@@ -478,8 +483,7 @@ bool c_gif_write::write_frame(
             }
         }
 
-        delete [] mp_rev_colour_table;
-        mp_rev_colour_table = nullptr;
+        delete [] p_rev_colour_table;
     }
 
 //    printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
@@ -529,13 +533,12 @@ bool c_gif_write::write_frame(
     // Write image descriptor to the file
     fwrite(&m_image_descriptor, 1, sizeof(m_image_descriptor), mp_gif_file);
 
-    if (m_colour) {
+    if (m_colour && p_colour_table != nullptr) {
         // Write local colour table to file
-        fwrite(mp_colour_table, 1, (1 << m_bit_depth) * 3, mp_gif_file);
+        fwrite(p_colour_table, 1, (1 << m_bit_depth) * 3, mp_gif_file);
 
         // Delete colour table as it is no longer required
-        delete [] mp_colour_table;
-        mp_colour_table = nullptr;
+        delete [] p_colour_table;
     }
 
     // Write LZW minimum code size to file
@@ -553,17 +556,11 @@ bool c_gif_write::write_frame(
         p_index_image);
 
 
-    if (!m_colour) {
-        lzw_compressor.set_lossy_details(
-            m_lossy_compression_level,  // int lossy_compression_level
-            mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
-            m_transparent_index);  // int transparent_index
-    } else {
-        lzw_compressor.set_lossy_details(
-            m_lossy_compression_level,  // int lossy_compression_level
-            mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
-            m_transparent_index);  // int transparent_index
-    }
+    // Set details of lossy compression
+    lzw_compressor.set_lossy_details(
+        m_lossy_compression_level,  // int lossy_compression_level
+        mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
+        m_transparent_index);  // int transparent_index
 
     bool all_compressed = false;
     while (!all_compressed) {
@@ -599,19 +596,9 @@ uint64_t c_gif_write::close()
 {
     uint64_t filesize = 0;
 
-    if (mp_colour_table != nullptr) {
-        delete [] mp_colour_table;
-        mp_colour_table = nullptr;
-    }
-
     if (mp_rev_mono_table != nullptr) {
         delete [] mp_rev_mono_table;
         mp_rev_mono_table = nullptr;
-    }
-
-    if (mp_rev_colour_table != nullptr) {
-        delete [] mp_rev_colour_table;
-        mp_rev_colour_table = nullptr;
     }
 
     if (mp_index_to_index_colour_difference_lut != nullptr) {
@@ -659,7 +646,6 @@ uint64_t c_gif_write::get_current_filesize()
 }
 
 
-
 void c_gif_write::quantise_colours(
         uint8_t *p_data,
         uint16_t x_start,
@@ -667,8 +653,14 @@ void c_gif_write::quantise_colours(
         uint16_t y_start,
         uint16_t y_end,
         int number_of_colours,
+        uint8_t *p_colour_table,
+        uint8_t *p_rev_colour_table,
         uint8_t *p_index_to_index_colour_difference_lut)
 {
+    assert (p_data != nullptr);
+    assert (p_colour_table != nullptr);
+    assert (p_rev_colour_table != nullptr);
+
     uint32_t *p_histogram_lut = new uint32_t[1 << 18]();
     uint32_t *p_index_lut = new uint32_t[1 << 18];
     for (int x = 0; x < (1 << 18); x++) {
@@ -727,13 +719,6 @@ void c_gif_write::quantise_colours(
     uint8_t *p_colour_r_palette = new uint8_t[256];
     uint8_t *p_colour_g_palette = new uint8_t[256];
     uint8_t *p_colour_b_palette = new uint8_t[256];
-    mp_rev_colour_table = new uint8_t[1 << (3 * 6)];
-
-    if (m_lossy_compression_level > 0) {
-        // Unused entries need to be == m_transparent_index so they can be identified by the
-        // lossy compression code
-        std::fill (mp_rev_colour_table, mp_rev_colour_table + (1 << (3 * 6)), (uint8_t)m_transparent_index);
-    }
 
     int number_of_palette_colours;
     bool colour_found = false;
@@ -803,7 +788,7 @@ void c_gif_write::quantise_colours(
             if (colour_found) {
                 // There was a similar colour already in the colour palette
                 // Update the colour to index LUT for this colour
-                mp_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)palette_entry;
+                p_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)palette_entry;
                 colour_found_count++;  // debug
             } else {
                 // No similar colour was found in the colour palette
@@ -813,7 +798,7 @@ void c_gif_write::quantise_colours(
                 p_colour_b_palette[number_of_palette_colours] = b;
 
                 // Also update the colour to index LUT for this colour
-                mp_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)number_of_palette_colours;
+                p_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)number_of_palette_colours;
 
                 // Increase palette colour count
                 number_of_palette_colours++;
@@ -872,7 +857,7 @@ void c_gif_write::quantise_colours(
         }
 
         // Update the colour to index LUT for this colour
-        mp_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)best_entry;
+        p_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)best_entry;
     }
 
     // Delete index table as it has done its job in creating the colour palette and reverse colour palettes
@@ -881,12 +866,7 @@ void c_gif_write::quantise_colours(
     // Create the real colour table
     // Update colour values to use all 8 bits rather than just 6 bits
     // The bottom 2 bits are just copies of the original top 2 bits
-    if (mp_colour_table != nullptr) {
-        delete [] mp_colour_table;
-    }
-
-    mp_colour_table = new uint8_t[3 * (1 << m_bit_depth)];
-    uint8_t *p_colour_table_entry = mp_colour_table;
+    uint8_t *p_colour_table_entry = p_colour_table;
     for (int palette_entry = 0; palette_entry < number_of_palette_colours; palette_entry++) {
         uint8_t r_top_2_bits = p_colour_r_palette[palette_entry];
         uint8_t g_top_2_bits = p_colour_g_palette[palette_entry];
@@ -921,7 +901,6 @@ void c_gif_write::quantise_colours(
         }
     }
 
-
     // Free memory used for temp palettes
     delete [] p_colour_r_palette;
     delete [] p_colour_g_palette;
@@ -937,6 +916,8 @@ void c_gif_write::detect_unchanged_border(
             uint16_t &y_start,
             uint16_t &y_end)
 {
+    assert(p_this_image != nullptr);
+
     if (!m_colour) {
         // Monochome version of the code
         if (p_last_image != nullptr) {  // Only currently supported for monochrome

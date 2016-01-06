@@ -83,6 +83,8 @@ class c_gif_write {
                 uint16_t y_start,
                 uint16_t y_end,
                 int number_of_colours,
+                uint8_t *p_colour_table,
+                uint8_t *p_rev_colour_table,
                 uint8_t *p_index_to_index_colour_difference);
 
 
@@ -191,9 +193,7 @@ class c_gif_write {
         int m_bit_depth;
 
         // LUTs
-        uint8_t *mp_colour_table;
         uint8_t *mp_rev_mono_table;
-        uint8_t *mp_rev_colour_table;
         uint8_t *mp_index_to_index_colour_difference_lut;
 
         // Other

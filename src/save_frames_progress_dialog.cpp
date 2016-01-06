@@ -58,6 +58,12 @@ c_save_frames_progress_dialog::c_save_frames_progress_dialog(QWidget *parent, in
 }
 
 
+void c_save_frames_progress_dialog::set_button_label(QString label)
+{
+    mp_abort_close_button->setText(label);
+}
+
+
 void c_save_frames_progress_dialog::set_value(int value)
 {
     mp_progress_bar->setValue(value);

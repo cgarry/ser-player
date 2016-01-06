@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.6"
+#define VERSION_STRING "v1.4.7"
 
 #include <Qt>
 #include <QApplication>
@@ -1134,6 +1134,11 @@ void c_ser_player::save_frames_as_gif_slot()
                 // Setup progress dialog
                 c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
                 save_progress_dialog.setWindowTitle(tr("Save Frames As Animated GIF"));
+                if (is_test_run) {
+                    // Change button label from 'Abort' to 'Truncate' when doing a test run
+                    save_progress_dialog.set_button_label(tr("Truncate"));
+                }
+
                 save_progress_dialog.show();
 
                 int saved_frames = 0;
@@ -1227,6 +1232,7 @@ void c_ser_player::save_frames_as_gif_slot()
                         stream << "<html>" << endl;
                         stream << "<body>" << endl;
                         stream << "<p>" << endl;
+                        stream << "<table><tr><td>" << endl;
                         stream << "<b><big>" << tr("SER Player Animated GIF Review") << "</big></b><br>" << endl;
                         stream << "<b>" << tr("(Close browser when reviewing is complete)") << " </b><br>" << endl;
 
@@ -1252,6 +1258,9 @@ void c_ser_player::save_frames_as_gif_slot()
                         } else {
                             stream << tr("Lossy Compression Level: Disabled") << "<br>" << endl;
                         }
+
+                        stream << "<hr>" << endl;
+                        stream << "<b>" << tr("Frames Saved: %1 of %2").arg(written_framecount).arg(frames_to_be_saved) << "</b><br>" << endl;
 
                         uint32_t filesize;
                         if (written_framecount < frames_to_be_saved) {
@@ -1287,6 +1296,7 @@ void c_ser_player::save_frames_as_gif_slot()
                             }
                         }
 
+                        stream << "</td></tr></table>" << endl;
                         stream << "</p>" << endl;
                         stream << "<img src=\"file:///" << temp_gif_filename << "\">" << endl;
 

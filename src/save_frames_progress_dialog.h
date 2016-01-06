@@ -35,6 +35,7 @@ public:
                                   int min_value,
                                   int max_value);
     void set_value(int value);
+    void set_button_label(QString label);
     bool was_cancelled();
     void set_complete();
 
