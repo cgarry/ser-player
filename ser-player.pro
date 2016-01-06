@@ -50,7 +50,9 @@ SOURCES += src/main.cpp\
     src/processing_options_dialog.cpp \
     src/icon_groupbox.cpp \
     src/gif_write.cpp \
-    src/lzw_compressor.cpp
+    src/lzw_compressor.cpp \
+    src/pipp_avi_write.cpp \
+    src/pipp_avi_write_dib.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -80,7 +82,10 @@ HEADERS  += src/ser_player.h \
     src/processing_options_dialog.h \
     src/icon_groupbox.h \
     src/gif_write.h \
-    src/lzw_compressor.h
+    src/lzw_compressor.h \
+    src/pipp_video_write.h \
+    src/pipp_avi_write.h \
+    src/pipp_avi_write_dib.h
 
 # Build directories
 contains(QT_ARCH, i386) {

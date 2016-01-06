@@ -56,6 +56,7 @@
 #include "ser_player.h"
 #include "persistent_data.h"
 #include "pipp_ser.h"
+#include "pipp_avi_write_dib.h"
 #include "pipp_ser_write.h"
 #include "pipp_timestamp.h"
 #include "pipp_utf8.h"
@@ -119,7 +120,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_save_frames_as_avi_Act->setEnabled(false);
     file_menu->addAction(mp_save_frames_as_avi_Act);
     connect(mp_save_frames_as_avi_Act, SIGNAL(triggered()), this, SLOT(save_frames_as_avi_slot()));
-    mp_save_frames_as_avi_Act->setVisible(false);
 
     mp_save_frames_as_gif_Act = new QAction(tr("Save Frames As Animated GIF...", "Menu title"), this);
     mp_save_frames_as_gif_Act->setEnabled(false);
@@ -999,6 +999,186 @@ void c_ser_player::save_frames_as_ser_slot()
 
 void c_ser_player::save_frames_as_avi_slot()
 {
+    // Pause playback if currently playing
+    bool restart_playing = false;
+    if (m_current_state == STATE_PLAYING) {
+        // Pause playing while frame is saved
+        restart_playing = true;
+        play_button_pressed_slot();
+    }
+
+    // Use save_frames dialog to get range of frames to be saved
+    if (mp_save_frames_as_avi_Dialog == nullptr) {
+        mp_save_frames_as_avi_Dialog = new c_save_frames_dialog(this,
+                                                                c_save_frames_dialog::SAVE_AVI,
+                                                                mp_ser_file->get_width(),
+                                                                mp_ser_file->get_height(),
+                                                                m_total_frames,
+                                                                mp_ser_file->has_timestamps(),
+                                                                QString::fromStdString(mp_ser_file->get_observer_string()),
+                                                                QString::fromStdString(mp_ser_file->get_instrument_string()),
+                                                                QString::fromStdString(mp_ser_file->get_telescope_string()));
+    }
+
+    mp_save_frames_as_avi_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
+                                              mp_frame_Slider->get_end_frame(),
+                                              mp_frame_Slider->get_markers_enable());
+
+    int ret = mp_save_frames_as_avi_Dialog->exec();
+
+    if (ret != QDialog::Rejected &&
+        m_current_state != STATE_NO_FILE &&
+        m_current_state != STATE_PLAYING) {
+
+        int min_frame = mp_save_frames_as_avi_Dialog->get_start_frame();
+        int max_frame = mp_save_frames_as_avi_Dialog->get_end_frame();
+        QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
+        int required_digits_for_number = mp_save_frames_as_avi_Dialog->get_required_digits_for_number();
+
+        if (default_filename.endsWith(".avi", Qt::CaseInsensitive)) {
+            default_filename.insert(default_filename.length()-4,
+                                    QString("_F%1-%2")
+                                    .arg(min_frame, required_digits_for_number, 10, QChar('0'))
+                                    .arg(max_frame, required_digits_for_number, 10, QChar('0')));
+        } else {
+            default_filename.append(QString("_F%1-%2")
+                                    .arg(min_frame, required_digits_for_number, 10, QChar('0'))
+                                    .arg(max_frame, required_digits_for_number, 10, QChar('0')));
+            default_filename.append(".avi");
+        }
+
+        QString selected_filter;
+        QFileDialog::Options save_dialog_options = 0;
+        #ifdef __APPLE__
+        // The native save file dialog on OS X does not fill out a default filename
+        // so we use QT's save file dialog instead
+        save_dialog_options |= QFileDialog::DontUseNativeDialog;
+        #endif
+
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As AVI File"),
+                                   default_filename,
+                                   tr("AVI Files (*.avi)", "Filetype filter"),
+                                   &selected_filter,
+                                   save_dialog_options);
+
+        if (!filename.isEmpty()) {
+            // Handle the case on Linux where an extension is not added by the save file dialog
+            if (!filename.endsWith(".avi", Qt::CaseInsensitive)) {
+                filename = filename + ".avi";
+            }
+
+            int frame_active_width = mp_save_frames_as_avi_Dialog->get_active_width();
+            int frame_active_height = mp_save_frames_as_avi_Dialog->get_active_height();
+            int frame_total_width = mp_save_frames_as_avi_Dialog->get_total_width();
+            int frame_total_height = mp_save_frames_as_avi_Dialog->get_total_height();
+            int decimate_value = mp_save_frames_as_avi_Dialog->get_frame_decimation();
+            int sequence_direction = mp_save_frames_as_avi_Dialog->get_sequence_direction();
+            int frames_to_be_saved = mp_save_frames_as_avi_Dialog->get_frames_to_be_saved();
+            bool do_frame_processing = mp_save_frames_as_avi_Dialog->get_processing_enable();
+            double avi_framerate = mp_save_frames_as_avi_Dialog->get_avi_framerate();
+
+            int32_t old_format = 0;
+            if (mp_save_frames_as_avi_Dialog->get_avi_old_format()) {
+                old_format = mp_save_frames_as_avi_Dialog->get_avi_max_size();
+            }
+
+            int32_t fps_rate = avi_framerate * 1000;
+            int32_t fps_scale = 1000;
+            while (fps_scale > 1) {
+                if (fps_rate % 10 == 0) {
+                    fps_rate /= 10;
+                    fps_scale /= 10;
+                } else {
+                    break;
+                }
+            }
+
+            c_pipp_video_write *p_avi_write_file = new c_pipp_avi_write_dib();;
+
+            // Keep list of last saved folders up to date
+            add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
+
+            // Update Save Folders Menu
+            update_recent_save_folders_menu();
+
+            // Setup progress dialog
+            c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
+            save_progress_dialog.setWindowTitle(tr("Save Frames As AVI File"));
+            save_progress_dialog.show();
+
+            int saved_frames = 0;
+
+            // Direction loop
+            int start_dir = (sequence_direction == 1) ? 1 : 0;
+            int end_dir = (sequence_direction == 0) ? 0 : 1;
+            for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                int start_frame = min_frame;
+                int end_frame = max_frame;
+                if (current_dir == 1) {  // Reverse direction - count backwards
+                    // Use negative numbers so for loop works counting up or down
+                    start_frame = -max_frame;
+                    end_frame = -min_frame;
+                }
+
+                for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                    // Update progress bar
+                    saved_frames++;
+                    save_progress_dialog.set_value(saved_frames);
+
+                    // Get frame from SER file
+                    bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
+                                                             false,  // conv_to_8_bit
+                                                             do_frame_processing);  // do_processing
+
+                    mp_frame_image->resize_image(frame_active_width, frame_active_height);
+                    mp_frame_image->add_bars(frame_total_width, frame_total_height);
+
+                    if (valid_frame) {
+                        if (!p_avi_write_file->get_open()) {
+                            // Create AVI file - only done once
+                            p_avi_write_file->create(
+                                filename.toUtf8().constData(),  // const char *filename
+                                mp_frame_image->get_width(),  // int32_t m_width
+                                mp_frame_image->get_height(),  // int32_t m_height
+                                mp_frame_image->get_colour(),  // bool m_colour
+                                fps_rate,  // int32_t fps_rate
+                                fps_scale, // int32_t fps_scale
+                                old_format,  // int32_t m_old_avi_format
+                                0);  // int32_t quality
+                        }
+
+
+                        // Write frame to AVI file
+                        p_avi_write_file->write_frame(
+                            mp_frame_image->get_p_buffer(),  // uint8_t *data
+                            0,  // int32_t m_colour
+                            mp_frame_image->get_byte_depth());  // uint32_t bpp
+                    }
+
+                    if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                        // Abort frame saving
+                        break;
+                    }
+                }
+            }
+
+            // Write header and close SER file
+            p_avi_write_file->close();
+
+            // Processing has completed
+            save_progress_dialog.set_complete();
+            while (!save_progress_dialog.was_cancelled()) {
+                  // Wait
+            }
+
+            delete p_avi_write_file;
+        }
+    }
+
+    // Restart playing if it was playing to start with
+    if (restart_playing == true) {
+        play_button_pressed_slot();
+    }
 }
 
 
