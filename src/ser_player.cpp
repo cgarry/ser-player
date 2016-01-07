@@ -833,6 +833,7 @@ void c_ser_player::save_frames_as_ser_slot()
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
                                                                 mp_ser_file->has_timestamps(),
+                                                                0.0,  // SER Framerate only used for AVI generation
                                                                 QString::fromStdString(mp_ser_file->get_observer_string()),
                                                                 QString::fromStdString(mp_ser_file->get_instrument_string()),
                                                                 QString::fromStdString(mp_ser_file->get_telescope_string()));
@@ -1008,6 +1009,11 @@ void c_ser_player::save_frames_as_avi_slot()
     }
 
     // Use save_frames dialog to get range of frames to be saved
+    double ser_framerate = 0.0;
+    if (mp_ser_file->get_fps_rate() > 0 && mp_ser_file->get_fps_scale()) {
+        ser_framerate = (double)(mp_ser_file->get_fps_rate()) / (double)(mp_ser_file->get_fps_scale());
+    }
+
     if (mp_save_frames_as_avi_Dialog == nullptr) {
         mp_save_frames_as_avi_Dialog = new c_save_frames_dialog(this,
                                                                 c_save_frames_dialog::SAVE_AVI,
@@ -1015,9 +1021,7 @@ void c_ser_player::save_frames_as_avi_slot()
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
                                                                 mp_ser_file->has_timestamps(),
-                                                                QString::fromStdString(mp_ser_file->get_observer_string()),
-                                                                QString::fromStdString(mp_ser_file->get_instrument_string()),
-                                                                QString::fromStdString(mp_ser_file->get_telescope_string()));
+                                                                ser_framerate);
     }
 
     mp_save_frames_as_avi_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
@@ -1199,10 +1203,7 @@ void c_ser_player::save_frames_as_gif_slot()
                                                                 mp_ser_file->get_width(),
                                                                 mp_ser_file->get_height(),
                                                                 m_total_frames,
-                                                                mp_ser_file->has_timestamps(),
-                                                                QString::fromStdString(mp_ser_file->get_observer_string()),
-                                                                QString::fromStdString(mp_ser_file->get_instrument_string()),
-                                                                QString::fromStdString(mp_ser_file->get_telescope_string()));
+                                                                mp_ser_file->has_timestamps());
 
         double gif_frame_time;
         if (mp_ser_file->get_fps_rate() > 0) {

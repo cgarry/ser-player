@@ -45,6 +45,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            int frame_height,
                                            int total_frames,
                                            bool ser_has_timestamps,
+                                           double ser_framerate,
                                            QString observer_string,
                                            QString instrument_string,
                                            QString telescope_string)
@@ -56,6 +57,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_marker_start_frame(0),
       m_marker_end_frame(total_frames-1),
       m_ser_has_timestamps(ser_has_timestamps),
+      m_ser_framerate(ser_framerate),
       m_start_frame(1),
       m_end_frame(total_frames),
       m_spin_boxes_valid(true)
@@ -384,7 +386,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     mp_avi_framerate_DSpinbox = new QDoubleSpinBox;
     mp_avi_framerate_DSpinbox->setSingleStep(1.0);
-    mp_avi_framerate_DSpinbox->setValue(24);
+    if (m_ser_framerate > 0.0) {
+        mp_avi_framerate_DSpinbox->setValue(m_ser_framerate);
+    } else {
+        mp_avi_framerate_DSpinbox->setValue(24);
+    }
+
     mp_avi_framerate_DSpinbox->setRange(0.01, 1000.0);
 
     QHBoxLayout *avi_framerate_HLayout = new QHBoxLayout;

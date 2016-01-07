@@ -47,6 +47,7 @@ public:
                          int frame_height,
                          int total_frames,
                          bool ser_has_timestamps,
+                         double ser_framerate = 0,
                          QString observer_string = "",
                          QString instrument_string = "",
                          QString telescope_string = "");
@@ -185,6 +186,7 @@ private:
     int m_marker_start_frame;
     int m_marker_end_frame;
     bool m_ser_has_timestamps;
+    double m_ser_framerate;
     int m_start_frame;
     int m_end_frame;
     int m_total_selected_frames;
