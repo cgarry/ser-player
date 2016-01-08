@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <cstdint>
+#include <memory>
 
 #define GIF_COMMENT_STRING "Created by SER Player"
 // Comment out GIF_COMMENT_STRING #define to disable adding a comment extension to the generated gif file
@@ -67,7 +68,7 @@ class c_lzw_compressor {
         // Get compressed data pointer
         // ------------------------------------------
         uint8_t *get_compressed_data_ptr() {
-            return p_compressed_data_buffer;
+            return mp_compressed_data_buffer.get();
         }
 
 
@@ -113,7 +114,7 @@ class c_lzw_compressor {
         int m_lossy_compression_level;
         uint8_t *mp_index_to_index_colour_difference_lut;
         int m_transparent_index;
-        uint8_t *p_compressed_data_buffer;
+        std::unique_ptr<uint8_t []> mp_compressed_data_buffer;
 
         // Special codes
         uint32_t m_clear_code;
@@ -123,7 +124,8 @@ class c_lzw_compressor {
         uint32_t m_current_code;
 
         // LZW dictonary tree
-        s_lzw_tree *mp_lzw_tree;
+//        s_lzw_tree *mp_lzw_tree;
+        std::unique_ptr<s_lzw_tree> mp_lzw_tree;
 
         int m_input_x;
         int m_input_y;

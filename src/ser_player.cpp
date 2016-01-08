@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.7"
+#define VERSION_STRING "v1.4.8"
 
 #include <Qt>
 #include <QApplication>
@@ -914,7 +914,8 @@ void c_ser_player::save_frames_as_ser_slot()
             // Direction loop
             int start_dir = (sequence_direction == 1) ? 1 : 0;
             int end_dir = (sequence_direction == 0) ? 0 : 1;
-            for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+            int ser_file_ret = 0;
+            for (int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
                 int start_frame = min_frame;
                 int end_frame = max_frame;
                 if (current_dir == 1) {  // Reverse direction - count backwards
@@ -945,11 +946,14 @@ void c_ser_player::save_frames_as_ser_slot()
 
                         if (!ser_write_file.get_open()) {
                             // Create SER file - only done once
-                            ser_write_file.create(filename, //  QString filename
-                                                  mp_frame_image->get_width(),  // int32_t  width
-                                                  mp_frame_image->get_height(), // int32_t  height
-                                                  mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
-                                                  mp_frame_image->get_byte_depth());  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
+                            ser_file_ret |= ser_write_file.create(filename, //  QString filename
+                                                                 mp_frame_image->get_width(),  // int32_t  width
+                                                                 mp_frame_image->get_height(), // int32_t  height
+                                                                 mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
+                                                                 mp_frame_image->get_byte_depth());  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
+                            if (ser_file_ret < 0) {
+                                break;
+                            }
                         }
 
                         // Write frame to SER file
@@ -995,6 +999,8 @@ void c_ser_player::save_frames_as_ser_slot()
     if (restart_playing == true) {
         play_button_pressed_slot();
     }
+
+    return;
 }
 
 

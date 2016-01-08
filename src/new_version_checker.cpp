@@ -47,6 +47,7 @@ void c_new_version_checker::check()
 void c_new_version_checker::finished(QNetworkReply *reply)
 {
     int http_status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+//    qDebug() << "c_new_version_checker: http_status" << http_status;
     if (http_status == 301 || http_status == 302  || http_status == 302)
     {
         // Handle redirect

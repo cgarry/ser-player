@@ -59,10 +59,10 @@ void c_histogram_thread::generate_histogram(c_image *p_image, int frame_number)
         m_byte_depth = p_image->get_byte_depth();
         m_buffer_size = m_width * m_height * m_byte_depth;
         m_buffer_size = (m_colour) ? m_buffer_size * 3 : m_buffer_size;
-        mp_buffer = new uint8_t[m_buffer_size];
+        mp_buffer.reset(new uint8_t[m_buffer_size]);
 
         // Copy image data to local buffer
-        memcpy(mp_buffer, p_image->get_p_buffer(), m_buffer_size);
+        memcpy(mp_buffer.get(), p_image->get_p_buffer(), m_buffer_size);
 
 
         generate_histogram_data_thread = QtConcurrent::run(this, &c_histogram_thread::calculate_pixmap_data);
@@ -88,14 +88,14 @@ void c_histogram_thread::calculate_pixmap_data()
 
         // Create histogram table
         if (m_byte_depth == 1) {
-            uint8_t *p_data = mp_buffer;
+            uint8_t *p_data = mp_buffer.get();
             for (int i = 0; i < m_width * m_height; i++) {
                 m_blue_table[*p_data++]++;
                 m_green_table[*p_data++]++;
                 m_red_table[*p_data++]++;
             }
         } else {  // m_byte_depth == 2
-            uint16_t *p_data = (uint16_t *)mp_buffer;
+            uint16_t *p_data = (uint16_t *)mp_buffer.get();
             for (int i = 0; i < m_width * m_height; i++) {
                 m_blue_table[(*p_data++) >> 8]++;
                 m_green_table[(*p_data++) >> 8]++;
@@ -103,7 +103,7 @@ void c_histogram_thread::calculate_pixmap_data()
             }
         }
 
-        delete [] mp_buffer;  // Free image buffer
+        mp_buffer.release();  // Free image buffer
 
         // Find max value in histogram table
         for (int i = 0; i < 256; i++) {
@@ -141,18 +141,18 @@ void c_histogram_thread::calculate_pixmap_data()
 
         // Create histogram table
         if (m_byte_depth == 1) {
-            uint8_t *p_data = mp_buffer;
+            uint8_t *p_data = mp_buffer.get();
             for (int i = 0; i < m_width * m_height; i++) {
                 m_blue_table[*p_data++]++;
             }
         } else {  // m_byte_depth == 2
-            uint16_t *p_data = (uint16_t *)mp_buffer;
+            uint16_t *p_data = (uint16_t *)mp_buffer.get();
             for (int i = 0; i < m_width * m_height; i++) {
                 m_blue_table[(*p_data++) >> 8]++;
             }
         }
 
-        delete [] mp_buffer;  // Free image buffer
+        mp_buffer.release();  // Free image buffer
 
         // Find max value in histogram table
         for (int i = 0; i < 256; i++) {

@@ -23,6 +23,7 @@
 #include <QThread>
 #include <QFuture>
 #include <cstdint>
+#include <memory>
 
 
 class c_image;
@@ -82,7 +83,7 @@ private:
     int32_t m_height;
     bool m_colour;
     int32_t m_byte_depth;
-    uint8_t *mp_buffer;
+    std::unique_ptr<uint8_t[]> mp_buffer;
     int32_t m_buffer_size;
     int32_t m_red_table[256];
     int32_t m_green_table[256];

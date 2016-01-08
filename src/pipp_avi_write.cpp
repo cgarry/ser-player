@@ -8,7 +8,7 @@
 #include "pipp_utf8.h"
 
 #include <cwchar>
-
+#include <memory>
 
 using namespace std;
 
@@ -31,8 +31,6 @@ using namespace std;
 // ------------------------------------------
 c_pipp_avi_write::c_pipp_avi_write() :
     mp_avi_file(NULL),
-    mp_filename(NULL),
-    mp_extension(NULL),
     m_open(0),
     m_split_count(0),
     m_old_avi_format(0),
@@ -419,19 +417,19 @@ int32_t c_pipp_avi_write::create(
 
     m_split_count = 0;
 
-    this->mp_filename = new char[strlen(filename) + 1];
+    mp_filename.reset(new char[strlen(filename) + 1]);
     // Copy filename into buffer
-    strcpy(mp_filename, filename);
+    strcpy(mp_filename.get(), filename);
 
     // Get extension
-    char *extension = strrchr(mp_filename, '.');
+    char *extension = strrchr(mp_filename.get(), '.');
     if (extension == NULL) {
         // No extension found - create one
-        mp_extension = new char[strlen(".avi") + 1];
-        strcpy(mp_extension, ".avi");  // Copy extension
+        mp_extension.reset(new char[strlen(".avi") + 1]);
+        strcpy(mp_extension.get(), ".avi");  // Copy extension
     } else {
-        mp_extension = new char[strlen(extension) + 1];
-        strcpy(mp_extension, extension);  // Copy extension
+        mp_extension.reset(new char[strlen(extension) + 1]);
+        strcpy(mp_extension.get(), extension);  // Copy extension
         *extension = 0;  // Remove extension from filename
     }
 
@@ -513,13 +511,10 @@ int32_t c_pipp_avi_write::create(
     //::SetWindowTextW(widen(filename).c_str())
     mp_avi_file = fopen_utf8(filename, "wb+");
 
-    // Free split filename memory
-    //delete[] p_split_filename;
-
     // Check file opened
     // Return if file did not open
     if (!mp_avi_file) {
-        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename);
+        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename.get());
         exit(-1);
     } 
 
@@ -554,27 +549,24 @@ int32_t c_pipp_avi_write::split_create()
     set_codec_values();
 
     // Create split filename
-    char *p_split_filename = new char[strlen(mp_filename) + 3 + strlen(mp_extension) + 1];
+    std::unique_ptr<char[]> p_split_filename(new char[strlen(mp_filename.get()) + 3 + strlen(mp_extension.get()) + 1]);
     if (m_split_count == 0) {
         // No split count to be inserted at end of filename
-        sprintf(p_split_filename, "%s%s", mp_filename, mp_extension);
+        sprintf(p_split_filename.get(), "%s%s", mp_filename.get(), mp_extension.get());
     } else {
         // Split count required at end of filename
-        sprintf(p_split_filename, "%s_%02d%s", mp_filename, m_split_count, mp_extension);
+        sprintf(p_split_filename.get(), "%s_%02d%s", mp_filename.get(), m_split_count, mp_extension.get());
     }
 
     // Open new file
-    mp_avi_file = fopen_utf8(p_split_filename, "wb+");
+    mp_avi_file = fopen_utf8(p_split_filename.get(), "wb+");
 
     // Check file opened
     // Return if file did not open
     if (!mp_avi_file) {
-        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename);
+        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename.get());
         exit(-1);
     } 
-
-    // Free split filename memory
-    delete[] p_split_filename;
 
     // Write headers to file
     write_headers();
@@ -588,7 +580,7 @@ int32_t c_pipp_avi_write::split_create()
 // ------------------------------------------
 void c_pipp_avi_write::finish_riff()
 {
-    int32_t ret;
+    size_t ret;
 
     // Add odml indexes
     if (m_old_avi_format == 0) {
@@ -666,7 +658,7 @@ void c_pipp_avi_write::finish_riff()
 
         // Write all entries
         for (int32_t x = 0; x < m_current_frame_count; x++) {
-            int32_t ret = fwrite (&m_avi_index_entry , 1 , sizeof(m_avi_index_entry), mp_avi_file);  // Write entry to file
+            size_t ret = fwrite (&m_avi_index_entry , 1 , sizeof(m_avi_index_entry), mp_avi_file);  // Write entry to file
             if (ret != sizeof(m_avi_index_entry)) {
                 fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
                 exit(-1);
@@ -736,14 +728,6 @@ int32_t c_pipp_avi_write::close()
 
     fclose(mp_avi_file);
     mp_avi_file = NULL;
-
-    // Free filename buffer
-    delete[] mp_filename;
-    mp_filename = NULL;
-
-    // Free extension buffer
-    delete[] mp_extension;
-    mp_extension = NULL;
 
     //debug_headers();
 

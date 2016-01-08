@@ -15,17 +15,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 
+#include "pipp_ser.h"
+#include "pipp_timestamp.h"
+#include "pipp_utf8.h"
 
 #include <cstdlib>
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <cstring>
 #include <cmath>
-#include "pipp_ser.h"
-#include "pipp_timestamp.h"
-#include "pipp_utf8.h"
 
 
 // 64-bit fseek for various platforms
@@ -334,14 +335,14 @@ int32_t c_pipp_ser::find_pixel_depth(
     uint32_t frame_number)
 {
     int32_t pixel_depth = m_header.pixel_depth;
-    uint8_t *p_temp_buffer = new uint8_t[m_header.image_width * m_header.image_height * 2 * 3];
+    std::unique_ptr<uint8_t[]> p_temp_buffer(new uint8_t[m_header.image_width * m_header.image_height * 2 * 3]);
     int32_t stored_pixel_depth = m_header.pixel_depth;
     m_header.pixel_depth = 16;  // Do not shift data this time
-    get_frame(frame_number, p_temp_buffer);  // Get the first frame to analyse
+    get_frame(frame_number, p_temp_buffer.get());  // Get the first frame to analyse
     m_header.pixel_depth = stored_pixel_depth;  // Restore pixel depth
 
     uint16_t max_pixel = 0;
-    uint16_t *p_temp_ptr = (uint16_t *)p_temp_buffer;
+    uint16_t *p_temp_ptr = (uint16_t *)p_temp_buffer.get();
     for (int x = 0; x < m_header.image_width * m_header.image_height * 3; x++) {
         uint16_t pixel = *p_temp_ptr++;
         if (pixel > max_pixel) {
@@ -360,7 +361,6 @@ int32_t c_pipp_ser::find_pixel_depth(
         }
     }
 
-    delete [] p_temp_buffer;
     return pixel_depth;
 }
 

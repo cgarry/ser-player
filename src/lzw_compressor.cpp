@@ -55,7 +55,7 @@ c_lzw_compressor::c_lzw_compressor(
     m_current_code = 0xFFFF;
 
     // Create a new LZW dictonary tree
-    mp_lzw_tree = new s_lzw_tree();
+    mp_lzw_tree.reset(new s_lzw_tree());
 
     // Reset input position variables
     m_input_x = m_x_start;
@@ -65,14 +65,12 @@ c_lzw_compressor::c_lzw_compressor(
     m_output_bit = 8;
 
     // Buffer for compressed data
-    p_compressed_data_buffer = new uint8_t[262];
+    mp_compressed_data_buffer.reset(new uint8_t[262]);
 }
 
 
 c_lzw_compressor::~c_lzw_compressor()
 {
-    delete mp_lzw_tree;
-    delete [] p_compressed_data_buffer;
 }
 
 
@@ -96,17 +94,17 @@ bool c_lzw_compressor::compress_data()
 
     if (m_output_bit <= 256 * 8) {
         // No code bits from the previous block needs to be written
-        *(p_compressed_data_buffer + 1) = 0;  // Clear 1st data entry of output buffer
+        *(mp_compressed_data_buffer.get() + 1) = 0;  // Clear 1st data entry of output buffer
         m_output_bit = 8;  // Reset output bit count
     } else {
         // There is code data from the previous block, copy it to start of buffer
         int bits_from_last_block = m_output_bit - 256 * 8;
         int bytes_from_last_block = (bits_from_last_block + 7) / 8;
-        std::copy(p_compressed_data_buffer + 256,
-                  p_compressed_data_buffer + 256 + bytes_from_last_block,
-                  p_compressed_data_buffer + 1);
+        std::copy(mp_compressed_data_buffer.get() + 256,
+                  mp_compressed_data_buffer.get() + 256 + bytes_from_last_block,
+                  mp_compressed_data_buffer.get() + 1);
 
-        *(p_compressed_data_buffer + 1 + bytes_from_last_block) = 0;  // Clear next data entry of output buffer
+        *(mp_compressed_data_buffer.get() + 1 + bytes_from_last_block) = 0;  // Clear next data entry of output buffer
         m_output_bit = 8 + bits_from_last_block;  // Update output bit count
     }
 
@@ -147,13 +145,13 @@ bool c_lzw_compressor::compress_data()
         if (m_current_code == 0xFFFF) {
             // First pixel - do nothing but save next_code as current_code
             m_current_code = next_code;
-            output_code_to_buffer(m_clear_code, m_code_length, p_compressed_data_buffer);
+            output_code_to_buffer(m_clear_code, m_code_length, mp_compressed_data_buffer.get());
         } else if (mp_lzw_tree->m_current[m_current_code].m_next[next_code] != 0) {
             // Current run is already in the dictionary tree
             m_current_code = mp_lzw_tree->m_current[m_current_code].m_next[next_code];
         } else { // Finish current run
             // Write current code out
-            output_code_to_buffer(m_current_code, m_code_length, p_compressed_data_buffer);
+            output_code_to_buffer(m_current_code, m_code_length, mp_compressed_data_buffer.get());
 
             // Add new run into the dictionary tree
             mp_lzw_tree->m_current[m_current_code].m_next[next_code] = m_next_free_code;
@@ -169,9 +167,8 @@ bool c_lzw_compressor::compress_data()
             if (m_next_free_code == 4096)
             {
                 // Dictionary full, delete it and start again
-                output_code_to_buffer(m_clear_code, m_code_length, p_compressed_data_buffer);
-                delete mp_lzw_tree;
-                mp_lzw_tree = new s_lzw_tree();
+                output_code_to_buffer(m_clear_code, m_code_length, mp_compressed_data_buffer.get());
+                mp_lzw_tree.reset(new s_lzw_tree());
                 m_code_length = m_bit_depth + 1;
                 m_next_free_code = m_clear_code + 2;
             }
@@ -186,8 +183,8 @@ bool c_lzw_compressor::compress_data()
             m_input_y++;
             if (m_input_y > m_y_end) {
                 complete = true;
-                output_code_to_buffer(m_current_code, m_code_length, p_compressed_data_buffer);  // Output final code
-                output_code_to_buffer(m_end_of_information_code, m_code_length, p_compressed_data_buffer);  // Output end of information code
+                output_code_to_buffer(m_current_code, m_code_length, mp_compressed_data_buffer.get());  // Output final code
+                output_code_to_buffer(m_end_of_information_code, m_code_length, mp_compressed_data_buffer.get());  // Output end of information code
                 break;  // Exit loop
             }
 
@@ -204,7 +201,7 @@ bool c_lzw_compressor::compress_data()
         complete = false;  // Cannot be complete if more than 255 bytes have been accumulated
     }
 
-    *p_compressed_data_buffer = bytes;  // Write byte count to start of buffer
+    mp_compressed_data_buffer[0] = bytes;  // Write byte count to start of buffer
     return complete;
 }
 

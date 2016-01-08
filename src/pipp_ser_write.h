@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QString>
 #include <cstdint>
+#include <memory>
 
 
 // Codes for ColourID
@@ -46,7 +47,7 @@ class c_pipp_ser_write {
 
         // Member variables
         FILE *mp_ser_file;
-        char *mp_index_filename;
+        std::unique_ptr<char[]> mp_index_filename;
         FILE *mp_ser_index_file;
         s_ser_header m_header;
         bool m_open;

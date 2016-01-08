@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <cstdint>
+#include <memory>
 
 #define GIF_COMMENT_STRING "Created by SER Player"
 // Comment out GIF_COMMENT_STRING #define to disable adding a comment extension to the generated gif file
@@ -193,14 +194,14 @@ class c_gif_write {
         int m_bit_depth;
 
         // LUTs
-        uint8_t *mp_rev_mono_table;
-        uint8_t *mp_index_to_index_colour_difference_lut;
+        std::unique_ptr<uint8_t[]> mp_rev_mono_table;
+        std::unique_ptr<uint8_t[]> mp_index_to_index_colour_difference_lut;
 
         // Other
         QString m_error_string;
         FILE *mp_gif_file;
         bool m_open;
-        uint8_t *mp_last_image;
+        std::unique_ptr<uint8_t[]> mp_last_image;
 
         // GIF implementation details
         s_gif_header m_gif_header;

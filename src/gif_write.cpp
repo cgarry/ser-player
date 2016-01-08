@@ -24,7 +24,7 @@
 #include <QDebug>
 #include <cmath>
 #include <cassert>
-
+#include <memory>
 
 // 64-bit fseek for various platforms
 #ifdef __linux__
@@ -41,10 +41,7 @@
 
 c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
-    m_open(false),
-    mp_rev_mono_table(nullptr),
-    mp_index_to_index_colour_difference_lut(nullptr),
-    mp_last_image(nullptr)
+    m_open(false)
 {
     // Header structure fixed fields
     m_gif_header.m_signature[0] = 'G';
@@ -155,9 +152,6 @@ bool c_gif_write::create(
         return false;
     }
 
-    // Clear last image pointer
-    mp_last_image = nullptr;
-
     // Set member variables
     m_width = width;
     m_height = height;
@@ -216,8 +210,8 @@ bool c_gif_write::create(
         const int colour_table_entries = 1 << m_bit_depth;
 
         // Create global colour table and write to the file
-        uint8_t *p_global_colour_table = new uint8_t[colour_table_entries * 3];
-        uint8_t *p_mono_table = new uint8_t[colour_table_entries];
+        std::unique_ptr<uint8_t[]> p_global_colour_table(new uint8_t[colour_table_entries * 3]);
+        std::unique_ptr<uint8_t[]> p_mono_table(new uint8_t[colour_table_entries]);
 
         // Create monochrome LUT
         for (int i = 0; i < colour_table_entries; i++) {
@@ -236,11 +230,10 @@ bool c_gif_write::create(
             p_mono_table[1] = p_mono_table[0];
         }
 
-        fwrite(p_global_colour_table, 1, colour_table_entries * 3, mp_gif_file);
-        delete [] p_global_colour_table;  // Global colour table is only used for monochrome data
+        fwrite(p_global_colour_table.get(), 1, colour_table_entries * 3, mp_gif_file);
 
         // Create a reverse LUT from LUT
-        mp_rev_mono_table = new uint8_t[256];
+        mp_rev_mono_table.reset(new uint8_t[256]);
         for (int i = 0; i < 256; i++) {
             int best_error = 255;
             uint8_t best_index = 0;
@@ -269,11 +262,7 @@ bool c_gif_write::create(
 
         // Create index to index colour difference (well mono difference in this case) table
         // This is used by the lossy compression code
-        if (mp_index_to_index_colour_difference_lut != nullptr) {
-            delete [] mp_index_to_index_colour_difference_lut;  // This should never happen
-        }
-
-        mp_index_to_index_colour_difference_lut = new uint8_t[256 * 256];
+        mp_index_to_index_colour_difference_lut.reset(new uint8_t[256 * 256]);
         for (int i = 0; i < (1 << m_bit_depth); i++) {
             int index = i << 8;
             for (int j = 0; j < (1 << m_bit_depth); j++) {
@@ -290,8 +279,6 @@ bool c_gif_write::create(
                 mp_index_to_index_colour_difference_lut[index | j] = diff;
             }
         }
-
-        delete [] p_mono_table;
     }
 
     // Update Netscape extension and write to file
@@ -326,8 +313,8 @@ bool c_gif_write::write_frame(
     }
 
     //  Create buffer for indexed pixels image
-    uint8_t *p_index_image = new uint8_t[m_width * m_height];
-    uint8_t *p_colour_table = nullptr;  // Colour table buffer for local colour tables
+    std::unique_ptr<uint8_t[]> p_index_image(new uint8_t[m_width * m_height]);
+    std::unique_ptr<uint8_t[]> p_colour_table;
 
     // Scan top/bottom lines and left/right columns to check for lines/columns identical to previous frame
     // These areas do not need to be encoded.
@@ -340,7 +327,7 @@ bool c_gif_write::write_frame(
         // Monochorome data
         detect_unchanged_border(
             p_data,  // const uint8_t *p_this_image
-            mp_last_image,  //const uint8_t *p_last_image
+            mp_last_image.get(),  //const uint8_t *p_last_image
             x_start,  // uint16_t &x_start
             x_end,  // uint16_t &x_end
             y_start,  // uint16_t &y_start
@@ -348,9 +335,9 @@ bool c_gif_write::write_frame(
 
         // Buffer to keep image data for processing the next frame
         bool first_frame = false;
-        if (mp_last_image == nullptr) {
+        if (mp_last_image.get() == nullptr) {
             // Create buffer if required
-            mp_last_image = new uint8_t[m_width * m_height];
+            mp_last_image.reset(new uint8_t[m_width * m_height]);
             first_frame = true;
         }
 
@@ -358,11 +345,11 @@ bool c_gif_write::write_frame(
         // Create an indexed version of the image including transparent pixels if required
         //
         // Create a buffer for the indexed image
-        uint8_t *p_write_data = p_index_image;
+        uint8_t *p_write_data = p_index_image.get();
         for (int y = y_start; y <= y_end; y++) {
             int x = x_start;
             uint8_t *p_current_data = p_data + (y * m_width + x);
-            uint8_t *p_last_data = mp_last_image + (y * m_width + x);
+            uint8_t *p_last_data = mp_last_image.get() + (y * m_width + x);
             for ( ; x <= x_end; x++) {
                 if (m_use_transparent_pixels && !first_frame) {
                     uint8_t mono = *p_current_data++;
@@ -397,7 +384,7 @@ bool c_gif_write::write_frame(
         // Colour data
         detect_unchanged_border(
             p_data,  // const uint8_t *p_this_image
-            mp_last_image,  //const uint8_t *p_last_image
+            mp_last_image.get(),  //const uint8_t *p_last_image
             x_start,  // uint16_t &x_start
             x_end,  // uint16_t &x_end
             y_start,  // uint16_t &y_start
@@ -410,12 +397,13 @@ bool c_gif_write::write_frame(
         }
 
         if (m_lossy_compression_level > 0) {
-            mp_index_to_index_colour_difference_lut = new uint8_t[256 * 256];
+            mp_index_to_index_colour_difference_lut.reset(new uint8_t[256 * 256]);
         }
 
         // Colour data - convert values to indexed values
-        p_colour_table = new uint8_t[3 * (1 << m_bit_depth)];
-        uint8_t *p_rev_colour_table = new uint8_t[1 << (3 * 6)];
+        p_colour_table.reset(new uint8_t[3 * (1 << m_bit_depth)]);
+        std::unique_ptr<uint8_t[]> p_rev_colour_table(new uint8_t[1 << (3 * 6)]);
+
         quantise_colours(
             p_data,  // uint8_t *p_data
             x_start,  // uint16_t x_start,
@@ -423,15 +411,15 @@ bool c_gif_write::write_frame(
             y_start,  // uint16_t y_start,
             y_end,  // uint16_t y_end,
             num_colours,  // int number_of_colours
-            p_colour_table,
-            p_rev_colour_table,
-            mp_index_to_index_colour_difference_lut); // uint8_t *p_index_to_index_colour_difference
+            p_colour_table.get(),
+            p_rev_colour_table.get(),
+            mp_index_to_index_colour_difference_lut.get()); // uint8_t *p_index_to_index_colour_difference
 
         // Buffer to keep image data for processing the next frame
         bool first_frame = false;
-        if (mp_last_image == nullptr) {
+        if (mp_last_image.get() == nullptr) {
             // Create buffer if required
-            mp_last_image = new uint8_t[m_width * m_height * 3];
+            mp_last_image.reset(new uint8_t[m_width * m_height * 3]);
             first_frame = true;
         }
 
@@ -439,11 +427,11 @@ bool c_gif_write::write_frame(
         // Create an indexed version of the image including transparent pixels if required
         //
         // Create a buffer for the index image
-        uint8_t *p_write_data = p_index_image;
+        uint8_t *p_write_data = p_index_image.get();
         for (int y = y_start; y <= y_end; y++) {
             int x = x_start;
             uint8_t *p_current_data = p_data + (y * m_width + x) * 3;
-            uint8_t *p_last_data = mp_last_image + (y * m_width + x) * 3;
+            uint8_t *p_last_data = mp_last_image.get() + (y * m_width + x) * 3;
             for ( ; x <= x_end; x++) {
                 if (m_use_transparent_pixels && !first_frame) {
                     uint8_t b = *p_current_data++;
@@ -482,8 +470,6 @@ bool c_gif_write::write_frame(
                 }
             }
         }
-
-        delete [] p_rev_colour_table;
     }
 
 //    printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
@@ -492,7 +478,7 @@ bool c_gif_write::write_frame(
     m_graphic_control_extension.m_packed_field  = 0 << 2;  // Disposal method: None specified
     m_graphic_control_extension.m_packed_field |= 0 << 1;  // User Input Flag: No user input expected
 
-    if (m_use_transparent_pixels && mp_last_image != nullptr) {
+    if (m_use_transparent_pixels && mp_last_image.get() != nullptr) {
         m_graphic_control_extension.m_packed_field |= 1 << 0;  // Transparent colour flag
     }
 
@@ -535,10 +521,7 @@ bool c_gif_write::write_frame(
 
     if (m_colour && p_colour_table != nullptr) {
         // Write local colour table to file
-        fwrite(p_colour_table, 1, (1 << m_bit_depth) * 3, mp_gif_file);
-
-        // Delete colour table as it is no longer required
-        delete [] p_colour_table;
+        fwrite(p_colour_table.get(), 1, (1 << m_bit_depth) * 3, mp_gif_file);
     }
 
     // Write LZW minimum code size to file
@@ -553,13 +536,13 @@ bool c_gif_write::write_frame(
         0,  // y_start,
         y_end - y_start,  // y_end,
         m_bit_depth,
-        p_index_image);
+        p_index_image.get());
 
 
     // Set details of lossy compression
     lzw_compressor.set_lossy_details(
         m_lossy_compression_level,  // int lossy_compression_level
-        mp_index_to_index_colour_difference_lut,  // p_index_to_index_colour_difference_lut
+        mp_index_to_index_colour_difference_lut.get(),  // p_index_to_index_colour_difference_lut
         m_transparent_index);  // int transparent_index
 
     bool all_compressed = false;
@@ -572,13 +555,9 @@ bool c_gif_write::write_frame(
         fwrite(p_compressed_data, 1, p_compressed_data[0] + 1, mp_gif_file);
     }
 
-    // Data for this frame has been written to the file, free buffer
-    delete [] p_index_image;
-
-    // Delete index to index colour difference table if one was used
-    if (m_colour && mp_index_to_index_colour_difference_lut != nullptr) {
-        delete [] mp_index_to_index_colour_difference_lut;
-        mp_index_to_index_colour_difference_lut = nullptr;
+    // Release index to index colour difference table if one was used
+    if (m_colour) {
+        mp_index_to_index_colour_difference_lut.release();
     }
 
 
@@ -596,20 +575,10 @@ uint64_t c_gif_write::close()
 {
     uint64_t filesize = 0;
 
-    if (mp_rev_mono_table != nullptr) {
-        delete [] mp_rev_mono_table;
-        mp_rev_mono_table = nullptr;
-    }
-
-    if (mp_index_to_index_colour_difference_lut != nullptr) {
-        delete [] mp_index_to_index_colour_difference_lut;
-        mp_index_to_index_colour_difference_lut = nullptr;
-    }
-
-    if (mp_last_image != nullptr) {
-        delete [] mp_last_image;
-        mp_last_image = nullptr;
-    }
+    // Relese memory used for tables
+    mp_rev_mono_table.release();
+    mp_index_to_index_colour_difference_lut.release();
+    mp_last_image.release();
 
     // Write comment block out if defined
 #ifdef GIF_COMMENT_STRING
@@ -661,8 +630,9 @@ void c_gif_write::quantise_colours(
     assert (p_colour_table != nullptr);
     assert (p_rev_colour_table != nullptr);
 
-    uint32_t *p_histogram_lut = new uint32_t[1 << 18]();
-    uint32_t *p_index_lut = new uint32_t[1 << 18];
+    std::unique_ptr<uint32_t[]> p_histogram_lut(new uint32_t[1 << 18]);
+    std::unique_ptr<uint32_t[]> p_index_lut(new uint32_t[1 << 18]);
+
     for (int x = 0; x < (1 << 18); x++) {
         p_index_lut[x] = x;
     }
@@ -716,9 +686,9 @@ void c_gif_write::quantise_colours(
     }
 
     // Create colour table and reverse colour table
-    uint8_t *p_colour_r_palette = new uint8_t[256];
-    uint8_t *p_colour_g_palette = new uint8_t[256];
-    uint8_t *p_colour_b_palette = new uint8_t[256];
+    std::unique_ptr<uint8_t[]> p_colour_r_palette(new uint8_t[256]);
+    std::unique_ptr<uint8_t[]> p_colour_g_palette(new uint8_t[256]);
+    std::unique_ptr<uint8_t[]> p_colour_b_palette(new uint8_t[256]);
 
     int number_of_palette_colours;
     bool colour_found = false;
@@ -827,9 +797,6 @@ void c_gif_write::quantise_colours(
         }
     }
 
-    // Delete histogram table as only the index table is required from here
-    delete [] p_histogram_lut;
-
     // We have now filled the colour palette but need to find the closest values in the
     // colour palette for the remaining values in the histogram LUT to add to the
     // colour to index LUT
@@ -859,9 +826,6 @@ void c_gif_write::quantise_colours(
         // Update the colour to index LUT for this colour
         p_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)best_entry;
     }
-
-    // Delete index table as it has done its job in creating the colour palette and reverse colour palettes
-    delete [] p_index_lut;
 
     // Create the real colour table
     // Update colour values to use all 8 bits rather than just 6 bits
@@ -900,11 +864,6 @@ void c_gif_write::quantise_colours(
             }
         }
     }
-
-    // Free memory used for temp palettes
-    delete [] p_colour_r_palette;
-    delete [] p_colour_g_palette;
-    delete [] p_colour_b_palette;
 }
 
 
@@ -920,7 +879,7 @@ void c_gif_write::detect_unchanged_border(
 
     if (!m_colour) {
         // Monochome version of the code
-        if (p_last_image != nullptr) {  // Only currently supported for monochrome
+        if (p_last_image != nullptr) {  // p_last_image == nullptr for first frame
             const uint8_t *p_last_data = p_last_image;
             const uint8_t *p_current_data = p_this_image;
             // Scan top lines
@@ -1046,16 +1005,17 @@ void c_gif_write::detect_unchanged_border(
 
                 // Scan left columns
                 mismatch = false;
+                int pixel_in_line_minus_2 = m_width * 3 - 2;
                 for (x_start = 0; x_start < m_width; x_start++) {
                     p_last_data = p_last_image + (y_start * m_width + x_start) * 3;
                     p_current_data = p_this_image + (y_start * m_width + x_start) * 3;
                     for (int y = y_start; y <= y_end; y++) {
-                        int diff = abs((int)(*p_current_data) - (*p_last_data));
-                        diff += abs((int)(*p_current_data) - (*p_last_data));
+                        int diff = abs((int)(*p_current_data++) - (*p_last_data++));
+                        diff += abs((int)(*p_current_data++) - (*p_last_data++));
                         diff += abs((int)(*p_current_data) - (*p_last_data));
                         mismatch |= diff > m_unchanged_border_tolerance;
-                        p_current_data += m_width * 3;
-                        p_last_data += m_width * 3;
+                        p_current_data += pixel_in_line_minus_2;
+                        p_last_data += pixel_in_line_minus_2;
                     }
 
                     // Break out of look on mismatch
@@ -1070,12 +1030,12 @@ void c_gif_write::detect_unchanged_border(
                     p_last_data = p_last_image + (y_start * m_width + x_end) * 3;
                     p_current_data = p_this_image + (y_start * m_width + x_end) * 3;
                     for (int y = y_start; y <= y_end; y++) {
-                        int diff = abs((int)(*p_current_data) - (*p_last_data));
-                        diff += abs((int)(*p_current_data) - (*p_last_data));
+                        int diff = abs((int)(*p_current_data++) - (*p_last_data++));
+                        diff += abs((int)(*p_current_data++) - (*p_last_data++));
                         diff += abs((int)(*p_current_data) - (*p_last_data));
                         mismatch |= diff > m_unchanged_border_tolerance;
-                        p_current_data += m_width * 3;
-                        p_last_data += m_width * 3;
+                        p_current_data += pixel_in_line_minus_2;
+                        p_last_data += pixel_in_line_minus_2;
                     }
 
                     // Break out of look on mismatch
@@ -1084,10 +1044,10 @@ void c_gif_write::detect_unchanged_border(
                     }
                 }
             }
-
-            // At this point x_start, x_end, y_start and y_end should be updated to allow for
-            // an unchanged border for this frame
         }
     }
+
+    // At this point x_start, x_end, y_start and y_end should be updated to allow for
+    // an unchanged border for this frame
 }
 

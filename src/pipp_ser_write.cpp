@@ -1,12 +1,13 @@
-#include <cstdlib>
-#include <cstdint>
-#include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <cstring>
 #include "pipp_ser_write.h"
 #include "pipp_utf8.h"
 
+#include <cstdlib>
+#include <cstdint>
+#include <cstring>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <memory>
 #include <QDebug>
 
 using namespace std;
@@ -72,18 +73,18 @@ int32_t c_pipp_ser_write::create(
     
     // Generate temp index filename
     int32_t filename_len = filename.length();
-    mp_index_filename = new char[filename_len + 5];
-    strcpy(mp_index_filename, filename.toUtf8().constData());
-    strcat(mp_index_filename, ".idx");
+    mp_index_filename.reset(new char[filename_len + 5]);
+    strcpy(mp_index_filename.get(), filename.toUtf8().constData());
+    strcat(mp_index_filename.get(), ".idx");
 
     // Open index file
-    mp_ser_index_file = fopen_utf8(mp_index_filename, "wb");
+    mp_ser_index_file = fopen_utf8(mp_index_filename.get(), "wb");
 
     // Check file opened
     // Return if file did not open
     if (!mp_ser_index_file) {
         m_error_string += QCoreApplication::tr("Error: could not open file '%1' for writing", "SER write file error message")
-                          .arg(mp_index_filename);
+                          .arg(mp_index_filename.get());
         m_error_string += "\n";
         return -1;
     }
@@ -117,11 +118,11 @@ int32_t c_pipp_ser_write::write_frame(
     }
 
     // Generate buffer
-    uint8_t *p_buffer = new uint8_t[m_width * m_height * m_bytes_per_sample];
+    std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[m_width * m_height * m_bytes_per_sample]);
 
     if (m_bytes_per_sample == 1) {
         // 8-bit mono data
-        uint8_t *write_ptr = p_buffer;
+        uint8_t *write_ptr = p_buffer.get();
         uint8_t *read_ptr;
 
         for (int32_t y = m_height-1; y >= 0; y--) {
@@ -131,7 +132,7 @@ int32_t c_pipp_ser_write::write_frame(
         }
     } else if (m_bytes_per_sample == 2) {
         // 16-bit mono data write
-        uint16_t *write_ptr = (uint16_t *)p_buffer;
+        uint16_t *write_ptr = (uint16_t *)p_buffer.get();
         uint16_t *read_ptr;
         uint16_t *data_16 = (uint16_t *)data;
         for (int32_t y = m_height-1; y >= 0; y--) {
@@ -141,7 +142,7 @@ int32_t c_pipp_ser_write::write_frame(
         }
     } else if (m_bytes_per_sample == 3) {
         // 24-bit colour data
-        uint8_t *write_ptr = p_buffer;
+        uint8_t *write_ptr = p_buffer.get();
         uint8_t *read_ptr;
 
         for (int32_t y = m_height-1; y >= 0; y--) {
@@ -151,7 +152,7 @@ int32_t c_pipp_ser_write::write_frame(
         }
     } else if (m_bytes_per_sample == 6) {
         // 48-bit colour data
-        uint16_t *write_ptr = (uint16_t *)p_buffer;
+        uint16_t *write_ptr = (uint16_t *)p_buffer.get();
         uint16_t *read_ptr;
         uint16_t *data_16 = (uint16_t *)data;
         for (int32_t y = m_height-1; y >= 0; y--) {
@@ -161,8 +162,7 @@ int32_t c_pipp_ser_write::write_frame(
         }
     }
 
-    ret = fwrite(p_buffer, 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
-    delete [] p_buffer;
+    ret = fwrite(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
 
     if (ret != m_width * m_height * m_bytes_per_sample) {
         m_error_string += QCoreApplication::tr("Error writing to SER file", "SER write file error message");
@@ -236,7 +236,7 @@ int32_t c_pipp_ser_write::close()
     // Open index file to read if we are using indexes
     if (m_date_time_utc != 0) {
         // Open index file to read
-        mp_ser_index_file = fopen_utf8(mp_index_filename, "rb");
+        mp_ser_index_file = fopen_utf8(mp_index_filename.get(), "rb");
 
         // Get file size
         fseek64(mp_ser_index_file, 0, SEEK_END);
@@ -244,15 +244,15 @@ int32_t c_pipp_ser_write::close()
         fseek64(mp_ser_index_file, 0, SEEK_SET);
 
         // Get buffer to store index in
-        uint8_t *p_buffer = new uint8_t[(uint32_t)filesize];
+        std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[(uint32_t)filesize]);
 
         // Read data into buffer
-        fread(p_buffer, 1, (uint32_t)filesize, mp_ser_index_file);
+        fread(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_index_file);
 	    fclose(mp_ser_index_file);
 
         // Write index data to output file
-        ret = fwrite (p_buffer, 1, (uint32_t)filesize, mp_ser_file);
-        delete [] p_buffer;
+        ret = fwrite (p_buffer.get(), 1, (uint32_t)filesize, mp_ser_file);
+        p_buffer.release();
 
         if (ret != (uint32_t)filesize) {
             m_error_string += QCoreApplication::tr("Error writing header to SER index file", "SER write file error message");
@@ -262,7 +262,7 @@ int32_t c_pipp_ser_write::close()
     }
 
     // Close index file and remove it
-    remove_utf8(mp_index_filename);
+    remove_utf8(mp_index_filename.get());
 
     // Goto start of file after SER FILE ID field
     fseek64(mp_ser_file, 14, SEEK_SET);
@@ -283,7 +283,7 @@ int32_t c_pipp_ser_write::close()
     mp_ser_file = nullptr;
 
     // Release filename memory
-    delete[] mp_index_filename;
+    mp_index_filename.release();
 
     m_error_string.clear();
     return 0;

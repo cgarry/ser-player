@@ -53,8 +53,6 @@ int32_t c_pipp_avi_write_dib::write_frame(
 {
     // Remove unused argument warnings
     (void)extra_data;
-
-    int32_t ret;
     
     if (colour < 0 || colour > 2) {
         colour = 0;
@@ -132,7 +130,7 @@ int32_t c_pipp_avi_write_dib::write_frame(
     // Write image data to file
     m_last_frame_pos = ftell64(mp_avi_file);  // Grab position of last file
 
-    ret = fwrite (buffer , 1 , (m_width * m_bytes_per_pixel + m_line_gap) * m_height, mp_avi_file);
+    size_t ret = fwrite(buffer , 1 , (m_width * m_bytes_per_pixel + m_line_gap) * m_height, mp_avi_file);
 
     if (ret != (m_width * m_bytes_per_pixel + m_line_gap) * m_height) {
         fprintf(stderr, "Error: Error writing to AVI file\n");

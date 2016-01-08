@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <memory>
+
 #include "pipp_video_write.h"
 #include "pipp_buffer.h"
 
@@ -207,8 +209,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
         };
 
         // Member variables
-        char *mp_filename;
-        char *mp_extension;
+        std::unique_ptr<char[]> mp_filename;
+        std::unique_ptr<char[]> mp_extension;
         FILE *mp_avi_file;
         int32_t m_open;
         int32_t m_split_count;

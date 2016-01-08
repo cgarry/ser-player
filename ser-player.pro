@@ -90,10 +90,10 @@ HEADERS  += src/ser_player.h \
 # Build directories
 contains(QT_ARCH, i386) {
     win32:OBJECTS_DIR = $$PWD/build/o/win32
-    DESTDIR = $$PWD/bin32
+    win32:DESTDIR = $$PWD/bin32
 } else {
     win32:OBJECTS_DIR = $$PWD/build/o/win64
-    DESTDIR = $$PWD/bin64
+    win32:DESTDIR = $$PWD/bin64
 }
 
 MOC_DIR = $$PWD/build/moc
@@ -115,6 +115,33 @@ RESOURCES += \
 macx:release:QMAKE_POST_LINK = $$PWD/platform-specific/os-x/post_compile.sh
 
 # Call windeployqt.exe to budle all DLLs and so on required to run
-win32:release:QMAKE_POST_LINK = windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"
+win32:release:QMAKE_POST_LINK = $$quote(windeployqt --force --no-translations \"$$DESTDIR/SER-Player.exe\"$$escape_expand(\n\t))
+
+# SSL DLLs
+win32 {
+contains(QT_ARCH, i386) {
+    EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win32/libeay32.dll \
+                      $$PWD/platform-specific/windows/openssl/win32/ssleay32.dll \
+                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt
+    EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
+    EXTRA_BINFILES_WIN ~= s,/,\\,g
+        DESTDIR_WIN = $${DESTDIR}
+    DESTDIR_WIN ~= s,/,\\,g
+    for(FILE,EXTRA_BINFILES_WIN){
+                QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
+    }
+} else {
+    EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win64/libeay32.dll \
+                      $$PWD/platform-specific/windows/openssl/win64/ssleay32.dll \
+                      $$PWD/platform-specific/windows/openssl/win64/OpenSSL_License.txt
+    EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
+    EXTRA_BINFILES_WIN ~= s,/,\\,g
+        DESTDIR_WIN = $${DESTDIR}
+    DESTDIR_WIN ~= s,/,\\,g
+    for(FILE,EXTRA_BINFILES_WIN){
+                QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
+    }
+}
+}
 
 
