@@ -10,14 +10,6 @@
 
 #define DEBUGF //printf
 
-// 64-bit fseek for various platforms
-#ifdef __linux__
-#define fseek64 fseeko64  // Windows
-#define ftell64 ftello64  // Windows
-#else
-#define fseek64 _fseeki64  // Windows
-#define ftell64 _ftelli64  // Windows
-#endif
 
 // AVI Flags
 #define AVIF_HASINDEX 0x00000010

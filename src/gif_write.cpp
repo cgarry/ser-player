@@ -231,6 +231,7 @@ bool c_gif_write::create(
         }
 
         fwrite(p_global_colour_table.get(), 1, colour_table_entries * 3, mp_gif_file);
+        p_global_colour_table.release();
 
         // Create a reverse LUT from LUT
         mp_rev_mono_table.reset(new uint8_t[256]);
@@ -470,6 +471,8 @@ bool c_gif_write::write_frame(
                 }
             }
         }
+
+        p_rev_colour_table.release();
     }
 
 //    printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
@@ -522,6 +525,9 @@ bool c_gif_write::write_frame(
     if (m_colour && p_colour_table != nullptr) {
         // Write local colour table to file
         fwrite(p_colour_table.get(), 1, (1 << m_bit_depth) * 3, mp_gif_file);
+
+        // Release colour table as it is no longer required
+        p_colour_table.release();
     }
 
     // Write LZW minimum code size to file
@@ -554,6 +560,9 @@ bool c_gif_write::write_frame(
         uint8_t *p_compressed_data = lzw_compressor.get_compressed_data_ptr();
         fwrite(p_compressed_data, 1, p_compressed_data[0] + 1, mp_gif_file);
     }
+
+    // Data for this frame has been written to the file, free buffer
+    p_index_image.release();
 
     // Release index to index colour difference table if one was used
     if (m_colour) {
@@ -630,7 +639,7 @@ void c_gif_write::quantise_colours(
     assert (p_colour_table != nullptr);
     assert (p_rev_colour_table != nullptr);
 
-    std::unique_ptr<uint32_t[]> p_histogram_lut(new uint32_t[1 << 18]);
+    std::unique_ptr<uint32_t[]> p_histogram_lut(new uint32_t[1 << 18]());
     std::unique_ptr<uint32_t[]> p_index_lut(new uint32_t[1 << 18]);
 
     for (int x = 0; x < (1 << 18); x++) {
@@ -797,6 +806,9 @@ void c_gif_write::quantise_colours(
         }
     }
 
+    // Delete histogram table as only the index table is required from here
+    p_histogram_lut.release();
+
     // We have now filled the colour palette but need to find the closest values in the
     // colour palette for the remaining values in the histogram LUT to add to the
     // colour to index LUT
@@ -826,6 +838,9 @@ void c_gif_write::quantise_colours(
         // Update the colour to index LUT for this colour
         p_rev_colour_table[r << 12 | g << 6 | b] = (uint8_t)best_entry;
     }
+
+    // Delete index table as it has done its job in creating the colour palette and reverse colour palettes
+    p_index_lut.release();
 
     // Create the real colour table
     // Update colour values to use all 8 bits rather than just 6 bits

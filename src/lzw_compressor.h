@@ -124,7 +124,6 @@ class c_lzw_compressor {
         uint32_t m_current_code;
 
         // LZW dictonary tree
-//        s_lzw_tree *mp_lzw_tree;
         std::unique_ptr<s_lzw_tree> mp_lzw_tree;
 
         int m_input_x;

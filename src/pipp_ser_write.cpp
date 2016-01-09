@@ -163,6 +163,7 @@ int32_t c_pipp_ser_write::write_frame(
     }
 
     ret = fwrite(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
+    p_buffer.release();
 
     if (ret != m_width * m_height * m_bytes_per_sample) {
         m_error_string += QCoreApplication::tr("Error writing to SER file", "SER write file error message");
