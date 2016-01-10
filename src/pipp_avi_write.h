@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <memory>
+#include <string>
 
 #include "pipp_video_write.h"
 #include "pipp_buffer.h"
@@ -204,7 +205,7 @@ class c_pipp_avi_write: public c_pipp_video_write {
         std::unique_ptr<char[]> mp_filename;
         std::unique_ptr<char[]> mp_extension;
         FILE *mp_avi_file;
-        int32_t m_open;
+        bool m_open;
         int32_t m_split_count;
         int32_t m_old_avi_format;
         int32_t m_width;
@@ -220,6 +221,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
         int32_t m_bytes_per_pixel;
         int64_t m_last_frame_pos;
         int64_t m_riff_start_position;
+        std::string m_error_string;
+        bool m_file_write_error;
 
         c_pipp_buffer m_temp_buffer;
 
@@ -271,21 +274,21 @@ class c_pipp_avi_write: public c_pipp_video_write {
         // Destructor
         // ------------------------------------------
         virtual ~c_pipp_avi_write() {
-        };
+        }
 
 
         // ------------------------------------------
         // Return the open state of the AVI file
         // ------------------------------------------
-        int32_t get_open() {
+        bool get_open() {
             return m_open;
-        };
+        }
 
 
         // ------------------------------------------
         // Create a new AVI file
         // ------------------------------------------
-        int32_t create(
+        bool create(
             const char *filename,
             int32_t  m_width,
             int32_t  m_height,
@@ -300,22 +303,34 @@ class c_pipp_avi_write: public c_pipp_video_write {
         // ------------------------------------------
         // Write frame to AVI file
         // ------------------------------------------
-        virtual int32_t write_frame(
+        virtual bool write_frame(
             uint8_t *data,
             int32_t m_colour,
             uint32_t bpp,
             void *extra_data = NULL) = 0;
         
+
         // ------------------------------------------
         // Write header and close AVI file
         // ------------------------------------------
-        int32_t close();
+        bool close();
+
 
     protected:
         // ------------------------------------------
         // Write headers to file
         // ------------------------------------------
-        int32_t write_headers();
+        void fwrite_error_check(
+                const void *ptr,
+                size_t size,
+                size_t count,
+                FILE *p_stream);
+
+
+        // ------------------------------------------
+        // Write headers to file
+        // ------------------------------------------
+        void write_headers();
 
 
         // ------------------------------------------
@@ -340,12 +355,12 @@ class c_pipp_avi_write: public c_pipp_video_write {
         // Finish the current RIFF
         // ------------------------------------------
         void finish_riff();
-        int32_t split_create();
+        void split_create();
 
         // ------------------------------------------
         // Write header and close AVI file
         // ------------------------------------------
-        int32_t split_close();
+        void split_close();
 };
 
     

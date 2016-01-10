@@ -32,7 +32,7 @@ using namespace std;
 c_pipp_ser_write::c_pipp_ser_write() :
     mp_ser_file(nullptr),
     m_open(false),
-    m_error_string("")
+    m_file_write_error(false)
 {
     // Clear header details
     memset(&m_header, 0, sizeof(s_ser_header));
@@ -42,7 +42,7 @@ c_pipp_ser_write::c_pipp_ser_write() :
 // ------------------------------------------
 // Create a new SER file
 // ------------------------------------------
-int32_t c_pipp_ser_write::create(
+bool c_pipp_ser_write::create(
     const QString &filename,
     int32_t  width,
     int32_t  height,
@@ -53,6 +53,8 @@ int32_t c_pipp_ser_write::create(
     m_width = width;
     m_height = height;
     m_colour = colour;
+    m_open = false;
+    m_date_time_utc = 0L;
 
     m_bytes_per_sample = byte_depth;
     if (colour) {
@@ -65,10 +67,7 @@ int32_t c_pipp_ser_write::create(
     // Check file opened
     // Return if file did not open
     if (!mp_ser_file) {
-        m_error_string += QCoreApplication::tr("Error: could not open file '%1' for writing", "SER write file error message")
-                          .arg(filename);
-        m_error_string += "\n";
-        return -1;
+        return true;
     }
     
     // Generate temp index filename
@@ -83,34 +82,42 @@ int32_t c_pipp_ser_write::create(
     // Check file opened
     // Return if file did not open
     if (!mp_ser_index_file) {
-        m_error_string += QCoreApplication::tr("Error: could not open file '%1' for writing", "SER write file error message")
-                          .arg(mp_index_filename.get());
-        m_error_string += "\n";
-        return -1;
+        // Close main SER file first
+        fclose(mp_ser_file);
+        return true;
     }
 
     // Write SER FILE ID to start of the file
-    fwrite ("LUCAM-RECORDER" , 1 , 14 , mp_ser_file );
+    fwrite_error_check("LUCAM-RECORDER" , 1 , 14 , mp_ser_file );
 
     // Write dummy header to file - to be overwritten later
-    fwrite (&m_header, 1, sizeof(s_ser_header), mp_ser_file );
+    fwrite_error_check(&m_header, 1, sizeof(s_ser_header), mp_ser_file );
 
-    // Note that the SER file is open
-    m_open = true;
-    m_date_time_utc = 0L;
+    if (m_file_write_error) {
+        // There were file errors, handle them
+        fclose(mp_ser_file);
+        fclose(mp_ser_index_file);
+    } else {
+        m_open = true;
+    }
 
-    return 0;
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
 // ------------------------------------------
 // Write frame to SER file
 // ------------------------------------------
-int32_t c_pipp_ser_write::write_frame(
+bool c_pipp_ser_write::write_frame(
     uint8_t *data,
     uint64_t timestamp)
 {
-    size_t ret;
+    // Early return if the file is not open
+    if (!m_open) {
+        return true;
+    }
 
     // Grab first timestamp
     if (m_header.frame_count == 0) {
@@ -162,31 +169,34 @@ int32_t c_pipp_ser_write::write_frame(
         }
     }
 
-    ret = fwrite(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
-    p_buffer.release();
-
-    if (ret != m_width * m_height * m_bytes_per_sample) {
-        m_error_string += QCoreApplication::tr("Error writing to SER file", "SER write file error message");
-        m_error_string += "\n";
-        return -1;
-    }
+    fwrite_error_check(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
+    p_buffer.reset(nullptr);
 
     if (m_date_time_utc != 0) {
         // Write timestamp to temp timestamp file
-        ret = fwrite (&timestamp, 8, 1, mp_ser_index_file);
+        fwrite_error_check(&timestamp, 8, 1, mp_ser_index_file);
     }
 
     // Increment frame count
     m_header.frame_count++;
 
-    return 0;
+    // Tidy up after write failures
+    if (m_file_write_error) {
+        fclose(mp_ser_file);
+        fclose(mp_ser_index_file);
+        m_open = false;
+    }
+
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
 // ------------------------------------------
 // Set details for SER file
 // ------------------------------------------
-int32_t c_pipp_ser_write::set_details(
+bool c_pipp_ser_write::set_details(
     int32_t lu_id,
     int32_t colour_id,
     int64_t utc_to_local_diff,
@@ -220,73 +230,82 @@ int32_t c_pipp_ser_write::set_details(
     memset(m_header.telescope, 0, 40);
     memcpy(m_header.telescope, telescope.toUtf8().constData(), 40);
 
-    return 0;
+    return false;
 }
 
 
 // ------------------------------------------
 // Write header and close AVI file
 // ------------------------------------------
-int32_t c_pipp_ser_write::close()
+bool c_pipp_ser_write::close()
 {
-    size_t ret;
+    if (m_open) {
+        // Close index file which may be empty
+        fclose(mp_ser_index_file);
 
-    // Close index file which may be empty
-    fclose(mp_ser_index_file);
+        // Open index file to read if we are using indexes
+        if (m_date_time_utc != 0) {
+            // Open index file to read
+            mp_ser_index_file = fopen_utf8(mp_index_filename.get(), "rb");
 
-    // Open index file to read if we are using indexes
-    if (m_date_time_utc != 0) {
-        // Open index file to read
-        mp_ser_index_file = fopen_utf8(mp_index_filename.get(), "rb");
+            // Get file size
+            fseek64(mp_ser_index_file, 0, SEEK_END);
+            uint64_t filesize = ftell64(mp_ser_index_file);
+            fseek64(mp_ser_index_file, 0, SEEK_SET);
 
-        // Get file size
-        fseek64(mp_ser_index_file, 0, SEEK_END);
-        uint64_t filesize = ftell64(mp_ser_index_file);
-        fseek64(mp_ser_index_file, 0, SEEK_SET);
+            // Get buffer to store index in
+            std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[(uint32_t)filesize]);
 
-        // Get buffer to store index in
-        std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[(uint32_t)filesize]);
+            // Read data into buffer
+            fread(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_index_file);
+            fclose(mp_ser_index_file);
 
-        // Read data into buffer
-        fread(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_index_file);
-	    fclose(mp_ser_index_file);
-
-        // Write index data to output file
-        ret = fwrite (p_buffer.get(), 1, (uint32_t)filesize, mp_ser_file);
-        p_buffer.release();
-
-        if (ret != (uint32_t)filesize) {
-            m_error_string += QCoreApplication::tr("Error writing header to SER index file", "SER write file error message");
-            m_error_string += "\n";
-            return -1;
+            // Write index data to output file
+            fwrite_error_check(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_file);
+            p_buffer.reset(nullptr);
         }
+
+        // Close index file and remove it
+        remove_utf8(mp_index_filename.get());
+
+        // Goto start of file after SER FILE ID field
+        fseek64(mp_ser_file, 14, SEEK_SET);
+
+        // Write header to file
+        fwrite_error_check(&m_header, 1, sizeof(s_ser_header), mp_ser_file );
+
+        // Note that the SER file is closed
+        m_open = false;
+
+        fclose(mp_ser_file);
+        mp_ser_file = nullptr;
     }
-
-    // Close index file and remove it
-    remove_utf8(mp_index_filename.get());
-
-    // Goto start of file after SER FILE ID field
-    fseek64(mp_ser_file, 14, SEEK_SET);
-
-    // Write header to file
-    ret = fwrite(&m_header, 1, sizeof(s_ser_header), mp_ser_file );
-
-    if (ret != sizeof(s_ser_header)) {
-        m_error_string += QCoreApplication::tr("Error writing header to SER index file", "SER write file error message");
-        m_error_string += "\n";
-        return -1;
-    }
-
-    // Note that the SER file is closed
-    m_open = false;
-
-    fclose(mp_ser_file);
-    mp_ser_file = nullptr;
 
     // Release filename memory
-    mp_index_filename.release();
+    mp_index_filename.reset(nullptr);
 
-    m_error_string.clear();
-    return 0;
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
+
+// ------------------------------------------
+// fwrite() function with error checking
+// ------------------------------------------
+// ------------------------------------------
+// fwrite() function with error checking
+// ------------------------------------------
+void c_pipp_ser_write::fwrite_error_check(
+    const void *ptr,
+    size_t size,
+    size_t count,
+    FILE *p_stream)
+{
+    if (!m_file_write_error) {  // Do not continue writing after an error has occured
+        size_t size_written = fwrite(ptr, size, count, p_stream);
+        if (size_written != count) {
+            m_file_write_error = true;
+        }
+    }
+}

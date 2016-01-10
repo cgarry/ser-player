@@ -9,6 +9,7 @@
 
 #include <cwchar>
 #include <memory>
+#include <sstream>
 
 // 64-bit fseek for various platforms
 #ifdef __linux__
@@ -43,7 +44,7 @@ using namespace std;
 // ------------------------------------------
 c_pipp_avi_write::c_pipp_avi_write() :
     mp_avi_file(NULL),
-    m_open(0),
+    m_open(false),
     m_split_count(0),
     m_old_avi_format(0),
     m_width(0),
@@ -55,7 +56,8 @@ c_pipp_avi_write::c_pipp_avi_write() :
     m_current_frame_count(0),
     m_riff_count(0),
     m_last_frame_pos(0),
-    m_write_colour_table(false)
+    m_write_colour_table(false),
+    m_file_write_error(false)
 {
     // Initialise RIFF AVI header
     m_avi_riff_header.list.u32 = FCC_RIFF;
@@ -220,36 +222,59 @@ c_pipp_avi_write::c_pipp_avi_write() :
 
 
 // ------------------------------------------
+// fwrite() function with error checking
+// ------------------------------------------
+void c_pipp_avi_write::fwrite_error_check(
+    const void *ptr,
+    size_t size,
+    size_t count,
+    FILE *p_stream)
+{
+    if (!m_file_write_error) {  // Do not continue writing after an error has occured
+        size_t size_written = fwrite(ptr, size, count, p_stream);
+        if (size_written != count) {
+            m_file_write_error = true;
+        }
+    }
+}
+
+
+// ------------------------------------------
 // Write headers to file
 // ------------------------------------------
-int32_t c_pipp_avi_write::write_headers()
+void c_pipp_avi_write::write_headers()
 {
+    if (m_file_write_error) {
+        // Early exit if there has already been a file write error
+        return;
+    }
+
     // Write RIF Header to file
-    fwrite (&m_avi_riff_header , 1 , sizeof(m_avi_riff_header) , mp_avi_file);
+    fwrite_error_check(&m_avi_riff_header , 1 , sizeof(m_avi_riff_header) , mp_avi_file);
 
     // Write hdrl list header to file
-    fwrite (&m_hdrl_list_header , 1 , sizeof(m_hdrl_list_header) , mp_avi_file);
+    fwrite_error_check(&m_hdrl_list_header , 1 , sizeof(m_hdrl_list_header) , mp_avi_file);
 
     // Write avih chunk header to file
-    fwrite (&m_avih_chunk_header , 1 , sizeof(m_avih_chunk_header) , mp_avi_file);
+    fwrite_error_check(&m_avih_chunk_header , 1 , sizeof(m_avih_chunk_header) , mp_avi_file);
 
     // Write Main avi header to file
-    fwrite (&m_main_avih_header , 1 , sizeof(m_main_avih_header) , mp_avi_file);
+    fwrite_error_check(&m_main_avih_header , 1 , sizeof(m_main_avih_header) , mp_avi_file);
 
     // Write strl list header to file
-    fwrite (&m_strl_list_header , 1 , sizeof(m_strl_list_header) , mp_avi_file);
+    fwrite_error_check(&m_strl_list_header , 1 , sizeof(m_strl_list_header) , mp_avi_file);
 
     // Write strh chunk header to file
-    fwrite (&m_strh_chunk_header , 1 , sizeof(m_strh_chunk_header) , mp_avi_file);
+    fwrite_error_check(&m_strh_chunk_header , 1 , sizeof(m_strh_chunk_header) , mp_avi_file);
 
     // Write video stream header to file
-    fwrite (&m_vids_stream_header , 1 , sizeof(m_vids_stream_header) , mp_avi_file);
+    fwrite_error_check(&m_vids_stream_header , 1 , sizeof(m_vids_stream_header) , mp_avi_file);
 
     // Write strf chunk header to file
-    fwrite (&m_strf_chunk_header , 1 , sizeof(m_strf_chunk_header) , mp_avi_file);
+    fwrite_error_check(&m_strf_chunk_header , 1 , sizeof(m_strf_chunk_header) , mp_avi_file);
 
     // Write BITMAPINFO header to file
-    fwrite (&m_bitmap_info_header , 1 , sizeof(m_bitmap_info_header) , mp_avi_file);
+    fwrite_error_check(&m_bitmap_info_header , 1 , sizeof(m_bitmap_info_header) , mp_avi_file);
 
     // Write colour table to file if required (for DIB mono images)
     if (m_write_colour_table) {
@@ -263,7 +288,7 @@ int32_t c_pipp_avi_write::write_headers()
         }
 
         // Write colour table to file
-        fwrite (colour_table , 1 , 256 * 4, mp_avi_file);
+        fwrite_error_check(colour_table , 1 , 256 * 4, mp_avi_file);
     }
 
     if (m_old_avi_format != 0) {
@@ -271,39 +296,37 @@ int32_t c_pipp_avi_write::write_headers()
         m_junk_chunk_header.size = 0x2000 - (int32_t)ftell64(mp_avi_file) - sizeof(m_junk_chunk_header);
 
         // Write junk header to file
-        fwrite (&m_junk_chunk_header , 1 , sizeof(m_junk_chunk_header) , mp_avi_file);
+        fwrite_error_check(&m_junk_chunk_header , 1 , sizeof(m_junk_chunk_header) , mp_avi_file);
 
         // Write junk data to file
         uint8_t junk_byte = 0;
         for (uint32_t junk_count = 0; junk_count < m_junk_chunk_header.size; junk_count++) {
-            fwrite (&junk_byte , 1 , 1, mp_avi_file);
+            fwrite_error_check(&junk_byte , 1 , 1, mp_avi_file);
         }
     } else {
         // These fields are not present with the old AVI format
 
         // Write indx chunk header to file
-        fwrite (&m_indx_chunk_header , 1 , sizeof(m_indx_chunk_header) , mp_avi_file);
+        fwrite_error_check(&m_indx_chunk_header , 1 , sizeof(m_indx_chunk_header) , mp_avi_file);
 
         // Write AVI Superindex header to file
-        fwrite (&m_avi_superindex_header , 1 , sizeof(m_avi_superindex_header), mp_avi_file);
+        fwrite_error_check(&m_avi_superindex_header , 1 , sizeof(m_avi_superindex_header), mp_avi_file);
 
         // Write AVI Superindex entries to file
-        fwrite (m_avi_superindex_entries , 1 , sizeof(m_avi_superindex_entries[0]) * NUMBER_SUPERINDEX_ENTRIES, mp_avi_file);
+        fwrite_error_check(m_avi_superindex_entries , 1 , sizeof(m_avi_superindex_entries[0]) * NUMBER_SUPERINDEX_ENTRIES, mp_avi_file);
 
         // Write odml list header to file
-        fwrite (&m_odml_list_header , 1 , sizeof(m_odml_list_header) , mp_avi_file);
+        fwrite_error_check(&m_odml_list_header , 1 , sizeof(m_odml_list_header) , mp_avi_file);
 
         // Write dmlh chunk header to file
-        fwrite (&m_dmlh_chunk_header , 1 , sizeof(m_dmlh_chunk_header) , mp_avi_file);
+        fwrite_error_check(&m_dmlh_chunk_header , 1 , sizeof(m_dmlh_chunk_header) , mp_avi_file);
 
         // Write extended AVI header to file
-        fwrite (&m_extended_avi_header , 1 , sizeof(m_extended_avi_header) , mp_avi_file);
+        fwrite_error_check(&m_extended_avi_header , 1 , sizeof(m_extended_avi_header) , mp_avi_file);
     }
 
     // Write movi list header
-    fwrite (&m_movi_list_header , 1 , sizeof(m_movi_list_header) , mp_avi_file);
-
-    return 0;
+    fwrite_error_check(&m_movi_list_header , 1 , sizeof(m_movi_list_header) , mp_avi_file);
 }
 
 
@@ -344,10 +367,10 @@ void c_pipp_avi_write::frame_added()
             finish_riff();  // Finish this RIFF
 
             // Start the next RIFF
-            fwrite (&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
+            fwrite_error_check(&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
 
             // Start the new movi LIST
-            fwrite (&m_movi_avix_list_header , 1, sizeof(m_movi_avix_list_header), mp_avi_file);
+            fwrite_error_check(&m_movi_avix_list_header , 1, sizeof(m_movi_avix_list_header), mp_avi_file);
 
             // Grab position of first frame in this RIFF for the base offset
             m_avi_superindex_header.entries_in_use++;
@@ -365,7 +388,7 @@ void c_pipp_avi_write::frame_added()
 // ------------------------------------------
 // Create a new AVI file
 // ------------------------------------------
-int32_t c_pipp_avi_write::create(
+bool c_pipp_avi_write::create(
     const char *filename,
     int32_t width,
     int32_t height,
@@ -520,30 +543,36 @@ int32_t c_pipp_avi_write::create(
                           + sizeof(m_movi_avix_list_header) - sizeof(m_movi_avix_list_header.four_cc)
                           + m_movi_avix_list_header.size;
 
-    //::SetWindowTextW(widen(filename).c_str())
     mp_avi_file = fopen_utf8(filename, "wb+");
 
     // Check file opened
     // Return if file did not open
-    if (!mp_avi_file) {
-        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename.get());
-        exit(-1);
-    } 
+    if (mp_avi_file) {
+        m_open = true;
+    } else {
+        m_open = false;
+        m_file_write_error = true;
+    }
 
     // Write headers to file
     write_headers();
 
-    // Note that the AVI file is open
-    m_open = 1;
+    // Handle case where file opened but subsequent write failed
+    if (m_open && m_file_write_error) {
+        fclose(mp_avi_file);
+        m_open = false;
+    }
 
-    return 0;
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
 // ------------------------------------------
 // Create a new AVI file
 // ------------------------------------------
-int32_t c_pipp_avi_write::split_create()
+void c_pipp_avi_write::split_create()
 {
     // Increment split count
     m_split_count++;
@@ -575,15 +604,15 @@ int32_t c_pipp_avi_write::split_create()
 
     // Check file opened
     // Return if file did not open
-    if (!mp_avi_file) {
-        fprintf(stderr, "Error: could not open file '%s' for writing\n", mp_filename.get());
-        exit(-1);
-    } 
+    if (mp_avi_file) {
+        m_open = true;
+    } else {
+        m_file_write_error = true;
+        m_open = false;
+    }
 
     // Write headers to file
     write_headers();
-
-    return 0;
 }
 
 
@@ -592,7 +621,10 @@ int32_t c_pipp_avi_write::split_create()
 // ------------------------------------------
 void c_pipp_avi_write::finish_riff()
 {
-    size_t ret;
+    if (m_file_write_error) {
+        // Early return for previous file write errors
+        return;
+    }
 
     // Add odml indexes
     if (m_old_avi_format == 0) {
@@ -605,32 +637,18 @@ void c_pipp_avi_write::finish_riff()
         m_avi_superindex_entries[m_riff_count].size = sizeof(m_ix00_chunk_header) + m_ix00_chunk_header.size;
 
         // Write ix00 chunk header to file
-        ret = fwrite (&m_ix00_chunk_header , 1, sizeof(m_ix00_chunk_header), mp_avi_file);
-        if (ret != sizeof(m_ix00_chunk_header)) {
-            fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
-            exit(-1);
-        }
+        fwrite_error_check(&m_ix00_chunk_header, 1, sizeof(m_ix00_chunk_header), mp_avi_file);
 
         // Write AVI standard header to file
         m_avi_stdindex_header.entries_in_use = m_current_frame_count;
-        ret = fwrite (&m_avi_stdindex_header , 1, sizeof(m_avi_stdindex_header), mp_avi_file);
-        if (ret != sizeof(m_avi_stdindex_header)) {
-            fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
-            exit(-1);
-        }
+        fwrite_error_check(&m_avi_stdindex_header, 1, sizeof(m_avi_stdindex_header), mp_avi_file);
 
         // Write AVI standard indexes to file
         m_avi_stdindex_entry.size = m_frame_size;
         for (int x = 0; x < m_current_frame_count; x++) {
             // Update entry
             m_avi_stdindex_entry.offset = x * (m_frame_size + sizeof(m_00db_chunk_header));
-
-
-            ret = fwrite (&m_avi_stdindex_entry , 1, sizeof(m_avi_stdindex_entry), mp_avi_file);
-            if (ret != sizeof(m_avi_stdindex_entry)) {
-                fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
-                exit(-1);
-            }
+            fwrite_error_check(&m_avi_stdindex_entry, 1, sizeof(m_avi_stdindex_entry), mp_avi_file);
         }
     }
 
@@ -658,24 +676,14 @@ void c_pipp_avi_write::finish_riff()
         }
 
         // Write index chunk header to file
-        ret = fwrite (&m_idx1_chunk_header , 1 , sizeof(m_idx1_chunk_header), mp_avi_file);
-
-        if (ret != sizeof(m_idx1_chunk_header)) {
-            fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
-            exit(-1);
-        }
+        fwrite_error_check(&m_idx1_chunk_header , 1 , sizeof(m_idx1_chunk_header), mp_avi_file);
 
         // Write AVI 1.0 index entries to file
         m_avi_index_entry.offset = 0x4;
 
         // Write all entries
         for (int32_t x = 0; x < m_current_frame_count; x++) {
-            size_t ret = fwrite (&m_avi_index_entry , 1 , sizeof(m_avi_index_entry), mp_avi_file);  // Write entry to file
-            if (ret != sizeof(m_avi_index_entry)) {
-                fprintf(stderr, "Error: Error writing to AVI file line %d\n", __LINE__);
-                exit(-1);
-            }
-
+            fwrite_error_check(&m_avi_index_entry , 1 , sizeof(m_avi_index_entry), mp_avi_file);  // Write entry to file
             m_avi_index_entry.offset += (sizeof(s_chunk_header) + m_frame_size);  // Increment offset
         }
 
@@ -699,11 +707,11 @@ void c_pipp_avi_write::finish_riff()
 
         // Write RIFF header again with correct length now that we know it
         m_avix_riff_header.size = (int32_t)(riff_end_position - m_riff_start_position) - sizeof(m_avix_riff_header) + sizeof(m_avix_riff_header.four_cc);
-        fwrite (&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
+        fwrite_error_check(&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
 
         // Write the movi LIST header again with the correct length now that we know it
         m_movi_avix_list_header.size = m_avix_riff_header.size - sizeof(m_movi_avix_list_header);
-        fwrite (&m_movi_avix_list_header , 1 , sizeof(m_movi_avix_list_header) , mp_avi_file);
+        fwrite_error_check(&m_movi_avix_list_header , 1 , sizeof(m_movi_avix_list_header) , mp_avi_file);
 
         // Go back to the end of this RIFF
         fseek64(mp_avi_file, riff_end_position, SEEK_SET);
@@ -724,33 +732,35 @@ void c_pipp_avi_write::finish_riff()
 // ------------------------------------------
 // Write header and close AVI file
 // ------------------------------------------
-int32_t c_pipp_avi_write::close()
+bool c_pipp_avi_write::close()
 {
-    // Finish off this RIFF
-    finish_riff();
+    if (m_open) {
+        // Finish off this RIFF
+        finish_riff();
 
-    // Go back to start of file
-    fseek64(mp_avi_file, 0, SEEK_SET);
+        // Go back to start of file
+        fseek64(mp_avi_file, 0, SEEK_SET);
 
-    // Write the updated headers to the file
-    write_headers();
+        // Write the updated headers to the file
+        write_headers();
 
-    // Note that the AVI file is closed
-    m_open = 0;
+        // Note that the AVI file is closed
+        m_open = false;
 
-    fclose(mp_avi_file);
-    mp_avi_file = NULL;
+        fclose(mp_avi_file);
+        mp_avi_file = NULL;
+    }
 
-    //debug_headers();
-
-    return 0;
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
 // ------------------------------------------
 // Write header and close AVI file
 // ------------------------------------------
-int32_t c_pipp_avi_write::split_close()
+void c_pipp_avi_write::split_close()
 {
     // Finish off this RIFF
     finish_riff();
@@ -763,8 +773,6 @@ int32_t c_pipp_avi_write::split_close()
 
     fclose(mp_avi_file);
     mp_avi_file = NULL;
-
-    return 0;
 }
 
 

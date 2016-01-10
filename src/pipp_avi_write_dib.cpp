@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
+#include <sstream>
 
 // 64-bit fseek for various platforms
 #ifdef __linux__
@@ -57,7 +58,7 @@ int32_t c_pipp_avi_write_dib::set_codec_values()
 // ------------------------------------------
 // Write frame to AVI file
 // ------------------------------------------
-int32_t c_pipp_avi_write_dib::write_frame(
+bool c_pipp_avi_write_dib::write_frame(
     uint8_t  *data,
     int32_t colour,
     uint32_t bpp,
@@ -65,6 +66,11 @@ int32_t c_pipp_avi_write_dib::write_frame(
 {
     // Remove unused argument warnings
     (void)extra_data;
+
+    // Early return if no file is open
+    if (!m_open) {
+        return true;
+    }
     
     if (colour < 0 || colour > 2) {
         colour = 0;
@@ -72,8 +78,7 @@ int32_t c_pipp_avi_write_dib::write_frame(
 
     // Indicate that a frame is about to be added
     frame_added();
-        
-    fwrite (&m_00db_chunk_header , 1 , sizeof(m_00db_chunk_header) , mp_avi_file);
+    fwrite_error_check(&m_00db_chunk_header, 1, sizeof(m_00db_chunk_header), mp_avi_file);
 
     uint8_t *buffer;
     int32_t line_length = m_width * m_bytes_per_pixel;
@@ -141,13 +146,15 @@ int32_t c_pipp_avi_write_dib::write_frame(
 
     // Write image data to file
     m_last_frame_pos = ftell64(mp_avi_file);  // Grab position of last file
+    fwrite_error_check(buffer , 1 , (m_width * m_bytes_per_pixel + m_line_gap) * m_height, mp_avi_file);
 
-    size_t ret = fwrite(buffer , 1 , (m_width * m_bytes_per_pixel + m_line_gap) * m_height, mp_avi_file);
-
-    if (ret != (m_width * m_bytes_per_pixel + m_line_gap) * m_height) {
-        fprintf(stderr, "Error: Error writing to AVI file\n");
-        exit(-1);
+    // Tidy up after write failures
+    if (m_file_write_error) {
+        fclose(mp_avi_file);
+        m_open = false;
     }
 
-    return 0;
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }

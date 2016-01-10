@@ -1,10 +1,9 @@
 #ifndef PIPP_SER_WRITE_H
 #define PIPP_SER_WRITE_H
 
-#include <QCoreApplication>
-#include <QString>
 #include <cstdint>
 #include <memory>
+#include <QString>
 
 
 // Codes for ColourID
@@ -22,8 +21,6 @@
 
 
 class c_pipp_ser_write {
-    Q_DECLARE_TR_FUNCTIONS(c_pipp_ser_write)
-
     // ------------------------------------------
     // Private definitions
     // ------------------------------------------
@@ -56,7 +53,7 @@ class c_pipp_ser_write {
         bool m_colour;
         int32_t m_bytes_per_sample;
         int64_t m_date_time_utc;
-        QString m_error_string;
+        bool m_file_write_error;
 
 
     // ------------------------------------------
@@ -78,17 +75,6 @@ class c_pipp_ser_write {
 
 
         // ------------------------------------------
-        // Get error string
-        // ------------------------------------------
-        QString get_error_string()
-        {
-            QString ret_string = m_error_string;
-            m_error_string.clear();
-            return ret_string;
-        }
-
-
-        // ------------------------------------------
         // Return the open state of the SER file
         // ------------------------------------------
         bool get_open () {
@@ -99,7 +85,7 @@ class c_pipp_ser_write {
         // ------------------------------------------
         // Create a new SER file
         // ------------------------------------------
-        int32_t create(
+        bool create(
             const QString &filename,
             int32_t  width,
             int32_t  height,
@@ -110,7 +96,7 @@ class c_pipp_ser_write {
         // ------------------------------------------
         // Write frame to SER file
         // ------------------------------------------
-        int32_t write_frame(
+        bool write_frame(
             uint8_t  *data,
             uint64_t timestamp);
             
@@ -118,7 +104,7 @@ class c_pipp_ser_write {
         // ------------------------------------------
         // Set details for SER file
         // ------------------------------------------
-        int32_t set_details(
+        bool set_details(
             int32_t lu_id,
             int32_t colour_id,
             int64_t utc_to_local_diff,
@@ -130,7 +116,22 @@ class c_pipp_ser_write {
         // ------------------------------------------
         // Write header and close SER file
         // ------------------------------------------
-        int32_t close();
+        bool close();
+
+
+    private:
+        // ------------------------------------------
+        // Private definitions
+        // ------------------------------------------
+
+        // ------------------------------------------
+        // fwrite() function with error checking
+        // ------------------------------------------
+        void fwrite_error_check(
+                const void *ptr,
+                size_t size,
+                size_t count,
+                FILE *p_stream);
 
 };
 

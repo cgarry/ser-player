@@ -41,7 +41,8 @@
 
 c_gif_write::c_gif_write() :
     mp_gif_file(nullptr),
-    m_open(false)
+    m_open(false),
+    m_file_write_error(false)
 {
     // Header structure fixed fields
     m_gif_header.m_signature[0] = 'G';
@@ -139,17 +140,17 @@ bool c_gif_write::create(
     // Check for unsupported arguments and do early return if required
     if (width > 0xFFFF || height > 0xFFFF) {
         qDebug() << "c_gif_write::create(): GIF size too large";
-        return false;
+        return true;
     }
 
     if (byte_depth != 1 && byte_depth != 2) {
         qDebug() << "c_gif_write::create(): Only byte depths of 1 and 2 are supported";
-        return false;
+        return true;
     }
 
     if (repeat_count > 0xFFFF) {
         qDebug() << "c_gif_write::create(): Repeat count greater then maximum";
-        return false;
+        return true;
     }
 
     // Set member variables
@@ -178,7 +179,7 @@ bool c_gif_write::create(
         m_error_string += QCoreApplication::tr("Error: could not open file '%1' for writing", "GIF write file error message")
                           .arg(filename);
         m_error_string += "\n";
-        return false;
+        return true;
     }
 
     // Update header structure variable fields now we have more information
@@ -204,7 +205,7 @@ bool c_gif_write::create(
     m_gif_header.m_background_colour_index = 0;  // We do not use background colour pixels as yet
 
     // Write GIF header to the file
-    fwrite(&m_gif_header, 1, sizeof(m_gif_header), mp_gif_file);
+    fwrite_error_check(&m_gif_header, 1, sizeof(m_gif_header), mp_gif_file);
 
     if (!m_colour) {
         const int colour_table_entries = 1 << m_bit_depth;
@@ -230,8 +231,8 @@ bool c_gif_write::create(
             p_mono_table[1] = p_mono_table[0];
         }
 
-        fwrite(p_global_colour_table.get(), 1, colour_table_entries * 3, mp_gif_file);
-        p_global_colour_table.release();
+        fwrite_error_check(p_global_colour_table.get(), 1, colour_table_entries * 3, mp_gif_file);
+        p_global_colour_table.reset(nullptr);
 
         // Create a reverse LUT from LUT
         mp_rev_mono_table.reset(new uint8_t[256]);
@@ -286,10 +287,18 @@ bool c_gif_write::create(
     // Netscape extension variable fields
     m_netscape_extension.m_loop_count[0] = (uint8_t)(repeat_count & 0xFF);
     m_netscape_extension.m_loop_count[1] = (uint8_t)(repeat_count >> 8);
-    fwrite(&m_netscape_extension, 1, sizeof(m_netscape_extension), mp_gif_file);
+    fwrite_error_check(&m_netscape_extension, 1, sizeof(m_netscape_extension), mp_gif_file);
 
-    m_open = true;
-    return true;
+    if (m_file_write_error) {
+        fclose(mp_gif_file);
+        mp_gif_file = nullptr;
+    } else {
+        m_open = true;
+    }
+
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
@@ -305,12 +314,12 @@ bool c_gif_write::write_frame(
     // Early return checks
     if (mp_gif_file == nullptr) {
         // No GIF file open
-        return false;
+        return true;
     }
 
     if (p_data == nullptr) {
         // Bad data pointer
-        return false;
+        return true;
     }
 
     //  Create buffer for indexed pixels image
@@ -472,7 +481,7 @@ bool c_gif_write::write_frame(
             }
         }
 
-        p_rev_colour_table.release();
+        p_rev_colour_table.reset(nullptr);
     }
 
 //    printf("Active area: (%d, %d) - (%d, %d)\n", x_start, x_end, y_start, y_end);
@@ -490,7 +499,7 @@ bool c_gif_write::write_frame(
     m_graphic_control_extension.m_transparent_colour_index = (uint8_t)m_transparent_index;
 
     // Write graphic control extension to the file
-    fwrite(&m_graphic_control_extension, 1, sizeof(m_graphic_control_extension), mp_gif_file);
+    fwrite_error_check(&m_graphic_control_extension, 1, sizeof(m_graphic_control_extension), mp_gif_file);
 
     // Update image descriptor structure variable fields
     m_image_descriptor.m_image_left_position[0] = (uint8_t)(x_start & 0xFF);
@@ -520,18 +529,18 @@ bool c_gif_write::write_frame(
     }
 
     // Write image descriptor to the file
-    fwrite(&m_image_descriptor, 1, sizeof(m_image_descriptor), mp_gif_file);
+    fwrite_error_check(&m_image_descriptor, 1, sizeof(m_image_descriptor), mp_gif_file);
 
     if (m_colour && p_colour_table != nullptr) {
         // Write local colour table to file
-        fwrite(p_colour_table.get(), 1, (1 << m_bit_depth) * 3, mp_gif_file);
+        fwrite_error_check(p_colour_table.get(), 1, (1 << m_bit_depth) * 3, mp_gif_file);
 
         // Release colour table as it is no longer required
-        p_colour_table.release();
+        p_colour_table.reset(nullptr);
     }
 
     // Write LZW minimum code size to file
-    fputc(m_bit_depth, mp_gif_file);
+    fwrite_error_check(&m_bit_depth, 1, 1, mp_gif_file);
 
     // Compress image data and write to file
     c_lzw_compressor lzw_compressor(
@@ -558,22 +567,32 @@ bool c_gif_write::write_frame(
 
         // Write compressed data block to file
         uint8_t *p_compressed_data = lzw_compressor.get_compressed_data_ptr();
-        fwrite(p_compressed_data, 1, p_compressed_data[0] + 1, mp_gif_file);
+        fwrite_error_check(p_compressed_data, 1, p_compressed_data[0] + 1, mp_gif_file);
     }
 
     // Data for this frame has been written to the file, free buffer
-    p_index_image.release();
+    p_index_image.reset(nullptr);
 
     // Release index to index colour difference table if one was used
     if (m_colour) {
-        mp_index_to_index_colour_difference_lut.release();
+        mp_index_to_index_colour_difference_lut.reset(nullptr);
     }
 
 
     // Write block terminator to file
-    fputc(0x00, mp_gif_file);
+    char null_term = 0;
+    fwrite_error_check(&null_term, 1, 1, mp_gif_file);
 
-    return true;
+    // Tidy up after write failures
+    if (m_file_write_error) {
+        fclose(mp_gif_file);
+        mp_gif_file = nullptr;
+        m_open = false;
+    }
+
+    bool ret = m_file_write_error;
+    m_file_write_error = false;
+    return ret;
 }
 
 
@@ -585,18 +604,19 @@ uint64_t c_gif_write::close()
     uint64_t filesize = 0;
 
     // Relese memory used for tables
-    mp_rev_mono_table.release();
-    mp_index_to_index_colour_difference_lut.release();
-    mp_last_image.release();
-
-    // Write comment block out if defined
-#ifdef GIF_COMMENT_STRING
-    fwrite(&m_comment_extension, 1, sizeof(m_comment_extension), mp_gif_file);
-#endif
+    mp_rev_mono_table.reset(nullptr);
+    mp_index_to_index_colour_difference_lut.reset(nullptr);
+    mp_last_image.reset(nullptr);
 
     if (mp_gif_file != nullptr) {
+        // Write comment block out if defined
+    #ifdef GIF_COMMENT_STRING
+        fwrite_error_check(&m_comment_extension, 1, sizeof(m_comment_extension), mp_gif_file);
+    #endif
+
         // Write file terminator to file
-        fputc(0x3B, mp_gif_file);
+        char file_terminator = 0x3B;
+        fwrite_error_check(&file_terminator, 1, 1, mp_gif_file);
 
         filesize = ftell64(mp_gif_file);  // Get final file size
 
@@ -621,6 +641,24 @@ uint64_t c_gif_write::get_current_filesize()
     }
 
     return filesize;
+}
+
+
+// ------------------------------------------
+// fwrite() function with error checking
+// ------------------------------------------
+void c_gif_write::fwrite_error_check(
+    const void *ptr,
+    size_t size,
+    size_t count,
+    FILE *p_stream)
+{
+    if (!m_file_write_error) {  // Do not continue writing after an error has occured
+        size_t size_written = fwrite(ptr, size, count, p_stream);
+        if (size_written != count) {
+            m_file_write_error = true;
+        }
+    }
 }
 
 
@@ -807,7 +845,7 @@ void c_gif_write::quantise_colours(
     }
 
     // Delete histogram table as only the index table is required from here
-    p_histogram_lut.release();
+    p_histogram_lut.reset(nullptr);
 
     // We have now filled the colour palette but need to find the closest values in the
     // colour palette for the remaining values in the histogram LUT to add to the
@@ -840,7 +878,7 @@ void c_gif_write::quantise_colours(
     }
 
     // Delete index table as it has done its job in creating the colour palette and reverse colour palettes
-    p_index_lut.release();
+    p_index_lut.reset(nullptr);
 
     // Create the real colour table
     // Update colour values to use all 8 bits rather than just 6 bits

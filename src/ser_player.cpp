@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.8"
+#define VERSION_STRING "v1.4.9"
 
 #include <Qt>
 #include <QApplication>
@@ -910,12 +910,14 @@ void c_ser_player::save_frames_as_ser_slot()
             save_progress_dialog.show();
 
             int saved_frames = 0;
+            bool file_create_error = false;
+            bool file_write_error = false;
 
             // Direction loop
             int start_dir = (sequence_direction == 1) ? 1 : 0;
             int end_dir = (sequence_direction == 0) ? 0 : 1;
-            int ser_file_ret = 0;
-            for (int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+            bool loop_break = false;
+            for (int current_dir = start_dir; current_dir <= end_dir && !loop_break; current_dir++) {
                 int start_frame = min_frame;
                 int end_frame = max_frame;
                 if (current_dir == 1) {  // Reverse direction - count backwards
@@ -924,7 +926,7 @@ void c_ser_player::save_frames_as_ser_slot()
                     end_frame = -min_frame;
                 }
 
-                for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                for (int frame_number = start_frame; frame_number <= end_frame && !loop_break; frame_number += decimate_value) {
                     // Update progress bar
                     saved_frames++;
                     save_progress_dialog.set_value(saved_frames);
@@ -946,25 +948,24 @@ void c_ser_player::save_frames_as_ser_slot()
 
                         if (!ser_write_file.get_open()) {
                             // Create SER file - only done once
-                            ser_file_ret |= ser_write_file.create(filename, //  QString filename
+                            file_create_error |= ser_write_file.create(filename, //  QString filename
                                                                  mp_frame_image->get_width(),  // int32_t  width
                                                                  mp_frame_image->get_height(), // int32_t  height
                                                                  mp_frame_image->get_colour(),  //mp_ser_file->get_colour() != 0,  // bool     colour
                                                                  mp_frame_image->get_byte_depth());  //mp_ser_file->get_byte_depth());  // int32_t  byte_depth
-                            if (ser_file_ret < 0) {
-                                break;
-                            }
                         }
 
                         // Write frame to SER file
-                        ser_write_file.write_frame(
-                            mp_frame_image->get_p_buffer(),  // uint8_t  *data,
-                            timestamp);  // uint64_t timestamp);
+                        if (!file_create_error && !file_write_error) {
+                            file_write_error |= ser_write_file.write_frame(
+                                mp_frame_image->get_p_buffer(),  // uint8_t  *data,
+                                timestamp);  // uint64_t timestamp);
+                        }
                     }
 
-                    if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                    if (save_progress_dialog.was_cancelled() || !valid_frame || file_write_error || file_create_error) {
                         // Abort frame saving
-                        break;
+                        loop_break = true;
                     }
                 }
             }
@@ -976,7 +977,7 @@ void c_ser_player::save_frames_as_ser_slot()
             }
 
             // Set details for SER file
-            ser_write_file.set_details(
+            file_write_error |= ser_write_file.set_details(
                 0,                  // int32_t lu_id - always 0
                 mp_frame_image->get_colour_id(),  // int32_t colour_id,
                 utc_to_local_diff,  // int64_t utc_to_local_diff,
@@ -985,12 +986,29 @@ void c_ser_player::save_frames_as_ser_slot()
                 mp_save_frames_as_ser_Dialog->get_telescope_string());
 
             // Write header and close SER file
-            ser_write_file.close();
+            file_write_error |= ser_write_file.close();
 
-            // Processing has completed
             save_progress_dialog.set_complete();
-            while (!save_progress_dialog.was_cancelled()) {
-                  // Wait
+
+            if (!file_create_error && !file_write_error) {
+                // Processing has completed with no file error
+                while (!save_progress_dialog.was_cancelled()) {
+                      // Wait
+                }
+            } else {
+                // There was a file error
+                save_progress_dialog.hide();
+                QString error_message;
+                if (file_create_error) {
+                    error_message = tr("Error: SER File creation failed");
+                } else if (file_write_error) {
+                    error_message = tr("Error: SER file writing failed");
+                }
+
+                QMessageBox::critical(
+                    this,
+                    tr("Save Frames As SER File Failed"),
+                    error_message);
             }
         }
     }
@@ -1117,11 +1135,14 @@ void c_ser_player::save_frames_as_avi_slot()
             save_progress_dialog.show();
 
             int saved_frames = 0;
+            bool file_create_error = false;
+            bool file_write_error = false;
 
             // Direction loop
             int start_dir = (sequence_direction == 1) ? 1 : 0;
             int end_dir = (sequence_direction == 0) ? 0 : 1;
-            for(int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+            bool loop_break = false;
+            for(int current_dir = start_dir; current_dir <= end_dir && !loop_break; current_dir++) {
                 int start_frame = min_frame;
                 int end_frame = max_frame;
                 if (current_dir == 1) {  // Reverse direction - count backwards
@@ -1130,7 +1151,7 @@ void c_ser_player::save_frames_as_avi_slot()
                     end_frame = -min_frame;
                 }
 
-                for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                for (int frame_number = start_frame; frame_number <= end_frame && !loop_break; frame_number += decimate_value) {
                     // Update progress bar
                     saved_frames++;
                     save_progress_dialog.set_value(saved_frames);
@@ -1146,7 +1167,7 @@ void c_ser_player::save_frames_as_avi_slot()
                     if (valid_frame) {
                         if (!p_avi_write_file->get_open()) {
                             // Create AVI file - only done once
-                            p_avi_write_file->create(
+                            file_create_error |= p_avi_write_file->create(
                                 filename.toUtf8().constData(),  // const char *filename
                                 mp_frame_image->get_width(),  // int32_t m_width
                                 mp_frame_image->get_height(),  // int32_t m_height
@@ -1159,26 +1180,45 @@ void c_ser_player::save_frames_as_avi_slot()
 
 
                         // Write frame to AVI file
-                        p_avi_write_file->write_frame(
-                            mp_frame_image->get_p_buffer(),  // uint8_t *data
-                            0,  // int32_t m_colour
-                            mp_frame_image->get_byte_depth());  // uint32_t bpp
+                        if (!file_write_error) {
+                            file_write_error |= p_avi_write_file->write_frame(
+                                mp_frame_image->get_p_buffer(),  // uint8_t *data
+                                0,  // int32_t m_colour
+                                mp_frame_image->get_byte_depth());  // uint32_t bpp
+                        }
                     }
 
-                    if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                    if (save_progress_dialog.was_cancelled() || !valid_frame || file_write_error || file_create_error) {
                         // Abort frame saving
-                        break;
+                        loop_break = true;
                     }
                 }
             }
 
             // Write header and close SER file
-            p_avi_write_file->close();
+            file_write_error |= p_avi_write_file->close();
 
-            // Processing has completed
-            save_progress_dialog.set_complete();
-            while (!save_progress_dialog.was_cancelled()) {
-                  // Wait
+            if (!file_write_error && !file_create_error) {
+                // Processing has completed with no file error
+                save_progress_dialog.set_complete();
+                while (!save_progress_dialog.was_cancelled()) {
+                      // Wait
+                }
+            } else {
+                // There was a file error
+                save_progress_dialog.set_complete();
+                save_progress_dialog.hide();
+                QString error_message;
+                if (file_create_error) {
+                    error_message = tr("Error: AVI file creation failed");
+                } else if (file_write_error) {
+                    error_message = tr("Error: AVI file writing failed");
+                }
+
+                QMessageBox::critical(
+                    this,
+                    tr("Save Frames As AVI File Failed"),
+                    error_message);
             }
 
             delete p_avi_write_file;
@@ -1316,8 +1356,6 @@ void c_ser_player::save_frames_as_gif_slot()
                     update_recent_save_folders_menu();
                 }
 
-                bool res;
-
                 // Setup progress dialog
                 c_save_frames_progress_dialog save_progress_dialog(this, 1, frames_to_be_saved);
                 save_progress_dialog.setWindowTitle(tr("Save Frames As Animated GIF"));
@@ -1329,11 +1367,14 @@ void c_ser_player::save_frames_as_gif_slot()
                 save_progress_dialog.show();
 
                 int saved_frames = 0;
+                bool file_create_error = false;
+                bool file_write_error = false;
 
                 // Direction loop
                 int start_dir = (sequence_direction == 1) ? 1 : 0;
                 int end_dir = (sequence_direction == 0) ? 0 : 1;
-                for (int current_dir = start_dir; current_dir <= end_dir; current_dir++) {
+                bool loop_break = false;
+                for (int current_dir = start_dir; current_dir <= end_dir && !loop_break; current_dir++) {
                     int start_frame = min_frame;
                     int end_frame = max_frame;
                     if (current_dir == 1) {  // Reverse direction - count backwards
@@ -1342,7 +1383,7 @@ void c_ser_player::save_frames_as_gif_slot()
                         end_frame = -min_frame;
                     }
 
-                    for (int frame_number = start_frame; frame_number <= end_frame; frame_number += decimate_value) {
+                    for (int frame_number = start_frame; frame_number <= end_frame && !loop_break; frame_number += decimate_value) {
                         // Update progress bar
                         saved_frames++;
                         save_progress_dialog.set_value(saved_frames);
@@ -1358,7 +1399,7 @@ void c_ser_player::save_frames_as_gif_slot()
                             mp_frame_image->conv_data_ready_for_gif();
 
                             if (!gif_write_file.is_open()) {
-                                res = gif_write_file.create(
+                                file_create_error |= gif_write_file.create(
                                         gif_filename,  // const QString &filename
                                         frame_total_width,  // int width
                                         frame_total_height,  // int height
@@ -1380,19 +1421,21 @@ void c_ser_player::save_frames_as_gif_slot()
                                 frametime = final_frametime;
                             }
 
-                            written_framecount++;
-                            res = gif_write_file.write_frame(
-                                      mp_frame_image->get_p_buffer(),  // uint8_t  *p_data
-                                      frametime);  // uint16_t display_time
+                            if (!file_write_error && !file_create_error) {
+                                written_framecount++;
+                                file_write_error |= gif_write_file.write_frame(
+                                          mp_frame_image->get_p_buffer(),  // uint8_t  *p_data
+                                          frametime);  // uint16_t display_time
+                            }
 
                             if (filesize_after_first_frame == 0) {
                                 filesize_after_first_frame = gif_write_file.get_current_filesize();
                             }
                         }
 
-                        if (save_progress_dialog.was_cancelled() || !valid_frame) {
+                        if (save_progress_dialog.was_cancelled() || !valid_frame || file_write_error || file_create_error) {
                             // Abort frame saving
-                            break;
+                            loop_break = true;
                         }
                     }
                 }
@@ -1403,14 +1446,32 @@ void c_ser_player::save_frames_as_gif_slot()
                 // Processing has completed
                 save_progress_dialog.set_complete();
 
-                // Wait until close buttin is pressed for non-test runs
-                if (!is_test_run) {
-                    while (!save_progress_dialog.was_cancelled()) {
-                          // Wait
+
+                if (!file_create_error && !file_write_error) {
+                    // Wait until close buttin is pressed for non-test runs
+                    if (!is_test_run) {
+                        // Processing has completed with no file error
+                        while (!save_progress_dialog.was_cancelled()) {
+                              // Wait
+                        }
                     }
+                } else {
+                    // There was a file error
+                    save_progress_dialog.hide();
+                    QString error_message;
+                    if (file_create_error) {
+                        error_message = tr("Error: Animated GIF file creation failed");
+                    } else if (file_write_error) {
+                        error_message = tr("Error: Animated GIF file writing failed");
+                    }
+
+                    QMessageBox::critical(
+                        this,
+                        tr("Save Frames As Animated GIF Failed"),
+                        error_message);
                 }
 
-                if (is_test_run) {
+                if (is_test_run && !file_create_error && !file_write_error) {
                     // Create an HTML file with animated GIF and options details
                     if (temp_html_file.open()) {
                         temp_html_file.resize(0);  // Clear any file contents

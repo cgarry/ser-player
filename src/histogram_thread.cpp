@@ -103,7 +103,7 @@ void c_histogram_thread::calculate_pixmap_data()
             }
         }
 
-        mp_buffer.release();  // Free image buffer
+        mp_buffer.reset(nullptr);  // Free image buffer
 
         // Find max value in histogram table
         for (int i = 0; i < 256; i++) {
@@ -152,7 +152,7 @@ void c_histogram_thread::calculate_pixmap_data()
             }
         }
 
-        mp_buffer.release();  // Free image buffer
+        mp_buffer.reset(nullptr);  // Free image buffer
 
         // Find max value in histogram table
         for (int i = 0; i < 256; i++) {

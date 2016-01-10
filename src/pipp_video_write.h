@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 
 class c_pipp_video_write {
@@ -15,19 +16,19 @@ class c_pipp_video_write {
         // ------------------------------------------
         virtual ~c_pipp_video_write()
         {
-        };
+        }
 
 
         // ------------------------------------------
         // Return the open state of the video file
         // ------------------------------------------
-        virtual int32_t get_open() = 0;
+        virtual bool get_open() = 0;
 
 
         // ------------------------------------------
         // Create a new video file
         // ------------------------------------------
-        virtual int32_t create(
+        virtual bool create(
             const char *filename,
             int32_t width,
             int32_t height,
@@ -42,7 +43,7 @@ class c_pipp_video_write {
         // ------------------------------------------
         // Write frame to AVI file
         // ------------------------------------------
-        virtual int32_t write_frame(
+        virtual bool write_frame(
             uint8_t *data,
             int32_t colour,
             uint32_t bpp,
@@ -51,7 +52,7 @@ class c_pipp_video_write {
         // ------------------------------------------
         // Write header and close AVI file
         // ------------------------------------------
-        virtual int32_t close() = 0;
+        virtual bool close() = 0;
 };
 
     

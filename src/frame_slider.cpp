@@ -24,6 +24,8 @@
 #include <QSlider>
 #include <QStyleOptionSlider>
 
+#include <cassert>
+
 #include "persistent_data.h"
 #include "frame_slider.h"
 #include "markers_dialog.h"
@@ -96,6 +98,8 @@ void c_frame_slider::set_direction(int dir)
 
 void c_frame_slider::goto_first_frame()
 {
+    assert(m_direction >= 0 && m_direction <= 2);  // Unsupported direction
+
     if (m_direction == 0) {
         setValue(get_start_frame());
     } else if (m_direction == 1) {
@@ -104,15 +108,14 @@ void c_frame_slider::goto_first_frame()
         // Forward + Reverse play
         m_current_direction = 0;
         setValue(get_start_frame());
-    } else {
-        qDebug() << "Unsupported direction!";
-        exit(-1);
     }
 }
 
 
 bool c_frame_slider::goto_next_frame()
 {
+    assert(m_direction >= 0 && m_direction <= 2);  // Unsupported direction
+
     bool ret = true;  // Default return value
     int current_value = value();
 
@@ -187,9 +190,6 @@ bool c_frame_slider::goto_next_frame()
                 }
             }
         }
-    } else {
-        qDebug() << "Unsupported direction!";
-        exit(-1);
     }
 
     return ret;

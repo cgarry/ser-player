@@ -20,7 +20,7 @@ public:
     // ------------------------------------------
     // Write frame to AVI file
     // ------------------------------------------
-    virtual int32_t write_frame(
+    virtual bool write_frame(
         uint8_t *data,
         int32_t m_colour,
         uint32_t bpp,

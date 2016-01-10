@@ -76,6 +76,19 @@ class c_gif_write {
         // ------------------------------------------
         uint64_t get_current_filesize();
 
+    private:
+        //
+        // Private functions
+        //
+        // ------------------------------------------
+        // fwrite() function with error checking
+        // ------------------------------------------
+        void fwrite_error_check(
+            const void *ptr,
+            size_t size,
+            size_t count,
+            FILE *p_stream);
+
 
         void quantise_colours(
                 uint8_t *p_data,
@@ -89,10 +102,6 @@ class c_gif_write {
                 uint8_t *p_index_to_index_colour_difference);
 
 
-    private:
-        //
-        // Private functions
-        //
         void detect_unchanged_border(
             const uint8_t *p_this_image,
             const uint8_t *mp_last_image,
@@ -192,6 +201,9 @@ class c_gif_write {
         int m_transparent_tolerence;
         int m_lossy_compression_level;
         int m_bit_depth;
+
+        // File writing error flag
+        bool m_file_write_error;
 
         // LUTs
         std::unique_ptr<uint8_t[]> mp_rev_mono_table;
