@@ -40,10 +40,12 @@ public:
     void set_data_has_bayer_pattern(bool bayer_pattern);
     void set_data_is_colour(bool colour);
     bool get_debayer_enable();
+    int get_debayer_pattern();
 
 
 signals:
     void debayer_enable(bool);
+    void debayer_pattern_specified(bool specified, int colour_id);
     void invert_frames(bool);
     void gain_changed(double gain);
     void gamma_changed(double gamma);
@@ -63,7 +65,7 @@ public slots:
 
     
 private slots:
-    void debayer_enable_slot(bool enable);
+    void debayer_controls_changed_slot();
     void gain_slider_changed_slot(int gain);
     void gain_spinbox_changed_slot(double gain);
     void gamma_slider_changed_slot(int gain);
@@ -88,7 +90,7 @@ private:
     // Widgets
     //
     c_icon_groupbox *mp_debayer_GroupBox;
-    QCheckBox *mp_debayer_CheckBox;
+    QComboBox *mp_bayer_pattern_Combobox;
     QCheckBox *mp_invert_CheckBox;
     // Gain and Gamma
     QSlider *mp_gain_Slider;

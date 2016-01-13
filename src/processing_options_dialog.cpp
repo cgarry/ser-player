@@ -33,6 +33,7 @@
 #include "processing_options_dialog.h"
 #include "persistent_data.h"
 #include "icon_groupbox.h"
+#include "pipp_ser.h"
 
 
 c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
@@ -43,21 +44,27 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     setWindowTitle(tr("Processing"));
     QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
+    mp_bayer_pattern_Combobox = new QComboBox;
+    mp_bayer_pattern_Combobox->addItem(tr("Auto"), -1);
+    mp_bayer_pattern_Combobox->addItem(tr("RGGB"), COLOURID_BAYER_RGGB);
+    mp_bayer_pattern_Combobox->addItem(tr("GRBG"), COLOURID_BAYER_GRBG);
+    mp_bayer_pattern_Combobox->addItem(tr("GBRG"), COLOURID_BAYER_GBRG);
+    mp_bayer_pattern_Combobox->addItem(tr("BGGR"), COLOURID_BAYER_BGGR);
+    connect(mp_bayer_pattern_Combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(debayer_controls_changed_slot()));
+    mp_bayer_pattern_Combobox->setToolTip(tr("This control allows the frames to be debayered using a different bayer pattern than specified in the SER file header"));
 
-    // Debayer checkbox
-    mp_debayer_CheckBox = new QCheckBox(tr("Enable Debayering"));
-    mp_debayer_CheckBox->setChecked(true);
-    connect(mp_debayer_CheckBox, SIGNAL(toggled(bool)), this, SLOT(debayer_enable_slot(bool)));
-
-    QHBoxLayout *debayer_HLayout1 = new QHBoxLayout;
-    debayer_HLayout1->setMargin(5);
-    debayer_HLayout1->addWidget(mp_debayer_CheckBox);
+    QFormLayout *bayer_pattern_FLayout = new QFormLayout;
+    bayer_pattern_FLayout->setMargin(5);
+    bayer_pattern_FLayout->setSpacing(5);
+    bayer_pattern_FLayout->addRow(tr("Bayer Pattern:"), mp_bayer_pattern_Combobox);
 
     mp_debayer_GroupBox = new c_icon_groupbox(this);
-    mp_debayer_GroupBox->setTitle(tr("Colour Debayer"));
+    mp_debayer_GroupBox->setTitle(tr("Enable Debayering"));
     mp_debayer_GroupBox->set_icon(":/res/resources/debayer_icon.png");
-    mp_debayer_GroupBox->setLayout(debayer_HLayout1);
-
+    mp_debayer_GroupBox->setLayout(bayer_pattern_FLayout);
+    mp_debayer_GroupBox->setCheckable(true);
+    mp_debayer_GroupBox->setChecked(true);
+    connect(mp_debayer_GroupBox, SIGNAL(toggled(bool)), this, SLOT(debayer_controls_changed_slot()));
 
     // Invert checkbox
     mp_invert_CheckBox = new QCheckBox(tr("Invert Frames"));
@@ -461,13 +468,12 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 }
 
 
-void c_processing_options_dialog::debayer_enable_slot(bool enable)
+void c_processing_options_dialog::debayer_controls_changed_slot()
 {
-    bool bayer_enabled = m_data_has_bayer_pattern && enable;
+    bool bayer_enabled = m_data_has_bayer_pattern && mp_debayer_GroupBox->isChecked();
     enable_and_disable_controls();
     emit debayer_enable(bayer_enabled);
 }
-
 
 
 void c_processing_options_dialog::gain_slider_changed_slot(int gain)
@@ -612,7 +618,7 @@ void c_processing_options_dialog::reset_colour_align_slot()
 
 void c_processing_options_dialog::reset_all_slot()
 {
-    mp_debayer_CheckBox->setChecked(true);
+    mp_debayer_GroupBox->setChecked(true);
     mp_invert_CheckBox->setChecked(false);
     mp_monochrome_conversion_GroupBox->setChecked(false);
     mp_monochrome_conversion_Combobox->setCurrentIndex(0);
@@ -683,6 +689,7 @@ void c_processing_options_dialog::set_data_has_bayer_pattern(bool bayer_pattern)
     enable_and_disable_controls();
 }
 
+
 void c_processing_options_dialog::set_data_is_colour(bool colour) {
     m_data_is_colour = colour;
     enable_and_disable_controls();
@@ -691,20 +698,26 @@ void c_processing_options_dialog::set_data_is_colour(bool colour) {
 
 bool c_processing_options_dialog::get_debayer_enable()
 {
-    return m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked();
+    return m_data_has_bayer_pattern && mp_debayer_GroupBox->isChecked();
+}
+
+
+int c_processing_options_dialog::get_debayer_pattern()
+{
+    return mp_bayer_pattern_Combobox->currentData().toInt();
 }
 
 
 void c_processing_options_dialog::enable_and_disable_controls()
 {
-    mp_debayer_CheckBox->setEnabled(m_data_has_bayer_pattern);
+    mp_debayer_GroupBox->setEnabled(m_data_has_bayer_pattern);
     mp_debayer_GroupBox->setVisible(m_data_has_bayer_pattern);
 
     bool enable_monochrome_conversion_control = false;
     if (m_data_is_colour) {
         // This is colour data
         enable_monochrome_conversion_control = true;
-    } else if (m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked()) {
+    } else if (m_data_has_bayer_pattern && mp_debayer_GroupBox->isChecked()) {
         enable_monochrome_conversion_control = true;
     }
 
@@ -720,7 +733,7 @@ void c_processing_options_dialog::enable_and_disable_controls()
     } else if (m_data_is_colour) {
         // This is colour data
         enable_colour_controls = true;
-    } else if (m_data_has_bayer_pattern && mp_debayer_CheckBox->isChecked()) {
+    } else if (m_data_has_bayer_pattern && mp_debayer_GroupBox->isChecked()) {
         // Debayered data with bayer pattern is colour data
         enable_colour_controls = true;
     } else {

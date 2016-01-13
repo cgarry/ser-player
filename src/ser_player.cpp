@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.9"
+#define VERSION_STRING "v1.4.10"
 
 #include <Qt>
 #include <QApplication>
@@ -1270,6 +1270,7 @@ void c_ser_player::save_frames_as_gif_slot()
     QTemporaryFile temp_html_file(QDir::tempPath() + "//XXXXXX.html");
     QString temp_gif_filename = QDir::tempPath() + "//ser_player_review.gif";
     uint64_t filesize_after_first_frame = 0;
+    uint64_t filesize_after_last_frame = 0;
     uint64_t final_filesize = 0;
     int written_framecount = 0;
     do {  // Loop for doing GIF animation test runs
@@ -1441,6 +1442,7 @@ void c_ser_player::save_frames_as_gif_slot()
                 }
 
                 // Close file
+                filesize_after_last_frame = gif_write_file.get_current_filesize();
                 final_filesize = gif_write_file.close();
 
                 // Processing has completed
@@ -1512,9 +1514,12 @@ void c_ser_player::save_frames_as_gif_slot()
 
                         uint32_t filesize;
                         if (written_framecount < frames_to_be_saved) {
-                            uint32_t temp = (uint32_t)(final_filesize - filesize_after_first_frame);
-                            temp /= (written_framecount - 1);
-                            filesize = filesize_after_first_frame + temp  * (frames_to_be_saved - 1);
+                            uint32_t size_of_average_frame = (uint32_t)(filesize_after_last_frame - filesize_after_first_frame);
+                            size_of_average_frame /= (written_framecount - 1);
+                            uint32_t size_after_last_frame = (uint32_t)(final_filesize - filesize_after_last_frame);
+                            filesize = filesize_after_first_frame +
+                                       size_of_average_frame  * (frames_to_be_saved - 1) +
+                                       size_after_last_frame;
                         } else {
                             filesize = (uint32_t)final_filesize;
                         }
@@ -2725,8 +2730,22 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
         if (do_processing) {
             // Debayer frame if required
             if (mp_processing_options_Dialog->get_debayer_enable()) {
-                mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
+                int colour_id = mp_processing_options_Dialog->get_debayer_pattern();
+                if (colour_id < 0) {
+                    // No colour_id specified, use value from SER file
+                    colour_id = mp_ser_file->get_colour_id();
+                }
+
+                mp_frame_image->debayer_image_bilinear(colour_id);
             }
+
+            // Temp for debug - start
+//            mp_frame_image->crop_image(
+//                    mp_frame_image->get_width() / 4,
+//                    mp_frame_image->get_height() / 4,
+//                    mp_frame_image->get_width() / 2,
+//                    mp_frame_image->get_height() / 2);
+            // Temp for debug - end
 
             mp_frame_image->align_colour_channels();
 
