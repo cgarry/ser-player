@@ -184,6 +184,12 @@ class c_image
                 int req_width,
                 int req_height);
 
+        bool crop_image(
+                int top_left_x,
+                int top_left_y,
+                int crop_width,
+                int crop_height);
+
         void add_bars(
                 int total_width,
                 int total_height);

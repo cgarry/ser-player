@@ -1018,6 +1018,64 @@ bool c_image::resize_image(
 }
 
 
+bool c_image::crop_image(
+        int top_left_x,
+        int top_left_y,
+        int crop_width,
+        int crop_height)
+{
+    // Early return if crop dimensions are outside original image
+    if ((top_left_x + crop_width) > m_width || (top_left_y + crop_height) > m_height) {
+        return false;
+    }
+
+    // Early return if nothing needs to be done
+    if (top_left_x == 0 && top_left_y == 0 && crop_width == m_width && crop_height == m_height) {
+        return true;
+    }
+
+    int line_length = m_width;
+    int x_start_pos = top_left_x;
+    int crop_width_length = crop_width;
+    if (m_colour) {
+        line_length *= 3;
+        x_start_pos *= 3;
+        crop_width_length *= 3;
+    }
+
+    if (m_byte_depth == 1) {
+        // 8-bit data
+        uint8_t *p_src = mp_buffer + (top_left_y * line_length) + x_start_pos;
+        uint8_t *p_dst = mp_buffer;
+        for (int y = top_left_y; y < (top_left_y + crop_height); y++) {
+            std::copy(p_src,
+                      p_src + crop_width_length,
+                      p_dst);
+
+            p_src += line_length;
+            p_dst += crop_width_length;
+        }
+    } else {
+        // 16-bit data
+        uint16_t *p_src = ((uint16_t *)mp_buffer) + (top_left_y * line_length) + x_start_pos;
+        uint16_t *p_dst = (uint16_t *)mp_buffer;
+        for (int y = top_left_y; y < (top_left_y + crop_height); y++) {
+            std::copy(p_src,
+                      p_src + crop_width_length,
+                      p_dst);
+
+            p_src += line_length;
+            p_dst += crop_width_length;
+        }
+    }
+
+    // Update width and height details
+    m_width = crop_width;
+    m_height = crop_height;
+    return true;
+}
+
+
 void c_image::add_bars(
         int total_width,
         int total_height)
