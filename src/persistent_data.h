@@ -40,6 +40,7 @@ public:
     static int m_play_direction;
     static bool m_histogram_enabled;
     static bool m_markers_enabled;
+    static int m_selection_box_colour;
 
 
     //

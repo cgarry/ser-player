@@ -67,6 +67,7 @@ c_image_Widget::c_image_Widget(QWidget *parent) :
     m_sel_area_Rect = QRect(0, 0, 0, 0);
     connect(mp_selection_box_dialog, SIGNAL(selection_box_changed(QRect)), this, SLOT(set_selection_slot(QRect)));
     connect(mp_selection_box_dialog, SIGNAL(selection_box_complete(bool,QRect)), this, SIGNAL(selection_box_complete_signal(bool,QRect)));
+    connect(mp_selection_box_dialog, SIGNAL(update_request_signal()), this, SLOT(update()));
 }
 
 
@@ -380,7 +381,9 @@ void c_image_Widget::draw_selection_rectangle(QPixmap &pixmap)
     m_sel_middle_right_Rect.translate(0, shift_to_middle);
 
     QPainter p(&pixmap);
-    p.setPen(QPen(Qt::red, 1, Qt::DashLine));
+    //p.setPen(QPen(Qt::red, 1, Qt::DashLine));
+    p.setPen(QPen(mp_selection_box_dialog->get_selection_colour(), 1, Qt::DashLine));
+
     // Draw main rectangle
     p.drawRect(m_sel_area_Rect);
 

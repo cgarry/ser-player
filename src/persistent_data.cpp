@@ -50,6 +50,7 @@ bool c_persistent_data::m_repeat = false;
 int c_persistent_data::m_play_direction = 0;
 bool c_persistent_data::m_histogram_enabled = false;
 bool c_persistent_data::m_markers_enabled = false;
+int c_persistent_data::m_selection_box_colour = 0;
 
 
 //
@@ -102,6 +103,9 @@ void c_persistent_data::load()
         m_markers_enabled = settings.value("markers_enabled").toBool();
     }
 
+    if (settings.value("selection_box_colour") != QVariant::Invalid) {
+        m_selection_box_colour = settings.value("selection_box_colour").toInt();
+    }
 }
 	
 	
@@ -122,4 +126,5 @@ void c_persistent_data::save()
     settings.setValue("play_direction", m_play_direction);   
     settings.setValue("histogram_enabled", m_histogram_enabled);
     settings.setValue("markers_enabled", m_markers_enabled);
+    settings.setValue("selection_box_colour", m_selection_box_colour);
 }

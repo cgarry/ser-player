@@ -866,6 +866,12 @@ void c_ser_player::save_frames_as_ser_slot()
                                               mp_frame_Slider->get_end_frame(),
                                               mp_frame_Slider->get_markers_enable());
 
+    if (m_crop_enable) {
+        mp_save_frames_as_ser_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
+    } else {
+        mp_save_frames_as_ser_Dialog->set_processed_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
+    }
+
     int ret = mp_save_frames_as_ser_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
@@ -1074,6 +1080,12 @@ void c_ser_player::save_frames_as_avi_slot()
     mp_save_frames_as_avi_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
                                               mp_frame_Slider->get_end_frame(),
                                               mp_frame_Slider->get_markers_enable());
+
+    if (m_crop_enable) {
+        mp_save_frames_as_avi_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
+    } else {
+        mp_save_frames_as_avi_Dialog->set_processed_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
+    }
 
     int ret = mp_save_frames_as_avi_Dialog->exec();
 
@@ -1628,6 +1640,12 @@ void c_ser_player::save_frames_as_images_slot()
     mp_save_frames_as_images_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
                                               mp_frame_Slider->get_end_frame(),
                                               mp_frame_Slider->get_markers_enable());
+
+    if (m_crop_enable) {
+        mp_save_frames_as_images_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
+    } else {
+        mp_save_frames_as_images_Dialog->set_processed_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
+    }
 
     int ret = mp_save_frames_as_images_Dialog->exec();
 
