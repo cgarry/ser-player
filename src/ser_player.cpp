@@ -238,12 +238,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Dialog, SIGNAL(colour_align_changed(int,int,int,int)), this, SLOT(colour_align_changed_slot(int,int,int,int)));
     connect(mp_processing_options_Dialog, SIGNAL(rejected()), this, SLOT(processor_options_closed_slot()));
 
-    // Area Select action
-    mp_selection_box_Act = tools_menu->addAction(tr("Selection Box", "Tools menu"));
-    mp_selection_box_Act->setEnabled(false);
-    mp_selection_box_Act->setCheckable(true);
-    mp_selection_box_Act->setChecked(false);
-
     // Markers Dialog action
     mp_markers_dialog_Act = tools_menu->addAction(tr("Markers", "Tools menu"));
     mp_markers_dialog_Act->setEnabled(false);
@@ -398,6 +392,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
     connect(mp_processing_options_Dialog, SIGNAL(enable_area_selection_signal(QSize,QRect)), mp_frame_image_Widget, SLOT(enable_area_selection_slot(QSize,QRect)));
+    connect(mp_processing_options_Dialog, SIGNAL(cancel_selected_area_signal()), mp_frame_image_Widget, SLOT(cancel_area_selection_slot()));
     connect(mp_frame_image_Widget, SIGNAL(selection_box_complete_signal(bool,QRect)), mp_processing_options_Dialog, SLOT(crop_selection_complete_slot(bool,QRect)));
 
     mp_frame_Slider = new c_frame_slider(this);
@@ -809,7 +804,11 @@ void c_ser_player::histogram_viewer_closed_slot()
 // Processing Options menu QAction has been clicked
 void c_ser_player::processor_options_slot(bool checked)
 {
-    mp_processing_options_Dialog->setVisible(checked);
+    if (checked) {
+        mp_processing_options_Dialog->show();
+    } else {
+        mp_processing_options_Dialog->reject();
+    }
 }
 
 
@@ -827,6 +826,7 @@ void c_ser_player::crop_changed_slot(bool crop_enable, int crop_x, int crop_y, i
     m_crop_width = crop_width;
     m_crop_height = crop_height;
     frame_slider_changed_slot();
+    resize_window_100_percent_slot();
 }
 
 
@@ -2147,7 +2147,6 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         mp_processing_options_Act->setEnabled(true);
-        mp_selection_box_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
 
         // Calculate frame rate, update framerate label an use value for playback timer

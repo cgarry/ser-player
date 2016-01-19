@@ -1036,6 +1036,7 @@ bool c_image::crop_image(
 
     int line_length = m_width;
     int x_start_pos = top_left_x;
+    int y_start_pos = m_height - crop_height - top_left_y;  // Allow for the fact line 0 is the bottom of the image, not the top
     int crop_width_length = crop_width;
     if (m_colour) {
         line_length *= 3;
@@ -1045,9 +1046,9 @@ bool c_image::crop_image(
 
     if (m_byte_depth == 1) {
         // 8-bit data
-        uint8_t *p_src = mp_buffer + (top_left_y * line_length) + x_start_pos;
+        uint8_t *p_src = mp_buffer + (y_start_pos * line_length) + x_start_pos;
         uint8_t *p_dst = mp_buffer;
-        for (int y = top_left_y; y < (top_left_y + crop_height); y++) {
+        for (int y = y_start_pos; y < (y_start_pos + crop_height); y++) {
             std::copy(p_src,
                       p_src + crop_width_length,
                       p_dst);
@@ -1057,9 +1058,9 @@ bool c_image::crop_image(
         }
     } else {
         // 16-bit data
-        uint16_t *p_src = ((uint16_t *)mp_buffer) + (top_left_y * line_length) + x_start_pos;
+        uint16_t *p_src = ((uint16_t *)mp_buffer) + (y_start_pos * line_length) + x_start_pos;
         uint16_t *p_dst = (uint16_t *)mp_buffer;
-        for (int y = top_left_y; y < (top_left_y + crop_height); y++) {
+        for (int y = y_start_pos; y < (y_start_pos + crop_height); y++) {
             std::copy(p_src,
                       p_src + crop_width_length,
                       p_dst);

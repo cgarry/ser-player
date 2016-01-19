@@ -62,7 +62,6 @@ private:
     QAction *mp_header_details_Act;
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
-    QAction *mp_selection_box_Act;
     QAction *mp_markers_dialog_Act;
 
     // Dialogs

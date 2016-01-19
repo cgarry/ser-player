@@ -44,6 +44,7 @@ public slots:
     void setPixmap(const QPixmap&);
     void enable_area_selection_slot(const QSize &frame_size, const QRect &selected_area);
     void set_selection_slot(QRect selection);
+    void cancel_area_selection_slot();
 
 protected:
     void paintEvent(QPaintEvent *);

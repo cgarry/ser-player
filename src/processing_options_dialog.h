@@ -58,6 +58,7 @@ signals:
     void estimate_colour_balance();
     void colour_align_changed(int red_align_x, int red_align_y, int blue_align_x, int blus_align_y);
     void enable_area_selection_signal(const QSize &frame_size, const QRect &selected_area);
+    void cancel_selected_area_signal();
 
 
 public slots:
@@ -67,6 +68,11 @@ public slots:
     void reset_colour_align_slot();
     void reset_all_slot();
     void crop_selection_complete_slot(bool accepted, QRect selected_area);
+    void reject();
+
+
+protected:
+
 
     
 private slots:

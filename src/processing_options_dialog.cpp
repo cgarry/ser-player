@@ -875,3 +875,15 @@ void c_processing_options_dialog::enable_and_disable_controls()
     mp_colour_balance_GroupBox->setEnabled(enable_colour_controls);
     mp_colour_balance_GroupBox->setVisible(enable_colour_controls);
 }
+
+
+void c_processing_options_dialog::reject()
+{
+    if (!isEnabled()) {
+        // Only allow dialog to be closed if it is enabled
+        emit cancel_selected_area_signal();
+        crop_selection_complete_slot(false, QRect());
+    }
+
+    QDialog::reject();
+}

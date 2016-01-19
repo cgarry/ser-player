@@ -69,12 +69,21 @@ c_image_Widget::c_image_Widget(QWidget *parent) :
     connect(mp_selection_box_dialog, SIGNAL(selection_box_complete(bool,QRect)), this, SIGNAL(selection_box_complete_signal(bool,QRect)));
 }
 
+
 void c_image_Widget::enable_area_selection_slot(const QSize &frame_size, const QRect &selected_area)
 {
     m_selected_area_top_left = selected_area.topLeft();
     m_selected_area_bottom_right = selected_area.bottomRight();
     mp_selection_box_dialog->start_get_selection_box_slot(frame_size.width(), frame_size.height());
     mp_selection_box_dialog->set_selection_box_slot(selected_area);
+    update();
+}
+
+
+void c_image_Widget::cancel_area_selection_slot()
+{
+    mp_selection_box_dialog->cancel_get_selection_box_slot();
+    update();
 }
 
 
@@ -82,12 +91,14 @@ void c_image_Widget::set_selection_slot(QRect selection)
 {
     m_selected_area_top_left = selection.topLeft();
     m_selected_area_bottom_right = selection.bottomRight();
+    update();
 }
 
 
 void c_image_Widget::disable_area_selection()
 {
     mp_selection_box_dialog->hide();
+    update();
 }
 
 
