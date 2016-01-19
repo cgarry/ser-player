@@ -51,6 +51,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            QString telescope_string)
     : QDialog(parent),
       m_save_type(save_type),
+      m_raw_frame_width(frame_width),
+      m_raw_frame_height(frame_height),
+      m_processed_frame_width(frame_width),
+      m_processed_frame_height(frame_height),
       m_frame_width(frame_width),
       m_frame_height(frame_height),
       m_total_frames(total_frames),
@@ -224,6 +228,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     mp_processing_enable_CBox = new QCheckBox(tr("Apply Processing To Frames Before Saving", "Save frames dialog"));
     mp_processing_enable_CBox->setChecked(true);
+    connect(mp_processing_enable_CBox, SIGNAL(toggled(bool)), this, SLOT(resize_control_handler()));
 
     QVBoxLayout *processing_enable_VLayout = new QVBoxLayout;
     processing_enable_VLayout->setMargin(INSIDE_GBOX_MARGIN);
@@ -678,6 +683,15 @@ void c_save_frames_dialog::set_markers(int marker_start_frame,
 }
 
 
+void c_save_frames_dialog::set_processed_frame_size(int frame_width,
+                                                    int frame_height)
+{
+    m_processed_frame_width = frame_width;
+    m_processed_frame_height = frame_height;
+    resize_control_handler();
+}
+
+
 void c_save_frames_dialog::set_gif_frametime(double frametime)
 {
     if (frametime < 0.01) {
@@ -870,6 +884,41 @@ void c_save_frames_dialog::resize_control_handler()
     static bool resize_add_black_bars = false;
     static int resize_width = 0;
     static int resize_height = 0;
+    static bool processing_enable = false;
+    static int processed_frame_width = m_frame_width;
+    static int processed_frame_height = m_frame_height;
+
+    if (mp_processing_enable_CBox->isChecked()) {
+        if (processed_frame_width != m_processed_frame_width ||
+            processed_frame_height != m_processed_frame_height) {
+            // Processed frame size has been changed
+            processed_frame_width = m_processed_frame_width;
+            processed_frame_height = m_processed_frame_height;
+            if (processing_enable) {
+                // Ensure processing enable changed code below is run
+                processing_enable = ! mp_processing_enable_CBox->isChecked();
+            }
+        }
+
+        m_frame_width = m_processed_frame_width;
+        m_frame_height = m_processed_frame_height;
+    } else {
+        m_frame_width = m_raw_frame_width;
+        m_frame_height = m_raw_frame_height;
+    }
+
+    if (processing_enable != mp_processing_enable_CBox->isChecked()) {
+        processing_enable = mp_processing_enable_CBox->isChecked();
+        if (mp_resize_units_ComboBox->currentIndex() == 0) {
+            // Resize to pixels mode, not percent mode
+            mp_resize_width_Spinbox->setRange(10, m_frame_width);
+            mp_resize_height_Spinbox->setRange(10, m_frame_height);
+            mp_resize_width_Spinbox->setSuffix("");
+            mp_resize_height_Spinbox->setSuffix("");
+            mp_resize_width_Spinbox->setValue(m_frame_width);
+            mp_resize_height_Spinbox->setValue(m_frame_height);
+        }
+    }
 
     if (resize_units_ComboBox !=  mp_resize_units_ComboBox->currentIndex()) {
         resize_units_ComboBox = mp_resize_units_ComboBox->currentIndex();

@@ -92,10 +92,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     // Menu Items
     m_ser_directory = "";
     m_display_framerate = -1;
-    m_colour_saturation = 1.0;
     m_monochrome_conversion_enable = false;
     m_monochrome_conversion_type = 0;
     m_play_direction = c_persistent_data::m_play_direction;
+
+    m_crop_enable = false;
+    m_crop_x_pos = 0;
+    m_crop_y_pos = 0;
+    m_crop_width = 10;
+    m_crop_height = 10;
 
 
     //
@@ -222,17 +227,22 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Act, SIGNAL(triggered(bool)), this, SLOT(processor_options_slot(bool)));
     mp_processing_options_Dialog = new c_processing_options_dialog(this);
     mp_processing_options_Dialog->hide();
-    connect(mp_processing_options_Dialog, SIGNAL(debayer_enable(bool)), this, SLOT(debayer_enable_slot()));
+    connect(mp_processing_options_Dialog, SIGNAL(crop_changed(bool,int,int,int,int)), this, SLOT(crop_changed_slot(bool,int,int,int,int)));
+    connect(mp_processing_options_Dialog, SIGNAL(update_image_req()), this, SLOT(debayer_enable_slot()));
     connect(mp_processing_options_Dialog, SIGNAL(invert_frames(bool)), this, SLOT(invert_changed_slot(bool)));
     connect(mp_processing_options_Dialog, SIGNAL(gain_changed(double)), this, SLOT(gain_changed_slot(double)));
     connect(mp_processing_options_Dialog, SIGNAL(gamma_changed(double)), this, SLOT(gamma_changed_slot(double)));
     connect(mp_processing_options_Dialog, SIGNAL(monochrome_conversion_changed(bool,int)), this, SLOT(monochrome_conversion_changed_slot(bool,int)));
-    connect(mp_processing_options_Dialog, SIGNAL(colour_saturation_changed(double)), this, SLOT(colour_saturation_changed_slot(double)));
     connect(mp_processing_options_Dialog, SIGNAL(colour_balance_changed(double,double,double)), this, SLOT(colour_balance_changed_slot(double,double,double)));
     connect(mp_processing_options_Dialog, SIGNAL(estimate_colour_balance()), this, SLOT(estimate_colour_balance()));
     connect(mp_processing_options_Dialog, SIGNAL(colour_align_changed(int,int,int,int)), this, SLOT(colour_align_changed_slot(int,int,int,int)));
     connect(mp_processing_options_Dialog, SIGNAL(rejected()), this, SLOT(processor_options_closed_slot()));
 
+    // Area Select action
+    mp_selection_box_Act = tools_menu->addAction(tr("Selection Box", "Tools menu"));
+    mp_selection_box_Act->setEnabled(false);
+    mp_selection_box_Act->setCheckable(true);
+    mp_selection_box_Act->setChecked(false);
 
     // Markers Dialog action
     mp_markers_dialog_Act = tools_menu->addAction(tr("Markers", "Tools menu"));
@@ -387,6 +397,8 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_frame_image_Widget = new c_image_Widget(this);
     mp_frame_image_Widget->setPixmap(m_no_file_open_Pixmap);
+    connect(mp_processing_options_Dialog, SIGNAL(enable_area_selection_signal(QSize,QRect)), mp_frame_image_Widget, SLOT(enable_area_selection_slot(QSize,QRect)));
+    connect(mp_frame_image_Widget, SIGNAL(selection_box_complete_signal(bool,QRect)), mp_processing_options_Dialog, SLOT(crop_selection_complete_slot(bool,QRect)));
 
     mp_frame_Slider = new c_frame_slider(this);
     mp_frame_Slider->set_maximum_frame(99);
@@ -804,6 +816,17 @@ void c_ser_player::processor_options_slot(bool checked)
 void c_ser_player::processor_options_closed_slot()
 {
     mp_processing_options_Act->setChecked(false);
+}
+
+
+void c_ser_player::crop_changed_slot(bool crop_enable, int crop_x, int crop_y, int crop_width, int crop_height)
+{
+    m_crop_enable = crop_enable;
+    m_crop_x_pos = crop_x;
+    m_crop_y_pos = crop_y;
+    m_crop_width = crop_width;
+    m_crop_height = crop_height;
+    frame_slider_changed_slot();
 }
 
 
@@ -1259,6 +1282,12 @@ void c_ser_player::save_frames_as_gif_slot()
         }
 
         mp_save_frames_as_gif_Dialog->set_gif_frametime(gif_frame_time);
+    }
+
+    if (m_crop_enable) {
+        mp_save_frames_as_gif_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
+    } else {
+        mp_save_frames_as_gif_Dialog->set_processed_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
     }
 
     mp_save_frames_as_gif_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
@@ -1853,13 +1882,6 @@ void c_ser_player::gamma_changed_slot(double gamma)
 }
 
 
-void c_ser_player::colour_saturation_changed_slot(double value)
-{
-    m_colour_saturation = value;
-    frame_slider_changed_slot();
-}
-
-
 void c_ser_player::colour_balance_changed_slot(double red, double green, double blue)
 {
     mp_frame_image->set_colour_balance(red, green, blue);
@@ -1900,7 +1922,6 @@ void c_ser_player::estimate_colour_balance()
 
         if (ret >= 0) {
             // Debayer frame if required
-
             if (mp_processing_options_Dialog->get_debayer_enable()) {
                 mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
             }
@@ -1981,6 +2002,9 @@ void c_ser_player::open_ser_file(const QString &filename)
     // Reset options before opening a new file
     mp_processing_options_Dialog->reset_all_slot();
 
+    // Disable area selection
+    mp_frame_image_Widget->disable_area_selection();
+
     mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
     stop_button_pressed_slot();  // Stop and reset and currently playing frame
 
@@ -2026,15 +2050,12 @@ void c_ser_player::open_ser_file(const QString &filename)
                 mp_ser_file->get_data_time_utc(),  // uint64_t date_time_utc)
                 QString::fromStdString(mp_ser_file->get_timestamp_info()));  // QString timestamp_info
 
-
-
         // Keep list of opened SER files up to date
         add_string_to_stringlist(c_persistent_data::m_recent_ser_files, QFileInfo(filename).absoluteFilePath());
         c_persistent_data::m_ser_directory = QFileInfo(filename).absolutePath();
 
         // Update Recent SER Files menu
         update_recent_ser_files_menu();
-
 
         // Ensure we are in the stopped state
         m_current_state = STATE_STOPPED;
@@ -2109,6 +2130,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         // Inform processing dialog whether this data has a bayer pattern or not
+        mp_processing_options_Dialog->set_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
         mp_processing_options_Dialog->set_data_has_bayer_pattern(m_has_bayer_pattern);
         mp_processing_options_Dialog->set_data_is_colour(m_is_colour);
 
@@ -2125,6 +2147,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         }
 
         mp_processing_options_Act->setEnabled(true);
+        mp_selection_box_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
 
         // Calculate frame rate, update framerate label an use value for playback timer
@@ -2739,13 +2762,14 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
                 mp_frame_image->debayer_image_bilinear(colour_id);
             }
 
-            // Temp for debug - start
-//            mp_frame_image->crop_image(
-//                    mp_frame_image->get_width() / 4,
-//                    mp_frame_image->get_height() / 4,
-//                    mp_frame_image->get_width() / 2,
-//                    mp_frame_image->get_height() / 2);
-            // Temp for debug - end
+            //
+            if (m_crop_enable) {
+                mp_frame_image->crop_image(
+                        m_crop_x_pos,
+                        m_crop_y_pos,
+                        m_crop_width,
+                        m_crop_height);
+            }
 
             mp_frame_image->align_colour_channels();
 
@@ -2756,7 +2780,7 @@ bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, b
             mp_frame_image->do_lut_based_processing();
 
             // Adjust colour saturation if required
-            mp_frame_image->change_colour_saturation(m_colour_saturation);
+            mp_frame_image->change_colour_saturation(mp_processing_options_Dialog->get_colour_saturation());
         }
     }
 

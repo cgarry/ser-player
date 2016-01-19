@@ -21,6 +21,7 @@
 
 #include <QDialog>
 
+// Forward declarations
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
@@ -36,24 +37,27 @@ class c_processing_options_dialog : public QDialog
 
 public:
     c_processing_options_dialog(QWidget *parent = 0);
+    void set_frame_size(int width, int height);
     void set_colour_balance(double red, double green, double blue);
     void set_data_has_bayer_pattern(bool bayer_pattern);
     void set_data_is_colour(bool colour);
     bool get_debayer_enable();
     int get_debayer_pattern();
+    double get_colour_saturation();
 
 
 signals:
-    void debayer_enable(bool);
+    void update_image_req();
+    void crop_changed(bool crop_enable, int crop_x, int crop_y, int crop_width, int crop_height);
     void debayer_pattern_specified(bool specified, int colour_id);
     void invert_frames(bool);
     void gain_changed(double gain);
     void gamma_changed(double gamma);
     void monochrome_conversion_changed(bool enabled, int selection);
-    void colour_saturation_changed(double saturation);
     void colour_balance_changed(double red, double green, double blue);
     void estimate_colour_balance();
     void colour_align_changed(int red_align_x, int red_align_y, int blue_align_x, int blus_align_y);
+    void enable_area_selection_signal(const QSize &frame_size, const QRect &selected_area);
 
 
 public slots:
@@ -62,9 +66,11 @@ public slots:
     void reset_colour_balance_slot();
     void reset_colour_align_slot();
     void reset_all_slot();
+    void crop_selection_complete_slot(bool accepted, QRect selected_area);
 
     
 private slots:
+    void crop_changed_slot();
     void debayer_controls_changed_slot();
     void gain_slider_changed_slot(int gain);
     void gain_spinbox_changed_slot(double gain);
@@ -80,9 +86,11 @@ private slots:
     void green_balance_spinbox_changed_slot();
     void blue_balance_spinbox_changed_slot();
     void colour_align_changed_slot();
+    void crop_selection_button_pressed_slot();
 
 private:
     void enable_and_disable_controls();
+    void setup_crop_spinboxes();
 
     
 private:
@@ -97,8 +105,6 @@ private:
     QDoubleSpinBox *mp_gain_DSpinbox;
     QSlider *mp_gamma_Slider;
     QDoubleSpinBox *mp_gamma_DSpinbox;
-    // Colour align
-    c_icon_groupbox *mp_colour_align_GroupBox;
     // Monochrome Conversion
     QComboBox *mp_monochrome_conversion_Combobox;
     c_icon_groupbox *mp_monochrome_conversion_GroupBox;
@@ -115,12 +121,22 @@ private:
     QSpinBox *mp_green_balance_SpinBox;
     QSpinBox *mp_blue_balance_SpinBox;
     // Colour Channel Align
+    c_icon_groupbox *mp_colour_align_GroupBox;
     QSpinBox *mp_blue_x_Spinbox;
     QSpinBox *mp_blue_y_Spinbox;
     QSpinBox *mp_red_x_Spinbox;
     QSpinBox *mp_red_y_Spinbox;
+    // Crop controls
+    c_icon_groupbox *mp_crop_Groupbox;
+    QSpinBox *mp_crop_x_start_Spinbox;
+    QSpinBox *mp_crop_y_start_Spinbox;
+    QSpinBox *mp_crop_width_Spinbox;
+    QSpinBox *mp_crop_height_Spinbox;
+
 
     // Other
+    int m_frame_width;
+    int m_frame_height;
     bool m_data_has_bayer_pattern;
     bool m_data_is_colour;
 };

@@ -58,6 +58,9 @@ public:
                      int marker_end_frame,
                      bool markers_enabled);
 
+    void set_processed_frame_size(int frame_width,
+                                  int frame_height);
+
     void set_gif_frametime(double frametime);
 
     int get_active_width();
@@ -180,6 +183,10 @@ private:
     c_utf8_validator *mp_utf8_validator;
 
     e_save_type m_save_type;
+    int m_raw_frame_width;
+    int m_raw_frame_height;
+    int m_processed_frame_width;
+    int m_processed_frame_height;
     int m_frame_width;
     int m_frame_height;
     int m_total_frames;

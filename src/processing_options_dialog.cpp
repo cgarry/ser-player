@@ -38,6 +38,8 @@
 
 c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     : QDialog(parent),
+      m_frame_width(100),
+      m_frame_height(100),
       m_data_has_bayer_pattern(false),
       m_data_is_colour(false)
 {
@@ -331,7 +333,6 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     connect(mp_red_y_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(colour_align_changed_slot()));
 
 
-
     //
     // Colour Saturation
     //
@@ -439,6 +440,61 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_colour_balance_GroupBox->set_icon(":/res/resources/colour_balance_icon.png");
     mp_colour_balance_GroupBox->setLayout(colour_balance_VLayout);
 
+
+    //
+    // Crop controls
+    //
+    mp_crop_x_start_Spinbox = new QSpinBox;
+    mp_crop_y_start_Spinbox = new QSpinBox;
+    mp_crop_width_Spinbox = new QSpinBox;
+    mp_crop_height_Spinbox = new QSpinBox;
+    setup_crop_spinboxes();
+
+    QGridLayout *frame_crop_GLayout = new QGridLayout;   
+    frame_crop_GLayout->setMargin(5);
+    frame_crop_GLayout->setHorizontalSpacing(10);
+    frame_crop_GLayout->setVerticalSpacing(8);
+    frame_crop_GLayout->addWidget(new QLabel(tr("X Position:")), 0, 0, 1, 1, Qt::AlignRight);
+    frame_crop_GLayout->addWidget(mp_crop_x_start_Spinbox, 0, 1);
+    frame_crop_GLayout->addItem(new QSpacerItem(10, 1), 0, 2);
+    frame_crop_GLayout->addWidget(new QLabel(tr("Width")), 0, 3, 1, 1, Qt::AlignRight);
+    frame_crop_GLayout->addWidget(mp_crop_width_Spinbox, 0, 4);
+
+    frame_crop_GLayout->addWidget(new QLabel(tr("Y Position:")), 1, 0, 1, 1, Qt::AlignRight);
+    frame_crop_GLayout->addWidget(mp_crop_y_start_Spinbox, 1, 1);
+    frame_crop_GLayout->addItem(new QSpacerItem(10, 1), 1, 2);
+    frame_crop_GLayout->addWidget(new QLabel(tr("Height")), 1, 3, 1, 1, Qt::AlignRight);
+    frame_crop_GLayout->addWidget(mp_crop_height_Spinbox, 1, 4);
+
+    QPushButton *crop_set_with_selection_box_button = new QPushButton(tr("Set With Selection Box"));
+    connect(crop_set_with_selection_box_button, SIGNAL(clicked(bool)), this, SLOT(crop_selection_button_pressed_slot()));
+
+    QHBoxLayout *crop_buttons_hlayout = new QHBoxLayout;
+    crop_buttons_hlayout->setMargin(5);
+    crop_buttons_hlayout->setSpacing(0);
+    crop_buttons_hlayout->addWidget(crop_set_with_selection_box_button);
+    crop_buttons_hlayout->addStretch();
+
+    QVBoxLayout *crop_groupbox_vlayout = new QVBoxLayout;
+    crop_groupbox_vlayout->setMargin(0);
+    crop_groupbox_vlayout->setSpacing(0);
+    crop_groupbox_vlayout->addLayout(frame_crop_GLayout);
+    crop_groupbox_vlayout->addLayout(crop_buttons_hlayout);
+
+    mp_crop_Groupbox = new c_icon_groupbox;
+    mp_crop_Groupbox->setTitle(tr("Frame Cropping"));
+    mp_crop_Groupbox->set_icon(":/res/resources/crop_icon.png");
+    mp_crop_Groupbox->setCheckable(true);
+    mp_crop_Groupbox->setChecked(false);
+    mp_crop_Groupbox->setLayout(crop_groupbox_vlayout);
+
+    connect(mp_crop_Groupbox, SIGNAL(toggled(bool)), this, SLOT(crop_changed_slot()));
+    connect(mp_crop_x_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(crop_changed_slot()));
+    connect(mp_crop_y_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(crop_changed_slot()));
+    connect(mp_crop_width_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(crop_changed_slot()));
+    connect(mp_crop_height_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(crop_changed_slot()));
+
+
     QVBoxLayout *dialog_lhs_vlayout = new QVBoxLayout;
     dialog_lhs_vlayout->setMargin(0);
     dialog_lhs_vlayout->setSpacing(10);
@@ -455,6 +511,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     dialog_rhs_vlayout->addWidget(mp_monochrome_conversion_GroupBox);
     dialog_rhs_vlayout->addWidget(mp_colour_saturation_GroupBox);
     dialog_rhs_vlayout->addWidget(mp_colour_balance_GroupBox);
+    dialog_rhs_vlayout->addWidget(mp_crop_Groupbox);
     dialog_rhs_vlayout->addStretch();
 
     QHBoxLayout *dialog_hlayout = new QHBoxLayout;
@@ -465,14 +522,26 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 
     setLayout(dialog_hlayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+    // Debug
+}
+
+
+void c_processing_options_dialog::crop_changed_slot()
+{
+    emit crop_changed(
+                mp_crop_Groupbox->isChecked() & isEnabled(),
+                mp_crop_x_start_Spinbox->value(),
+                mp_crop_y_start_Spinbox->value(),
+                mp_crop_width_Spinbox->value(),
+                mp_crop_height_Spinbox->value());
 }
 
 
 void c_processing_options_dialog::debayer_controls_changed_slot()
 {
-    bool bayer_enabled = m_data_has_bayer_pattern && mp_debayer_GroupBox->isChecked();
     enable_and_disable_controls();
-    emit debayer_enable(bayer_enabled);
+    emit update_image_req();
 }
 
 
@@ -525,13 +594,7 @@ void c_processing_options_dialog::colour_saturation_slider_changed_slot(int sat)
 void c_processing_options_dialog::colour_saturation_spinbox_changed_slot()
 {
     mp_colsat_Slider->setValue(100 * mp_colsat_DSpinbox->value());
-    if (mp_colsat_DSpinbox->isEnabled()) {
-        // Control is anabled
-        emit colour_saturation_changed(mp_colsat_DSpinbox->value());
-    } else {
-        // Control is not enabled
-        emit colour_saturation_changed(1.0);
-    }
+    emit this->update_image_req();
 }
 
 
@@ -594,6 +657,33 @@ void c_processing_options_dialog::colour_align_changed_slot()
 }
 
 
+void c_processing_options_dialog::crop_selection_button_pressed_slot()
+{
+    setEnabled(false);  // Disable this processing options dialog
+    crop_changed_slot();  // Signal that the crop has changed (no longer enabled)
+    QSize frame_size = QSize(m_frame_width, m_frame_height);
+    QRect selected_area = QRect(mp_crop_x_start_Spinbox->value(),
+                                mp_crop_y_start_Spinbox->value(),
+                                mp_crop_width_Spinbox->value(),
+                                mp_crop_height_Spinbox->value());
+    emit enable_area_selection_signal(frame_size, selected_area);
+}
+
+
+void c_processing_options_dialog::crop_selection_complete_slot(bool accepted, QRect selected_area)
+{
+    if (accepted) {
+        mp_crop_x_start_Spinbox->setValue(selected_area.left());
+        mp_crop_y_start_Spinbox->setValue(selected_area.top());
+        mp_crop_width_Spinbox->setValue(selected_area.width());
+        mp_crop_height_Spinbox->setValue(selected_area.height());
+    }
+
+    setEnabled(true);
+    crop_changed_slot();  // Signal that the crop has changed
+}
+
+
 void c_processing_options_dialog::reset_colour_saturation_slot()
 {
     mp_colsat_DSpinbox->setValue(1.0);
@@ -626,6 +716,30 @@ void c_processing_options_dialog::reset_all_slot()
     reset_colour_saturation_slot();
     reset_colour_balance_slot();
     reset_colour_align_slot();
+}
+
+
+void c_processing_options_dialog::set_frame_size(int width, int height)
+{
+    m_frame_width = width;
+    m_frame_height = height;
+    setup_crop_spinboxes();
+}
+
+
+void c_processing_options_dialog::setup_crop_spinboxes()
+{
+    mp_crop_x_start_Spinbox->setRange(0, m_frame_width - 1);
+    mp_crop_x_start_Spinbox->setValue(0);
+
+    mp_crop_y_start_Spinbox->setRange(0, m_frame_height - 1);
+    mp_crop_y_start_Spinbox->setValue(0);
+
+    mp_crop_width_Spinbox->setRange(4, m_frame_width);
+    mp_crop_width_Spinbox->setValue(m_frame_width);
+
+    mp_crop_height_Spinbox->setRange(4, m_frame_height);
+    mp_crop_height_Spinbox->setValue(m_frame_height);
 }
 
 
@@ -705,6 +819,21 @@ bool c_processing_options_dialog::get_debayer_enable()
 int c_processing_options_dialog::get_debayer_pattern()
 {
     return mp_bayer_pattern_Combobox->currentData().toInt();
+}
+
+
+double c_processing_options_dialog::get_colour_saturation()
+{
+    double colour_saturation;
+    if (mp_colsat_DSpinbox->isEnabled()) {
+        // Control is anabled
+        colour_saturation = mp_colsat_DSpinbox->value();
+    } else {
+        // Control is not enabled
+        colour_saturation = 1.0;
+    }
+
+    return colour_saturation;
 }
 
 

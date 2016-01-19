@@ -62,6 +62,7 @@ private:
     QAction *mp_header_details_Act;
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
+    QAction *mp_selection_box_Act;
     QAction *mp_markers_dialog_Act;
 
     // Dialogs
@@ -125,7 +126,12 @@ private:
 
     bool m_monochrome_conversion_enable;
     int m_monochrome_conversion_type;
-    double m_colour_saturation;
+    bool m_crop_enable;
+    int m_crop_x_pos;
+    int m_crop_y_pos;
+    int m_crop_width;
+    int m_crop_height;
+
 
 public:
     c_ser_player(QWidget *parent = 0);
@@ -143,8 +149,8 @@ public slots:
     void invert_changed_slot(bool invert);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
+    void crop_changed_slot(bool crop_enable, int crop_x, int crop_y, int crop_width, int crop_height);
     void monochrome_conversion_changed_slot(bool enabled, int selection);
-    void colour_saturation_changed_slot(double saturation);
     void colour_balance_changed_slot(double red, double green, double blue);
     void estimate_colour_balance();
     void colour_align_changed_slot(int red_align_x, int red_align_y, int blue_align_x, int blue_align_y);

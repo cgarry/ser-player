@@ -25,5 +25,6 @@
         <file>resources/colour_align.png</file>
         <file>resources/down_button.png</file>
         <file>resources/up_button.png</file>
+        <file>resources/crop_icon.png</file>
     </qresource>
 </RCC>
