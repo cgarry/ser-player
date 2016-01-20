@@ -74,6 +74,7 @@ private:
     // Variables
     int m_width;
     int m_height;
+    bool m_spinbox_values_valid;
 
 };
 

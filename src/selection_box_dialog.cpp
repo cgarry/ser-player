@@ -35,7 +35,8 @@
 c_selection_box_dialog::c_selection_box_dialog(QWidget *parent)
     : QDialog(parent),
       m_width(10),
-      m_height(10)
+      m_height(10),
+      m_spinbox_values_valid(true)
 {
     setWindowTitle(tr("Selection Box"));
     QDialog::setWindowFlags((QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint));
@@ -76,6 +77,13 @@ c_selection_box_dialog::c_selection_box_dialog(QWidget *parent)
     area_select_GLayout->addWidget(new QLabel(tr("Height")), 1, 3, 1, 1, Qt::AlignRight);
     area_select_GLayout->addWidget(mp_height_SpinBox, 1, 4);
 
+    QHBoxLayout *area_select_HLayout = new QHBoxLayout;
+    area_select_HLayout->setMargin(0);
+    area_select_HLayout->setSpacing(0);
+    area_select_HLayout->addLayout(area_select_GLayout);
+    area_select_HLayout->addStretch();
+
+
     mp_selection_colour_CBox = new QComboBox;
     mp_selection_colour_CBox->addItem(tr("Red"), QVariant(QColor(Qt::red)));
     mp_selection_colour_CBox->addItem(tr("Green"), QVariant(QColor(Qt::green)));
@@ -107,7 +115,7 @@ c_selection_box_dialog::c_selection_box_dialog(QWidget *parent)
     QVBoxLayout *gbox_VLayout = new QVBoxLayout;
     gbox_VLayout->setMargin(8);
     gbox_VLayout->setSpacing(15);
-    gbox_VLayout->addLayout(area_select_GLayout);
+    gbox_VLayout->addLayout(area_select_HLayout);
     gbox_VLayout->addLayout(colour_select_HLayout);
     gbox_VLayout->addLayout(reset_button_HLayout);
 
@@ -152,6 +160,7 @@ void c_selection_box_dialog::start_get_selection_box_slot(int width, int height)
     mp_y_pos_SpinBox->setRange(0, m_height-1);
     mp_width_SpinBox->setRange(1, m_width);
     mp_height_SpinBox->setRange(1, m_height);
+    m_spinbox_values_valid = true;
     reset_selection_box_slot();
     show();
 }
@@ -208,12 +217,14 @@ void c_selection_box_dialog::reject()
 
 void c_selection_box_dialog::accept()
 {
-    QRect new_selected_area = QRect(mp_x_pos_SpinBox->value(),
-                                    mp_y_pos_SpinBox->value(),
-                                    mp_width_SpinBox->value(),
-                                    mp_height_SpinBox->value());
-    emit selection_box_complete(true, new_selected_area);
-    QDialog::accept();
+    if (m_spinbox_values_valid) {
+        QRect new_selected_area = QRect(mp_x_pos_SpinBox->value(),
+                                        mp_y_pos_SpinBox->value(),
+                                        mp_width_SpinBox->value(),
+                                        mp_height_SpinBox->value());
+        emit selection_box_complete(true, new_selected_area);
+        QDialog::accept();
+    }
 }
 
 
@@ -223,12 +234,41 @@ void c_selection_box_dialog::accept()
 //
 void c_selection_box_dialog::spinbox_changed_slot()
 {
-    QRect new_selected_area = QRect(mp_x_pos_SpinBox->value(),
-                                    mp_y_pos_SpinBox->value(),
-                                    mp_width_SpinBox->value(),
-                                    mp_height_SpinBox->value());
+    // Update spinbox handling to allow non-valid combinations to exist while entering
+    QPalette text_Palette;
+    m_spinbox_values_valid = true;
+    if (mp_x_pos_SpinBox->value() + mp_width_SpinBox->value() > m_width) {
+        // Value is not currently valid
+        m_spinbox_values_valid = false;
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        mp_x_pos_SpinBox->setPalette(text_Palette);
+        mp_width_SpinBox->setPalette(text_Palette);
+    } else {
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        mp_x_pos_SpinBox->setPalette(text_Palette);
+        mp_width_SpinBox->setPalette(text_Palette);
+    }
 
-    emit selection_box_changed(new_selected_area);
+    if (mp_y_pos_SpinBox->value() + mp_height_SpinBox->value() > m_width) {
+        // Value is not currently valid
+        m_spinbox_values_valid = false;
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        mp_y_pos_SpinBox->setPalette(text_Palette);
+        mp_height_SpinBox->setPalette(text_Palette);
+    } else {
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        mp_y_pos_SpinBox->setPalette(text_Palette);
+        mp_height_SpinBox->setPalette(text_Palette);
+    }
+
+    if (m_spinbox_values_valid) {
+        QRect new_selected_area = QRect(mp_x_pos_SpinBox->value(),
+                                        mp_y_pos_SpinBox->value(),
+                                        mp_width_SpinBox->value(),
+                                        mp_height_SpinBox->value());
+
+        emit selection_box_changed(new_selected_area);
+    }
 }
 
 
