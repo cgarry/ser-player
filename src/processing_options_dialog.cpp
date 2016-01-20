@@ -535,12 +535,42 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
 
 void c_processing_options_dialog::crop_changed_slot()
 {
-    emit crop_changed(
-                mp_crop_Groupbox->isChecked() & isEnabled(),
-                mp_crop_x_start_Spinbox->value(),
-                mp_crop_y_start_Spinbox->value(),
-                mp_crop_width_Spinbox->value(),
-                mp_crop_height_Spinbox->value());
+    QPalette text_Palette;
+    bool crop_spinbox_values_valid = true;
+    if (mp_crop_x_start_Spinbox->value() + mp_crop_width_Spinbox->value() > m_frame_width) {
+        // Value is not currently valid
+        crop_spinbox_values_valid = false;
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        mp_crop_x_start_Spinbox->setPalette(text_Palette);
+        mp_crop_width_Spinbox->setPalette(text_Palette);
+    } else {
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        mp_crop_x_start_Spinbox->setPalette(text_Palette);
+        mp_crop_width_Spinbox->setPalette(text_Palette);
+    }
+
+    if (mp_crop_y_start_Spinbox->value() + mp_crop_height_Spinbox->value() > m_frame_height) {
+        // Value is not currently valid
+        crop_spinbox_values_valid = false;
+        text_Palette.setColor(QPalette::Text,Qt::red);
+        mp_crop_y_start_Spinbox->setPalette(text_Palette);
+        mp_crop_height_Spinbox->setPalette(text_Palette);
+    } else {
+        text_Palette.setColor(QPalette::Text,Qt::black);
+        mp_crop_y_start_Spinbox->setPalette(text_Palette);
+        mp_crop_height_Spinbox->setPalette(text_Palette);
+    }
+
+    bool enabled = mp_crop_Groupbox->isChecked() & isEnabled();
+    if (crop_spinbox_values_valid || !enabled) {
+        // Emit signal if all spinbox values are valid or crop is not enabled
+        emit crop_changed(
+                    enabled,
+                    mp_crop_x_start_Spinbox->value(),
+                    mp_crop_y_start_Spinbox->value(),
+                    mp_crop_width_Spinbox->value(),
+                    mp_crop_height_Spinbox->value());
+    }
 }
 
 

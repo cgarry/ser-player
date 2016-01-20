@@ -249,7 +249,7 @@ void c_selection_box_dialog::spinbox_changed_slot()
         mp_width_SpinBox->setPalette(text_Palette);
     }
 
-    if (mp_y_pos_SpinBox->value() + mp_height_SpinBox->value() > m_width) {
+    if (mp_y_pos_SpinBox->value() + mp_height_SpinBox->value() > m_height) {
         // Value is not currently valid
         m_spinbox_values_valid = false;
         text_Palette.setColor(QPalette::Text,Qt::red);
