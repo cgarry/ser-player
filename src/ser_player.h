@@ -104,6 +104,7 @@ private:
     QString m_framecount_label_String;
     QLabel *mp_framecount_Label;
     QString m_timestamp_label_String;
+    QString m_no_timestamp_label_String;
     QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
 

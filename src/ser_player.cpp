@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.10"
+#define VERSION_STRING "v1.4.11"
 
 #include <Qt>
 #include <QApplication>
@@ -491,8 +491,9 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_pixel_depth_Label->setToolTip(tr("Pixel bit depth", "Tool tip"));
 
     m_timestamp_label_String = tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label");
+    m_no_timestamp_label_String = tr("No Timestamp", "Timestamp label for no timestamp");
     mp_timestamp_Label = new QLabel;
-    mp_timestamp_Label->setText(tr("No Timestamp", "Timestamp label for no timestamp"));
+    mp_timestamp_Label->setText(m_no_timestamp_label_String);
     mp_timestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
 
     QHBoxLayout *slider_h_layout = new QHBoxLayout;
@@ -825,6 +826,18 @@ void c_ser_player::crop_changed_slot(bool crop_enable, int crop_x, int crop_y, i
     m_crop_y_pos = crop_y;
     m_crop_width = crop_width;
     m_crop_height = crop_height;
+
+    // Update frame size label
+    if (m_crop_enable) {
+        mp_frame_size_Label->setText(m_frame_size_label_String
+                                  .arg(m_crop_width)
+                                  .arg(m_crop_height));
+    } else {
+        mp_frame_size_Label->setText(m_frame_size_label_String
+                                  .arg(mp_ser_file->get_width())
+                                  .arg(mp_ser_file->get_height()));
+    }
+
     frame_slider_changed_slot();
     resize_window_100_percent_slot();
 }
@@ -2239,6 +2252,8 @@ void c_ser_player::frame_slider_changed_slot()
                                          .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                                          .arg(ts_second, 2, 10, QLatin1Char( '0' ))
                                          .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
+            } else {
+                mp_timestamp_Label->setText(m_no_timestamp_label_String);
             }
 
             // Ensure displayed histogram matches displayed frame
