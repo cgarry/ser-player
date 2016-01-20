@@ -451,7 +451,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     setup_crop_spinboxes();
 
     QGridLayout *frame_crop_GLayout = new QGridLayout;   
-    frame_crop_GLayout->setMargin(5);
+    frame_crop_GLayout->setMargin(0);
     frame_crop_GLayout->setHorizontalSpacing(10);
     frame_crop_GLayout->setVerticalSpacing(8);
     frame_crop_GLayout->addWidget(new QLabel(tr("X Position:")), 0, 0, 1, 1, Qt::AlignRight);
@@ -466,6 +466,12 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     frame_crop_GLayout->addWidget(new QLabel(tr("Height")), 1, 3, 1, 1, Qt::AlignRight);
     frame_crop_GLayout->addWidget(mp_crop_height_Spinbox, 1, 4);
 
+    QHBoxLayout *frame_crop_HLayout = new QHBoxLayout;
+    frame_crop_HLayout->setMargin(5);
+    frame_crop_HLayout->setSpacing(0);
+    frame_crop_HLayout->addLayout(frame_crop_GLayout);
+    frame_crop_HLayout->addStretch();
+
     QPushButton *crop_set_with_selection_box_button = new QPushButton(tr("Set With Selection Box"));
     connect(crop_set_with_selection_box_button, SIGNAL(clicked(bool)), this, SLOT(crop_selection_button_pressed_slot()));
 
@@ -478,7 +484,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     QVBoxLayout *crop_groupbox_vlayout = new QVBoxLayout;
     crop_groupbox_vlayout->setMargin(0);
     crop_groupbox_vlayout->setSpacing(0);
-    crop_groupbox_vlayout->addLayout(frame_crop_GLayout);
+    crop_groupbox_vlayout->addLayout(frame_crop_HLayout);
     crop_groupbox_vlayout->addLayout(crop_buttons_hlayout);
 
     mp_crop_Groupbox = new c_icon_groupbox;
