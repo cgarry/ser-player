@@ -482,7 +482,7 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     crop_groupbox_vlayout->addLayout(crop_buttons_hlayout);
 
     mp_crop_Groupbox = new c_icon_groupbox;
-    mp_crop_Groupbox->setTitle(tr("Frame Cropping"));
+    mp_crop_Groupbox->setTitle(tr("Frame Crop"));
     mp_crop_Groupbox->set_icon(":/res/resources/crop_icon.png");
     mp_crop_Groupbox->setCheckable(true);
     mp_crop_Groupbox->setChecked(false);
@@ -716,6 +716,7 @@ void c_processing_options_dialog::reset_all_slot()
     reset_colour_saturation_slot();
     reset_colour_balance_slot();
     reset_colour_align_slot();
+    mp_crop_Groupbox->setChecked(false);
 }
 
 
