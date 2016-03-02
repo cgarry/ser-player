@@ -772,10 +772,10 @@ void c_processing_options_dialog::setup_crop_spinboxes()
     mp_crop_y_start_Spinbox->setRange(0, m_frame_height - 1);
     mp_crop_y_start_Spinbox->setValue(0);
 
-    mp_crop_width_Spinbox->setRange(4, m_frame_width);
+    mp_crop_width_Spinbox->setRange(15, m_frame_width);
     mp_crop_width_Spinbox->setValue(m_frame_width);
 
-    mp_crop_height_Spinbox->setRange(4, m_frame_height);
+    mp_crop_height_Spinbox->setRange(15, m_frame_height);
     mp_crop_height_Spinbox->setValue(m_frame_height);
 }
 
