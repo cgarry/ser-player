@@ -22,6 +22,7 @@
 
 #include "pipp_ser.h"  // colour IDs
 #include "header_details_dialog.h"
+#include "pipp_timestamp.h"
 
 
 c_header_details_dialog::c_header_details_dialog(QWidget *parent)
@@ -116,8 +117,52 @@ void c_header_details_dialog::set_details(
     mp_header_details_Tedit->append(tr(" * Observer: %1").arg(observer));
     mp_header_details_Tedit->append(tr(" * Instrument: %1").arg(instrument));
     mp_header_details_Tedit->append(tr(" * Telescope: %1").arg(telescope));
-    mp_header_details_Tedit->append(tr(" * DateTime: 0x%1").arg(date_time, 1, 16));
-    mp_header_details_Tedit->append(tr(" * DateTime_UTC: 0x%1").arg(date_time_utc, 1, 16));
+
+    int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
+    c_pipp_timestamp::timestamp_to_date(
+        date_time,
+        &ts_year,
+        &ts_month,
+        &ts_day,
+        &ts_hour,
+        &ts_minute,
+        &ts_second,
+        &ts_microsec);
+
+    QString date_time_str = tr("%3/%2/%1 %4:%5:%6.%7")
+                   .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                   .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_microsec, 6, 10, QLatin1Char( '0' )).toUtf8().constData();
+
+    c_pipp_timestamp::timestamp_to_date(
+        date_time_utc,
+        &ts_year,
+        &ts_month,
+        &ts_day,
+        &ts_hour,
+        &ts_minute,
+        &ts_second,
+        &ts_microsec);
+
+    QString date_time_utc_str = tr("%3/%2/%1 %4:%5:%6.%7")
+                   .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                   .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_day, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_second, 2, 10, QLatin1Char( '0' ))
+                   .arg(ts_microsec, 6, 10, QLatin1Char( '0' )).toUtf8().constData();
+
+    mp_header_details_Tedit->append(tr(" * DateTime: %1 (0x%2)")
+                                    .arg(date_time_str)
+                                    .arg(date_time, 1, 16));
+    mp_header_details_Tedit->append(tr(" * DateTime_UTC: %1 (0x%2)")
+                                    .arg(date_time_utc_str)
+                                    .arg(date_time_utc, 1, 16));
     mp_header_details_Tedit->append("");
     mp_header_details_Tedit->append(tr("Timestamps:"));
     mp_header_details_Tedit->append(timestamp_info);
