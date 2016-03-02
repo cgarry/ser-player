@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="fr_FR">
+<TS version="2.0" language="fr_FR">
 <context>
     <name>QCoreApplication</name>
     <message>
@@ -54,28 +54,28 @@
     <message>
         <source>Error: SER timestamp read failed for file &apos;%1&apos;</source>
         <comment>SER File error message</comment>
-        <translation type="vanished">Erreur : La lecture de l&apos;horodatage a échoué pour le fichier &apos;%1&apos;</translation>
+        <translation>Erreur : La lecture de l&apos;horodatage a échoué pour le fichier &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Error: could not open file &apos;%1&apos; for writing</source>
         <comment>SER write file error message</comment>
-        <translation type="vanished">Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
+        <translation>Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
-        <translation type="vanished">Erreur lors de l&apos;écriture du fichier SER</translation>
+        <translation>Erreur lors de l&apos;écriture du fichier SER</translation>
     </message>
     <message>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
-        <translation type="vanished">Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
+        <translation>Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
     </message>
     <message>
         <location filename="../src/gif_write.cpp" line="191"/>
         <source>Error: could not open file &apos;%1&apos; for writing</source>
         <comment>GIF write file error message</comment>
-        <translation type="unfinished">Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
+        <translation>Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
     </message>
 </context>
 <context>
@@ -185,25 +185,25 @@
         <location filename="../src/header_details_dialog.cpp" line="132"/>
         <location filename="../src/header_details_dialog.cpp" line="151"/>
         <source>%3/%2/%1 %4:%5:%6.%7</source>
-        <translation type="unfinished">%1% {3/%2/%1 %4:%5:%6.%7?}</translation>
+        <translation>%1/%2/%3 %4:%5:%6.%7</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="160"/>
         <source> * DateTime: %1 (0x%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Date : %1 (0x%2)</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="163"/>
         <source> * DateTime_UTC: %1 (0x%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Date UTC : %1 (0x%2)</translation>
     </message>
     <message>
         <source> * DateTime: 0x%1</source>
-        <translation type="vanished"> * DateTime: 0x%1</translation>
+        <translation> * DateTime: 0x%1</translation>
     </message>
     <message>
         <source> * DateTime_UTC: 0x%1</source>
-        <translation type="vanished"> * DateTime_UTC: 0x%1</translation>
+        <translation> * DateTime_UTC: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="167"/>
@@ -252,7 +252,7 @@
         <location filename="../src/markers_dialog.cpp" line="59"/>
         <source>Reset</source>
         <comment>Reset Markers</comment>
-        <translation>Supprimer la sélection</translation>
+        <translation>Remettre à zéro</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="72"/>
@@ -334,37 +334,37 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="50"/>
         <source>Auto</source>
-        <translation type="unfinished">Automatique</translation>
+        <translation>Automatique</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="51"/>
         <source>RGGB</source>
-        <translation type="unfinished">RGGB</translation>
+        <translation>RGGB</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="52"/>
         <source>GRBG</source>
-        <translation type="unfinished">GRBG</translation>
+        <translation>GRBG</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="53"/>
         <source>GBRG</source>
-        <translation type="unfinished">GBRG</translation>
+        <translation>GBRG</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="54"/>
         <source>BGGR</source>
-        <translation type="unfinished">BGGR</translation>
+        <translation>BGGR</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="56"/>
         <source>This control allows the frames to be debayered using a different bayer pattern than specified in the SER file header</source>
-        <translation type="unfinished"></translation>
+        <translation>Ce controle permet aux images d&apos;être dématricées en utilisant le schéma de Bayer spécifié dans l&apos;entête du fichier SER</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="61"/>
         <source>Bayer Pattern:</source>
-        <translation type="unfinished"></translation>
+        <translation>Schéma de Bayer :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="64"/>
@@ -373,7 +373,7 @@
     </message>
     <message>
         <source>Colour Debayer</source>
-        <translation type="vanished">Dématriçage couleur</translation>
+        <translation>Dématriçage couleur</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="72"/>
@@ -410,12 +410,12 @@
     </message>
     <message>
         <source>Convert Colour To Monochrome Using: </source>
-        <translation type="vanished">Convertir couleur en monochrome en utilisant :</translation>
+        <translation>Convertir couleur en monochrome en utilisant :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="143"/>
         <source>Convert To Monochrome Using: </source>
-        <translation type="unfinished"></translation>
+        <translation>Convertir en niveau de gris en utilisant :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="146"/>
@@ -460,17 +460,17 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="243"/>
         <source>Red Channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Canal rouge</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="298"/>
         <source>Blue Channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Canal Bleu</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="314"/>
         <source>Colour Channel Align</source>
-        <translation type="unfinished"></translation>
+        <translation>Aligner les canaux des couleurs</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="352"/>
@@ -511,32 +511,32 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="457"/>
         <source>X Position:</source>
-        <translation type="unfinished"></translation>
+        <translation>Position en X :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="460"/>
         <source>Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Largeur</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="463"/>
         <source>Y Position:</source>
-        <translation type="unfinished"></translation>
+        <translation>Position en Y :</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="466"/>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Hauteur</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="475"/>
         <source>Set With Selection Box</source>
-        <translation type="unfinished"></translation>
+        <translation>Défte définir avec la boite de sélection</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="491"/>
         <source>Frame Crop</source>
-        <translation type="unfinished"></translation>
+        <translation>Recadrer l&apos;image</translation>
     </message>
 </context>
 <context>
@@ -625,13 +625,13 @@
         <location filename="../src/save_frames_dialog.cpp" line="77"/>
         <source>Save Frames As AVI File</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images comme fichier AVI</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="80"/>
         <source>Save Frames As Animated GIF</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>ENregistrer les images comme GIF animé</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="137"/>
@@ -696,40 +696,40 @@
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="260"/>
         <source>Pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>Pixels</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="261"/>
         <source>Percent</source>
-        <translation type="unfinished"></translation>
+        <translation>Pourcentage</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="263"/>
         <source>Keep Original Aspect Ratio</source>
         <comment>Resize Frames Control</comment>
-        <translation type="unfinished"></translation>
+        <translation>Garder le ratio original</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="266"/>
         <source>Add Black Bars To Keep Original Aspert Ratio</source>
-        <translation type="unfinished"></translation>
+        <translation>AJouter des bandes noires pour garder le ratio original</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="270"/>
         <source>Width:</source>
         <comment>Resize Frames Control</comment>
-        <translation type="unfinished"></translation>
+        <translation>Largeur :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="273"/>
         <source>Height:</source>
         <comment>Resize Frames Control</comment>
-        <translation type="unfinished"></translation>
+        <translation>Hauteur :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="287"/>
         <source>Resize Frames</source>
-        <translation type="unfinished"></translation>
+        <translation>Redimensionner les images</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="308"/>
@@ -822,117 +822,117 @@
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="404"/>
         <source>AVI Framerate:</source>
-        <translation type="unfinished"></translation>
+        <translation>Fréquence d&apos;images de l&apos;AVI :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="408"/>
         <source>Old Format AVI File</source>
-        <translation type="unfinished"></translation>
+        <translation>Vieux format de fichier AVI</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="410"/>
         <source>4GB Maximum Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille maximum de 4Go</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="411"/>
         <source>2GB Maximum Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille maximum de 2 Go</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="426"/>
         <source>AVI File Options</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Options du fichier AVI</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="439"/>
         <location filename="../src/save_frames_dialog.cpp" line="444"/>
         <source> s</source>
         <comment>seconds</comment>
-        <translation type="unfinished"></translation>
+        <translation> s</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="448"/>
         <source>1. Maximum Quality</source>
         <comment>GIF preset options</comment>
-        <translation type="unfinished"></translation>
+        <translation>1. Qualité Maximum</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="449"/>
         <source>2. Good Quality</source>
         <comment>GIF preset options</comment>
-        <translation type="unfinished"></translation>
+        <translation>2 Bonne Qualité</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="450"/>
         <source>3. Medium Quality</source>
         <comment>GIF preset options</comment>
-        <translation type="unfinished"></translation>
+        <translation>3 Qualité Moyenne</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="451"/>
         <source>4. Small File Size</source>
         <comment>GIF preset options</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fichier de petite taille</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="452"/>
         <source>5. Smaller File Size</source>
         <comment>GIF preset options</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fichier de plus petite taille</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="460"/>
         <source>Review Animated GIF In Browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Revue du GIF animé dans le navigateur</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="469"/>
         <source>Frame Delay:</source>
-        <translation type="unfinished"></translation>
+        <translation>Temporisation de l&apos;image :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="471"/>
         <source>Final Frame Delay:</source>
-        <translation type="unfinished"></translation>
+        <translation>Temporisation de l&apos;image finale :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="473"/>
         <source>Preset Advanced Options:</source>
-        <translation type="unfinished"></translation>
+        <translation>Préréglage des options avancées :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="482"/>
         <source>Unchanged Border Tolerance:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tolérance des bords inchangés :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="492"/>
         <source>Transparent Pixel Tolerance:</source>
-        <translation type="unfinished"></translation>
+        <translation>Toléra,ce de la transparence des pixels :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="502"/>
         <source>Reduced Colour Table Bit Depth:</source>
-        <translation type="unfinished"></translation>
+        <translation>Palette de couleur réduite :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="513"/>
         <source>Lossy Compression Level:</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveau de compression avec perte :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="537"/>
         <source>Advanced Options</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Options avancées</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="547"/>
         <source>Animated GIF Options</source>
         <comment>Save frames dialog</comment>
-        <translation type="unfinished"></translation>
+        <translation>Options du GIF animé</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="573"/>
@@ -1012,87 +1012,87 @@
         <location filename="../src/selection_box_dialog.cpp" line="41"/>
         <location filename="../src/selection_box_dialog.cpp" line="122"/>
         <source>Selection Box</source>
-        <translation type="unfinished"></translation>
+        <translation>Boite de sélection</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="68"/>
         <source>X Position:</source>
-        <translation type="unfinished"></translation>
+        <translation>Position en X :</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="71"/>
         <source>Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Largeur</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="74"/>
         <source>Y Position:</source>
-        <translation type="unfinished"></translation>
+        <translation>Position en Y :</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="77"/>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Hauteur</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="88"/>
         <source>Red</source>
-        <translation type="unfinished">Rouge</translation>
+        <translation>Rouge</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="89"/>
         <source>Green</source>
-        <translation type="unfinished">Vert</translation>
+        <translation>Vert</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="90"/>
         <source>Blue</source>
-        <translation type="unfinished">Bleu</translation>
+        <translation>Bleu</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="91"/>
         <source>Yellow</source>
-        <translation type="unfinished"></translation>
+        <translation>Jaune</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="92"/>
         <source>Magenta</source>
-        <translation type="unfinished"></translation>
+        <translation>Magenta</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="93"/>
         <source>Cyan</source>
-        <translation type="unfinished"></translation>
+        <translation>Cyan</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="94"/>
         <source>White</source>
-        <translation type="unfinished"></translation>
+        <translation>Blanc</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="95"/>
         <source>Black</source>
-        <translation type="unfinished"></translation>
+        <translation>Noir</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="102"/>
         <source>Colour:</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleur :</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="106"/>
         <source>Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>Réinitialiser</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="126"/>
         <source>Accept</source>
-        <translation type="unfinished"></translation>
+        <translation>Accépter</translation>
     </message>
     <message>
         <location filename="../src/selection_box_dialog.cpp" line="127"/>
         <source>Cancel</source>
-        <translation type="unfinished">Annuler</translation>
+        <translation>Annuler</translation>
     </message>
 </context>
 <context>
@@ -1148,13 +1148,13 @@
         <location filename="../src/ser_player.cpp" line="124"/>
         <source>Save Frames As AVI File...</source>
         <comment>Menu title</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images en fichier AVI...</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="129"/>
         <source>Save Frames As Animated GIF...</source>
         <comment>Menu title</comment>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images en GIF animé...</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="254"/>
@@ -1392,166 +1392,166 @@
     <message>
         <location filename="../src/ser_player.cpp" line="1045"/>
         <source>Error: SER File creation failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur : la création du fichier SER a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1047"/>
         <source>Error: SER file writing failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur : l&apos;écriture dans le fichier SER a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1052"/>
         <source>Save Frames As SER File Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;enregistrement des images en fichier SER a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1134"/>
         <location filename="../src/ser_player.cpp" line="1182"/>
         <source>Save Frames As AVI File</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images en fichier AVI</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1136"/>
         <source>AVI Files (*.avi)</source>
         <comment>Filetype filter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fichiers AVI (*.avi)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1261"/>
         <source>Error: AVI file creation failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur : la création du fichier AVI a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1263"/>
         <source>Error: AVI file writing failed</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;écriture du fichier AVI a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1268"/>
         <source>Save Frames As AVI File Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;enregistrement des images en fichier AVI a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1376"/>
         <location filename="../src/ser_player.cpp" line="1416"/>
         <source>Save Frames As Animated GIF</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer les images en GIF animé</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1378"/>
         <source>GIF Files (*.gif)</source>
         <comment>Filetype filter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fichiers GIF (*.gif)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1419"/>
         <source>Truncate</source>
-        <translation type="unfinished"></translation>
+        <translation>Tronquer</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1519"/>
         <source>Error: Animated GIF file creation failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur : la création du fichier GIF animé a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1521"/>
         <source>Error: Animated GIF file writing failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Erreur : L&apos;écriture du fichier GIF animé a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1526"/>
         <source>Save Frames As Animated GIF Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>L&apos;enregistrement des images en GIF animé a échoué</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1540"/>
         <source>SER Player Animated GIF Review</source>
-        <translation type="unfinished"></translation>
+        <translation>Revue du GIF animé</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1541"/>
         <source>(Close browser when reviewing is complete)</source>
-        <translation type="unfinished"></translation>
+        <translation>(Fermer le navigateur quand la revue est complète)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1543"/>
         <source>Frame Delay: </source>
-        <translation type="unfinished"></translation>
+        <translation>Temporisation de l&apos;image :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1544"/>
         <source>Final Frame Delay: </source>
-        <translation type="unfinished"></translation>
+        <translation>Temporisation de l&apos;image finale :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1546"/>
         <source>Unchanged Border Tolerance: </source>
-        <translation type="unfinished"></translation>
+        <translation>Tolérance des bords inchangée :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1549"/>
         <source>Transperant Pixel Tolerance: </source>
-        <translation type="unfinished"></translation>
+        <translation>Tolérance de la transparence des pixels :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1551"/>
         <source>Transperant Pixel Tolerance: Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Tolérance de la transparence des pixels : Désactivée</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1555"/>
         <source>Reduced Pixel Depth: </source>
-        <translation type="unfinished"></translation>
+        <translation>Profondeur des pixels réduite :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1557"/>
         <source>Reduced Pixel Depth: Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Profondeur des pixels réduite : Désactivée</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1561"/>
         <source>Lossy Compression Level: </source>
-        <translation type="unfinished"></translation>
+        <translation>Niveau de la compression avec perte :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1563"/>
         <source>Lossy Compression Level: Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Niveau de la compression avec perte : Désactivée</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1567"/>
         <source>Frames Saved: %1 of %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Images enregistrée : %1 de %2</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1585"/>
         <source>Estimated Filesize: %1 MB (%2 Bytes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier estimée : %1 MB (%2 Bytes)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1588"/>
         <source>Filesize: %1 MB (%2 Bytes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier : %1 MB (%2 Bytes)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1594"/>
         <source>Estimated Filesize: %1 KB (%2 Bytes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier estimée : %1 KB (%2 Bytes)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1596"/>
         <source>Filesize: %1 KB (%2 Bytes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier : %1 KB (%2 Bytes)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1600"/>
         <source>Estimated Filesize: %1 Bytes</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier estimée : %1 Bytes</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1602"/>
         <source>Filesize: %1 Bytes</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du fichier : %1 Bytes</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2582"/>
