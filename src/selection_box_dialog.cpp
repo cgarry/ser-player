@@ -158,8 +158,8 @@ void c_selection_box_dialog::start_get_selection_box_slot(int width, int height)
     m_height = height;
     mp_x_pos_SpinBox->setRange(0, m_width-1);
     mp_y_pos_SpinBox->setRange(0, m_height-1);
-    mp_width_SpinBox->setRange(1, m_width);
-    mp_height_SpinBox->setRange(1, m_height);
+    mp_width_SpinBox->setRange(15, m_width);
+    mp_height_SpinBox->setRange(15, m_height);
     m_spinbox_values_valid = true;
     reset_selection_box_slot();
     show();
