@@ -124,7 +124,9 @@ win32 {
 contains(QT_ARCH, i386) {
     EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win32/libeay32.dll \
                       $$PWD/platform-specific/windows/openssl/win32/ssleay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt
+                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt \
+                      $$PWD/platform-specific/windows/win32/msvcr100.dll \
+                      $$PWD/platform-specific/windows/win32/msvcp100.dll
     EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
     EXTRA_BINFILES_WIN ~= s,/,\\,g
         DESTDIR_WIN = $${DESTDIR}
