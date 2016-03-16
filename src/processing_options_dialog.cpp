@@ -52,6 +52,10 @@ c_processing_options_dialog::c_processing_options_dialog(QWidget *parent)
     mp_bayer_pattern_Combobox->addItem(tr("GRBG"), COLOURID_BAYER_GRBG);
     mp_bayer_pattern_Combobox->addItem(tr("GBRG"), COLOURID_BAYER_GBRG);
     mp_bayer_pattern_Combobox->addItem(tr("BGGR"), COLOURID_BAYER_BGGR);
+    mp_bayer_pattern_Combobox->addItem(tr("CYYM"), COLOURID_BAYER_CYYM);
+    mp_bayer_pattern_Combobox->addItem(tr("YCMY"), COLOURID_BAYER_YCMY);
+    mp_bayer_pattern_Combobox->addItem(tr("YMCY"), COLOURID_BAYER_YMCY);
+    mp_bayer_pattern_Combobox->addItem(tr("MYYC"), COLOURID_BAYER_MYYC);
     connect(mp_bayer_pattern_Combobox, SIGNAL(currentIndexChanged(int)), this, SLOT(debayer_controls_changed_slot()));
     mp_bayer_pattern_Combobox->setToolTip(tr("This control allows the frames to be debayered using a different bayer pattern than specified in the SER file header"));
 

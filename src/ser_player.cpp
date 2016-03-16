@@ -2138,15 +2138,19 @@ void c_ser_player::open_ser_file(const QString &filename)
             break;
         case COLOURID_BAYER_CYYM:
             mp_colour_id_Label->setText(tr("CYYM", "Colour ID label"));
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_YCMY:
             mp_colour_id_Label->setText(tr("YCMY", "Colour ID label"));
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_YMCY:
             mp_colour_id_Label->setText(tr("YMCY", "Colour ID label"));
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_MYYC:
             mp_colour_id_Label->setText(tr("MYYC", "Colour ID label"));
+            m_has_bayer_pattern = true;
             break;
         case COLOURID_RGB:
             mp_colour_id_Label->setText(tr("RGB", "Colour ID label"));

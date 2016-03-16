@@ -1641,9 +1641,35 @@ bool c_image::debayer_image_bilinear_int(int32_t colour_id)
     case COLOURID_BAYER_BGGR:
         bayer_code = 1;
         break;
+    case COLOURID_BAYER_CYYM:  // Inverted RBBG - which is RGGB with swapped G and B
+        bayer_code = 2;
+        break;
+    case COLOURID_BAYER_YCMY:  // Inverted BRGB - which is RGGB with swapped G and B
+        bayer_code = 3;
+        break;
+    case COLOURID_BAYER_YMCY:  // Inverted BGRB - which is RGGB with swapped  G and B
+        bayer_code = 0;
+        break;
+    case COLOURID_BAYER_MYYC:  // Inverted GBBR - which is RGGB with swapped  G and B
+        bayer_code = 1;
+        break;
     default:
         // We only debayer these types
         return false;
+    }
+
+    if (colour_id == COLOURID_BAYER_CYYM ||
+        colour_id == COLOURID_BAYER_YCMY ||
+        colour_id == COLOURID_BAYER_YMCY ||
+        colour_id == COLOURID_BAYER_MYYC) {
+        // Start by inverting all the pixels to make them RGB
+        T *p_raw_data_ptr = (T *)mp_buffer;
+        for (int y = 0; y < (m_height); y++) {
+            for (int x = 0; x < (m_width); x++) {
+                *p_raw_data_ptr = 255 - *p_raw_data_ptr;
+                p_raw_data_ptr++;
+            }
+        }
     }
 
     int32_t x, y;
@@ -1748,6 +1774,26 @@ bool c_image::debayer_image_bilinear_int(int32_t colour_id)
 
         rgb_data_ptr1 += 6;
         raw_data_ptr += 2;
+    }
+
+    // We currently have data in GBR, change order to BGR
+    if (colour_id == COLOURID_BAYER_CYYM ||
+        colour_id == COLOURID_BAYER_YCMY ||
+        colour_id == COLOURID_BAYER_YMCY ||
+        colour_id == COLOURID_BAYER_MYYC) {
+        T *p_read_data_ptr = (T *)rgb_data;
+        T *p_write_data_ptr = (T *)rgb_data;
+        for (int y = 0; y < (m_height); y++) {
+            for (int x = 0; x < (m_width); x++) {
+                T green = *p_read_data_ptr++;
+                T blue = *p_read_data_ptr++;
+                p_read_data_ptr++;
+
+                *p_write_data_ptr++ = blue;
+                *p_write_data_ptr++ = green;
+                p_write_data_ptr++;
+            }
+        }
     }
 
     // Make new debayered data the frame buffer data
