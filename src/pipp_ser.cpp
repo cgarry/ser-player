@@ -334,7 +334,6 @@ int32_t c_pipp_ser::open(
 int32_t c_pipp_ser::find_pixel_depth(
     uint32_t frame_number)
 {
-    int32_t pixel_depth = m_header.pixel_depth;
     std::unique_ptr<uint8_t[]> p_temp_buffer(new uint8_t[m_header.image_width * m_header.image_height * 2 * 3]);
     int32_t stored_pixel_depth = m_header.pixel_depth;
     m_header.pixel_depth = 16;  // Do not shift data this time
@@ -354,6 +353,7 @@ int32_t c_pipp_ser::find_pixel_depth(
         }
     }
 
+    int32_t pixel_depth = 9;  // Smallest pixel depth
     for (int x = 15; x >= 8; x--) {
         if (max_pixel >= (1 << x)) {
             pixel_depth = x + 1;
