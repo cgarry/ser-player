@@ -155,9 +155,11 @@ int32_t c_pipp_ser::open(
 
     // Check the pixel depth
     if (m_header.pixel_depth > 8) {
-        m_bytes_depth = 2;
+        m_byte_depth_in = 2;
+        m_byte_depth_out = 2;
     } else {
-        m_bytes_depth = 1;
+        m_byte_depth_in = 1;
+        m_byte_depth_out = 1;
     }
 
     // Decide if this is a colour or mono image (raw colour is mono!)
@@ -171,7 +173,7 @@ int32_t c_pipp_ser::open(
         break;
     }
 
-    int32_t total_bytes_per_sample = m_bytes_depth * (1 + m_colour * 2);
+    int32_t total_bytes_per_sample = m_byte_depth_in * (1 + m_colour * 2);
 
     // Check that the file is large enough to hold all the frames
     if (m_filesize < (m_header.frame_count * m_header.image_height * m_header.image_width * total_bytes_per_sample + 178)) {
@@ -183,14 +185,11 @@ int32_t c_pipp_ser::open(
 
 
     // Store size of frame
-    m_framesize = m_header.image_width * m_header.image_height;
-    if (m_header.pixel_depth > 8) {
-        // 2 bytes per pixel
-        m_framesize *= 2;
-    }
+    m_framesize_in = m_header.image_width * m_header.image_height;
+    m_framesize_in *= m_byte_depth_in;  // Allow for 2 bytes per pixel
 
     if (m_header.colour_id == COLOURID_RGB || m_header.colour_id == COLOURID_BGR) {
-        m_framesize *= 3;
+        m_framesize_in *= 3;
     }
 
     // Check for timestamps
@@ -301,7 +300,7 @@ int32_t c_pipp_ser::open(
     }
 
     // Code to check m_header.pixel_depth since many software packages seem to set this incorrectly
-    if (m_bytes_depth == 2 && m_header.frame_count > 0) {
+    if (m_byte_depth_in == 2 && m_header.frame_count > 0) {
         const int FRAMES_TO_CHECK_FOR_PIXEL_DEPTH = 10;
         int32_t pixel_depth[FRAMES_TO_CHECK_FOR_PIXEL_DEPTH];
         pixel_depth[0] = find_pixel_depth(1);  // First frame
@@ -325,6 +324,9 @@ int32_t c_pipp_ser::open(
 
         // Use largest pixel depth found instead of the value from the SER header field
         m_header.pixel_depth = max_pixel_depth;
+        if (max_pixel_depth < 9) {
+            m_byte_depth_out = 1;
+        }
     }
 
     return m_header.frame_count;
@@ -353,7 +355,7 @@ int32_t c_pipp_ser::find_pixel_depth(
         }
     }
 
-    int32_t pixel_depth = 9;  // Smallest pixel depth
+    int32_t pixel_depth = 8;  // Smallest pixel depth
     for (int x = 15; x >= 8; x--) {
         if (max_pixel >= (1 << x)) {
             pixel_depth = x + 1;
@@ -370,7 +372,7 @@ int32_t c_pipp_ser::find_pixel_depth(
 // ------------------------------------------
 int32_t c_pipp_ser::get_buffer_size()
 {
-    int size = m_header.image_width * m_header.image_height * m_bytes_depth;
+    int size = m_header.image_width * m_header.image_height * m_byte_depth_out;
 
     if (m_header.colour_id == COLOURID_RGB || m_header.colour_id == COLOURID_BGR) {
         size *= 3;
@@ -598,7 +600,7 @@ int32_t c_pipp_ser::get_frame (
     if (frame_number != m_current_frame + 1) {
         // This is not the next frame, seek to the correct frame
         m_current_frame = frame_number - 1;
-        uint64_t offset = ((uint64_t)m_current_frame * (uint64_t)m_framesize) + 178;
+        uint64_t offset = ((uint64_t)m_current_frame * (uint64_t)m_framesize_in) + 178;
         fseek64(mp_ser_file, offset, SEEK_SET);
 
         // Update timestamp pointer
@@ -634,7 +636,7 @@ int32_t c_pipp_ser::get_frame (
         m_timestamp = *mp_timestamp++;
     }
 
-    if (m_header.pixel_depth > 8) {
+    if (m_byte_depth_in == 2 && m_byte_depth_out == 2) {
         // More than 8 bits per pixel
         if (m_header.colour_id == COLOURID_RGB) {
             // Colour RGB data
@@ -777,7 +779,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 }
-            } else {
+            } else if (m_header.pixel_depth > 8) {
                 if (m_header.little_endian == 0) {
                     // Big endian, bits per pixel > 8 but < 16
                     uint16_t r, g, b;
@@ -822,7 +824,6 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             }
-
         } else {
             // Mono data
 
@@ -861,7 +862,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 }
-            } else {
+            } else  {
                 if (m_header.little_endian == 0) {
                     // Big endian, bits per pixel > 8 but < 16
                     uint16_t value;
@@ -887,6 +888,156 @@ int32_t c_pipp_ser::get_frame (
                             value = (value << shift1) + (value >> shift2);
                             *write_ptr++ = value;
                         }
+                    }
+                }
+            }
+        }
+    } else if (m_byte_depth_in == 2 && m_byte_depth_out == 1) {
+        // More than 8 bits per pixel
+        if (m_header.colour_id == COLOURID_RGB) {
+            // Colour RGB data
+
+            // Skip frame if required
+            if (buffer == nullptr) {
+                fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 6 ,SEEK_CUR);
+                return 0;
+            }
+
+            // Create a temp buffer and load frame from file into it
+            uint16_t *temp_buffer_ptr = (uint16_t *)m_temp_buffer.get_buffer(m_header.image_width * m_header.image_height * 2 * 3);
+            fread(temp_buffer_ptr, 1, m_header.image_width * m_header.image_height * 2 * 3, mp_ser_file);
+
+            // Copy data into supplied buffer
+            uint8_t *read_ptr8;
+            uint8_t *write_ptr8 = (uint8_t *)buffer;
+
+            if (m_header.little_endian == 0) {
+                // Big endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t r = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t g = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t b = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = b;
+                        *write_ptr8++ = g;
+                        *write_ptr8++ = r;
+                    }
+                }
+            } else {
+                // Little endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
+                    read_ptr8++;
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t r = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t g = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t b = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = b;
+                        *write_ptr8++ = g;
+                        *write_ptr8++ = r;
+                    }
+                }
+            }
+        } else if (m_header.colour_id == COLOURID_BGR) {
+            // Colour BGR data
+
+            // Skip frame if required
+            if (buffer == nullptr) {
+                fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 6 ,SEEK_CUR);
+                return 0;
+            }
+
+            // Create a temp buffer and load frame from file into it
+            uint16_t *temp_buffer_ptr = (uint16_t *)m_temp_buffer.get_buffer(m_header.image_width * m_header.image_height * 2 * 3);
+            fread(temp_buffer_ptr, 1, m_header.image_width * m_header.image_height * 2 * 3, mp_ser_file);
+
+            // Copy data into supplied buffer
+            uint8_t *read_ptr8;
+            uint8_t *write_ptr8 = (uint8_t *)buffer;
+
+            if (m_header.little_endian == 0) {
+                // Big endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t b = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t g = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t r = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = b;
+                        *write_ptr8++ = g;
+                        *write_ptr8++ = r;
+                    }
+                }
+            } else {
+                // Little endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
+                    read_ptr8++;
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t b = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t g = *read_ptr8;
+                        read_ptr8 += 2;
+                        uint8_t r = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = b;
+                        *write_ptr8++ = g;
+                        *write_ptr8++ = r;
+                    }
+                }
+            }
+        } else {
+            // Mono Data
+
+            // Skip frame if required
+            if (buffer == nullptr) {
+                fseek64(mp_ser_file, m_header.image_width * m_header.image_height * 2 ,SEEK_CUR);
+                return 0;
+            }
+
+            // Create a temp buffer and load frame from file into it
+            uint16_t *temp_buffer_ptr = (uint16_t *)m_temp_buffer.get_buffer(m_header.image_width * m_header.image_height * 2);
+            fread(temp_buffer_ptr, 1, m_header.image_width * m_header.image_height * 2, mp_ser_file);
+
+            // Copy data into supplied buffer
+            uint8_t *read_ptr8;
+            uint8_t *write_ptr8 = (uint8_t *)buffer;
+
+            if (m_header.little_endian == 0) {
+                // Big endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width);
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t value = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = value;
+                    }
+                }
+            } else {
+                // Little endian (16-bit data) but pixel depth is only 8-bits
+                for (int32_t y = m_header.image_height-1; y >= 0; y--) {
+                    read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width);
+                    read_ptr8++;
+                    for (int32_t x = 0; x < m_header.image_width; x++) {
+                        uint8_t value = *read_ptr8;
+                        read_ptr8 += 2;
+
+                        *write_ptr8++ = value;
                     }
                 }
             }

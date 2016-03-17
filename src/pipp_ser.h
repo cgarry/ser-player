@@ -65,9 +65,10 @@ class c_pipp_ser {
         std::string m_filename;
         FILE *mp_ser_file;
         int64_t m_filesize;
-        uint32_t m_framesize;
+        uint32_t m_framesize_in;
         s_ser_header m_header;
-        int32_t m_bytes_depth;
+        int32_t m_byte_depth_in;
+        int32_t m_byte_depth_out;
         int32_t m_colour;
         uint32_t m_current_frame;
         uint64_t m_timestamp;
@@ -94,7 +95,8 @@ class c_pipp_ser {
         c_pipp_ser() :
             mp_ser_file(nullptr),
             m_filesize(0),
-            m_bytes_depth(0),
+            m_byte_depth_in(0),
+            m_byte_depth_out(0),
             m_colour(0),
             mp_timestamp(nullptr),
             m_error_string("") {}
@@ -213,7 +215,7 @@ class c_pipp_ser {
         // Get byte_depth
         // ------------------------------------------
         int32_t get_byte_depth() {
-            return m_bytes_depth;
+            return m_byte_depth_out;
         }
 
 
