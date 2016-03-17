@@ -26,5 +26,6 @@
         <file>resources/down_button.png</file>
         <file>resources/up_button.png</file>
         <file>resources/crop_icon.png</file>
+        <file>translations/ser_player_de.qm</file>
     </qresource>
 </RCC>

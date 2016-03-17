@@ -13,8 +13,9 @@ CONFIG += warn_on
 unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Internationalisation
-TRANSLATIONS = translations/ser_player_da.ts\
-               translations/ser_player_fr.ts
+TRANSLATIONS = translations/ser_player_da.ts \
+               translations/ser_player_fr.ts \
+               translations/ser_player_de.ts
 
 # Make Mac version as backwards compatible with old OS versions as possible
 macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
@@ -124,9 +125,7 @@ win32 {
 contains(QT_ARCH, i386) {
     EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win32/libeay32.dll \
                       $$PWD/platform-specific/windows/openssl/win32/ssleay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt \
-                      $$PWD/platform-specific/windows/win32/msvcr100.dll \
-                      $$PWD/platform-specific/windows/win32/msvcp100.dll
+                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt
     EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
     EXTRA_BINFILES_WIN ~= s,/,\\,g
         DESTDIR_WIN = $${DESTDIR}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="fr_FR">
+<TS version="2.1" language="fr_FR">
 <context>
     <name>QCoreApplication</name>
     <message>
@@ -54,25 +54,25 @@
     <message>
         <source>Error: SER timestamp read failed for file &apos;%1&apos;</source>
         <comment>SER File error message</comment>
-        <translation>Erreur : La lecture de l&apos;horodatage a échoué pour le fichier &apos;%1&apos;</translation>
+        <translation type="vanished">Erreur : La lecture de l&apos;horodatage a échoué pour le fichier &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Error: could not open file &apos;%1&apos; for writing</source>
         <comment>SER write file error message</comment>
-        <translation>Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
+        <translation type="vanished">Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Error writing to SER file</source>
         <comment>SER write file error message</comment>
-        <translation>Erreur lors de l&apos;écriture du fichier SER</translation>
+        <translation type="vanished">Erreur lors de l&apos;écriture du fichier SER</translation>
     </message>
     <message>
         <source>Error writing header to SER index file</source>
         <comment>SER write file error message</comment>
-        <translation>Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
+        <translation type="vanished">Erreur lors de l&apos;écriture de l&apos;entête du fichier SER</translation>
     </message>
     <message>
-        <location filename="../src/gif_write.cpp" line="191"/>
+        <location filename="../src/gif_write.cpp" line="179"/>
         <source>Error: could not open file &apos;%1&apos; for writing</source>
         <comment>GIF write file error message</comment>
         <translation>Erreur : Impossible d&apos;ouvrir le fichier &apos;%1&apos;</translation>
@@ -199,11 +199,11 @@
     </message>
     <message>
         <source> * DateTime: 0x%1</source>
-        <translation> * DateTime: 0x%1</translation>
+        <translation type="vanished"> * DateTime: 0x%1</translation>
     </message>
     <message>
         <source> * DateTime_UTC: 0x%1</source>
-        <translation> * DateTime_UTC: 0x%1</translation>
+        <translation type="vanished"> * DateTime_UTC: 0x%1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="167"/>
@@ -357,184 +357,204 @@
         <translation>BGGR</translation>
     </message>
     <message>
+        <location filename="../src/processing_options_dialog.cpp" line="55"/>
+        <source>CYYM</source>
+        <translation type="unfinished">CYYM</translation>
+    </message>
+    <message>
         <location filename="../src/processing_options_dialog.cpp" line="56"/>
+        <source>YCMY</source>
+        <translation type="unfinished">YCMY</translation>
+    </message>
+    <message>
+        <location filename="../src/processing_options_dialog.cpp" line="57"/>
+        <source>YMCY</source>
+        <translation type="unfinished">YMCY</translation>
+    </message>
+    <message>
+        <location filename="../src/processing_options_dialog.cpp" line="58"/>
+        <source>MYYC</source>
+        <translation type="unfinished">MYYC</translation>
+    </message>
+    <message>
+        <location filename="../src/processing_options_dialog.cpp" line="60"/>
         <source>This control allows the frames to be debayered using a different bayer pattern than specified in the SER file header</source>
         <translation>Ce controle permet aux images d&apos;être dématricées en utilisant le schéma de Bayer spécifié dans l&apos;entête du fichier SER</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="61"/>
+        <location filename="../src/processing_options_dialog.cpp" line="65"/>
         <source>Bayer Pattern:</source>
         <translation>Schéma de Bayer :</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="64"/>
+        <location filename="../src/processing_options_dialog.cpp" line="68"/>
         <source>Enable Debayering</source>
         <translation>Activer le dématriçage</translation>
     </message>
     <message>
         <source>Colour Debayer</source>
-        <translation>Dématriçage couleur</translation>
+        <translation type="vanished">Dématriçage couleur</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="72"/>
+        <location filename="../src/processing_options_dialog.cpp" line="76"/>
         <source>Invert Frames</source>
         <translation>Oui</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="81"/>
+        <location filename="../src/processing_options_dialog.cpp" line="85"/>
         <source>Frame Inversion</source>
         <translation>Images en négatif</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="113"/>
+        <location filename="../src/processing_options_dialog.cpp" line="117"/>
         <source>Gain</source>
         <translation>Gain</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="116"/>
+        <location filename="../src/processing_options_dialog.cpp" line="120"/>
         <source>Gamma</source>
         <translation>Gamma</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="120"/>
-        <location filename="../src/processing_options_dialog.cpp" line="305"/>
-        <location filename="../src/processing_options_dialog.cpp" line="356"/>
-        <location filename="../src/processing_options_dialog.cpp" line="418"/>
+        <location filename="../src/processing_options_dialog.cpp" line="124"/>
+        <location filename="../src/processing_options_dialog.cpp" line="309"/>
+        <location filename="../src/processing_options_dialog.cpp" line="360"/>
+        <location filename="../src/processing_options_dialog.cpp" line="422"/>
         <source>Reset</source>
         <translation>Supprimer sélection</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="135"/>
+        <location filename="../src/processing_options_dialog.cpp" line="139"/>
         <source>Gain and Gamma</source>
         <translation>Gain et Gamma</translation>
     </message>
     <message>
         <source>Convert Colour To Monochrome Using: </source>
-        <translation>Convertir couleur en monochrome en utilisant :</translation>
+        <translation type="vanished">Convertir couleur en monochrome en utilisant :</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="143"/>
+        <location filename="../src/processing_options_dialog.cpp" line="147"/>
         <source>Convert To Monochrome Using: </source>
         <translation>Convertir en niveau de gris en utilisant :</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="146"/>
+        <location filename="../src/processing_options_dialog.cpp" line="150"/>
         <source>RG &amp; B Channels</source>
         <translation>Canaux RVB</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="147"/>
+        <location filename="../src/processing_options_dialog.cpp" line="151"/>
         <source>R Channel Only</source>
         <translation>Canal R seulement</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="148"/>
+        <location filename="../src/processing_options_dialog.cpp" line="152"/>
         <source>G Channel Only</source>
         <translation>Canal VR seulement</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="149"/>
+        <location filename="../src/processing_options_dialog.cpp" line="153"/>
         <source>B Channel Only</source>
         <translation>Canal B seulement</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="150"/>
+        <location filename="../src/processing_options_dialog.cpp" line="154"/>
         <source>R &amp; G Channels</source>
         <translation>Canaux R &amp; V</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="151"/>
+        <location filename="../src/processing_options_dialog.cpp" line="155"/>
         <source>R &amp; B Channels</source>
         <translation>Canaux R &amp; B</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="152"/>
+        <location filename="../src/processing_options_dialog.cpp" line="156"/>
         <source>G &amp; B Channels</source>
         <translation>Canaux V &amp; B</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="162"/>
+        <location filename="../src/processing_options_dialog.cpp" line="166"/>
         <source>Monochrome Conversion</source>
         <translation>Conversion monochrome</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="243"/>
+        <location filename="../src/processing_options_dialog.cpp" line="247"/>
         <source>Red Channel</source>
         <translation>Canal rouge</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="298"/>
+        <location filename="../src/processing_options_dialog.cpp" line="302"/>
         <source>Blue Channel</source>
         <translation>Canal Bleu</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="314"/>
+        <location filename="../src/processing_options_dialog.cpp" line="318"/>
         <source>Colour Channel Align</source>
         <translation>Aligner les canaux des couleurs</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="352"/>
+        <location filename="../src/processing_options_dialog.cpp" line="356"/>
         <source>Saturation</source>
         <translation>Saturation</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="369"/>
+        <location filename="../src/processing_options_dialog.cpp" line="373"/>
         <source>Colour Saturation</source>
         <translation>Saturation de la couleur</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="408"/>
+        <location filename="../src/processing_options_dialog.cpp" line="412"/>
         <source>Red</source>
         <translation>Rouge</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="411"/>
+        <location filename="../src/processing_options_dialog.cpp" line="415"/>
         <source>Green</source>
         <translation>Vert</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="414"/>
+        <location filename="../src/processing_options_dialog.cpp" line="418"/>
         <source>Blue</source>
         <translation>Bleu</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="421"/>
+        <location filename="../src/processing_options_dialog.cpp" line="425"/>
         <source>Estimate</source>
         <comment>Estimate Colour Balance Button</comment>
         <translation>Estimer</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="439"/>
+        <location filename="../src/processing_options_dialog.cpp" line="443"/>
         <source>Colour Balance</source>
         <translation>Balance des couleurs</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="457"/>
+        <location filename="../src/processing_options_dialog.cpp" line="461"/>
         <source>X Position:</source>
         <translation>Position en X :</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="460"/>
+        <location filename="../src/processing_options_dialog.cpp" line="464"/>
         <source>Width</source>
         <translation>Largeur</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="463"/>
+        <location filename="../src/processing_options_dialog.cpp" line="467"/>
         <source>Y Position:</source>
         <translation>Position en Y :</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="466"/>
+        <location filename="../src/processing_options_dialog.cpp" line="470"/>
         <source>Height</source>
         <translation>Hauteur</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="475"/>
+        <location filename="../src/processing_options_dialog.cpp" line="479"/>
         <source>Set With Selection Box</source>
         <translation>Défte définir avec la boite de sélection</translation>
     </message>
     <message>
-        <location filename="../src/processing_options_dialog.cpp" line="491"/>
+        <location filename="../src/processing_options_dialog.cpp" line="495"/>
         <source>Frame Crop</source>
         <translation>Recadrer l&apos;image</translation>
     </message>
@@ -1554,7 +1574,7 @@
         <translation>Taille du fichier : %1 Bytes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2582"/>
+        <location filename="../src/ser_player.cpp" line="2586"/>
         <source>A video player and processing utility for SER files.</source>
         <translation>Un utilitaire de lecture et de traitement de vidéos SER.</translation>
     </message>
@@ -1833,37 +1853,37 @@ Maj-click pour reculer de plusieurs images</translation>
         <translation>CYYM</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2143"/>
+        <location filename="../src/ser_player.cpp" line="2144"/>
         <source>YCMY</source>
         <comment>Colour ID label</comment>
         <translation>YCMY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2146"/>
+        <location filename="../src/ser_player.cpp" line="2148"/>
         <source>YMCY</source>
         <comment>Colour ID label</comment>
         <translation>YMCY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2149"/>
+        <location filename="../src/ser_player.cpp" line="2152"/>
         <source>MYYC</source>
         <comment>Colour ID label</comment>
         <translation>MYYC</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2152"/>
+        <location filename="../src/ser_player.cpp" line="2156"/>
         <source>RGB</source>
         <comment>Colour ID label</comment>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2156"/>
+        <location filename="../src/ser_player.cpp" line="2160"/>
         <source>BGR</source>
         <comment>Colour ID label</comment>
         <translation>BGR</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2160"/>
+        <location filename="../src/ser_player.cpp" line="2164"/>
         <source>????</source>
         <comment>Colour ID label for unknown ID</comment>
         <translation>????</translation>
@@ -1955,46 +1975,46 @@ Maj-click pour reculer de plusieurs images</translation>
         <translation>Tagged Image File Format (*.tif)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2581"/>
+        <location filename="../src/ser_player.cpp" line="2585"/>
         <source>SER Player</source>
         <translation>Lecteur SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2586"/>
+        <location filename="../src/ser_player.cpp" line="2590"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Traduction française par Cyril Richard</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2595"/>
+        <location filename="../src/ser_player.cpp" line="2599"/>
         <source>Credits:</source>
         <translation>Crédits :</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2597"/>
+        <location filename="../src/ser_player.cpp" line="2601"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
         <translation>Sylvain Weiller pour toutes ses suggestions, ses tests et ses retours.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2610"/>
+        <location filename="../src/ser_player.cpp" line="2614"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ; si ce n&apos;est pas le cas, consultez &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2615"/>
+        <location filename="../src/ser_player.cpp" line="2619"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>À propos du lecteur SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2623"/>
+        <location filename="../src/ser_player.cpp" line="2627"/>
         <source>No SER File Open</source>
         <comment>No SER file message on inital image</comment>
         <translation>Aucun Fichier SER Ouvert</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2663"/>
+        <location filename="../src/ser_player.cpp" line="2667"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>Nouvelle version de SER Player disponible : %1</translation>
