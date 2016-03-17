@@ -3,7 +3,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "SER Player"
-!define PRODUCT_VERSION "1.4.14"
+!define PRODUCT_VERSION "1.4.15"
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"
@@ -65,6 +65,11 @@ Section "MainSection" SEC01
   File /r "..\platform-specific\windows\win*"
 SectionEnd
 
+Section -Prerequisites
+; Install VC++ 2013 Redistributable
+  ExecWait '"$INSTDIR\vcredist_x86.exe /install /quiet /norestart /log %TEMP%\vcredist_2013_x86.log"'
+SectionEnd
+
 Section -AdditionalIcons
   SetShellVarContext all
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
@@ -84,19 +89,7 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
-Function .onInit
-  ; Check if VC++ 2013 Redistributable is installed
-  ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\13.0\VC\VCRedist\x86" "Installed"
-  StrCmp $1 1 installed
-  
-  ; VC++ 2010 Redistributable is not installed
-  MessageBox MB_OK "VC++ 2010 Redistributable is not installed"
-  ExecWait '"$INSTDIR\vcredist_x86.exe"'
-  
-  installed:
-  ; VC++ 2010 Redistributable is already installed
-  MessageBox MB_OK "VC++ 2010 Redistributable is installed"
-  
+Function .onInit  
   StrCpy $InstDir "$PROGRAMFILES\SER Player"
 FunctionEnd
 
@@ -168,7 +161,6 @@ Function CreateSerFileAssication
         ${EndIf}
   ${EndIf}
 FunctionEnd
- 
  
 !macro _OpenURL URL
 Push "${URL}"

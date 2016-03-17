@@ -3,7 +3,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "SER Player"
-!define PRODUCT_VERSION "1.4.11"
+!define PRODUCT_VERSION "1.4.15"
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"
@@ -64,6 +64,12 @@ Section "MainSection" SEC01
   File /r "..\bin64\*"
   File /r "..\platform-specific\windows\win*"
 SectionEnd
+
+Section -Prerequisites
+; Install VC++ 2013 Redistributable
+  ExecWait '"$INSTDIR\vcredist_x64.exe /install /quiet /norestart /log %TEMP%\vcredist_2013_x64.log"'
+SectionEnd
+
 
 Section -AdditionalIcons
   SetShellVarContext all
@@ -154,8 +160,8 @@ pop $R1
 
 Function CreateSerFileAssication
     ${If} ${Cmd} 'MessageBox MB_YESNO "Associate .ser files and install .ser thumbnail preview DLL?$\nThis allows .ser files to be opened with SER Player by double-clicking on them and allows .ser files to be previewed as thumbnails in Windows Explorer." IDYES' 
-        ${unregisterExtension} ".ser" "SER File"
         ${registerExtension} "$INSTDIR\ser-player.exe" ".ser" "SER File"
+      
         ${If} ${AtLeastWinVista}
             ${If} ${RunningX64}
                 # 64 bit code
@@ -173,7 +179,6 @@ Function CreateSerFileAssication
         ${EndIf}
     ${EndIf}
 FunctionEnd
- 
  
 !macro _OpenURL URL
 Push "${URL}"
