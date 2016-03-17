@@ -24,251 +24,6 @@
 #include "pipp_ser.h"
 
 
-
-template <typename T>
-void c_image::debayer_pixel_bilinear(
-    uint32_t bayer,
-    int32_t x,
-    int32_t y,
-    T *raw_data,
-    T *rgb_data)
-{
-    T *raw_data_ptr = ((T *)raw_data) + (y * m_width + x);
-    T *rgb_data_ptr = ((T *)rgb_data) + ((y * m_width + x) * 3);
-
-    uint32_t count;
-    uint32_t total;
-
-    // Blue channel
-    switch (bayer) {
-        case 0:
-            // Blue - Average of 4 corners;
-            count = 0;
-            total = 0;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-m_width-1);
-                count++;
-            }
-
-            if (y > 0 && x < m_width-1) {
-                total += *(raw_data_ptr-m_width+1);
-                count++;
-            }
-
-            if (y < m_height-1 && x > 0) {
-                total += *(raw_data_ptr+m_width-1);
-                count++;
-            }
-
-            if (y < m_height-1 && x < m_width-1) {
-                total += *(raw_data_ptr+m_width+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 nearest neighbours
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-1);
-                count++;
-            }
-
-            if (x < m_width-1) {
-                total += *(raw_data_ptr+1);
-                count++;
-            }
-
-            if (y < m_height-1) {
-                total += *(raw_data_ptr+m_width);
-                count++;
-            }
-
-            if (y > 0) {
-                total += *(raw_data_ptr-m_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Simple case just return data at this position
-            *rgb_data_ptr = *raw_data_ptr;
-            break;
-
-        case 1:
-            // Blue - Average of above and below pixels
-            count = 0;
-            total = 0;
-            if (y > 0) {
-                total += *(raw_data_ptr-m_width);
-                count++;
-            }
-
-            if (y < m_height-1) {
-                total += *(raw_data_ptr+m_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 corners and this position
-            count = 1;
-            total = *raw_data_ptr;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-m_width-1);
-                count++;
-            }
-
-            if (y > 0 && x < m_width-1) {
-                total += *(raw_data_ptr-m_width+1);
-                count++;
-            }
-
-            if (y < m_height-1 && x > 0) {
-                total += *(raw_data_ptr+m_width-1);
-                count++;
-            }
-
-            if (y < m_height-1 && x < m_width-1) {
-                total += *(raw_data_ptr+m_width+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of left and right pixels
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-1);
-                count++;
-            }
-
-            if (x < m_width-1) {
-                total += *(raw_data_ptr+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-
-        case 2:
-            // Blue - Average of left and right pixels
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-1);
-                count++;
-            }
-
-            if (x < m_width-1) {
-                total += *(raw_data_ptr+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Blue
-
-            // Green - Average of 4 corners and this position
-            count = 1;
-            total = *raw_data_ptr;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-m_width-1);
-                count++;
-            }
-
-            if (y > 0 && x < m_width-1) {
-                total += *(raw_data_ptr-m_width+1);
-                count++;
-            }
-
-            if (y < m_height-1 && x > 0) {
-                total += *(raw_data_ptr+m_width-1);
-                count++;
-            }
-
-            if (y < m_height-1 && x < m_width-1) {
-                total += *(raw_data_ptr+m_width+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of above and below pixels
-            count = 0;
-            total = 0;
-            if (y > 0) {
-                total += *(raw_data_ptr-m_width);
-                count++;
-            }
-
-            if (y < m_height-1) {
-                total += *(raw_data_ptr+m_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-
-        default:
-            // Blue - Simple case just return data at this position
-            *rgb_data_ptr++ = *raw_data_ptr;
-
-            // Green - Return average of 4 nearest neighbours
-            count = 0;
-            total = 0;
-            if (x > 0) {
-                total += *(raw_data_ptr-1);
-                count++;
-            }
-
-            if (x < m_width-1) {
-                total += *(raw_data_ptr+1);
-                count++;
-            }
-
-            if (y < m_height-1) {
-                total += *(raw_data_ptr+m_width);
-                count++;
-            }
-
-            if (y > 0) {
-                total += *(raw_data_ptr-m_width);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Green
-
-            // Red - Average of 4 corners;
-            count = 0;
-            total = 0;
-            if (x > 0 && y > 0) {
-                total += *(raw_data_ptr-m_width-1);
-                count++;
-            }
-
-            if (y > 0 && x < m_width-1) {
-                total += *(raw_data_ptr-m_width+1);
-                count++;
-            }
-
-            if (y < m_height-1 && x > 0) {
-                total += *(raw_data_ptr+m_width-1);
-                count++;
-            }
-
-            if (y < m_height-1 && x < m_width-1) {
-                total += *(raw_data_ptr+m_width+1);
-                count++;
-            }
-
-            *rgb_data_ptr++ = total / count;  // Red
-            break;
-    }
-}
-
-
-
 void c_image::set_image_details(int32_t width,
                                 int32_t height,
                                 int32_t byte_depth,
@@ -1625,6 +1380,249 @@ bool c_image::debayer_image_bilinear(int32_t colour_id)
 
 
 template <typename T>
+void c_image::debayer_pixel_bilinear(
+    uint32_t bayer,
+    int32_t x,
+    int32_t y,
+    T *raw_data,
+    T *rgb_data)
+{
+    T *raw_data_ptr = ((T *)raw_data) + (y * m_width + x);
+    T *rgb_data_ptr = ((T *)rgb_data) + ((y * m_width + x) * 3);
+
+    uint32_t count;
+    uint32_t total;
+
+    // Blue channel
+    switch (bayer) {
+        case 0:
+            // Blue - Average of 4 corners;
+            count = 0;
+            total = 0;
+            if (x > 0 && y > 0) {
+                total += *(raw_data_ptr-m_width-1);
+                count++;
+            }
+
+            if (y > 0 && x < m_width-1) {
+                total += *(raw_data_ptr-m_width+1);
+                count++;
+            }
+
+            if (y < m_height-1 && x > 0) {
+                total += *(raw_data_ptr+m_width-1);
+                count++;
+            }
+
+            if (y < m_height-1 && x < m_width-1) {
+                total += *(raw_data_ptr+m_width+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Blue
+
+            // Green - Average of 4 nearest neighbours
+            count = 0;
+            total = 0;
+            if (x > 0) {
+                total += *(raw_data_ptr-1);
+                count++;
+            }
+
+            if (x < m_width-1) {
+                total += *(raw_data_ptr+1);
+                count++;
+            }
+
+            if (y < m_height-1) {
+                total += *(raw_data_ptr+m_width);
+                count++;
+            }
+
+            if (y > 0) {
+                total += *(raw_data_ptr-m_width);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Green
+
+            // Red - Simple case just return data at this position
+            *rgb_data_ptr = *raw_data_ptr;
+            break;
+
+        case 1:
+            // Blue - Average of above and below pixels
+            count = 0;
+            total = 0;
+            if (y > 0) {
+                total += *(raw_data_ptr-m_width);
+                count++;
+            }
+
+            if (y < m_height-1) {
+                total += *(raw_data_ptr+m_width);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Blue
+
+            // Green - Average of 4 corners and this position
+            count = 1;
+            total = *raw_data_ptr;
+            if (x > 0 && y > 0) {
+                total += *(raw_data_ptr-m_width-1);
+                count++;
+            }
+
+            if (y > 0 && x < m_width-1) {
+                total += *(raw_data_ptr-m_width+1);
+                count++;
+            }
+
+            if (y < m_height-1 && x > 0) {
+                total += *(raw_data_ptr+m_width-1);
+                count++;
+            }
+
+            if (y < m_height-1 && x < m_width-1) {
+                total += *(raw_data_ptr+m_width+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Green
+
+            // Red - Average of left and right pixels
+            count = 0;
+            total = 0;
+            if (x > 0) {
+                total += *(raw_data_ptr-1);
+                count++;
+            }
+
+            if (x < m_width-1) {
+                total += *(raw_data_ptr+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Red
+            break;
+
+        case 2:
+            // Blue - Average of left and right pixels
+            count = 0;
+            total = 0;
+            if (x > 0) {
+                total += *(raw_data_ptr-1);
+                count++;
+            }
+
+            if (x < m_width-1) {
+                total += *(raw_data_ptr+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Blue
+
+            // Green - Average of 4 corners and this position
+            count = 1;
+            total = *raw_data_ptr;
+            if (x > 0 && y > 0) {
+                total += *(raw_data_ptr-m_width-1);
+                count++;
+            }
+
+            if (y > 0 && x < m_width-1) {
+                total += *(raw_data_ptr-m_width+1);
+                count++;
+            }
+
+            if (y < m_height-1 && x > 0) {
+                total += *(raw_data_ptr+m_width-1);
+                count++;
+            }
+
+            if (y < m_height-1 && x < m_width-1) {
+                total += *(raw_data_ptr+m_width+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Green
+
+            // Red - Average of above and below pixels
+            count = 0;
+            total = 0;
+            if (y > 0) {
+                total += *(raw_data_ptr-m_width);
+                count++;
+            }
+
+            if (y < m_height-1) {
+                total += *(raw_data_ptr+m_width);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Red
+            break;
+
+        default:
+            // Blue - Simple case just return data at this position
+            *rgb_data_ptr++ = *raw_data_ptr;
+
+            // Green - Return average of 4 nearest neighbours
+            count = 0;
+            total = 0;
+            if (x > 0) {
+                total += *(raw_data_ptr-1);
+                count++;
+            }
+
+            if (x < m_width-1) {
+                total += *(raw_data_ptr+1);
+                count++;
+            }
+
+            if (y < m_height-1) {
+                total += *(raw_data_ptr+m_width);
+                count++;
+            }
+
+            if (y > 0) {
+                total += *(raw_data_ptr-m_width);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Green
+
+            // Red - Average of 4 corners;
+            count = 0;
+            total = 0;
+            if (x > 0 && y > 0) {
+                total += *(raw_data_ptr-m_width-1);
+                count++;
+            }
+
+            if (y > 0 && x < m_width-1) {
+                total += *(raw_data_ptr-m_width+1);
+                count++;
+            }
+
+            if (y < m_height-1 && x > 0) {
+                total += *(raw_data_ptr+m_width-1);
+                count++;
+            }
+
+            if (y < m_height-1 && x < m_width-1) {
+                total += *(raw_data_ptr+m_width+1);
+                count++;
+            }
+
+            *rgb_data_ptr++ = total / count;  // Red
+            break;
+    }
+}
+
+
+template <typename T>
 bool c_image::debayer_image_bilinear_int(int32_t colour_id)
 {
     uint32_t bayer_code;
@@ -1776,11 +1774,11 @@ bool c_image::debayer_image_bilinear_int(int32_t colour_id)
         raw_data_ptr += 2;
     }
 
-    // We currently have data in GBR, change order to BGR
     if (colour_id == COLOURID_BAYER_CYYM ||
         colour_id == COLOURID_BAYER_YCMY ||
         colour_id == COLOURID_BAYER_YMCY ||
         colour_id == COLOURID_BAYER_MYYC) {
+		// We currently have data in GBR order, change order to BGR
         T *p_read_data_ptr = (T *)rgb_data;
         T *p_write_data_ptr = (T *)rgb_data;
         for (int y = 0; y < (m_height); y++) {
