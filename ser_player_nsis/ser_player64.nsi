@@ -7,7 +7,8 @@
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"
-!define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+!define PRODUCT_UNINST_KEY_X86 "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+!define PRODUCT_UNINST_KEY_X64 "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME} x64"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 ; MUI 1.67 compatible ------
@@ -82,12 +83,12 @@ Section -Post
   SetShellVarContext all
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\ser-player.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\ser-player.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "DisplayName" "$(^Name)"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "UninstallString" "$INSTDIR\uninst.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "DisplayIcon" "$INSTDIR\ser-player.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "DisplayVersion" "${PRODUCT_VERSION}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
 Function .onInit
@@ -96,9 +97,11 @@ Function .onInit
     ; Check for current 32-bit installation
     IfFileExists "$PROGRAMFILES\SER Player\uninst.exe" Uninstall32Exists PastUninstall32Check
     Uninstall32Exists:
-      ${If} ${Cmd} 'MessageBox MB_YESNO "A 32-bit version of SER Player is already installed.  It is recommended that this version is uninstalled before installing the 64-bit version of SER Player.$\nUninstall now?" IDYES' 
+    ${If} ${Cmd} 'MessageBox MB_YESNO "A 32-bit version of SER Player is already installed.  This version must be uninstalled before the 64-bit version of SER Player can be installed.$\nUninstall now?" IDYES' 
         ExecWait '"$PROGRAMFILES\SER Player\uninst.exe" /S _?=$INSTDIR'
         RMDir /r "$INSTDIR"
+	${Else}
+	    Quit
     ${EndIf}
 
     PastUninstall32Check:
@@ -210,7 +213,7 @@ Section Uninstall
   RMDir /r "$SMPROGRAMS\SER Player"
   
   
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
+  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY_X64}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   ${unregisterExtension} ".ser" "SER File"
   SetAutoClose true 

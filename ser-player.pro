@@ -92,9 +92,11 @@ HEADERS  += src/ser_player.h \
 
 # Build directories
 contains(QT_ARCH, i386) {
+    DEFINES += BUILD_32_BIT
     win32:OBJECTS_DIR = $$PWD/build/o/win32
     win32:DESTDIR = $$PWD/bin32
 } else {
+    DEFINES += BUILD_64_BIT
     win32:OBJECTS_DIR = $$PWD/build/o/win64
     win32:DESTDIR = $$PWD/bin64
 }

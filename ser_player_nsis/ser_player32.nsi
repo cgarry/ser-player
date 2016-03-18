@@ -65,10 +65,12 @@ Section "MainSection" SEC01
   File /r "..\platform-specific\windows\win*"
 SectionEnd
 
+
 Section -Prerequisites
 ; Install VC++ 2013 Redistributable
   ExecWait '"$INSTDIR\vcredist_x86.exe /install /quiet /norestart /log %TEMP%\vcredist_2013_x86.log"'
 SectionEnd
+
 
 Section -AdditionalIcons
   SetShellVarContext all
@@ -76,6 +78,7 @@ Section -AdditionalIcons
   CreateShortCut "$SMPROGRAMS\SER Player\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\SER Player\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
+
 
 Section -Post
   SetShellVarContext all
@@ -89,9 +92,25 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
+
 Function .onInit  
+  ; Only do this check on 64-bit machines
+  ${If} ${RunningX64}
+    ; Check for current 64-bit installation
+    IfFileExists "$PROGRAMFILES64\SER Player\uninst.exe" Uninstall64Exists PastUninstall64Check
+    Uninstall64Exists:
+      ${If} ${Cmd} 'MessageBox MB_YESNO "A 64-bit version of SER Player is already installed.  This version must be uninstalled before the 32-bit version of SER Player can be installed.$\nUninstall now?" IDYES' 
+        ExecWait '"$PROGRAMFILES64\SER Player\uninst.exe" /S _?=$INSTDIR'
+        RMDir /r "$INSTDIR"
+      ${Else}
+        Quit
+      ${EndIf}
+      PastUninstall64Check:
+  ${EndIf}
+
   StrCpy $InstDir "$PROGRAMFILES\SER Player"
 FunctionEnd
+
 
 Function .onInstSuccess
   Call CreateSerFileAssication
