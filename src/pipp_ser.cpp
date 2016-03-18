@@ -153,7 +153,6 @@ int32_t c_pipp_ser::open(
         m_header.pixel_depth = bpp;
     }
 
-    // Check the pixel depth
     if (m_header.pixel_depth > 8) {
         m_byte_depth_in = 2;
         m_byte_depth_out = 2;
@@ -344,18 +343,14 @@ int32_t c_pipp_ser::find_pixel_depth(
 
     uint16_t max_pixel = 0;
     uint16_t *p_temp_ptr = (uint16_t *)p_temp_buffer.get();
-    for (int x = 0; x < m_header.image_width * m_header.image_height * 3; x++) {
-        uint16_t pixel = *p_temp_ptr++;
-        if (pixel > max_pixel) {
-            max_pixel = pixel;
-            if (max_pixel >= 0x8000) {
-                // Max pixel value is already 16-bits
-                break;
-            }
-        }
+    for (int x = 0; x < m_header.image_width * m_header.image_height; x++) {
+        max_pixel |= *p_temp_ptr++;
+        max_pixel |= *p_temp_ptr++;
+        max_pixel |= *p_temp_ptr++;
     }
 
-    int32_t pixel_depth = 8;  // Smallest pixel depth
+    // Find the pixel depth from max_pixel
+    int32_t pixel_depth = 8;
     for (int x = 15; x >= 8; x--) {
         if (max_pixel >= (1 << x)) {
             pixel_depth = x + 1;
