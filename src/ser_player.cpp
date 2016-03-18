@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.4.14"
+#define VERSION_STRING "v1.4.15"
 
 #include <Qt>
 #include <QApplication>
@@ -2582,7 +2582,13 @@ void c_ser_player::about_ser_player()
 {
     QPixmap ser_player_logoPixmap(":/res/resources/ser_player_logo_150x150.png");
     QMessageBox msgBox;
-    msgBox.setText("<b><big>" + tr("SER Player") + "</big> (" VERSION_STRING ")</b>");
+#ifdef BUILD_64_BIT
+    QString build_type_string = "x64";
+#else
+    QString build_type_string = "x86";
+#endif
+
+    msgBox.setText("<b><big>" + tr("SER Player") + "</big> (" VERSION_STRING " - " + build_type_string + ")</b>");
     QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
     informative_text += "Copyright (c) 2015 Chris Garry";
