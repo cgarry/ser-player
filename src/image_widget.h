@@ -59,7 +59,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *p_event);
 
 private:
-    void c_image_Widget::draw_selection_rectangle(QPixmap &pixmap);
+    void draw_selection_rectangle(QPixmap &pixmap);
 
     c_selection_box_dialog *mp_selection_box_dialog;
     QPixmap m_image_Pixmap;
