@@ -1,0 +1,13 @@
+Package: ser-player
+Version: _ser_player_version_-_debian_version_
+Section: video
+Priority: optional
+Architecture: _arch_
+Depends: libc6, libx11-xcb1, libxi6, libxcb-util0, libfontconfig, libfreetype6, libxrender1, libx11-6, libstdc++6, libgcc1, libxext6, libxau6, libxdmcp6, libexpat1, libglapi-mesa,  libxdamage1, libxfixes3, libxcb-glx0, libxcb-dri2-0, libxxf86vm1, libdrm2
+Maintainer: Chris Garry <astropipp@gmail.com>
+Installed-Size: _installed_size_
+Description: A video player and processing utility for SER files.
+ The SER file format can be used to store data from fast frame rate astronomy
+ cameras intead of using the AVI file format.  This application enables users to
+ review SER files in the same way that AVI files are reviewed with a video
+ player.
