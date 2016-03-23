@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# QMAKEDIR="/home/cgarry/Qt/5.4/gcc_64/bin/"
-QMAKEDIR="/usr/lib/x86_64-linux-gnu/qt5/bin/"
