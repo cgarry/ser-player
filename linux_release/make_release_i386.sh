@@ -51,15 +51,15 @@ cp $QTDIR/lib/libQt5Core.so.5 $release_dir/usr/lib/ser-player/libs/
 chmod 0644 $release_dir/usr/lib/ser-player/libs/libQt5Core.so.5
 cp $QTDIR/lib/libQt5DBus.so.5 $release_dir/usr/lib/ser-player/libs/
 chmod 0644 $release_dir/usr/lib/ser-player/libs/libQt5DBus.so.5
-cp $QTDIR/lib/libicui18n.so.53 $release_dir/usr/lib/ser-player/libs/
-strip -s $release_dir/usr/lib/ser-player/libs/libicui18n.so.53
-chmod 0644 $release_dir/usr/lib/ser-player/libs/libicui18n.so.53
-cp $QTDIR/lib/libicuuc.so.53 $release_dir/usr/lib/ser-player/libs/
-strip -s $release_dir/usr/lib/ser-player/libs/libicuuc.so.53
-chmod 0644 $release_dir/usr/lib/ser-player/libs/libicuuc.so.53
-cp $QTDIR/lib/libicudata.so.53 $release_dir/usr/lib/ser-player/libs/
-strip -s $release_dir/usr/lib/ser-player/libs/libicudata.so.53
-chmod 0644 $release_dir/usr/lib/ser-player/libs/libicudata.so.53
+cp $QTDIR/lib/libicui18n.so.54 $release_dir/usr/lib/ser-player/libs/
+strip -s $release_dir/usr/lib/ser-player/libs/libicui18n.so.54
+chmod 0644 $release_dir/usr/lib/ser-player/libs/libicui18n.so.54
+cp $QTDIR/lib/libicuuc.so.54 $release_dir/usr/lib/ser-player/libs/
+strip -s $release_dir/usr/lib/ser-player/libs/libicuuc.so.54
+chmod 0644 $release_dir/usr/lib/ser-player/libs/libicuuc.so.54
+cp $QTDIR/lib/libicudata.so.54 $release_dir/usr/lib/ser-player/libs/
+strip -s $release_dir/usr/lib/ser-player/libs/libicudata.so.54
+chmod 0644 $release_dir/usr/lib/ser-player/libs/libicudata.so.54
 
 
 # Copy plugins to directories
