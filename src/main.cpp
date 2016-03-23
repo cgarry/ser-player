@@ -26,7 +26,5 @@
 int main(int argc, char *argv[])
 {
     c_application app(argc, argv);
-    qDebug() << "QStyle: " << app.style()->objectName();
-
     return app.exec();
 }
