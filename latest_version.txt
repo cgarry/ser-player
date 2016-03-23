@@ -1,15 +1,10 @@
-v1.4.0
-Bug Fixes:
-  * Minor bugfix and various updates release.
-
+v1.5.0
 Enhancements:
-  * Fixed playback of SER files with incorrectly set pixel_depth in header.
-  * Added controls to modify display colour saturation and colour balance.
-  * Added controls to modify gain and gamma.
-  * Added support for 'reverse' and 'forward + reverse' play.
-  * Added start and end markers to restrict frames that are played.
-  * Added support for saving multiple frames as images, including while playback is active.
-  * Added a histogram viewer.
-  * Added option to open recently used SER files.
-  * Added option to open folders recently used to save frames in.
-  * Added support for saving frames as a new SER file, with or without processing.
+  * Added support for viewing SER file thumbnails in Explorer (Windows Only).
+  * Added support for resizing frames when saving them.
+  * Added support for aligning RGB channels.
+  * Added support for generating animated GIFs.
+  * Added support for generating raw AVI files.
+  * Added support for frame cropping.
+  * Added support for CYYM, YCMY, YMCY and MYYC bayer patterns.
+  * Added German language translation.
