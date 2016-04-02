@@ -46,7 +46,7 @@
         <translation>Erreur : Le fichier &apos;%1&apos; a une profondeur de pixel de %2 invalide</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="178"/>
+        <location filename="../src/pipp_ser.cpp" line="179"/>
         <source>Error: File &apos;%1&apos; is too short to hold all the frames</source>
         <comment>SER File error message</comment>
         <translation>Erreur : Le fichier &apos;%1&apos; est trop petit pour contenir toutes les images</translation>
@@ -269,57 +269,57 @@
 <context>
     <name>c_pipp_ser</name>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="465"/>
+        <location filename="../src/pipp_ser.cpp" line="462"/>
         <source> * Timestamps are all identical</source>
         <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="467"/>
+        <location filename="../src/pipp_ser.cpp" line="464"/>
         <source> * Timestamps are all in order</source>
         <translation> * Les horodatages sont tous en ordre</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="470"/>
+        <location filename="../src/pipp_ser.cpp" line="467"/>
         <source> * Out of order timestamps detected</source>
         <translation> * Horodatage dans le désordre détecté</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="486"/>
+        <location filename="../src/pipp_ser.cpp" line="483"/>
         <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation> * Horodatage min : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="506"/>
+        <location filename="../src/pipp_ser.cpp" line="503"/>
         <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation> * Horodatage max : %3/%2/%1 %4:%5:%6.%7 TU</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="532"/>
+        <location filename="../src/pipp_ser.cpp" line="529"/>
         <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 jours %2 heures %3 min %4 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="535"/>
+        <location filename="../src/pipp_ser.cpp" line="532"/>
         <source> * Min to Max timestamp difference: %1 hours %2 min %3 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 heures %2 min %3 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="538"/>
+        <location filename="../src/pipp_ser.cpp" line="535"/>
         <source> * Min to Max timestamp difference: %1 min %2 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %1 min %2 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="541"/>
+        <location filename="../src/pipp_ser.cpp" line="538"/>
         <source> * Min to Max timestamp difference: %2 s</source>
         <translation> * Différence de l&apos;horodatage min et max : %2 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="549"/>
+        <location filename="../src/pipp_ser.cpp" line="546"/>
         <source> * Average frames per second: %1</source>
         <translation> * Moyenne des images par seconde : %1</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="554"/>
+        <location filename="../src/pipp_ser.cpp" line="551"/>
         <source> * No Timestamps</source>
         <translation> * Aucun horodatage</translation>
     </message>
@@ -1574,7 +1574,7 @@
         <translation>Taille du fichier : %1 Bytes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2586"/>
+        <location filename="../src/ser_player.cpp" line="2592"/>
         <source>A video player and processing utility for SER files.</source>
         <translation>Un utilitaire de lecture et de traitement de vidéos SER.</translation>
     </message>
@@ -1975,46 +1975,46 @@ Maj-click pour reculer de plusieurs images</translation>
         <translation>Tagged Image File Format (*.tif)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2585"/>
+        <location filename="../src/ser_player.cpp" line="2591"/>
         <source>SER Player</source>
         <translation>Lecteur SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2590"/>
+        <location filename="../src/ser_player.cpp" line="2596"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Traduction française par Cyril Richard</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2599"/>
+        <location filename="../src/ser_player.cpp" line="2605"/>
         <source>Credits:</source>
         <translation>Crédits :</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2601"/>
+        <location filename="../src/ser_player.cpp" line="2607"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
         <translation>Sylvain Weiller pour toutes ses suggestions, ses tests et ses retours.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2614"/>
+        <location filename="../src/ser_player.cpp" line="2620"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Vous devez avoir reçu une copie de la GNU General Public License en même temps que ce programme ; si ce n&apos;est pas le cas, consultez &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2619"/>
+        <location filename="../src/ser_player.cpp" line="2625"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>À propos du lecteur SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2627"/>
+        <location filename="../src/ser_player.cpp" line="2633"/>
         <source>No SER File Open</source>
         <comment>No SER file message on inital image</comment>
         <translation>Aucun Fichier SER Ouvert</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2667"/>
+        <location filename="../src/ser_player.cpp" line="2673"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>Nouvelle version de SER Player disponible : %1</translation>

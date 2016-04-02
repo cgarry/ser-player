@@ -46,7 +46,7 @@
         <translation>Fejl: Filen &apos;%1&apos; har en ugyldig pixel dybte af %2</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="178"/>
+        <location filename="../src/pipp_ser.cpp" line="179"/>
         <source>Error: File &apos;%1&apos; is too short to hold all the frames</source>
         <comment>SER File error message</comment>
         <translation type="unfinished">Fejl: Filen &apos;%1&apos; er for kort til at indeholde alle frames</translation>
@@ -324,57 +324,57 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="465"/>
+        <location filename="../src/pipp_ser.cpp" line="462"/>
         <source> * Timestamps are all identical</source>
         <translation type="unfinished"> * Tidsstemplerne er alle identiske</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="467"/>
+        <location filename="../src/pipp_ser.cpp" line="464"/>
         <source> * Timestamps are all in order</source>
         <translation type="unfinished"> * Tidsstemplerne er alle i stigende orden</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="470"/>
+        <location filename="../src/pipp_ser.cpp" line="467"/>
         <source> * Out of order timestamps detected</source>
         <translation type="unfinished"> * Ud af orden tidsstempler opdaget</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="486"/>
+        <location filename="../src/pipp_ser.cpp" line="483"/>
         <source> * Min timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation type="unfinished"> * Laveste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="506"/>
+        <location filename="../src/pipp_ser.cpp" line="503"/>
         <source> * Max timestamp: %3/%2/%1 %4:%5:%6.%7 UT</source>
         <translation type="unfinished"> * Højeste tidsstempel: %3/%2/%1 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="532"/>
+        <location filename="../src/pipp_ser.cpp" line="529"/>
         <source> * Min to Max timestamp difference: %1 days %2 hours %3 min %4 s</source>
         <translation type="unfinished"> * Tid fra første til sidste frame: %1 dage %2 timer %3 min %4 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="535"/>
+        <location filename="../src/pipp_ser.cpp" line="532"/>
         <source> * Min to Max timestamp difference: %1 hours %2 min %3 s</source>
         <translation type="unfinished"> * Tid fra første til sidste frame: %1 timer %2 min %3 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="538"/>
+        <location filename="../src/pipp_ser.cpp" line="535"/>
         <source> * Min to Max timestamp difference: %1 min %2 s</source>
         <translation type="unfinished"> * Tid fra første til sidste frame: %1 min %2 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="541"/>
+        <location filename="../src/pipp_ser.cpp" line="538"/>
         <source> * Min to Max timestamp difference: %2 s</source>
         <translation type="unfinished"> * Tid fra første til sidste frame: %2 s</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="549"/>
+        <location filename="../src/pipp_ser.cpp" line="546"/>
         <source> * Average frames per second: %1</source>
         <translation> * Gennemsnit af frames pr sekund: %1</translation>
     </message>
     <message>
-        <location filename="../src/pipp_ser.cpp" line="554"/>
+        <location filename="../src/pipp_ser.cpp" line="551"/>
         <source> * No Timestamps</source>
         <translation type="unfinished"> * Ingen tidsmærker</translation>
     </message>
@@ -1971,17 +1971,17 @@ Skift+klik for flere frames tilbage</translation>
         <translation>????</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2586"/>
+        <location filename="../src/ser_player.cpp" line="2592"/>
         <source>A video player and processing utility for SER files.</source>
         <translation>En video afspiller og billedprocessing utility for SER videoformat.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2599"/>
+        <location filename="../src/ser_player.cpp" line="2605"/>
         <source>Credits:</source>
         <translation>Credits: </translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2601"/>
+        <location filename="../src/ser_player.cpp" line="2607"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
         <translation>Sylvian Weiller for ønsker, testning og tilbagemeldinger.</translation>
     </message>
@@ -2042,36 +2042,36 @@ Skift+klik for flere frames tilbage</translation>
         <translation>%1/%2</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2585"/>
+        <location filename="../src/ser_player.cpp" line="2591"/>
         <source>SER Player</source>
         <translation>SER Afspiller</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2590"/>
+        <location filename="../src/ser_player.cpp" line="2596"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Dansk oversættelse ved Leif Jørgensen</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2614"/>
+        <location filename="../src/ser_player.cpp" line="2620"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Du skulle have modtaget en kopi af GNU General Public Licence sammen med programmet.  Hvis ikke, se &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2619"/>
+        <location filename="../src/ser_player.cpp" line="2625"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>Om SER Afspilleren</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2627"/>
+        <location filename="../src/ser_player.cpp" line="2633"/>
         <source>No SER File Open</source>
         <comment>No SER file message on inital image</comment>
         <translation>Ingen SER Fil er Åben</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2667"/>
+        <location filename="../src/ser_player.cpp" line="2673"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>En ny udgave af SER Player er tilgængelig: %1</translation>
