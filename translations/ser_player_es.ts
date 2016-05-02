@@ -19,7 +19,7 @@
         <location filename="../src/pipp_ser.cpp" line="89"/>
         <source>Error: File &apos;%1&apos; is too short to contain SER header</source>
         <comment>SER File error message</comment>
-        <translation>Error: Archivo &apos;%1&apos;is demasiado corto para contener un encabezado SER</translation>
+        <translation>Error: Archivo &apos;%1&apos;es demasiado corto para contener un encabezado SER</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="107"/>
@@ -91,7 +91,7 @@
     <message>
         <location filename="../src/header_details_dialog.cpp" line="31"/>
         <source>SER File Details</source>
-        <translation>SER Archivos Detalles</translation>
+        <translation>Detalle del Archivo SER</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="105"/>
@@ -141,7 +141,7 @@
     <message>
         <location filename="../src/header_details_dialog.cpp" line="114"/>
         <source> * ImageHeight: %1</source>
-        <translation>AlturaImagen: %1</translation>
+        <translation>*AlturaImagen: %1</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="115"/>
@@ -569,7 +569,7 @@
         <location filename="../src/save_frames_dialog.cpp" line="93"/>
         <source>Save All %1 Frames</source>
         <comment>Save frames dialog</comment>
-        <translation>Guardar Todos los cuadros %1</translation>
+        <translation>Guardar Todos los %1 cuadros</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="95"/>
@@ -588,7 +588,7 @@
         <location filename="../src/save_frames_dialog.cpp" line="137"/>
         <source> to </source>
         <comment>Save frames dialog</comment>
-        <translation>Hasta</translation>
+        <translation> Hasta </translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="156"/>
@@ -614,40 +614,40 @@
         <source>Enable Frame Decimation</source>
         <comment>Save frames dialog</comment>
         <translatorcomment>Keeping the term decimation</translatorcomment>
-        <translation>Habilitar Decimation de cuadros</translation>
+        <translation>Habilitar &quot;Decimation&quot; de cuadros</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="199"/>
         <source>Forwards</source>
         <comment>Save frames dialog</comment>
-        <translation>Adelanta</translation>
+        <translation>Hacia adelante</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="200"/>
         <source>Save the frames in their forward order.</source>
-        <translation>Guardar los cuadros en su orden (Adelanta).</translation>
+        <translation>Guardar los cuadros en su orden hacia adelante.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="202"/>
         <source>Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation>Reversa</translation>
+        <translation>Hacia atrás</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="203"/>
         <source>Save the frames in their reverse order.</source>
-        <translation>Guardar los cuadros en su orden reversado.</translation>
+        <translation>Guardar los cuadros en su orden hacia atrás.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="205"/>
         <source>Forwards Then Reverse</source>
         <comment>Save frames dialog</comment>
-        <translation>Adelanta luego Reversa</translation>
+        <translation>Hacia adelante luego hacia atrás</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="206"/>
         <source>Save the frames in their forward order and then in their reverse order. This will result in twice as many frames being saved.</source>
-        <translation>Guarda los cuadros en su orden adelante y luego en su orden reversado. Esto resultará en que se guardan el doble de los cuadros.</translation>
+        <translation>Guarda los cuadros en su orden hacia adelante y luego en su orden hacia atrás. Esto resultará en que se guardan el doble de los cuadros.</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="221"/>
@@ -665,7 +665,7 @@
         <location filename="../src/save_frames_dialog.cpp" line="238"/>
         <source>Image Processing</source>
         <comment>Save frames dialog</comment>
-        <translation>Procesamiento de Imágen</translation>
+        <translation>Procesamiento de Imagen</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="240"/>
@@ -691,7 +691,7 @@
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="266"/>
         <source>Add Black Bars To Keep Original Aspert Ratio</source>
-        <translation>Adicionar barras negreas para mantener la relación de aspecto original</translation>
+        <translation>Adicionar barras negras para mantener la relación de aspecto original</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="270"/>
@@ -1680,7 +1680,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1521"/>
         <source>Error: Animated GIF file writing failed</source>
-        <translation>Error: Fallí Escritura de archivo GIF</translation>
+        <translation>Error: Falló Escritura de archivo GIF</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1526"/>
@@ -1960,7 +1960,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <location filename="../src/ser_player.cpp" line="2596"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
-        <translation>Traducción al Idioma Inglés por Chris Garry</translation>
+        <translation>Traducción al Idioma Español por Carlos Valencia (C.A.V.A.)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2605"/>
