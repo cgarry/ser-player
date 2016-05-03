@@ -1,3 +1,10 @@
+ser-player (1.5.1-1) unstable; urgency=low
+  * Minor bugfix and update release
+    o Added Spanish translations.
+    o Fixed issue with dependancy in Ubuntu 16.04
+
+  -- Chris Garry <astropipp@gmail.com>
+
 ser-player (1.5.0-1) unstable; urgency=low
   * Various enhancements release
     o Added support for viewing SER file thumbnails in Explorer (Windows Only).
