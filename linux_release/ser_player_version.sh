@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ser_player_version="1.5.1"
+ser_player_version="1.5.2"

@@ -1,4 +1,4 @@
-ser-player (1.5.1-1) unstable; urgency=low
+ser-player (1.5.2-1) unstable; urgency=low
   * Minor bugfix and update release
     o Added Spanish translations.
     o Fixed issue with dependancy in Ubuntu 16.04
