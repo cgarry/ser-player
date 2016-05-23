@@ -212,8 +212,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
         int32_t m_height;
         int32_t m_frame_size;
         bool m_colour;
-        uint32_t m_max_frames_in_first_riff;
-        uint32_t m_max_frames_in_other_riffs;
+        int32_t m_max_frames_in_first_riff;
+        int32_t m_max_frames_in_other_riffs;
         bool m_write_colour_table;
         int32_t m_total_frame_count;
         int32_t m_current_frame_count;

@@ -40,9 +40,9 @@
 
 
 c_gif_write::c_gif_write() :
+    m_file_write_error(false),
     mp_gif_file(nullptr),
-    m_open(false),
-    m_file_write_error(false)
+    m_open(false)
 {
     // Header structure fixed fields
     m_gif_header.m_signature[0] = 'G';

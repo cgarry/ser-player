@@ -214,7 +214,7 @@ int32_t c_pipp_ser::open(
             read_ret = fread(mp_timestamp, 1, 8 * m_header.frame_count, mp_ser_file);
 
             // Debug Start
-            if (read_ret != 8 * m_header.frame_count) {
+            if ((int32_t)read_ret != 8 * m_header.frame_count) {
 //                m_error_string += QCoreApplication::tr("Error: SER timestamp read failed for file '%1'", "SER File error message")
 //                                  .arg(filename);
 //                m_error_string += "\n";

@@ -340,7 +340,6 @@ void c_image_Widget::draw_selection_rectangle(QPixmap &pixmap)
     int y_scale_num = pixmap.height()-1;
     int y_scale_denum = m_image_Pixmap.size().height()-1;
 
-    m_scale_factor;
     if (y_scale_num > x_scale_num) {
         m_scale_factor = qreal(y_scale_num) / y_scale_denum;
     } else {

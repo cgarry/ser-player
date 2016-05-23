@@ -51,12 +51,12 @@ c_pipp_avi_write::c_pipp_avi_write() :
     m_height(0),
     m_frame_size(0),
     m_colour(false),
-    m_bytes_per_pixel(1),
+    m_write_colour_table(false),
     m_total_frame_count(0),
     m_current_frame_count(0),
     m_riff_count(0),
+    m_bytes_per_pixel(1),
     m_last_frame_pos(0),
-    m_write_colour_table(false),
     m_file_write_error(false)
 {
     // Initialise RIFF AVI header
