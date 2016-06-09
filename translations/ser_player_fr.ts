@@ -421,7 +421,7 @@
         <location filename="../src/processing_options_dialog.cpp" line="360"/>
         <location filename="../src/processing_options_dialog.cpp" line="422"/>
         <source>Reset</source>
-        <translation>Supprimer sélection</translation>
+        <translation>Rétablir</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="139"/>
@@ -551,7 +551,7 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="479"/>
         <source>Set With Selection Box</source>
-        <translation>Défte définir avec la boite de sélection</translation>
+        <translation>Définir avec la boite de sélection</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="495"/>
