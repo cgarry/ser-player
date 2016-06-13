@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.5.2"
+#define VERSION_STRING "v1.5.4"
 
 #include <Qt>
 #include <QApplication>
@@ -243,6 +243,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_markers_dialog_Act->setEnabled(false);
     mp_markers_dialog_Act->setCheckable(true);
     mp_markers_dialog_Act->setChecked(false);
+
+    mp_timestamp_analysis_Act = tools_menu->addAction(tr("Timestamp Analysis", "Tools menu"));
+    mp_timestamp_analysis_Act->setEnabled(false);
+    connect(mp_timestamp_analysis_Act, SIGNAL(triggered()), this, SLOT(timestamp_analysis()));
 
 
     //
@@ -1169,7 +1173,7 @@ void c_ser_player::save_frames_as_avi_slot()
                 }
             }
 
-            c_pipp_video_write *p_avi_write_file = new c_pipp_avi_write_dib();;
+            c_pipp_video_write *p_avi_write_file = new c_pipp_avi_write_dib();
 
             // Keep list of last saved folders up to date
             add_string_to_stringlist(c_persistent_data::m_recent_save_folders, QFileInfo(filename).absolutePath());
@@ -2042,14 +2046,58 @@ void c_ser_player::open_ser_file(const QString &filename)
     mp_ser_file->close();
     m_total_frames = mp_ser_file->open(filename.toUtf8().constData(), 0, 0);
 
-    if (m_total_frames <= 0) {
-        // Invalid SER file
+    // Check if SER file is broken but fixable - fix it if possible
+    bool ser_file_broken = false;
+    if (m_total_frames == mp_ser_file->ERROR_ZERO_FRAME_COUNT) {
+        // Zero frame count is often the result of the capture software crashing and failing to
+        // finish writing the file.  However, the file can be updated with a best guess framecount
+        // and the usable data recovered
+        ser_file_broken = true;
+
+        // Offer to fix the fix
+        QMessageBox::StandardButton fix_ser_file;
+
+        QString error_message = tr("Error: File '%1' has an invalid frame count.  SER Player may be able to fix this file.", "SER File error message")
+                                .arg(filename);
+        error_message += "\n\n";
+        error_message += tr("Fix this SER file?");
+
+        fix_ser_file = QMessageBox::question(nullptr,
+                                             tr("Invalid SER File", "Message box title for invalid SER file"),
+                                             error_message,
+                                             QMessageBox::Yes|QMessageBox::No);
+        if (fix_ser_file == QMessageBox::Yes) {
+            mp_ser_file->fix_broken_ser_file(filename.toUtf8().constData());
+
+            // Now try and open the file again
+            m_total_frames = mp_ser_file->open(filename.toUtf8().constData(), 0, 0);
+
+            if (m_total_frames > 0) {
+                ser_file_broken = false;  // File is no longer broken!
+                QMessageBox::information(nullptr,
+                                         tr("Invalid SER File", "Message box title for invalid SER file"),
+                                         tr("The SER file has succesfully been fixed"));
+                ser_file_broken = false;  // No longer broken
+            } else {
+                QMessageBox::warning(nullptr,
+                                   tr("Invalid SER File", "Message box title for invalid SER file"),
+                                   tr("The SER file could not be fixed"));
+            }
+        }
+    }
+
+    // Check if SER file is broken and not fixable
+    if (m_total_frames <= 0 && !ser_file_broken) {
+        // Invalid SER file that cannot be fixed
         if (mp_ser_file->get_error_string().length() > 0) {
             QMessageBox::warning(nullptr,
                                  tr("Invalid SER File", "Message box title for invalid SER file"),
                                  mp_ser_file->get_error_string().c_str());
+            ser_file_broken = true;
         }
-    } else {
+    }
+
+    if (!ser_file_broken) {
         // This is a valid SER file
 
         // Delete previous save frames dialogs to remove remembered settings
@@ -2183,6 +2231,8 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         mp_processing_options_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
+        mp_timestamp_analysis_Act->setEnabled(mp_ser_file->has_timestamps());
+
 
         // Calculate frame rate, update framerate label an use value for playback timer
         calculate_display_framerate();
@@ -2575,6 +2625,34 @@ void c_ser_player::histogram_done_slot()
     QPixmap histogram_Pixmap;
     mp_histogram_thread->draw_histogram_pixmap(histogram_Pixmap);
     mp_histogram_dialog->set_pixmap(histogram_Pixmap);
+}
+
+void c_ser_player::timestamp_analysis()
+{
+    if (mp_ser_file != nullptr && mp_ser_file->has_timestamps()) {
+        uint64_t first_timestamp = mp_ser_file->get_timestamp(0);
+        uint64_t last_timestamp = first_timestamp;
+        QString csv_filename =  QString::fromStdString(mp_ser_file->get_filename());
+        if (csv_filename.endsWith(".ser", Qt::CaseInsensitive)) {
+            // Remove .ser extension
+            csv_filename.chop(4);
+        }
+
+        csv_filename += "_timestamps.csv";
+        FILE *p_file = fopen(csv_filename.toUtf8().constData(), "w");
+        if (p_file != nullptr) {
+            fprintf(p_file, "Time (seconds),Frame Gap (seconds)\n");
+            for (int x = 1; x < m_total_frames; x++) {
+                uint64_t diff = mp_ser_file->get_timestamp(x) - last_timestamp;
+                double d_diff = (double)diff / 10000000;
+                double d_last = (double)(last_timestamp - first_timestamp) / 10000000;
+                fprintf(p_file, "%f,%f\n", d_last, d_diff);
+                last_timestamp = mp_ser_file->get_timestamp(x);
+            }
+
+            fclose(p_file);
+        }
+    }
 }
 
 

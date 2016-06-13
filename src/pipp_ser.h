@@ -88,6 +88,13 @@ class c_pipp_ser {
     // Public definitions
     // ------------------------------------------
     public:
+        enum e_error_code {
+            ERROR_NO_ERROR = 1,
+            ERROR_ZERO_FRAME_COUNT = -1,
+            ERROR_CANNOT_OPEN_FILE = -2,
+            ERROR_FILE_TOO_SHORT = -3,
+            ERROR_FILE_TOO_SHORT_FOR_FRAMES = -4,
+            ERROR_INVALID_HEADER_VALUE = -5};
     
         // ------------------------------------------
         // Constructor
@@ -122,6 +129,13 @@ class c_pipp_ser {
         // Close AVI file
         // ------------------------------------------
         int32_t close();
+
+
+        // ------------------------------------------
+        // Fix broken SER file
+        // ------------------------------------------
+        static int32_t fix_broken_ser_file(
+            const std::string &filename_utf8);
 
 
         // ------------------------------------------
@@ -302,6 +316,21 @@ class c_pipp_ser {
         //
         uint64_t get_timestamp() {
             return m_timestamp + m_timestamp_correction_value;
+        }
+
+
+        //
+        // Get a specific timestamp from SER file
+        //
+        uint64_t get_timestamp(uint32_t frame_number) {
+            uint32_t temp = frame_number;
+
+            if (frame_number >= (uint32_t)m_header.frame_count) {
+                temp = (uint32_t)m_header.frame_count - 1;
+            }
+
+            uint64_t * p_timestamp_buffer = (uint64_t *)m_timestamp_buffer.get_buffer_ptr();
+            return p_timestamp_buffer[temp];
         }
 
 

@@ -63,6 +63,7 @@ private:
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
     QAction *mp_markers_dialog_Act;
+    QAction *mp_timestamp_analysis_Act;
 
     // Dialogs
     c_header_details_dialog *mp_header_details_dialog;
@@ -187,6 +188,8 @@ public slots:
     void about_ser_player();
     void forward_button_held_slot();
     void histogram_done_slot();
+
+    void timestamp_analysis();
 
 
 protected:

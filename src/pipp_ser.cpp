@@ -71,12 +71,12 @@ int32_t c_pipp_ser::open(
     // Open SER file
     mp_ser_file = fopen_utf8(filename_utf8.c_str(), "rb");
 
-    // Return if file did not open
-    if (!mp_ser_file) {
+    // Early exit if the file did not open
+    if (mp_ser_file == nullptr) {
         m_error_string += QCoreApplication::tr("Error: Could not open file '%1'", "SER file error message")
                           .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += '\n';
-        return 0;
+        return ERROR_CANNOT_OPEN_FILE;
     }
 
     // Get file size
@@ -89,8 +89,9 @@ int32_t c_pipp_ser::open(
         m_error_string += QCoreApplication::tr("Error: File '%1' is too short to contain SER header", "SER File error message")
                           .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += '\n';
+        fclose(mp_ser_file);  // Close file
         mp_ser_file = nullptr;
-        return 0;
+        return ERROR_FILE_TOO_SHORT;
     }
 
     // Read File ID
@@ -102,22 +103,15 @@ int32_t c_pipp_ser::open(
     // Read the rest of the header
     read_ret = fread(&m_header, 1, sizeof(m_header), mp_ser_file);
 
-    if (m_header.frame_count <= 0) {
-        // Invalid frame count
-        m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid frame count of %2", "SER File error message")
-                          .arg(filename_utf8.c_str())
-                          .arg(m_header.frame_count).toUtf8().constData();
-        m_error_string += "\n";
-        return 0;
-    }
-
     if (m_header.little_endian < 0 || m_header.little_endian > 1) {
         // Invalid little endian
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid little endian value of %2", "SER File error message")
                           .arg(filename_utf8.c_str())
                           .arg(m_header.little_endian).toUtf8().constData();
         m_error_string += "\n";
-        return 0;
+        fclose(mp_ser_file);  // Close file
+        mp_ser_file = nullptr;
+        return ERROR_INVALID_HEADER_VALUE;
     }
 
     if (m_header.image_width <= 0) {
@@ -126,7 +120,7 @@ int32_t c_pipp_ser::open(
                           .arg(filename_utf8.c_str())
                           .arg(m_header.image_width).toUtf8().constData();
         m_error_string += "\n";
-        return 0;
+        return ERROR_INVALID_HEADER_VALUE;
     }
 
     if (m_header.image_height <= 0) {
@@ -135,7 +129,9 @@ int32_t c_pipp_ser::open(
                           .arg(filename_utf8.c_str())
                           .arg(m_header.image_height).toUtf8().constData();
         m_error_string += "\n";
-        return 0;
+        fclose(mp_ser_file);  // Close file
+        mp_ser_file = nullptr;
+        return ERROR_INVALID_HEADER_VALUE;
     }
 
     if (m_header.pixel_depth < 1 || m_header.pixel_depth > 16) {
@@ -144,7 +140,20 @@ int32_t c_pipp_ser::open(
                           .arg(filename_utf8.c_str())
                           .arg(m_header.pixel_depth).toUtf8().constData();
         m_error_string += "\n";
-        return 0;
+        fclose(mp_ser_file);  // Close file
+        mp_ser_file = nullptr;
+        return ERROR_INVALID_HEADER_VALUE;
+    }
+
+    if (m_header.frame_count <= 0) {
+        // Invalid frame count
+        m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid frame count of %2", "SER File error message")
+                          .arg(filename_utf8.c_str())
+                          .arg(m_header.frame_count).toUtf8().constData();
+        m_error_string += "\n";
+        fclose(mp_ser_file);  // Close file
+        mp_ser_file = nullptr;
+        return ERROR_ZERO_FRAME_COUNT;
     }
 
     // Override pixel depth if required
@@ -179,7 +188,9 @@ int32_t c_pipp_ser::open(
         m_error_string += QCoreApplication::tr("Error: File '%1' is too short to hold all the frames", "SER File error message")
                           .arg(filename_utf8.c_str()).toUtf8().constData();
         m_error_string += "\n";
-        return 0;
+        fclose(mp_ser_file);  // Close file
+        mp_ser_file = nullptr;
+        return ERROR_FILE_TOO_SHORT_FOR_FRAMES;
     }
 
 
@@ -215,10 +226,6 @@ int32_t c_pipp_ser::open(
 
             // Debug Start
             if ((int32_t)read_ret != 8 * m_header.frame_count) {
-//                m_error_string += QCoreApplication::tr("Error: SER timestamp read failed for file '%1'", "SER File error message")
-//                                  .arg(filename);
-//                m_error_string += "\n";
-//                return 0;
                 // Timestamps did not read correctly
                 m_header.date_time[1] = 0;
                 m_header.date_time[0] = 0;
@@ -329,6 +336,66 @@ int32_t c_pipp_ser::open(
     }
 
     return m_header.frame_count;
+}
+
+
+// ------------------------------------------
+// Fix broken SER file
+// ------------------------------------------
+int32_t c_pipp_ser::fix_broken_ser_file(
+    const std::string &filename_utf8)
+{
+    // Open SER file
+    FILE *p_broken_ser_file = fopen_utf8(filename_utf8.c_str(), "r+b");
+
+    // Get file size
+    fseek64(p_broken_ser_file, 0, SEEK_END);
+    int64_t filesize = ftell64(p_broken_ser_file);
+    fseek64(p_broken_ser_file, 0, SEEK_SET);
+
+    // Early exit if the file did not open
+    if (p_broken_ser_file == nullptr) {
+        return ERROR_CANNOT_OPEN_FILE;
+    }
+
+    // Read File ID
+    char file_id[15];
+    size_t read_ret = fread(file_id, 1, 14, p_broken_ser_file);
+    file_id[14] = 0;
+
+    // Read the rest of the header
+    s_ser_header ser_header;
+    read_ret = fread(&ser_header, 1, sizeof(ser_header), p_broken_ser_file);
+
+    // Calculate the size in bytes of each frame
+    int32_t frame_size = ser_header.image_width * ser_header.image_height;
+    if (ser_header.colour_id == COLOURID_RGB || ser_header.colour_id == COLOURID_BGR) {
+        frame_size *= 3;  // Colour images have twice as many samples
+    }
+
+    if (ser_header.pixel_depth > 8) {
+        frame_size *= 2;  // Greater than 8-bit data has 2 bytes per pixel rather than one
+    }
+
+    // Use the frame size to calculate how many whole frames are in the file
+    filesize -= 14;  // Remove File ID size from file size
+    filesize -= sizeof(ser_header);  // Remove header size from file size
+    int32_t frame_count_calculated = filesize / frame_size;
+
+    // Update the frame_count field in the SER file header
+    ser_header.frame_count = frame_count_calculated;
+
+    // Write the FileID back to the broken file
+    fseek64(p_broken_ser_file, 0, SEEK_SET);  // Go back to start of file
+    fwrite("LUCAM-RECORDER", 1, 14, p_broken_ser_file);
+
+    // Write the updated header back to the broken file
+    fwrite(&ser_header, 1, sizeof(ser_header), p_broken_ser_file);
+
+    // Close the updated file
+    fclose(p_broken_ser_file);
+
+    return frame_count_calculated;
 }
 
 
