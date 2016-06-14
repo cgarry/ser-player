@@ -6,6 +6,7 @@
 
 QT += core gui
 QT += concurrent
+QT += widgets
 !DISABLE_NEW_VERSION_CHECK: QT += network
 
 CONFIG += c++11
@@ -24,9 +25,7 @@ macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
 # Remove standard function warnings on Windows
 win32:DEFINES += _CRT_SECURE_NO_WARNINGS
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-
+lessThan(QT_MAJOR_VERSION, 5): error("SER Player requires at least Qt5 to build")
 
 TARGET = "ser-player"
 TEMPLATE = app
