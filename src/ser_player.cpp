@@ -39,7 +39,6 @@
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <QThread>
 #include <QTimer>
