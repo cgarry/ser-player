@@ -252,7 +252,7 @@
         <location filename="../src/markers_dialog.cpp" line="59"/>
         <source>Reset</source>
         <comment>Reset Markers</comment>
-        <translation>Remettre à zéro</translation>
+        <translation>Rétablir</translation>
     </message>
     <message>
         <location filename="../src/markers_dialog.cpp" line="72"/>
@@ -359,22 +359,22 @@
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="55"/>
         <source>CYYM</source>
-        <translation type="unfinished">CYYM</translation>
+        <translation>CYYM</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="56"/>
         <source>YCMY</source>
-        <translation type="unfinished">YCMY</translation>
+        <translation>YCMY</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="57"/>
         <source>YMCY</source>
-        <translation type="unfinished">YMCY</translation>
+        <translation>YMCY</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="58"/>
         <source>MYYC</source>
-        <translation type="unfinished">MYYC</translation>
+        <translation>MYYC</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="60"/>
