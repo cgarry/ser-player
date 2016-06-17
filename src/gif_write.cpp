@@ -26,18 +26,6 @@
 #include <cassert>
 #include <memory>
 
-// 64-bit fseek for various platforms
-#ifdef __linux__
-#define fseek64 fseeko64  // Linux
-#define ftell64 ftello64  // Linux
-#elif defined (__APPLE__)
-#define fseek64 fseeko  // OS X
-#define ftell64 ftello  // OS X
-#else
-#define fseek64 _fseeki64  // Windows
-#define ftell64 _ftelli64  // Windows
-#endif
-
 
 c_gif_write::c_gif_write() :
     m_file_write_error(false),

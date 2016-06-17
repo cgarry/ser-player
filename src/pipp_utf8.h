@@ -50,4 +50,25 @@ bool create_directories_utf8(
 const char *pipp_get_filename_from_filepath(
     const std::string &path);
 
+
+// 64-bit fseek for various platforms
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#include <sys/param.h>        // define or not BSD macro
+#endif
+
+#ifdef __linux__
+#define fseek64 fseeko64  // Linux
+#define ftell64 ftello64  // Linux
+#elif defined (__APPLE__)  && defined(__MACH__)
+#define fseek64 fseeko  // OS X
+#define ftell64 ftello  // OS X
+#elif defined(BSD)
+#define fseek64 fseeko  // DragonFly BSD, FreeBSD, OpenBSD, NetBSD
+#define ftell64 ftello  // DragonFly BSD, FreeBSD, OpenBSD, NetBSD
+#else
+#define fseek64 _fseeki64  // Windows
+#define ftell64 _ftelli64  // Windows
+#endif
+
+
 #endif  // PIPP_UTF8_H
