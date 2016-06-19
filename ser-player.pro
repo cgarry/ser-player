@@ -59,7 +59,8 @@ SOURCES += src/main.cpp\
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
 macx:SOURCES += src/pipp_utf8_osx.cpp
-unix:!macx:SOURCES += src/pipp_utf8_linux.cpp
+bsd:SOURCES += src/pipp_utf8_osx.cpp
+linux:SOURCES += src/pipp_utf8_linux.cpp
 win32:SOURCES += src/pipp_utf8.cpp
 
 HEADERS  += src/ser_player.h \
