@@ -59,7 +59,7 @@ SOURCES += src/main.cpp\
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
 macx:SOURCES += src/pipp_utf8_osx.cpp
-bsd:SOURCES += src/pipp_utf8_osx.cpp
+bsd:SOURCES += src/pipp_utf8_bsd.cpp
 linux:SOURCES += src/pipp_utf8_linux.cpp
 win32:SOURCES += src/pipp_utf8.cpp
 
