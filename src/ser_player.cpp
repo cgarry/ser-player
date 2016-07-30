@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.5.4"
+#define VERSION_STRING "v1.5.5"
 
 #include <Qt>
 #include <QApplication>
@@ -245,6 +245,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     mp_timestamp_analysis_Act = tools_menu->addAction(tr("Timestamp Analysis", "Tools menu"));
     mp_timestamp_analysis_Act->setEnabled(false);
+    mp_timestamp_analysis_Act->setVisible(false);
     connect(mp_timestamp_analysis_Act, SIGNAL(triggered()), this, SLOT(timestamp_analysis()));
 
 
@@ -626,6 +627,12 @@ c_ser_player::c_ser_player(QWidget *parent)
                 this, SLOT(new_version_available_slot(QString)));
     }
 #endif
+
+    if (QSslSocket::supportsSsl()) {
+        qDebug() << "SSL INFO: SSL Support Included";
+    } else {
+        qDebug() << "SSL INFO: SSL Support Missing";
+    }
 }
 
 
