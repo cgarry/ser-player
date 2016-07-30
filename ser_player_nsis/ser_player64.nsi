@@ -68,7 +68,7 @@ SectionEnd
 
 Section -Prerequisites
 ; Install VC++ 2013 Redistributable
-  ExecWait '"$INSTDIR\vcredist_x64.exe /install /quiet /norestart /log %TEMP%\vcredist_2013_x64.log"'
+  ExecWait '"$INSTDIR\vcredist_x64.exe" /install /quiet /norestart /log "%TEMP%\vcredist_2013_x64.log"'
 SectionEnd
 
 
