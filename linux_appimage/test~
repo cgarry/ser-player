@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo "Copying Qt libs to qt_libs"
+rm -r qt_libs
+mkdir qt_libs
+
+qt_libs=$(ldd ../bin/ser-player | grep Qt)
+
+qt_lib=()
+mapfile -t qt_lib <<< "$qt_libs"
+for lib in "${qt_lib[@]}"
+do
+    a=( $lib )
+    cp -n ${a[2]} qt_libs
+    sub_libs=$(ldd ${a[2]} | grep Qt)
+    sub_lib=()
+    mapfile -t sub_lib <<< "$sub_libs"
+    for lib2 in "${qt_lib[@]}"
+    do
+        a2=( $lib2 )
+        cp -n ${a2[2]} qt_libs
+    done
+
+done
+

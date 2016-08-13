@@ -1,0 +1,9 @@
+#!/bin/sh
+appname=`basename $0 | sed s,\.sh$,,`
+
+exe_directory="././/lib/ser-player/"
+
+export LD_LIBRARY_PATH=$exe_directory/libs/
+export QT_PLUGIN_PATH=$exe_directory/plugins/
+$exe_directory/$appname "$@"
+
