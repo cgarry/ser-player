@@ -63,6 +63,10 @@ rm -rf temp
 mkdir temp
 cd temp
 
+# Checkout and build AppImageKit
+git clone https://github.com/probonopd/AppImageKit.git
+./AppImageKit/build.sh
+
 # Get the AppImage script functions file
 wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
 . ./functions.sh
@@ -92,7 +96,7 @@ cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/hicolor/128x128/app
 cp ../files/share/ser-player.xml ser-player.AppDir/usr/share/mime/packages/
 
 # Copy file into top level of AppDir
-cp ../files/AppRun ser-player.AppDir/
+cp ./AppImageKit/AppRun ser-player.AppDir/
 cp ../files/ser-player.desktop ser-player.AppDir/
 cp ../files/ser-player.png ser-player.AppDir/
 
@@ -125,8 +129,7 @@ chmod 0644 ser-player.AppDir/usr/lib/lib*
 
 
 #wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
-git clone https://github.com/probonopd/AppImageKit.git
-./AppImageKit/build.sh
+
 
 ./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-test_${SYS_ARCH}.AppImage
 
