@@ -101,15 +101,15 @@ cp ../files/ser-player.desktop ser-player.AppDir/
 cp ../files/ser-player.png ser-player.AppDir/
 
 # Copy Qt platform plugin to AppDir
-cp ${QT_INSTALL_DIR}/plugins/platforms/libqxcb.* ser-player.AppDir/usr/lib/ser-player/platforms/ #TODO
+cp ${QT_INSTALL_DIR}/plugins/platforms/libqxcb.* ser-player.AppDir/usr/lib/ser-player/platforms/
 
 # Copy other Qt plugins to AppDir
-cp ${QT_INSTALL_DIR}/plugins/imageformats/libqjpeg.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/ #TODO
-cp ${QT_INSTALL_DIR}/plugins/imageformats/libqtiff.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/ #TODO
+cp ${QT_INSTALL_DIR}/plugins/imageformats/libqjpeg.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/
+cp ${QT_INSTALL_DIR}/plugins/imageformats/libqtiff.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/
 
 # Copy Qt libs to AppDir
 copy_qt_libs_for_binary ../../bin/ser-player ser-player.AppDir/usr/lib/ser-player/libs/
-copy_qt_libs_for_binary ${QT_INSTALL_DIR}plugins/platforms/libqxcb.so ser-player.AppDir/usr/lib/ser-player/libs/  #TODO
+copy_qt_libs_for_binary ${QT_INSTALL_DIR}plugins/platforms/libqxcb.so ser-player.AppDir/usr/lib/ser-player/libs/
 
 # Strip Qt libs and change permissions
 strip -s ser-player.AppDir/usr/lib/ser-player/libs/*
