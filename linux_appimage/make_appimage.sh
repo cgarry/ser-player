@@ -1,47 +1,23 @@
 #!/bin/bash
 
-copy_qt_libs_for_binary()
+copy_libs_for_binary()
 {
-    echo "Copying Qt libs for binary $1 to $2"
+    echo "Copying libs for binary $1 to $2"
 
-    qt_libs=$(ldd $1 | grep Qt)
+    libs=$(ldd $1)
 
-    qt_lib=()
-    mapfile -t qt_lib <<< "$qt_libs"
-    for lib in "${qt_lib[@]}"
-    do
-        a=( $lib )
-        cp -n ${a[2]} $2
-        sub_libs=$(ldd ${a[2]} | grep Qt)
-        sub_lib=()
-        mapfile -t sub_lib <<< "$sub_libs"
-        for lib2 in "${qt_lib[@]}"
-        do
-            a2=( $lib2 )
-            cp -n ${a2[2]} $2
-        done
-    done
-}
-
-
-copy_other_libs_for_binary()
-{
-    echo "Copying other libs for binary $1 to $2"
-
-    other_libs=$(ldd $1 | grep -v Qt)
-
-    other_lib=()
-    mapfile -t other_lib <<< "$other_libs"
-    for lib in "${other_lib[@]}"
+    lib=()
+    mapfile -t lib <<< "$libs"
+    for lib in "${lib[@]}"
     do
         a=( $lib )
         count=${#a[@]}
         if ((count > 3)); then
             cp -n ${a[2]} $2
-            sub_libs=$(ldd ${a[2]} | grep -v Qt)
+            sub_libs=$(ldd ${a[2]})
             sub_lib=()
             mapfile -t sub_lib <<< "$sub_libs"
-            for lib2 in "${other_lib[@]}"
+            for lib2 in "${lib[@]}"
             do
                 a2=( $lib2 )
                 count2=${#a2[@]}
@@ -73,7 +49,7 @@ wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./func
 
 # Create the AppImage directory structure
 mkdir -p ser-player.AppDir/usr/bin
-mkdir -p ser-player.AppDir/usr/lib/ser-player/libs
+#mkdir -p ser-player.AppDir/usr/lib/ser-player/libs
 mkdir -p ser-player.AppDir/usr/lib/ser-player/platforms
 mkdir -p ser-player.AppDir/usr/lib/ser-player/plugins/imageformats
 mkdir -p ser-player.AppDir/usr/share/applications
@@ -107,23 +83,18 @@ cp ${QT_INSTALL_DIR}/plugins/platforms/libqxcb.* ser-player.AppDir/usr/lib/ser-p
 cp ${QT_INSTALL_DIR}/plugins/imageformats/libqjpeg.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/
 cp ${QT_INSTALL_DIR}/plugins/imageformats/libqtiff.* ser-player.AppDir/usr/lib/ser-player/plugins/imageformats/
 
-# Copy Qt libs to AppDir
-copy_qt_libs_for_binary ../../bin/ser-player ser-player.AppDir/usr/lib/ser-player/libs/
-copy_qt_libs_for_binary ${QT_INSTALL_DIR}plugins/platforms/libqxcb.so ser-player.AppDir/usr/lib/ser-player/libs/
-
-# Strip Qt libs and change permissions
-strip -s ser-player.AppDir/usr/lib/ser-player/libs/*
-chmod 0644 ser-player.AppDir/usr/lib/ser-player/libs/*
-
-# Copy System libs to AppDir
-copy_other_libs_for_binary ../../bin/ser-player ser-player.AppDir/usr/lib/
+# Copy all required libs to AppDir
+copy_libs_for_binary ../../bin/ser-player ser-player.AppDir/usr/lib/
+copy_libs_for_binary ${QT_INSTALL_DIR}/plugins/platforms/libqxcb.so ser-player.AppDir/usr/lib/
+copy_libs_for_binary ${QT_INSTALL_DIR}/plugins/imageformats/libqjpeg.so ser-player.AppDir/usr/lib/
+copy_libs_for_binary ${QT_INSTALL_DIR}/plugins/imageformats/libqtiff.so ser-player.AppDir/usr/lib/
 
 # Remove excluded libraries
 cd ser-player.AppDir/usr/lib/
 delete_blacklisted
 cd ../../..
 
-# Strip other libs and change permissions
+# Strip all libs and change permissions
 strip -s ser-player.AppDir/usr/lib/lib*
 chmod 0644 ser-player.AppDir/usr/lib/lib*
 
@@ -135,6 +106,6 @@ cd ..
 #wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
 
 
-./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
+./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
 
 cd ..
