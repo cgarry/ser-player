@@ -127,10 +127,14 @@ cd ../../..
 strip -s ser-player.AppDir/usr/lib/lib*
 chmod 0644 ser-player.AppDir/usr/lib/lib*
 
+# Get the glibc version required using the glibc_need() function from the AppImageKit functions.sh 
+cd ser-player.AppDir
+GLIBC_NEEDED=$(glibc_needed)
+cd ..
 
 #wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
 
 
-./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-test_${SYS_ARCH}.AppImage
+./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
 
 cd ..
