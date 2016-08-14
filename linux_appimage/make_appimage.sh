@@ -10,6 +10,7 @@ copy_libs_for_binary()
     mapfile -t lib <<< "$libs"
     for lib in "${lib[@]}"
     do
+        #echo "lib: ${lib}"
         a=( $lib )
         count=${#a[@]}
         if ((count > 3)); then
@@ -17,8 +18,9 @@ copy_libs_for_binary()
             sub_libs=$(ldd ${a[2]})
             sub_lib=()
             mapfile -t sub_lib <<< "$sub_libs"
-            for lib2 in "${lib[@]}"
+            for lib2 in "${sub_lib[@]}"
             do
+                #echo "    lib2: ${lib2}"
                 a2=( $lib2 )
                 count2=${#a2[@]}
                 if ((count2 > 3)); then
