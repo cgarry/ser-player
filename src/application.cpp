@@ -34,6 +34,7 @@ c_application::c_application(int &argc, char **argv)
 {
     setOrganizationName("PIPP");
     setApplicationName(tr("SER Player"));
+    setWindowIcon(QIcon(":/res/resources/main_icon.png"));
     c_persistent_data::load();  // Load persistent data
 
     // If user has specified a specific locale then use that one
