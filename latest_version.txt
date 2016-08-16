@@ -1,10 +1,5 @@
-v1.5.0
+v1.6.0
 Enhancements:
-  * Added support for viewing SER file thumbnails in Explorer (Windows Only).
-  * Added support for resizing frames when saving them.
-  * Added support for aligning RGB channels.
-  * Added support for generating animated GIFs.
-  * Added support for generating raw AVI files.
-  * Added support for frame cropping.
-  * Added support for CYYM, YCMY, YMCY and MYYC bayer patterns.
-  * Added German language translation.
+  * Added functionality to fix broken (0 framecount) SER files rather than just rejecting them.
+  * Fixed bug in Windows installer that failed to install MSCVP120.dll.
+  * Changed Linux releases to distribution independent AppImage packages instead of .deb packages.
