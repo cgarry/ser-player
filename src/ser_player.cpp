@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.5.5"
+#define VERSION_STRING "v1.6.0"
 
 #include <Qt>
 #include <QApplication>
@@ -2675,7 +2675,7 @@ void c_ser_player::about_ser_player()
     msgBox.setText("<b><big>" + tr("SER Player") + "</big> (" VERSION_STRING " - " + build_type_string + ")</b>");
     QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
-    informative_text += "Copyright (c) 2015 Chris Garry";
+    informative_text += "Copyright (c) 2015-2016 Chris Garry";
 
     QString translator_credit = tr("English language translation by Chris Garry",
                                    "Translator credit - Replace language and translator names when translating");
