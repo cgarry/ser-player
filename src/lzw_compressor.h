@@ -18,13 +18,8 @@
 #ifndef LZW_COMPRESSOR_H
 #define LZW_COMPRESSOR_H
 
-#include <QString>
 #include <cstdint>
 #include <memory>
-
-#define GIF_COMMENT_STRING "Created by SER Player"
-// Comment out GIF_COMMENT_STRING #define to disable adding a comment extension to the generated gif file
-
 
 class c_lzw_compressor {
 
