@@ -930,7 +930,7 @@
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="492"/>
         <source>Transparent Pixel Tolerance:</source>
-        <translation>Toléra,ce de la transparence des pixels :</translation>
+        <translation>Tolérance de la transparence des pixels :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="502"/>
