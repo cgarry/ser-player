@@ -51,6 +51,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
                                            QString telescope_string)
     : QDialog(parent),
       m_save_type(save_type),
+      m_is_colour_raw(false),
+      m_is_colour_processed(false),
       m_raw_frame_width(frame_width),
       m_raw_frame_height(frame_height),
       m_processed_frame_width(frame_width),
@@ -457,6 +459,11 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
             this,
             SLOT(gif_apply_preset_options()));
 
+    mp_gif_colour_quantisation_type_Label = new QLabel(tr("Colour Quantisation:"));
+    mp_gif_colour_quantisation_type_ComboBox = new QComboBox;
+    mp_gif_colour_quantisation_type_ComboBox->addItem(tr("Neural-Net Quantisation"));
+    mp_gif_colour_quantisation_type_ComboBox->addItem(tr("Median Cut Quantisation"));
+
     QPushButton *p_gif_test_options_PButton = new QPushButton(tr("Review Animated GIF In Browser"));
     connect(p_gif_test_options_PButton,
             SIGNAL(clicked(bool)),
@@ -470,8 +477,10 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     gif_file_options_FLayout->addWidget(mp_gif_frame_delay_DSpinBox, 0, 1);
     gif_file_options_FLayout->addWidget(new QLabel(tr("Final Frame Delay:")), 1, 0);
     gif_file_options_FLayout->addWidget(mp_gif_final_frame_delay_DSpinBox, 1, 1);
-    gif_file_options_FLayout->addWidget(new QLabel(tr("Preset Advanced Options:")), 2, 0);
-    gif_file_options_FLayout->addWidget(mp_gif_preset_options_ComboBox, 2, 1);
+    gif_file_options_FLayout->addWidget(mp_gif_colour_quantisation_type_Label, 2, 0);
+    gif_file_options_FLayout->addWidget(mp_gif_colour_quantisation_type_ComboBox, 2, 1);
+    gif_file_options_FLayout->addWidget(new QLabel(tr("Preset Advanced Options:")), 3, 0);
+    gif_file_options_FLayout->addWidget(mp_gif_preset_options_ComboBox, 3, 1);
 
     QHBoxLayout *gif_file_options_HLayout = new QHBoxLayout;
     gif_file_options_HLayout->setMargin(0);
@@ -700,6 +709,28 @@ void c_save_frames_dialog::set_gif_frametime(double frametime)
 
     mp_gif_frame_delay_DSpinBox->setValue(frametime);
     mp_gif_final_frame_delay_DSpinBox->setValue(frametime);
+}
+
+
+void c_save_frames_dialog::set_colour_details(bool is_colour_raw,
+                                              bool is_colour_processed)
+{
+    m_is_colour_raw = is_colour_raw;
+    m_is_colour_processed = is_colour_processed;
+    colour_updated();
+}
+
+
+void c_save_frames_dialog::colour_updated()
+{
+    if ((mp_processing_enable_CBox->isChecked() && m_is_colour_processed) ||
+        (!mp_processing_enable_CBox->isChecked() && m_is_colour_raw)) {
+        mp_gif_colour_quantisation_type_Label->show();
+        mp_gif_colour_quantisation_type_ComboBox->show();
+    } else {
+        mp_gif_colour_quantisation_type_Label->hide();
+        mp_gif_colour_quantisation_type_ComboBox->hide();
+    }
 }
 
 
@@ -997,6 +1028,8 @@ void c_save_frames_dialog::resize_control_handler()
             }
         }
     }
+
+    colour_updated();
 }
 
 
@@ -1096,6 +1129,7 @@ int c_save_frames_dialog::get_gif_unchanged_border_tolerance()
     return tolerance;
 }
 
+
 bool c_save_frames_dialog::get_gif_transparent_pixel_enable()
 {
     return mp_gif_transparent_tolerance_CBox->isChecked();
@@ -1105,6 +1139,18 @@ bool c_save_frames_dialog::get_gif_transparent_pixel_enable()
 int c_save_frames_dialog::get_gif_transparent_pixel_tolerance()
 {
     return mp_gif_transparent_tolerance_SpinBox->value();
+}
+
+
+int c_save_frames_dialog::get_gif_colour_quantisation_type()
+{
+    return mp_gif_colour_quantisation_type_ComboBox->currentIndex();
+}
+
+
+QString c_save_frames_dialog::get_gif_colour_quantisation_name()
+{
+    return mp_gif_colour_quantisation_type_ComboBox->currentText();
 }
 
 

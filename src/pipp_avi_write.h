@@ -221,7 +221,6 @@ class c_pipp_avi_write: public c_pipp_video_write {
         int32_t m_bytes_per_pixel;
         int64_t m_last_frame_pos;
         int64_t m_riff_start_position;
-        std::string m_error_string;
         bool m_file_write_error;
 
         c_pipp_buffer m_temp_buffer;

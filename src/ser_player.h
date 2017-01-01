@@ -63,7 +63,6 @@ private:
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
     QAction *mp_markers_dialog_Act;
-    QAction *mp_timestamp_analysis_Act;
 
     // Dialogs
     c_header_details_dialog *mp_header_details_dialog;
@@ -145,8 +144,8 @@ public slots:
     void header_details_dialog_slot(bool checked);
     void histogram_viewer_closed_slot();
     void histogram_viewer_slot(bool checked);
+    void processing_options_slot(bool checked);
     void processor_options_closed_slot();
-    void processor_options_slot(bool checked);
     void invert_changed_slot(bool invert);
     void gain_changed_slot(double gain);
     void gamma_changed_slot(double gamma);
@@ -188,8 +187,6 @@ public slots:
     void about_ser_player();
     void forward_button_held_slot();
     void histogram_done_slot();
-
-    void timestamp_analysis();
 
 
 protected:

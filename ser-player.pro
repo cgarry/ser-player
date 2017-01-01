@@ -9,6 +9,11 @@ QT += concurrent
 QT += widgets
 !DISABLE_NEW_VERSION_CHECK: QT += network
 
+DEFINES += QT_BUILD
+
+# Comment string added to generated GIFs
+DEFINES += GIF_COMMENT_STRING='"\\\"Created by SER Player\\\""'
+
 CONFIG += c++11
 CONFIG += warn_on
 unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
@@ -54,7 +59,8 @@ SOURCES += src/main.cpp\
     src/lzw_compressor.cpp \
     src/pipp_avi_write.cpp \
     src/pipp_avi_write_dib.cpp \
-    src/selection_box_dialog.cpp
+    src/selection_box_dialog.cpp \
+    src/NEUQUANT.C
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -89,7 +95,8 @@ HEADERS  += src/ser_player.h \
     src/pipp_video_write.h \
     src/pipp_avi_write.h \
     src/pipp_avi_write_dib.h \
-    src/selection_box_dialog.h
+    src/selection_box_dialog.h \
+    src/NEUQUANT.H
 
 # Build directories
 contains(QT_ARCH, i386) {

@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.6.0"
+#define VERSION_STRING "v1.6.2"
 
 #include <Qt>
 #include <QApplication>
@@ -223,7 +223,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_processing_options_Act->setEnabled(false);
     mp_processing_options_Act->setCheckable(true);
     mp_processing_options_Act->setChecked(false);
-    connect(mp_processing_options_Act, SIGNAL(triggered(bool)), this, SLOT(processor_options_slot(bool)));
+    connect(mp_processing_options_Act, SIGNAL(triggered(bool)), this, SLOT(processing_options_slot(bool)));
     mp_processing_options_Dialog = new c_processing_options_dialog(this);
     mp_processing_options_Dialog->hide();
     connect(mp_processing_options_Dialog, SIGNAL(crop_changed(bool,int,int,int,int)), this, SLOT(crop_changed_slot(bool,int,int,int,int)));
@@ -242,12 +242,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_markers_dialog_Act->setEnabled(false);
     mp_markers_dialog_Act->setCheckable(true);
     mp_markers_dialog_Act->setChecked(false);
-
-    mp_timestamp_analysis_Act = tools_menu->addAction(tr("Timestamp Analysis", "Tools menu"));
-    mp_timestamp_analysis_Act->setEnabled(false);
-    mp_timestamp_analysis_Act->setVisible(false);
-    connect(mp_timestamp_analysis_Act, SIGNAL(triggered()), this, SLOT(timestamp_analysis()));
-
 
     //
     // Help menu
@@ -813,7 +807,7 @@ void c_ser_player::histogram_viewer_closed_slot()
 
 
 // Processing Options menu QAction has been clicked
-void c_ser_player::processor_options_slot(bool checked)
+void c_ser_player::processing_options_slot(bool checked)
 {
     if (checked) {
         mp_processing_options_Dialog->show();
@@ -1319,6 +1313,9 @@ void c_ser_player::save_frames_as_gif_slot()
         mp_save_frames_as_gif_Dialog->set_gif_frametime(gif_frame_time);
     }
 
+    mp_save_frames_as_gif_Dialog->set_colour_details(m_is_colour,
+                                                     mp_processing_options_Dialog->get_processed_data_is_colour());
+
     if (m_crop_enable) {
         mp_save_frames_as_gif_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
     } else {
@@ -1409,6 +1406,7 @@ void c_ser_player::save_frames_as_gif_slot()
                 int final_frametime = 100 * mp_save_frames_as_gif_Dialog->get_gif_final_frametime();
                 unchanged_border_tolerance = mp_save_frames_as_gif_Dialog->get_gif_unchanged_border_tolerance();
                 transparent_pixel_enable = mp_save_frames_as_gif_Dialog->get_gif_transparent_pixel_enable();
+                int colour_quantisation_type = mp_save_frames_as_gif_Dialog->get_gif_colour_quantisation_type();
                 transparent_pixel_tolerence = mp_save_frames_as_gif_Dialog->get_gif_transparent_pixel_tolerance();
                 lossy_compression_level = mp_save_frames_as_gif_Dialog->get_gif_lossy_compression_level();
                 pixel_depth = mp_save_frames_as_gif_Dialog->get_gif_pixel_bit_depth();
@@ -1471,6 +1469,7 @@ void c_ser_player::save_frames_as_gif_slot()
                                         mp_frame_image->get_byte_depth(), // int byte_depth
                                         mp_frame_image->get_colour(), // bool colour
                                         0,  // int repeat_count
+                                        (c_gif_write::e_colour_quant_type)colour_quantisation_type,
                                         unchanged_border_tolerance, // int unchanged_border_tolerance
                                         transparent_pixel_enable,  // bool use_transparent_pixels
                                         transparent_pixel_tolerence, // int transparent_tolerence
@@ -1552,6 +1551,8 @@ void c_ser_player::save_frames_as_gif_slot()
 
                         stream << tr("Frame Delay: ") << mp_save_frames_as_gif_Dialog->get_gif_frametime() << " s<br>" << endl;
                         stream << tr("Final Frame Delay: ") << mp_save_frames_as_gif_Dialog->get_gif_final_frametime() << " s<br>" << endl;
+
+                        stream << tr("Colour Quantisation: ") << mp_save_frames_as_gif_Dialog->get_gif_colour_quantisation_name() << "<br>" << endl;
 
                         stream << tr("Unchanged Border Tolerance: ") << unchanged_border_tolerance << "<br>" << endl;
 
@@ -2237,8 +2238,6 @@ void c_ser_player::open_ser_file(const QString &filename)
 
         mp_processing_options_Act->setEnabled(true);
         mp_markers_dialog_Act->setEnabled(true);
-        mp_timestamp_analysis_Act->setEnabled(mp_ser_file->has_timestamps());
-
 
         // Calculate frame rate, update framerate label an use value for playback timer
         calculate_display_framerate();
@@ -2633,34 +2632,6 @@ void c_ser_player::histogram_done_slot()
     mp_histogram_dialog->set_pixmap(histogram_Pixmap);
 }
 
-void c_ser_player::timestamp_analysis()
-{
-    if (mp_ser_file != nullptr && mp_ser_file->has_timestamps()) {
-        uint64_t first_timestamp = mp_ser_file->get_timestamp(0);
-        uint64_t last_timestamp = first_timestamp;
-        QString csv_filename =  QString::fromStdString(mp_ser_file->get_filename());
-        if (csv_filename.endsWith(".ser", Qt::CaseInsensitive)) {
-            // Remove .ser extension
-            csv_filename.chop(4);
-        }
-
-        csv_filename += "_timestamps.csv";
-        FILE *p_file = fopen(csv_filename.toUtf8().constData(), "w");
-        if (p_file != nullptr) {
-            fprintf(p_file, "Time (seconds),Frame Gap (seconds)\n");
-            for (int x = 1; x < m_total_frames; x++) {
-                uint64_t diff = mp_ser_file->get_timestamp(x) - last_timestamp;
-                double d_diff = (double)diff / 10000000;
-                double d_last = (double)(last_timestamp - first_timestamp) / 10000000;
-                fprintf(p_file, "%f,%f\n", d_last, d_diff);
-                last_timestamp = mp_ser_file->get_timestamp(x);
-            }
-
-            fclose(p_file);
-        }
-    }
-}
-
 
 void c_ser_player::about_ser_player()
 {
@@ -2672,7 +2643,7 @@ void c_ser_player::about_ser_player()
     QString build_type_string = "x86";
 #endif
 
-    msgBox.setText("<b><big>" + tr("SER Player") + "</big> (" VERSION_STRING " - " + build_type_string + ")</b>");
+    msgBox.setText("<b><big>" + tr("SER Player") + "</big> " VERSION_STRING " (" + build_type_string + ")</b>");
     QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
     informative_text += "Copyright (c) 2015-2016 Chris Garry";

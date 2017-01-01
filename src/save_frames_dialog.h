@@ -63,6 +63,9 @@ public:
 
     void set_gif_frametime(double frametime);
 
+    void set_colour_details(bool is_colour_raw,
+                            bool is_colour_processed);
+
     int get_active_width();
     int get_active_height();
     int get_total_width();
@@ -72,6 +75,8 @@ public:
     int get_gif_unchanged_border_tolerance();
     bool get_gif_transparent_pixel_enable();
     int get_gif_transparent_pixel_tolerance();
+    int get_gif_colour_quantisation_type();
+    QString get_gif_colour_quantisation_name();
     int get_gif_pixel_bit_depth();
     int get_gif_lossy_compression_level();
     bool get_gif_test_run()
@@ -123,6 +128,7 @@ private slots:
 private:
     // Private methods
     void helper_method();
+    void colour_updated();
     
     // Widgets
     QRadioButton *mp_save_current_frame_RButton;
@@ -167,6 +173,8 @@ private:
     // Animated GIF options
     QDoubleSpinBox *mp_gif_frame_delay_DSpinBox;
     QDoubleSpinBox *mp_gif_final_frame_delay_DSpinBox;
+    QLabel *mp_gif_colour_quantisation_type_Label;
+    QComboBox *mp_gif_colour_quantisation_type_ComboBox;
     QComboBox *mp_gif_preset_options_ComboBox;
     QCheckBox *mp_gif_unchanged_border_tolerance_CBox;
     QSpinBox *mp_gif_unchanged_border_tolerance_SpinBox;
@@ -183,6 +191,8 @@ private:
     c_utf8_validator *mp_utf8_validator;
 
     e_save_type m_save_type;
+    bool m_is_colour_raw;
+    bool m_is_colour_processed;
     int m_raw_frame_width;
     int m_raw_frame_height;
     int m_processed_frame_width;

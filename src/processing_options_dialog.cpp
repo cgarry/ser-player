@@ -878,6 +878,26 @@ double c_processing_options_dialog::get_colour_saturation()
 }
 
 
+bool c_processing_options_dialog::get_processed_data_is_colour()
+{
+    bool data_is_colour = m_data_is_colour;
+    if (m_data_has_bayer_pattern)
+    {
+        if (mp_debayer_GroupBox->isChecked())
+        {
+            data_is_colour = true;
+        }
+    }
+
+    if (mp_monochrome_conversion_GroupBox->isChecked())
+    {
+        data_is_colour = false;
+    }
+
+    return data_is_colour;
+}
+
+
 void c_processing_options_dialog::enable_and_disable_controls()
 {
     mp_debayer_GroupBox->setEnabled(m_data_has_bayer_pattern);

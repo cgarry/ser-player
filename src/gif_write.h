@@ -18,29 +18,46 @@
 #ifndef GIF_WRITE_H
 #define GIF_WRITE_H
 
-#include <QString>
+#ifdef QT_BUILD
+    #include <QString>
+#else
+    #include <string>
+#endif
+
 #include <cstdint>
 #include <memory>
 
-#define GIF_COMMENT_STRING "Created by SER Player"
+#ifndef GIF_COMMENT_STRING
+    #define GIF_COMMENT_STRING "Created by PIPP"
+#endif
 // Comment out GIF_COMMENT_STRING #define to disable adding a comment extension to the generated gif file
 
 
 class c_gif_write {
 
     public:
+        enum e_colour_quant_type {
+            COLOUR_QUANT_TYPE_NEUQUANT,
+            COLOUR_QUANT_TYPE_MEDIAN_CUT
+        };
+
         c_gif_write();
 
         // ------------------------------------------
         // Create a new GIF file
         // ------------------------------------------
         bool create(
+#ifdef QT_BUILD
                 const QString &filename,
+#else
+                const std::string &filename,
+#endif
                 int width,
                 int height,
                 int byte_depth,
                 bool colour,
                 int repeat_count,
+                e_colour_quant_type colour_quantisation,
                 int unchanged_border_tolerance,
                 bool use_transparent_pixels,
                 int transparent_tolerence,
@@ -76,6 +93,7 @@ class c_gif_write {
         // ------------------------------------------
         uint64_t get_current_filesize();
 
+
     private:
         //
         // Private functions
@@ -90,7 +108,7 @@ class c_gif_write {
             FILE *p_stream);
 
 
-        void quantise_colours(
+        void quantise_colours_median_cut(
                 uint8_t *p_data,
                 uint16_t x_start,
                 uint16_t x_end,
@@ -100,6 +118,22 @@ class c_gif_write {
                 uint8_t *p_colour_table,
                 uint8_t *p_rev_colour_table,
                 uint8_t *p_index_to_index_colour_difference);
+
+        uint8_t get_best_index_median_cut(uint8_t b, uint8_t g, uint8_t r, uint8_t *p_rev_colour_table);
+
+
+        void quantise_colours_neuquant(
+            uint8_t *p_data,
+//            uint16_t x_start,
+//            uint16_t x_end,
+//            uint16_t y_start,
+//            uint16_t y_end,
+            int number_of_colours,
+            uint8_t *p_colour_table,
+//            uint8_t *p_rev_colour_table,
+            uint8_t *p_index_to_index_colour_difference);
+
+        uint8_t get_best_index_neuquant(uint8_t b, uint8_t g, uint8_t r, uint8_t *p_rev_colour_table);
 
 
         void detect_unchanged_border(
@@ -195,12 +229,14 @@ class c_gif_write {
         int m_bytes_per_sample;
 
         // Encoding details
+
         int m_unchanged_border_tolerance;
         bool m_use_transparent_pixels;
         int m_transparent_index;
         int m_transparent_tolerence;
         int m_lossy_compression_level;
         int m_bit_depth;
+        e_colour_quant_type m_colour_quant_type;
 
         // File writing error flag
         bool m_file_write_error;
@@ -210,7 +246,11 @@ class c_gif_write {
         std::unique_ptr<uint8_t[]> mp_index_to_index_colour_difference_lut;
 
         // Other
+#ifdef QT_BUILD
         QString m_error_string;
+#else
+        std::string m_error_string;
+#endif
         FILE *mp_gif_file;
         bool m_open;
         std::unique_ptr<uint8_t[]> mp_last_image;

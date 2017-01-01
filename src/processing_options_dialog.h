@@ -44,6 +44,7 @@ public:
     bool get_debayer_enable();
     int get_debayer_pattern();
     double get_colour_saturation();
+    bool get_processed_data_is_colour();
 
 
 signals:
@@ -143,8 +144,8 @@ private:
     // Other
     int m_frame_width;
     int m_frame_height;
-    bool m_data_has_bayer_pattern;
     bool m_data_is_colour;
+    bool m_data_has_bayer_pattern;
 };
 
 #endif // PROCESSING_OPTIONS_H
