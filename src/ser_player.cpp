@@ -2646,7 +2646,7 @@ void c_ser_player::about_ser_player()
     msgBox.setText("<b><big>" + tr("SER Player") + "</big> " VERSION_STRING " (" + build_type_string + ")</b>");
     QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
-    informative_text += "Copyright (c) 2015-2016 Chris Garry";
+    informative_text += "Copyright (c) 2015-2017 Chris Garry";
 
     QString translator_credit = tr("English language translation by Chris Garry",
                                    "Translator credit - Replace language and translator names when translating");
@@ -2657,11 +2657,19 @@ void c_ser_player::about_ser_player()
     }
 
     informative_text += "<qt>&nbsp;<br>";
-    informative_text += tr("Credits:");
+
+    informative_text += "<b>" + tr("3rd Party Components:") + "</b>";
+    informative_text += "<br>";
+    informative_text += tr("NeuQuant (c) Anthony Dekker 1994") + "<br>";
+    informative_text += tr("Neural-Net image quantization algorithm");
+    informative_text += "<qt>&nbsp;<br>";
+
+    informative_text += "<b>" + tr("Credits:") + "</b>";
     informative_text += "<br>";
     informative_text += tr("Sylvain Weiller for all his suggestions, testing and feedback.");
 
     informative_text += "<qt>&nbsp;<br>";
+    informative_text += "<b>" + tr("License:") + "</b><br>";
     informative_text += "This program is free software: you can redistribute it and/or modify "
                            "it under the terms of the GNU General Public License as published by "
                            "the Free Software Foundation, either version 3 of the License, or "
@@ -2674,6 +2682,7 @@ void c_ser_player::about_ser_player()
     informative_text += "<qt>&nbsp;<br>";
     informative_text += tr("You should have received a copy of the GNU General Public License "
                            "along with this program.  If not, see <a href=\"http://www.gnu.org/licenses/\">http://www.gnu.org/licenses/</a>", "About box text");
+    informative_text += "<qt>&nbsp;";
 
     msgBox.setInformativeText(informative_text);
     msgBox.addButton(QMessageBox::Ok);
