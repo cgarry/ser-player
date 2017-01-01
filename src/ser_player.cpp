@@ -2660,7 +2660,7 @@ void c_ser_player::about_ser_player()
 
     informative_text += "<b>" + tr("3rd Party Components:") + "</b>";
     informative_text += "<br>";
-    informative_text += tr("NeuQuant (c) Anthony Dekker 1994") + "<br>";
+    informative_text += tr("NeuQuant (c) 1994 Anthony Dekker") + "<br>";
     informative_text += tr("Neural-Net image quantization algorithm");
     informative_text += "<qt>&nbsp;<br>";
 
