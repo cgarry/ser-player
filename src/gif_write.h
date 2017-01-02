@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------
-// Copyright (C) 2015 Chris Garry
+// Copyright (C) 2016-2017 Chris Garry
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
