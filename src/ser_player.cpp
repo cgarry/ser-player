@@ -1965,7 +1965,13 @@ void c_ser_player::estimate_colour_balance()
         if (ret >= 0) {
             // Debayer frame if required
             if (mp_processing_options_Dialog->get_debayer_enable()) {
-                mp_frame_image->debayer_image_bilinear(mp_ser_file->get_colour_id());
+                int colour_id = mp_processing_options_Dialog->get_debayer_pattern();
+                if (colour_id < 0) {
+                    // No colour_id specified, use value from SER file
+                    colour_id = mp_ser_file->get_colour_id();
+                }
+
+                mp_frame_image->debayer_image_bilinear(colour_id);
             }
         }
 
