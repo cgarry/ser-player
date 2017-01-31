@@ -21,7 +21,7 @@
 #include "lzw_compressor.h"
 
 extern "C" {
-    #include "NEUQUANT.H"
+    #include "neuquant.h"
 }
 
 #ifdef QT_BUILD
