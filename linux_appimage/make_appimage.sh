@@ -43,19 +43,14 @@ mkdir temp
 cd temp
 
 # Checkout and build AppImageKit
-git clone https://github.com/probonopd/AppImageKit.git
-
-
-#cd AppImageKit
-#git reset --hard 28cc61e
-#cd ..
-
-cd AppImageKit 
-./build.sh
-cd ..
+##git clone https://github.com/probonopd/AppImageKit.git
+##
+##cd AppImageKit 
+##./build.sh
+##cd ..
 
 # Get the AppImage script functions file
-wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
+wget https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
 . ./functions.sh
 
 # Create the AppImage directory structure
@@ -83,7 +78,11 @@ cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/
 cp ../files/share/ser-player.xml ser-player.AppDir/usr/share/mime/packages/
 
 # Copy file into top level of AppDir
-cp ./AppImageKit/build/AppRun ser-player.AppDir/
+APP_RUN_FILE="AppRun-$SYS_ARCH"
+wget https://github.com/probonopd/AppImageKit/releases/download/continuous/$APP_RUN_FILE
+chmod a+x $APP_RUN_FILE
+cp $APP_RUN_FILE ser-player.AppDir/AppRun
+#cp ./AppImageKit/build/AppRun ser-player.AppDir/
 cp ../files/ser-player.desktop ser-player.AppDir/
 cp ../files/ser-player.png ser-player.AppDir/
 
@@ -114,10 +113,13 @@ cd ser-player.AppDir
 GLIBC_NEEDED=$(glibc_needed)
 cd ..
 
-#wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
+APPIMAGETOOL_FILE="appimagetool-$SYS_ARCH.AppImage"
+wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+chmod a+x $APPIMAGETOOL_FILE
+./$APPIMAGETOOL_FILE ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
 
-
-# ./AppImageKit/build/appimagetool ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
-./AppImageKit/build/appimagetool ./ser-player.AppDir/ 
+#./AppImageKit/build/appimagetool ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
 
 cd ..
+rm -rf temp
+
