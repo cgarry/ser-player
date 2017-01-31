@@ -20,7 +20,7 @@
  */
 
 
-#include "neuquant.h"
+#include "NEUQUANT.H"
 
 
 /* Network Definitions
