@@ -44,19 +44,25 @@ This disk image file contains the SER-Player application and can be distributed 
 
 ##Building SER Player for Debian Linux
 ###Building using the Terminal
-This section has some basic notes on building the application for Debian Linux using the terminal.  These notes assume a PC running a varient of Debian Linux is being used to build the application.  The qtbase5-dev package must be installed.
+This section has some basic notes on building the application for Linux using the terminal.  This has only been tested with variations of Debian linux but should work with other linux distributions.  The qtbase5-dev package must be installed.
 
 * Terminal $ **cd ser-player**
 * Terminal $ **qmake CONFIG+=release** (Or **qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release**)
 * Terminal $ **make**
-* The directory **ser_player/bin/** will contain the application executable only.
+* The directory **ser-player/bin/** will now contain the application executable only.
+* Terminal $ **cd linux_appimage/**
+* Terminal $ **./make_appimage.sh**
+* The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
 
 
 ###Building Using Qt Creator
-This section has some basic notes on building the application for Debian Linux using Qt Creator.  These notes assume a PC running a varient of Debian Linux is being used to build the application.
+This section has some basic notes on building the application for Linux using Qt Creator.  This has only been tested with variations of Debian linux but should work with other linux distributions.
 * Install Qt v5.4.1 and Qt Creator
 * Open Qt project file **ser-player/ser_player/ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
 * Do **Build Menu->Build All** to build the application.
-* The directory **ser_player/bin/** will contain the application executable only.
+* The directory **ser-player/bin/** will contain the application executable only.
+* Terminal $ **cd ser-player/linux_appimage/**
+* Terminal $ **./make_appimage.sh**
+* The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
