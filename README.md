@@ -49,10 +49,10 @@ This section has some basic notes on building the application for Linux using th
 * Terminal $ **cd ser-player**
 * Terminal $ **qmake CONFIG+=release** (Or **qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release**)
 * Terminal $ **make**
-* The directory **ser-player/bin/** will now contain the application executable only.
+The directory **ser-player/bin/** will now contain the application executable only.
 * Terminal $ **cd linux_appimage/**
 * Terminal $ **./make_appimage.sh**
-* The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
+The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
 
 
 ###Building Using Qt Creator
@@ -62,7 +62,7 @@ This section has some basic notes on building the application for Linux using Qt
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
 * Do **Build Menu->Build All** to build the application.
-* The directory **ser-player/bin/** will contain the application executable only.
+The directory **ser-player/bin/** will contain the application executable only.
 * Terminal $ **cd ser-player/linux_appimage/**
 * Terminal $ **./make_appimage.sh**
-* The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
+The directory **ser-player/linux_appimage/** will now contain the the SER Player Appimage.
