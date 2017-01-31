@@ -44,7 +44,15 @@ cd temp
 
 # Checkout and build AppImageKit
 git clone https://github.com/probonopd/AppImageKit.git
-./AppImageKit/build.sh
+
+
+#cd AppImageKit
+#git reset --hard 28cc61e
+#cd ..
+
+cd AppImageKit 
+./build.sh
+cd ..
 
 # Get the AppImage script functions file
 wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
@@ -56,7 +64,7 @@ mkdir -p ser-player.AppDir/usr/bin
 mkdir -p ser-player.AppDir/usr/lib/ser-player/platforms
 mkdir -p ser-player.AppDir/usr/lib/ser-player/plugins/imageformats
 mkdir -p ser-player.AppDir/usr/share/applications
-mkdir -p ser-player.AppDir/usr/share/icons/hicolor/128x128/apps
+mkdir -p ser-player.AppDir/usr/share/icons
 mkdir -p ser-player.AppDir/usr/share/mime/packages
 
 # Copy ser-player executable file into place and strip it
@@ -71,11 +79,11 @@ cp ../files/ser-player.wrapper ser-player.AppDir/usr/bin/
 
 # Copy files in share directories
 cp ../files/share/ser-player.desktop ser-player.AppDir/usr/share/applications/
-cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/hicolor/128x128/apps/
+cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/
 cp ../files/share/ser-player.xml ser-player.AppDir/usr/share/mime/packages/
 
 # Copy file into top level of AppDir
-cp ./AppImageKit/AppRun ser-player.AppDir/
+cp ./AppImageKit/build/AppRun ser-player.AppDir/
 cp ../files/ser-player.desktop ser-player.AppDir/
 cp ../files/ser-player.png ser-player.AppDir/
 
@@ -109,6 +117,7 @@ cd ..
 #wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
 
 
-./AppImageKit/AppImageAssistant ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
+# ./AppImageKit/build/appimagetool ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
+./AppImageKit/build/appimagetool ./ser-player.AppDir/ 
 
 cd ..
