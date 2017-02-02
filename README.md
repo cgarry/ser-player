@@ -42,7 +42,7 @@ This section has some basic notes on building the application for OS X.  These n
 This disk image file contains the SER-Player application and can be distributed to other Mac users.
 
 
-##Building SER Player for Debian Linux
+##Building SER Player for Linux
 ###Building using the Terminal
 This section has some basic notes on building the application for Linux using the terminal.  This has only been tested with variations of Debian linux but should work with other linux distributions.  The qtbase5-dev package must be installed.
 
