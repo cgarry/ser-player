@@ -13,7 +13,7 @@ Some simple goals that hopefully get accross my intentions for this project.
 
 ##Building SER Player for Windows
 This section has some basic notes on building the application for Windows.  These notes assume a Windows PC is being used to build the application.
-* Install Qt v5.4.1 and Qt Creator
+* Install Qt v5.4.1 or later and Qt Creator
 * Open Qt project file **ser-player\ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
@@ -32,7 +32,7 @@ This installer file can now be distributed to other Windows users.
 
 ##Building SER Player for OS X
 This section has some basic notes on building the application for OS X.  These notes assume a Mac running OS X is being used to build the application.
-* Install Qt v5.4.1 and Qt Creator
+* Install Qt v5.4.1 or later and Qt Creator
 * Open Qt project file **ser-player\ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
@@ -60,7 +60,7 @@ The directory **ser-player/linux_appimage/** will now contain the the SER Player
 
 ###Building Using Qt Creator
 This section has some basic notes on building the application for Linux using Qt Creator.  This has only been tested with variations of Debian linux but should work with other linux distributions.
-* Install Qt v5.4.1 and Qt Creator
+* Install Qt v5.4.1 or later and Qt Creator
 * Open Qt project file **ser-player/ser_player/ser_player.pro** with Qt Creator
 * Select **Release** instead of **Debug**.
 * Do **Build Menu->Run qmake** to run qmake.
