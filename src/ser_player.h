@@ -26,12 +26,14 @@
 class QAction;
 class QActionGroup;
 class QLabel;
-class c_pipp_ser;
-class c_frame_slider;
 class QPushButton;
 class QImage;
 class QTimer;
+class QVBoxLayout;
 
+class c_pipp_ser;
+class c_playback_controls_dialog;
+class c_playback_controls_widget;
 class c_header_details_dialog;
 class c_histogram_dialog;
 class c_processing_options_dialog;
@@ -63,8 +65,10 @@ private:
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
     QAction *mp_markers_dialog_Act;
+    QAction *mp_disconnect_playback_controls_Act;
 
     // Dialogs
+    c_playback_controls_dialog *mp_playback_controls_dialog;
     c_header_details_dialog *mp_header_details_dialog;
     c_processing_options_dialog *mp_processing_options_Dialog;
     c_histogram_dialog *mp_histogram_dialog;
@@ -77,52 +81,24 @@ private:
     c_histogram_thread *mp_histogram_thread;
 
     // Widgets
+    c_playback_controls_widget *mp_playback_controls_widget;
     QPixmap m_no_file_open_Pixmap;
-    QPixmap m_play_Pixmap;
-    QPixmap m_pause_Pixmap;
-    QPixmap m_forward_play_Pixmap;
-    QPixmap m_reverse_play_Pixmap;
-    QPixmap m_forward_and_reverse_play_Pixmap;
-    QPushButton *mp_forward_PushButton;
-    QPushButton *mp_back_PushButton;
-    QPushButton *mp_play_PushButton;
-    QPushButton *mp_stop_PushButton;
-    QPushButton *mp_repeat_PushButton;
-    QPushButton *mp_play_direction_PushButton;
     c_image_Widget *mp_frame_image_Widget;
     QTimer *mp_frame_Timer;
-    c_frame_slider *mp_frame_Slider;
-    QString m_zoom_label_String;
-    QLabel *mp_zoom_Label;
-    QString m_frame_size_label_String;
-    QLabel *mp_frame_size_Label;
-    QString m_pixel_depth_label_String;
-    QLabel *mp_pixel_depth_Label;
-    QLabel *mp_colour_id_Label;
-    QString m_fps_label_String;
-    QLabel *mp_fps_Label;
-    QString m_framecount_label_String;
-    QLabel *mp_framecount_Label;
-    QString m_timestamp_label_String;
-    QString m_no_timestamp_label_String;
-    QLabel *mp_timestamp_Label;
     QTimer *mp_resize_Timer;
 
-    // Other
-    bool m_forward_button_held;
-    bool m_back_button_held;
+    QVBoxLayout *mp_main_vlayout;
 
+    // Other
+    bool m_ser_file_loaded;
     c_pipp_ser *mp_ser_file;
     c_image *mp_frame_image;
     QString m_ser_directory;
-    enum e_state {STATE_NO_FILE, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_FINISHED};
-    enum e_state m_current_state;
     int m_total_frames;
     int m_display_framerate;
     int m_display_frame_time;
     bool m_is_colour;
     bool m_has_bayer_pattern;
-    int m_play_direction;
 
     bool m_monochrome_conversion_enable;
     int m_monochrome_conversion_type;
@@ -131,6 +107,7 @@ private:
     int m_crop_y_pos;
     int m_crop_width;
     int m_crop_height;
+    int m_requested_zoom;
 
 
 public:
@@ -144,6 +121,8 @@ public slots:
     void header_details_dialog_slot(bool checked);
     void histogram_viewer_closed_slot();
     void histogram_viewer_slot(bool checked);
+    void disconnect_playback_controls_slot(bool disconnect);
+    void playback_controls_closed_slot();
     void processing_options_slot(bool checked);
     void processor_options_closed_slot();
     void invert_changed_slot(bool invert);
@@ -167,15 +146,6 @@ public slots:
     void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
     void markers_dialog_closed_slot();
-    void forward_button_pressed_slot();
-    void forward_button_released_slot();
-    void back_button_pressed_slot();
-    void back_button_released_slot();
-    void back_button_held_slot();
-    void play_button_pressed_slot();
-    void stop_button_pressed_slot();
-    void play_direction_button_pressed_slot();
-    void repeat_button_toggled_slot(bool checked);
     void resize_window_100_percent_slot();
     void check_for_updates_slot(bool enabled);
     void debayer_enable_slot();
@@ -185,8 +155,9 @@ public slots:
     void dropEvent(QDropEvent *e);
     void handle_arguments();
     void about_ser_player();
-    void forward_button_held_slot();
     void histogram_done_slot();
+    void start_playing_slot();
+    void stop_playing_slot();
 
 
 protected:

@@ -60,7 +60,9 @@ SOURCES += src/main.cpp\
     src/pipp_avi_write.cpp \
     src/pipp_avi_write_dib.cpp \
     src/selection_box_dialog.cpp \
-    src/neuquant.c
+    src/neuquant.c \
+    src/playback_controls_widget.cpp \
+    src/playback_controls_dialog.cpp
 
 !DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
 
@@ -96,7 +98,9 @@ HEADERS  += src/ser_player.h \
     src/pipp_avi_write.h \
     src/pipp_avi_write_dib.h \
     src/selection_box_dialog.h \
-    src/neuquant.h
+    src/neuquant.h \
+    src/playback_controls_widget.h \
+    src/playback_controls_dialog.h
 
 # Build directories
 contains(QT_ARCH, i386) {

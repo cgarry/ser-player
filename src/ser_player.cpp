@@ -47,17 +47,18 @@
 
 #include <cmath>
 
+#include "playback_controls_dialog.h"
+#include "playback_controls_widget.h"
 #include "gif_write.h"
 #include "histogram_thread.h"
 #include "histogram_dialog.h"
 #include "image.h"
-#include "frame_slider.h"
 #include "ser_player.h"
 #include "persistent_data.h"
+#include "pipp_timestamp.h"
 #include "pipp_ser.h"
 #include "pipp_avi_write_dib.h"
 #include "pipp_ser_write.h"
-#include "pipp_timestamp.h"
 #include "pipp_utf8.h"
 #include "image_widget.h"
 #include "processing_options_dialog.h"
@@ -76,13 +77,15 @@ const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent),
+      mp_playback_controls_dialog(nullptr),
       mp_save_frames_as_ser_Dialog(nullptr),
       mp_save_frames_as_avi_Dialog(nullptr),
       mp_save_frames_as_gif_Dialog(nullptr),
       mp_save_frames_as_images_Dialog(nullptr)
 {
+    m_requested_zoom = 100;
+    m_ser_file_loaded = false;
     mp_frame_image = new c_image;
-    m_current_state = STATE_NO_FILE;
     m_is_colour = false;
     m_has_bayer_pattern = false;
     mp_histogram_thread = new c_histogram_thread;
@@ -93,7 +96,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_display_framerate = -1;
     m_monochrome_conversion_enable = false;
     m_monochrome_conversion_type = 0;
-    m_play_direction = c_persistent_data::m_play_direction;
 
     m_crop_enable = false;
     m_crop_x_pos = 0;
@@ -163,6 +165,14 @@ c_ser_player::c_ser_player(QWidget *parent)
     }
 
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
+
+    mp_disconnect_playback_controls_Act = playback_menu->addAction(tr("Disconnect Playback Controls", "Playback menu"));
+    mp_disconnect_playback_controls_Act->setEnabled(true);
+    mp_disconnect_playback_controls_Act->setCheckable(true);
+    //mp_disconnect_playback_controls_Act->setChecked(c_persistent_data::m_histogram_enabled);
+    connect(mp_disconnect_playback_controls_Act, SIGNAL(triggered(bool)), this, SLOT(disconnect_playback_controls_slot(bool)));
+
+
     playback_menu->addSeparator();
 
     mp_framerate_Menu = playback_menu->addMenu(tr("Framerate", "Playback menu"));
@@ -205,6 +215,16 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_header_details_dialog->hide();
     connect(mp_header_details_dialog, SIGNAL(rejected()), this, SLOT(header_details_dialog_closed_slot()));
 
+    // Detached playback controls dialog
+    mp_playback_controls_dialog = new c_playback_controls_dialog(this);
+    mp_playback_controls_dialog->hide();
+    connect(mp_playback_controls_dialog, SIGNAL(rejected()), this, SLOT(playback_controls_closed_slot()));
+
+    mp_playback_controls_widget = new c_playback_controls_widget(this);
+    mp_playback_controls_widget->set_maximum_frame(99);
+    mp_playback_controls_widget->set_repeat(c_persistent_data::m_repeat);
+    connect(mp_playback_controls_widget, SIGNAL(markers_dialog_closed()), this, SLOT(markers_dialog_closed_slot()));
+    connect(mp_playback_controls_widget, SIGNAL(open_ser_file_signal()), this, SLOT(open_ser_file_slot()));
 
     // Histogram viewer
     mp_histogram_viewer_Act = tools_menu->addAction(tr("Histogram", "Tools menu"));
@@ -242,6 +262,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_markers_dialog_Act->setEnabled(false);
     mp_markers_dialog_Act->setCheckable(true);
     mp_markers_dialog_Act->setChecked(false);
+    connect(mp_markers_dialog_Act, SIGNAL(triggered(bool)), mp_playback_controls_widget, SLOT(show_markers_dialog(bool)));
 
     //
     // Help menu
@@ -393,178 +414,15 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Dialog, SIGNAL(cancel_selected_area_signal()), mp_frame_image_Widget, SLOT(cancel_area_selection_slot()));
     connect(mp_frame_image_Widget, SIGNAL(selection_box_complete_signal(bool,QRect)), mp_processing_options_Dialog, SLOT(crop_selection_complete_slot(bool,QRect)));
 
-    mp_frame_Slider = new c_frame_slider(this);
-    mp_frame_Slider->set_maximum_frame(99);
-    mp_frame_Slider->set_direction(m_play_direction);
-    mp_frame_Slider->set_repeat(c_persistent_data::m_repeat);
-    connect(mp_markers_dialog_Act, SIGNAL(triggered(bool)), mp_frame_Slider, SLOT(show_markers_dialog(bool)));
-    connect(mp_frame_Slider, SIGNAL(markers_dialog_closed()), this, SLOT(markers_dialog_closed_slot()));
-
-    m_play_Pixmap = QPixmap(":/res/resources/play_button.png");
-    m_pause_Pixmap = QPixmap(":/res/resources/pause_button.png");
-
-    mp_forward_PushButton = new QPushButton;
-    QPixmap forward_Pixmap = QPixmap(":/res/resources/forward_button.png");
-    mp_forward_PushButton->setIcon(forward_Pixmap);
-    mp_forward_PushButton->setIconSize(forward_Pixmap.size());
-    mp_forward_PushButton->setFixedSize(forward_Pixmap.size() + QSize(10, 10));  // Nice and small
-    mp_forward_PushButton->setToolTip(tr("Click to advance 1 frame\nShift-Click to advance multiple frames", "Button Tool tip"));  // Nice and small
-
-    mp_back_PushButton = new QPushButton;
-    QPixmap back_Pixmap = QPixmap(":/res/resources/back_button.png");
-    mp_back_PushButton->setIcon(back_Pixmap);
-    mp_back_PushButton->setIconSize(back_Pixmap.size());
-    mp_back_PushButton->setFixedSize(back_Pixmap.size() + QSize(10, 10));
-    mp_back_PushButton->setToolTip(tr("Click to go back 1 frame\nShift-Click to go back multiple frames", "Button Tool tip"));
-
-    mp_play_PushButton = new QPushButton;
-    mp_play_PushButton->setIcon(m_play_Pixmap);
-    mp_play_PushButton->setIconSize(m_play_Pixmap.size());
-    mp_play_PushButton->setFixedSize(m_play_Pixmap.size() + QSize(10, 10));
-    mp_play_PushButton->setToolTip(tr("Play/Pause", "Button Tool tip"));
-
-    mp_stop_PushButton = new QPushButton;
-    QPixmap stop_Pixmap = QPixmap(":/res/resources/stop_button.png");
-    mp_stop_PushButton->setIcon(stop_Pixmap);
-    mp_stop_PushButton->setIconSize(stop_Pixmap.size());
-    mp_stop_PushButton->setFixedSize(stop_Pixmap.size() + QSize(10, 10));
-    mp_stop_PushButton->setToolTip(tr("Stop", "Button Tool tip"));
-
-    mp_repeat_PushButton = new QPushButton;
-    QPixmap repeat_Pixmap = QPixmap(":/res/resources/repeat_button.png");
-    mp_repeat_PushButton->setIcon(repeat_Pixmap);
-    mp_repeat_PushButton->setIconSize(repeat_Pixmap.size());
-    mp_repeat_PushButton->setFixedSize(repeat_Pixmap.size() + QSize(10, 10));
-    mp_repeat_PushButton->setCheckable(true);
-    mp_repeat_PushButton->setChecked(c_persistent_data::m_repeat);
-    mp_repeat_PushButton->setToolTip(tr("Repeat On/Off", "Button Tool tip"));
-
-    mp_play_direction_PushButton = new QPushButton;
-    m_forward_play_Pixmap = QPixmap(":/res/resources/play_forward.png");
-    m_reverse_play_Pixmap = QPixmap(":/res/resources/play_reverse.png");
-    m_forward_and_reverse_play_Pixmap = QPixmap(":/res/resources/play_forward_and_reverse.png");
-    switch (m_play_direction) {
-    case 0:
-        mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
-        break;
-    case 1:
-        mp_play_direction_PushButton->setIcon(m_reverse_play_Pixmap);
-        break;
-    default:
-        mp_play_direction_PushButton->setIcon(m_forward_and_reverse_play_Pixmap);
-    }
-
-    mp_play_direction_PushButton->setIconSize(m_forward_play_Pixmap.size());
-    mp_play_direction_PushButton->setFixedSize(m_forward_play_Pixmap.size() + QSize(10, 10));
-    mp_play_direction_PushButton->setToolTip(tr("Play Direction", "Button Tool tip"));
-    connect(mp_play_direction_PushButton, SIGNAL(clicked()), this, SLOT(play_direction_button_pressed_slot()));
-
-    m_framecount_label_String = tr("%1/%2", "Frame number/Frame count label");
-    mp_framecount_Label = new QLabel;
-    mp_framecount_Label->setText(m_framecount_label_String.arg("-").arg("----"));
-    mp_framecount_Label->setToolTip(tr("Frame number/Total Frames", "Tool tip"));
-
-    mp_fps_Label = new QLabel;
-    m_fps_label_String = tr("%1 FPS", "Framerate label");
-    mp_fps_Label->setText(m_fps_label_String.arg("--"));
-    mp_fps_Label->setToolTip(tr("Display Frame rate", "Tool tip"));
-
-    mp_colour_id_Label = new QLabel;
-    mp_colour_id_Label->setText("----");
-    mp_colour_id_Label->setToolTip(tr("Colour ID", "Tool tip"));
-
-    m_zoom_label_String = tr("%1%", "Zoom level label");
-    mp_zoom_Label =  new QLabel;
-    mp_zoom_Label->setText(m_zoom_label_String.arg(100));
-    mp_zoom_Label->setToolTip(tr("Display Zoom Level", "Tool tip"));
-
-    m_frame_size_label_String = tr("%1x%2", "Frame size label");
-    mp_frame_size_Label = new QLabel;
-    mp_frame_size_Label->setText(m_frame_size_label_String.arg("---").arg("---"));
-    mp_frame_size_Label->setToolTip(tr("Frame size", "Tool tip"));
-
-    m_pixel_depth_label_String = tr("%1-Bit", "Pixel depth label");
-    mp_pixel_depth_Label = new QLabel;
-    mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg("-"));
-    mp_pixel_depth_Label->setToolTip(tr("Pixel bit depth", "Tool tip"));
-
-    m_timestamp_label_String = tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label");
-    m_no_timestamp_label_String = tr("No Timestamp", "Timestamp label for no timestamp");
-    mp_timestamp_Label = new QLabel;
-    mp_timestamp_Label->setText(m_no_timestamp_label_String);
-    mp_timestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
-
-    QHBoxLayout *slider_h_layout = new QHBoxLayout;
-    slider_h_layout->setSpacing(0);
-    slider_h_layout->setMargin(0);
-    slider_h_layout->addWidget(mp_back_PushButton);
-#ifdef __APPLE__
-    slider_h_layout->addSpacing(15);
-#else
-    slider_h_layout->addSpacing(4);
-#endif
-    slider_h_layout->addWidget(mp_forward_PushButton);
-#ifdef __APPLE__
-    slider_h_layout->addSpacing(15);
-#else
-    slider_h_layout->addSpacing(4);
-#endif
-    slider_h_layout->addWidget(mp_frame_Slider);
-
-    QHBoxLayout *controls_h_layout1 = new QHBoxLayout;
-    controls_h_layout1->setSpacing(8);
-    controls_h_layout1->setMargin(0);
-    controls_h_layout1->addStretch();
-    controls_h_layout1->addWidget(mp_zoom_Label, 0, Qt::AlignTop | Qt::AlignRight);
-    controls_h_layout1->addWidget(mp_frame_size_Label, 0, Qt::AlignTop | Qt::AlignRight);
-    controls_h_layout1->addWidget(mp_pixel_depth_Label, 0, Qt::AlignTop | Qt::AlignRight);
-    controls_h_layout1->addWidget(mp_colour_id_Label, 0, Qt::AlignTop | Qt::AlignRight);
-    controls_h_layout1->addWidget(mp_framecount_Label, 0, Qt::AlignTop | Qt::AlignRight);
-
-    QHBoxLayout *controls_h_layout2 = new QHBoxLayout;
-    controls_h_layout2->setMargin(0);
-    controls_h_layout2->setSpacing(0);
-    controls_h_layout2->setMargin(0);
-    controls_h_layout2->addStretch();
-    controls_h_layout2->addWidget(mp_fps_Label, 0, Qt::AlignRight);
-    controls_h_layout2->addSpacing(8);
-    controls_h_layout2->addWidget(mp_timestamp_Label, 0, Qt::AlignRight);
-
-    QVBoxLayout *controls_v_layout1 = new QVBoxLayout;
-    controls_v_layout1->setSpacing(0);
-    controls_v_layout1->setMargin(0);
-    controls_v_layout1->addLayout(controls_h_layout1);
-    controls_v_layout1->addLayout(controls_h_layout2);
-
-    QHBoxLayout *controls_h_layout = new QHBoxLayout;
-#ifdef __APPLE__
-    controls_h_layout->setSpacing(20);
-#else
-    controls_h_layout->setSpacing(4);
-#endif
-    controls_h_layout->setMargin(0);
-    controls_h_layout->addWidget(mp_play_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addWidget(mp_stop_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addWidget(mp_repeat_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addWidget(mp_play_direction_PushButton, 0, Qt::AlignTop);
-    controls_h_layout->addStretch();
-    controls_h_layout->addLayout(controls_v_layout1);
-
-    QVBoxLayout *controls_v_layout = new QVBoxLayout;
-    controls_v_layout->setSpacing(5);
-    controls_v_layout->setMargin(5);
-    controls_v_layout->addLayout(slider_h_layout);
-    controls_v_layout->addLayout(controls_h_layout);
-
-    QVBoxLayout *main_vlayout = new QVBoxLayout;
-    main_vlayout->setSpacing(0);
-    main_vlayout->setMargin(0);
-    main_vlayout->addWidget(mp_frame_image_Widget, 2);
-    main_vlayout->addLayout(controls_v_layout);
+    mp_main_vlayout = new QVBoxLayout;
+    mp_main_vlayout->setSpacing(0);
+    mp_main_vlayout->setMargin(0);
+    mp_main_vlayout->addWidget(mp_frame_image_Widget, 2);
+    mp_main_vlayout->addWidget(mp_playback_controls_widget);
 
     // Set layout in QWidget
     QWidget *main_widget = new QWidget;
-    main_widget->setLayout(main_vlayout);
+    main_widget->setLayout(mp_main_vlayout);
 
     setCentralWidget(main_widget);
     setWindowTitle(C_WINDOW_TITLE_QSTRING);
@@ -579,32 +437,11 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     connect(mp_resize_Timer, SIGNAL(timeout()), this, SLOT(resize_timer_timeout_slot()));
 
-    connect(mp_forward_PushButton, SIGNAL(pressed()),
-            this, SLOT(forward_button_pressed_slot()));
+    connect(mp_playback_controls_widget, SIGNAL(slider_value_changed(int)), this, SLOT(frame_slider_changed_slot()));
+    connect(mp_playback_controls_widget, SIGNAL(start_playing_signal()), this, SLOT(start_playing_slot()));
+    connect(mp_playback_controls_widget, SIGNAL(stop_playing_signal()), this, SLOT(stop_playing_slot()));
 
-    connect(mp_forward_PushButton, SIGNAL(released()),
-            this, SLOT(forward_button_released_slot()));
-
-    connect(mp_back_PushButton, SIGNAL(pressed()),
-            this, SLOT(back_button_pressed_slot()));
-
-    connect(mp_back_PushButton, SIGNAL(released()),
-            this, SLOT(back_button_released_slot()));
-
-    connect(mp_play_PushButton, SIGNAL(pressed()),
-            this, SLOT(play_button_pressed_slot()));
-
-    connect(mp_stop_PushButton, SIGNAL(pressed()),
-            this, SLOT(stop_button_pressed_slot()));
-
-    connect(mp_repeat_PushButton, SIGNAL(toggled(bool)),
-            this, SLOT(repeat_button_toggled_slot(bool)));
-
-    connect(mp_frame_Slider, SIGNAL(valueChanged(int)),
-            this, SLOT(frame_slider_changed_slot()));
-
-    connect(mp_frame_image_Widget, SIGNAL(double_click_signal()),
-            this, SLOT(resize_window_100_percent_slot()));
+    connect(mp_frame_image_Widget, SIGNAL(double_click_signal()), this, SLOT(resize_window_100_percent_slot()));
 
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -772,6 +609,45 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
+void c_ser_player::disconnect_playback_controls_slot(bool disconnect)
+{
+    int delta_height = mp_playback_controls_widget->height();
+    if (disconnect) {
+        mp_main_vlayout->removeWidget(mp_playback_controls_widget);
+        mp_playback_controls_dialog->add_controls_widget(mp_playback_controls_widget);
+        delta_height = -delta_height;
+    } else {
+        mp_playback_controls_dialog->remove_controls_widget(mp_playback_controls_widget);
+        mp_main_vlayout->insertWidget(1, mp_playback_controls_widget);
+    }
+
+    // Resize window to allow for removed/adde controls
+    if (windowState() != Qt::WindowMaximized) {
+        QSize new_size = size();
+        new_size.setHeight(new_size.height() + delta_height);
+
+        QSize frame_border_and_title_size = frameSize() - size();
+        QDesktopWidget widget;
+        QSize available_desktop_size = widget.availableGeometry().size() - frame_border_and_title_size;
+        if (new_size.height() > available_desktop_size.height())
+        {
+            new_size.setHeight(available_desktop_size.height());
+        }
+
+        resize(new_size);
+    }
+
+    QPoint dialog_pos = pos();
+    if (windowState() != Qt::WindowMaximized) {
+        dialog_pos.setY(dialog_pos.y() + size().height());
+    } else {
+        dialog_pos.setY(dialog_pos.y() + size().height() - mp_playback_controls_widget->height());
+    }
+
+    mp_playback_controls_dialog->move(dialog_pos);
+}
+
+
 // Histogram viewer
 void c_ser_player::histogram_viewer_slot(bool checked)
 {
@@ -823,6 +699,13 @@ void c_ser_player::processor_options_closed_slot()
 }
 
 
+void c_ser_player::playback_controls_closed_slot()
+{
+    mp_disconnect_playback_controls_Act->setChecked(false);
+    disconnect_playback_controls_slot(false);
+}
+
+
 void c_ser_player::crop_changed_slot(bool crop_enable, int crop_x, int crop_y, int crop_width, int crop_height)
 {
     m_crop_enable = crop_enable;
@@ -833,13 +716,9 @@ void c_ser_player::crop_changed_slot(bool crop_enable, int crop_x, int crop_y, i
 
     // Update frame size label
     if (m_crop_enable) {
-        mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(m_crop_width)
-                                  .arg(m_crop_height));
+        mp_playback_controls_widget->update_frame_size_label(m_crop_width, m_crop_height);
     } else {
-        mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(mp_ser_file->get_width())
-                                  .arg(mp_ser_file->get_height()));
+        mp_playback_controls_widget->update_frame_size_label(mp_ser_file->get_width(), mp_ser_file->get_height());
     }
 
     frame_slider_changed_slot();
@@ -859,10 +738,10 @@ void c_ser_player::save_frames_as_ser_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
-    if (m_current_state == STATE_PLAYING) {
+    if (mp_playback_controls_widget->is_playing()) {
         // Pause playing while frame is saved
         restart_playing = true;
-        play_button_pressed_slot();
+        mp_playback_controls_widget->pause_payback();
     }
 
     // Use save_frames dialog to get range of frames to be saved
@@ -879,9 +758,9 @@ void c_ser_player::save_frames_as_ser_slot()
                                                                 QString::fromStdString(mp_ser_file->get_telescope_string()));
     }
 
-    mp_save_frames_as_ser_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
-                                              mp_frame_Slider->get_end_frame(),
-                                              mp_frame_Slider->get_markers_enable());
+    mp_save_frames_as_ser_Dialog->set_markers(mp_playback_controls_widget->get_start_frame(),
+                                              mp_playback_controls_widget->get_end_frame(),
+                                              mp_playback_controls_widget->get_markers_enable());
 
     if (m_crop_enable) {
         mp_save_frames_as_ser_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
@@ -892,8 +771,8 @@ void c_ser_player::save_frames_as_ser_slot()
     int ret = mp_save_frames_as_ser_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
-        m_current_state != STATE_NO_FILE &&
-        m_current_state != STATE_PLAYING) {
+        m_ser_file_loaded &&
+        !mp_playback_controls_widget->is_playing()) {
 
         int min_frame = mp_save_frames_as_ser_Dialog->get_start_frame();
         int max_frame = mp_save_frames_as_ser_Dialog->get_end_frame();
@@ -1061,7 +940,7 @@ void c_ser_player::save_frames_as_ser_slot()
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
-        play_button_pressed_slot();
+        mp_playback_controls_widget->start_playback();
     }
 
     return;
@@ -1072,10 +951,10 @@ void c_ser_player::save_frames_as_avi_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
-    if (m_current_state == STATE_PLAYING) {
+    if (mp_playback_controls_widget->is_playing()) {
         // Pause playing while frame is saved
         restart_playing = true;
-        play_button_pressed_slot();
+        mp_playback_controls_widget->pause_payback();
     }
 
     // Use save_frames dialog to get range of frames to be saved
@@ -1094,9 +973,9 @@ void c_ser_player::save_frames_as_avi_slot()
                                                                 ser_framerate);
     }
 
-    mp_save_frames_as_avi_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
-                                              mp_frame_Slider->get_end_frame(),
-                                              mp_frame_Slider->get_markers_enable());
+    mp_save_frames_as_avi_Dialog->set_markers(mp_playback_controls_widget->get_start_frame(),
+                                              mp_playback_controls_widget->get_end_frame(),
+                                              mp_playback_controls_widget->get_markers_enable());
 
     if (m_crop_enable) {
         mp_save_frames_as_avi_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
@@ -1107,8 +986,8 @@ void c_ser_player::save_frames_as_avi_slot()
     int ret = mp_save_frames_as_avi_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
-        m_current_state != STATE_NO_FILE &&
-        m_current_state != STATE_PLAYING) {
+        m_ser_file_loaded &&
+        !mp_playback_controls_widget->is_playing()) {
 
         int min_frame = mp_save_frames_as_avi_Dialog->get_start_frame();
         int max_frame = mp_save_frames_as_avi_Dialog->get_end_frame();
@@ -1279,7 +1158,7 @@ void c_ser_player::save_frames_as_avi_slot()
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
-        play_button_pressed_slot();
+        mp_playback_controls_widget->start_playback();
     }
 }
 
@@ -1288,10 +1167,10 @@ void c_ser_player::save_frames_as_gif_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
-    if (m_current_state == STATE_PLAYING) {
+    if (mp_playback_controls_widget->is_playing()) {
         // Pause playing while frame is saved
         restart_playing = true;
-        play_button_pressed_slot();
+        mp_playback_controls_widget->pause_payback();
     }
 
     // Use save_frames dialog to get range of frames to be saved
@@ -1322,9 +1201,9 @@ void c_ser_player::save_frames_as_gif_slot()
         mp_save_frames_as_gif_Dialog->set_processed_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
     }
 
-    mp_save_frames_as_gif_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
-                                              mp_frame_Slider->get_end_frame(),
-                                              mp_frame_Slider->get_markers_enable());
+    mp_save_frames_as_gif_Dialog->set_markers(mp_playback_controls_widget->get_start_frame(),
+                                              mp_playback_controls_widget->get_end_frame(),
+                                              mp_playback_controls_widget->get_markers_enable());
 
     bool is_test_run = false;
     int save_frames_dialog_ret = QDialog::Rejected;
@@ -1344,8 +1223,8 @@ void c_ser_player::save_frames_as_gif_slot()
         int pixel_depth;
 
         if (save_frames_dialog_ret != QDialog::Rejected &&
-            m_current_state != STATE_NO_FILE &&
-            m_current_state != STATE_PLAYING) {
+            m_ser_file_loaded &&
+            !mp_playback_controls_widget->is_playing()) {
 
             is_test_run = mp_save_frames_as_gif_Dialog->get_gif_test_run();  // Is this just a test run?
 
@@ -1636,7 +1515,7 @@ void c_ser_player::save_frames_as_gif_slot()
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
-        play_button_pressed_slot();
+        mp_playback_controls_widget->start_playback();
     }
 }
 
@@ -1645,10 +1524,10 @@ void c_ser_player::save_frames_as_images_slot()
 {
     // Pause playback if currently playing
     bool restart_playing = false;
-    if (m_current_state == STATE_PLAYING) {
+    if (mp_playback_controls_widget->is_playing()) {
         // Pause playing while frame is saved
         restart_playing = true;
-        play_button_pressed_slot();
+        mp_playback_controls_widget->pause_payback();
     }
 
     // Use save_frames dialog to get range of frames to be saved
@@ -1661,9 +1540,9 @@ void c_ser_player::save_frames_as_images_slot()
                                                                    mp_ser_file->has_timestamps());
     }
 
-    mp_save_frames_as_images_Dialog->set_markers(mp_frame_Slider->get_start_frame(),
-                                              mp_frame_Slider->get_end_frame(),
-                                              mp_frame_Slider->get_markers_enable());
+    mp_save_frames_as_images_Dialog->set_markers(mp_playback_controls_widget->get_start_frame(),
+                                              mp_playback_controls_widget->get_end_frame(),
+                                              mp_playback_controls_widget->get_markers_enable());
 
     if (m_crop_enable) {
         mp_save_frames_as_images_Dialog->set_processed_frame_size(m_crop_width, m_crop_height);
@@ -1674,8 +1553,8 @@ void c_ser_player::save_frames_as_images_slot()
     int ret = mp_save_frames_as_images_Dialog->exec();
 
     if (ret != QDialog::Rejected &&
-        m_current_state != STATE_NO_FILE &&
-        m_current_state != STATE_PLAYING) {
+        m_ser_file_loaded &&
+        !mp_playback_controls_widget->is_playing()) {
 
         // Get image filename and type to use
         const QString jpg_ext = QString(tr(".jpg"));
@@ -1744,7 +1623,7 @@ void c_ser_player::save_frames_as_images_slot()
             if (min_frame == -1) {
                 // Save current frame only
                 // Get frame from ser file
-                bool valid_frame = get_and_process_frame(mp_frame_Slider->value(),  // frame_number
+                bool valid_frame = get_and_process_frame(mp_playback_controls_widget->slider_value(),  // frame_number
                                                        true,  // conv_to_8_bit
                                                        do_frame_processing);  // do_processing
                 if (valid_frame) {
@@ -1874,7 +1753,7 @@ void c_ser_player::save_frames_as_images_slot()
 
     // Restart playing if it was playing to start with
     if (restart_playing == true) {
-        play_button_pressed_slot();
+        mp_playback_controls_widget->start_playback();
     }
 }
 
@@ -1944,7 +1823,7 @@ void c_ser_player::colour_align_changed_slot(
 
 void c_ser_player::estimate_colour_balance()
 {
-    if (m_current_state != STATE_NO_FILE) {
+    if (m_ser_file_loaded) {
         // Get frame from SER file
         bool is_colour = false;
         if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
@@ -1958,7 +1837,7 @@ void c_ser_player::estimate_colour_balance()
                     mp_ser_file->get_colour_id(),  // colour_id
                     is_colour);  // colour
 
-        int32_t ret = mp_ser_file->get_frame(mp_frame_Slider->value(), mp_frame_image->get_p_buffer());
+        int32_t ret = mp_ser_file->get_frame(mp_playback_controls_widget->slider_value(), mp_frame_image->get_p_buffer());
 
         mp_frame_image->convert_image_to_8bit();
 
@@ -2053,10 +1932,11 @@ void c_ser_player::open_ser_file(const QString &filename)
     // Disable area selection
     mp_frame_image_Widget->disable_area_selection();
 
-    mp_frame_Slider->reset_all_markers_slot();  // Ensure start marker is reset
-    stop_button_pressed_slot();  // Stop and reset and currently playing frame
+    mp_playback_controls_widget->reset_all_markers_slot();  // Ensure start marker is reset
+    mp_playback_controls_widget->stop_playback();  // Stop and reset and currently playing frame
 
     mp_ser_file->close();
+    m_ser_file_loaded = false;
     m_total_frames = mp_ser_file->open(filename.toUtf8().constData(), 0, 0);
 
     // Check if SER file is broken but fixable - fix it if possible
@@ -2150,7 +2030,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         update_recent_ser_files_menu();
 
         // Ensure we are in the stopped state
-        m_current_state = STATE_STOPPED;
+        mp_playback_controls_widget->stop_playback();
 
         // Update window title with SER filename
         QString ser_filename = pipp_get_filename_from_filepath(filename.toStdString());
@@ -2160,69 +2040,67 @@ void c_ser_player::open_ser_file(const QString &filename)
         m_ser_directory = QFileInfo(filename).canonicalPath();
 
         // Set up frame slider widget
-        mp_frame_Slider->set_maximum_frame(m_total_frames);
-        mp_frame_Slider->reset_all_markers_slot();  // Reset markers to new frame range
-        mp_frame_Slider->set_markers_show(true);  // Un-hide markers
-        mp_frame_Slider->goto_first_frame();
+        mp_playback_controls_widget->set_maximum_frame(m_total_frames);
+        mp_playback_controls_widget->reset_all_markers_slot();  // Reset markers to new frame range
+        mp_playback_controls_widget->set_markers_show(true);  // Un-hide markers
+        mp_playback_controls_widget->goto_first_frame();
 
         // Update frame size label
-        mp_frame_size_Label->setText(m_frame_size_label_String
-                                  .arg(mp_ser_file->get_width())
-                                  .arg(mp_ser_file->get_height()));
+        mp_playback_controls_widget->update_frame_size_label(mp_ser_file->get_width(), mp_ser_file->get_height());
 
         // Update pixel depth label
-        mp_pixel_depth_Label->setText(m_pixel_depth_label_String
-                                      .arg(mp_ser_file->get_pixel_depth()));
+        mp_playback_controls_widget->update_pixel_depth_label(mp_ser_file->get_pixel_depth());
+        m_ser_file_loaded = true;
         m_is_colour = false;
         m_has_bayer_pattern = false;
 
         // Update colour ID label
         switch (mp_ser_file->get_colour_id()) {
         case COLOURID_MONO:
-            mp_colour_id_Label->setText(tr("MONO", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("MONO", "Colour ID label"));
             break;
         case COLOURID_BAYER_RGGB:
-            mp_colour_id_Label->setText(tr("RGGB", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("RGGB", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_GRBG:
-            mp_colour_id_Label->setText(tr("GRBG", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("GRBG", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_GBRG:
-            mp_colour_id_Label->setText(tr("GBRG", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("GBRG", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_BGGR:
-            mp_colour_id_Label->setText(tr("BGGR", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("BGGR", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_CYYM:
-            mp_colour_id_Label->setText(tr("CYYM", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("CYYM", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_YCMY:
-            mp_colour_id_Label->setText(tr("YCMY", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("YCMY", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_YMCY:
-            mp_colour_id_Label->setText(tr("YMCY", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("YMCY", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_BAYER_MYYC:
-            mp_colour_id_Label->setText(tr("MYYC", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("MYYC", "Colour ID label"));
             m_has_bayer_pattern = true;
             break;
         case COLOURID_RGB:
-            mp_colour_id_Label->setText(tr("RGB", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("RGB", "Colour ID label"));
             m_is_colour = true;
             break;
         case COLOURID_BGR:
-            mp_colour_id_Label->setText(tr("BGR", "Colour ID label"));
+            mp_playback_controls_widget->update_colour_id_label(tr("BGR", "Colour ID label"));
             m_is_colour = true;
             break;
         default:
-            mp_colour_id_Label->setText(tr("????", "Colour ID label for unknown ID"));
+            mp_playback_controls_widget->update_colour_id_label(tr("????", "Colour ID label for unknown ID"));
         }
 
         // Inform processing dialog whether this data has a bayer pattern or not
@@ -2256,7 +2134,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         move(QApplication::desktop()->screen()->rect().center() - rect().center());
 
         // Start playback
-        play_button_pressed_slot();  // Start playing SER file
+        mp_playback_controls_widget->start_playback();
     }
 }
 
@@ -2270,18 +2148,17 @@ void c_ser_player::markers_dialog_closed_slot()
 void c_ser_player::frame_slider_changed_slot()
 {
     // Update image to new frame
-    if (m_current_state == STATE_NO_FILE) {
-        mp_frame_Slider->setValue(1);
+    if (!m_ser_file_loaded) {
+        mp_playback_controls_widget->stop_playback();
     } else {
-        mp_framecount_Label->setText(m_framecount_label_String.arg(mp_frame_Slider->value()).arg(m_total_frames));
-        bool valid_frame = get_and_process_frame(mp_frame_Slider->value(),  // frame_number
+        bool valid_frame = get_and_process_frame(mp_playback_controls_widget->slider_value(),  // frame_number
                                                true,  // conv_to_8_bit
                                                true);  // do_processing
 
         if (valid_frame) {
             // Start histogram generation if one is not already being generated
             if (mp_histogram_dialog->isVisible() && !mp_histogram_thread->is_running()) {
-                mp_histogram_thread->generate_histogram(mp_frame_image, mp_frame_Slider->value());
+                mp_histogram_thread->generate_histogram(mp_frame_image, mp_playback_controls_widget->slider_value());
             }
 
             mp_frame_image->conv_data_ready_for_qimage();
@@ -2295,35 +2172,11 @@ void c_ser_player::frame_slider_changed_slot()
             mp_frame_image_Widget->setPixmap(QPixmap::fromImage(frame_qimage));
 
             // Update timestamp label
-            uint64_t ts = mp_ser_file->get_timestamp();
-            if (ts > 0) {
-                int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
-                c_pipp_timestamp::timestamp_to_date(
-                    ts,
-                    &ts_year,
-                    &ts_month,
-                    &ts_day,
-                    &ts_hour,
-                    &ts_minute,
-                    &ts_second,
-                    &ts_microsec);
-
-                int32_t ts_millisec = ts_microsec / 1000;
-                mp_timestamp_Label->setText(m_timestamp_label_String
-                                         .arg(ts_year, 4, 10, QLatin1Char( '0' ))
-                                         .arg(ts_month, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_day, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_second, 2, 10, QLatin1Char( '0' ))
-                                         .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
-            } else {
-                mp_timestamp_Label->setText(m_no_timestamp_label_String);
-            }
+            mp_playback_controls_widget->update_timestamp_label(mp_ser_file->get_timestamp());
 
             // Ensure displayed histogram matches displayed frame
-            if (m_current_state != STATE_PLAYING) {
-                if (mp_histogram_dialog->isVisible() && mp_frame_Slider->value() != mp_histogram_thread->get_frame_number()) {
+            if (!mp_playback_controls_widget->is_playing()) {
+                if (mp_histogram_dialog->isVisible() && mp_playback_controls_widget->slider_value() != mp_histogram_thread->get_frame_number()) {
                     // We have stopped playing but the histogram is not the histogram for the last frame
                     // Display the last frame again to regenerate the histogram
                     QTimer::singleShot(5, this, SLOT(frame_slider_changed_slot()));
@@ -2332,8 +2185,7 @@ void c_ser_player::frame_slider_changed_slot()
         } else {
             // Should never get here unless something has gone very wrong
             // Stop playing as a last resort
-            mp_frame_Timer->stop();
-            mp_play_PushButton->setIcon(m_play_Pixmap);
+            mp_playback_controls_widget->stop_playback();
         }
     }
 }
@@ -2341,13 +2193,11 @@ void c_ser_player::frame_slider_changed_slot()
 
 void c_ser_player::frame_timer_timeout_slot()
 {
-    if (m_current_state == STATE_NO_FILE) {
-        mp_frame_Timer->stop();
-        mp_play_PushButton->setIcon(m_play_Pixmap);
+    if (!m_ser_file_loaded) {
+        mp_playback_controls_widget->stop_playback();
     } else {
-        if (!mp_frame_Slider->goto_next_frame()) {
+        if (!mp_playback_controls_widget->goto_next_frame()) {
             // End of playback
-            m_current_state = STATE_FINISHED;
             if (mp_histogram_dialog->isVisible()) {
                 // A slightly messy way to ensure the displayed histogram matches the displayed frame
                 // when playback has stopped
@@ -2355,200 +2205,11 @@ void c_ser_player::frame_timer_timeout_slot()
             }
         }
 
-        if (m_current_state != STATE_PLAYING) {
-            mp_frame_Timer->stop();
-            mp_play_PushButton->setIcon(m_play_Pixmap);
+        if (!mp_playback_controls_widget->is_playing()) {
+            mp_playback_controls_widget->stop_playback();
         }
     }
 }
-
-
-void c_ser_player::forward_button_pressed_slot()
-{
-    if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-        bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
-        int value = mp_frame_Slider->value();
-
-        if (shift_key) {
-            value += 50;
-        } else {
-            value++;
-        }
-
-        if (value > mp_frame_Slider->maximum()) {
-            value = mp_frame_Slider->maximum();
-        }
-
-        mp_frame_Slider->setValue(value);
-
-        // Start repeat timer
-        m_forward_button_held = true;
-        QTimer::singleShot(500, this, SLOT(forward_button_held_slot()));
-    }
-}
-
-
-void c_ser_player::forward_button_released_slot()
-{
-    m_forward_button_held = false;
-}
-
-
-void c_ser_player::forward_button_held_slot()
-{
-    if (m_forward_button_held &&
-        mp_forward_PushButton->rect().contains(mp_forward_PushButton->mapFromGlobal(QCursor::pos())) &&
-        QApplication::mouseButtons() & Qt::LeftButton) {
-        // Forward button is still being held
-        if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-            bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
-            int value = mp_frame_Slider->value();
-
-            if (shift_key) {
-                value += 50;
-            } else {
-                value++;
-            }
-
-            if (value > mp_frame_Slider->maximum()) {
-                value = mp_frame_Slider->maximum();
-            }
-
-            mp_frame_Slider->setValue(value);
-        }
-
-        // Re-set repeat timer
-        QTimer::singleShot(100, this, SLOT(forward_button_held_slot()));
-    }
-}
-
-
-void c_ser_player::back_button_pressed_slot()
-{
-    if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-        bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
-        int value = mp_frame_Slider->value();
-
-        if (shift_key) {
-            value -= 50;
-        } else {
-            value--;
-        }
-
-        if (value < mp_frame_Slider->minimum()) {
-            value = mp_frame_Slider->minimum();
-        }
-
-        mp_frame_Slider->setValue(value);
-
-        // Start repeat timer
-        m_back_button_held = true;
-        QTimer::singleShot(500, this, SLOT(back_button_held_slot()));
-    }
-}
-
-
-void c_ser_player::back_button_released_slot()
-{
-    m_back_button_held = false;
-}
-
-
-
-void c_ser_player::back_button_held_slot()
-{
-    if (m_back_button_held &&
-        mp_back_PushButton->rect().contains(mp_back_PushButton->mapFromGlobal(QCursor::pos())) &&
-        QApplication::mouseButtons() & Qt::LeftButton) {
-        // Forward button is still being held
-        if (m_current_state != STATE_NO_FILE && m_current_state != STATE_PLAYING) {
-            bool shift_key = QApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier);
-            int value = mp_frame_Slider->value();
-
-            if (shift_key) {
-                value -= 50;
-            } else {
-                value--;
-            }
-
-            if (value < mp_frame_Slider->minimum()) {
-                value = mp_frame_Slider->minimum();
-            }
-
-            mp_frame_Slider->setValue(value);
-        }
-
-        // Re-set repeat timer
-        QTimer::singleShot(100, this, SLOT(back_button_held_slot()));
-    }
-}
-
-
-void c_ser_player::play_button_pressed_slot()
-{
-    if (m_current_state == STATE_NO_FILE) {
-        open_ser_file_slot();
-    } else {
-        if (m_current_state == STATE_PLAYING) {
-            // Stop playing
-            m_current_state = STATE_PAUSED;
-            mp_play_PushButton->setIcon(m_play_Pixmap);
-        } else if (m_current_state == STATE_FINISHED) {
-            // Start playing from start
-            m_current_state = STATE_PLAYING;
-            mp_play_PushButton->setIcon(m_pause_Pixmap);
-            mp_frame_Timer->start(m_display_frame_time);
-            mp_frame_Slider->goto_first_frame();
-        } else {
-            // Start playing from current position if not before start marker
-            m_current_state = STATE_PLAYING;
-            mp_play_PushButton->setIcon(m_pause_Pixmap);
-            mp_frame_Slider->goto_next_frame();
-            mp_frame_Timer->start(m_display_frame_time);
-        }
-    }
-}
-
-
-void c_ser_player::stop_button_pressed_slot()
-{
-    if (m_current_state != STATE_NO_FILE) {
-        m_current_state = STATE_STOPPED;
-        mp_play_PushButton->setIcon(m_play_Pixmap);
-        mp_frame_Timer->stop();
-        mp_frame_Slider->goto_first_frame();
-    }
-}
-
-
-void c_ser_player::repeat_button_toggled_slot(bool checked)
-{
-    c_persistent_data::m_repeat = checked;
-    mp_frame_Slider->set_repeat(checked);
-}
-
-
-void c_ser_player::play_direction_button_pressed_slot()
-{
-    switch (m_play_direction) {
-    case 0:
-        m_play_direction = 1;
-        mp_play_direction_PushButton->setIcon(m_reverse_play_Pixmap);
-        break;
-    case 1:
-        m_play_direction = 2;
-        mp_play_direction_PushButton->setIcon(m_forward_and_reverse_play_Pixmap);
-        break;
-    default:
-        m_play_direction = 0;
-        mp_play_direction_PushButton->setIcon(m_forward_play_Pixmap);
-    }
-
-
-    c_persistent_data::m_play_direction = m_play_direction;
-    mp_frame_Slider->set_direction(m_play_direction);
-}
-
 
 
 void c_ser_player::resize_window_100_percent_slot()
@@ -2559,6 +2220,7 @@ void c_ser_player::resize_window_100_percent_slot()
 
 void c_ser_player::resize_window_with_zoom(int zoom)
 {
+    m_requested_zoom = zoom;
     QSize frame_border_and_title_size = frameSize() - size();
     QDesktopWidget widget;
     QSize available_desktop_size = widget.availableGeometry().size() - frame_border_and_title_size;
@@ -2636,6 +2298,18 @@ void c_ser_player::histogram_done_slot()
     QPixmap histogram_Pixmap;
     mp_histogram_thread->draw_histogram_pixmap(histogram_Pixmap);
     mp_histogram_dialog->set_pixmap(histogram_Pixmap);
+}
+
+
+void c_ser_player::start_playing_slot()
+{
+    mp_frame_Timer->start(m_display_frame_time);
+}
+
+
+void c_ser_player::stop_playing_slot()
+{
+    mp_frame_Timer->stop();
 }
 
 
@@ -2806,7 +2480,7 @@ void c_ser_player::resizeEvent(QResizeEvent *e)
 void c_ser_player::resize_timer_timeout_slot()
 {
     int zoom_level = mp_frame_image_Widget->get_zoom_level();
-    mp_zoom_Label->setText(m_zoom_label_String.arg(zoom_level));
+    mp_playback_controls_widget->update_zoom_label(zoom_level);
 }
 
 
@@ -2836,7 +2510,7 @@ void c_ser_player::calculate_display_framerate()
         fps = (double)m_display_framerate;
     }
 
-    mp_fps_Label->setText(m_fps_label_String.arg(fps));
+    mp_playback_controls_widget->update_fps_label(fps);
     mp_frame_Timer->setInterval(m_display_frame_time);
 }
 
