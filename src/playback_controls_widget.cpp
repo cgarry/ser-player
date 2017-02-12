@@ -24,6 +24,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTimer>
+#include <QMouseEvent>
+#include <QDebug>
 
 #include "playback_controls_widget.h"
 #include "pipp_timestamp.h"
@@ -220,6 +222,8 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     connect(mp_back_PushButton, SIGNAL(released()), this, SLOT(back_button_released_slot()));
     connect(mp_play_PushButton, SIGNAL(pressed()), this, SLOT(play_button_pressed_slot()));
     connect(mp_stop_PushButton, SIGNAL(pressed()), this, SLOT(stop_button_pressed_slot()));
+
+    setToolTip(tr("Double-Click to Attach/Detach Playback Controls"));
 }
 
 
@@ -628,4 +632,10 @@ void c_playback_controls_widget::update_timestamp_label(uint64_t timestamp)
     }
 }
 
+
+void c_playback_controls_widget::mouseDoubleClickEvent(QMouseEvent *p_event)
+{
+    (void)p_event;
+    emit double_clicked_signal();
+}
 

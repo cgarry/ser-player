@@ -60,6 +60,7 @@ signals:
     void start_playing_signal();
     void stop_playing_signal();
     void open_ser_file_signal();
+    void double_clicked_signal();
 
 public slots:
     void show_markers_dialog(bool show);
@@ -86,6 +87,8 @@ private slots:
     void stop_button_pressed_slot();
     void slider_value_changed_slot(int value);
 
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *p_event);
 
 private:
     //

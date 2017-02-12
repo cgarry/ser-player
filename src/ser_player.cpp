@@ -166,12 +166,10 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
 
-    mp_disconnect_playback_controls_Act = playback_menu->addAction(tr("Disconnect Playback Controls", "Playback menu"));
-    mp_disconnect_playback_controls_Act->setEnabled(true);
-    mp_disconnect_playback_controls_Act->setCheckable(true);
-    //mp_disconnect_playback_controls_Act->setChecked(c_persistent_data::m_histogram_enabled);
-    connect(mp_disconnect_playback_controls_Act, SIGNAL(triggered(bool)), this, SLOT(disconnect_playback_controls_slot(bool)));
-
+    mp_detach_playback_controls_Act = playback_menu->addAction(tr("Detach Playback Controls", "Playback menu"));
+    mp_detach_playback_controls_Act->setEnabled(true);
+    mp_detach_playback_controls_Act->setCheckable(true);
+    connect(mp_detach_playback_controls_Act, SIGNAL(triggered(bool)), this, SLOT(detach_playback_controls_slot(bool)));
 
     playback_menu->addSeparator();
 
@@ -225,6 +223,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_playback_controls_widget->set_repeat(c_persistent_data::m_repeat);
     connect(mp_playback_controls_widget, SIGNAL(markers_dialog_closed()), this, SLOT(markers_dialog_closed_slot()));
     connect(mp_playback_controls_widget, SIGNAL(open_ser_file_signal()), this, SLOT(open_ser_file_slot()));
+    connect(mp_playback_controls_widget, SIGNAL(double_clicked_signal()), this, SLOT(playback_controls_double_clicked_slot()));
 
     // Histogram viewer
     mp_histogram_viewer_Act = tools_menu->addAction(tr("Histogram", "Tools menu"));
@@ -610,10 +609,17 @@ void c_ser_player::fps_changed_slot(QAction *action)
 }
 
 
-void c_ser_player::disconnect_playback_controls_slot(bool disconnect)
+void c_ser_player::playback_controls_double_clicked_slot()
+{
+    detach_playback_controls_slot(!mp_detach_playback_controls_Act->isChecked());
+    mp_detach_playback_controls_Act->setChecked(!mp_detach_playback_controls_Act->isChecked());
+}
+
+
+void c_ser_player::detach_playback_controls_slot(bool detach)
 {
     int delta_height = mp_playback_controls_widget->height();
-    if (disconnect) {
+    if (detach) {
         mp_main_vlayout->removeWidget(mp_playback_controls_widget);
         mp_playback_controls_dialog->add_controls_widget(mp_playback_controls_widget);
         delta_height = -delta_height;
@@ -702,8 +708,8 @@ void c_ser_player::processor_options_closed_slot()
 
 void c_ser_player::playback_controls_closed_slot()
 {
-    mp_disconnect_playback_controls_Act->setChecked(false);
-    disconnect_playback_controls_slot(false);
+    mp_detach_playback_controls_Act->setChecked(false);
+    detach_playback_controls_slot(false);
 }
 
 

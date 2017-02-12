@@ -65,7 +65,7 @@ private:
     QAction *mp_histogram_viewer_Act;
     QAction *mp_processing_options_Act;
     QAction *mp_markers_dialog_Act;
-    QAction *mp_disconnect_playback_controls_Act;
+    QAction *mp_detach_playback_controls_Act;
 
     // Dialogs
     c_playback_controls_dialog *mp_playback_controls_dialog;
@@ -121,7 +121,7 @@ public slots:
     void header_details_dialog_slot(bool checked);
     void histogram_viewer_closed_slot();
     void histogram_viewer_slot(bool checked);
-    void disconnect_playback_controls_slot(bool disconnect);
+    void detach_playback_controls_slot(bool detach);
     void playback_controls_closed_slot();
     void processing_options_slot(bool checked);
     void processor_options_closed_slot();
@@ -158,6 +158,7 @@ public slots:
     void histogram_done_slot();
     void start_playing_slot();
     void stop_playing_slot();
+    void playback_controls_double_clicked_slot();
 
 
 protected:
