@@ -153,6 +153,13 @@ c_ser_player::c_ser_player(QWidget *parent)
     //
     QMenu *playback_menu = menuBar()->addMenu(tr("Playback", "Menu title"));
 
+    mp_detach_playback_controls_Act = playback_menu->addAction(tr("Detach Playback Controls", "Playback menu"));
+    mp_detach_playback_controls_Act->setEnabled(true);
+    mp_detach_playback_controls_Act->setCheckable(true);
+    connect(mp_detach_playback_controls_Act, SIGNAL(triggered(bool)), this, SLOT(detach_playback_controls_slot(bool)));
+
+    playback_menu->addSeparator();
+
     const int zoom_levels[] = {25, 50, 75, 100, 125, 150, 200, 250, 300};
     QMenu *zoom_Menu = playback_menu->addMenu(tr("Zoom", "Playback menu"));
     QActionGroup *zoom_ActGroup = new QActionGroup(zoom_Menu);
@@ -165,13 +172,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     }
 
     connect(zoom_ActGroup, SIGNAL (triggered(QAction *)), this, SLOT (zoom_changed_slot(QAction *)));
-
-    mp_detach_playback_controls_Act = playback_menu->addAction(tr("Detach Playback Controls", "Playback menu"));
-    mp_detach_playback_controls_Act->setEnabled(true);
-    mp_detach_playback_controls_Act->setCheckable(true);
-    connect(mp_detach_playback_controls_Act, SIGNAL(triggered(bool)), this, SLOT(detach_playback_controls_slot(bool)));
-
-    playback_menu->addSeparator();
 
     mp_framerate_Menu = playback_menu->addMenu(tr("Framerate", "Playback menu"));
     mp_framerate_Menu->setEnabled(false);
