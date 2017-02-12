@@ -588,7 +588,7 @@ void c_playback_controls_widget::update_frame_size_label(int width, int height)
 }
 
 
-void c_playback_controls_widget::update_zoom_label(int zoom)
+void c_playback_controls_widget::update_zoom_label_slot(int zoom)
 {
     mp_zoom_Label->setText(m_zoom_label_String.arg(zoom));
 }

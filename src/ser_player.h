@@ -85,7 +85,7 @@ private:
     QPixmap m_no_file_open_Pixmap;
     c_image_Widget *mp_frame_image_Widget;
     QTimer *mp_frame_Timer;
-    QTimer *mp_resize_Timer;
+//    QTimer *mp_resize_Timer;
 
     QVBoxLayout *mp_main_vlayout;
 
@@ -143,7 +143,7 @@ public slots:
     void save_frames_as_images_slot();
     void open_save_folder_slot(QAction *);
     void frame_timer_timeout_slot();
-    void resize_timer_timeout_slot();
+//void resize_timer_timeout_slot();
     void frame_slider_changed_slot();
     void markers_dialog_closed_slot();
     void resize_window_100_percent_slot();
@@ -161,7 +161,7 @@ public slots:
 
 
 protected:
-    virtual void resizeEvent(QResizeEvent *event);
+//    virtual void resizeEvent(QResizeEvent *event);
 
 private:
     void add_string_to_stringlist(QStringList &string_list, QString string);

@@ -413,6 +413,7 @@ c_ser_player::c_ser_player(QWidget *parent)
     connect(mp_processing_options_Dialog, SIGNAL(enable_area_selection_signal(QSize,QRect)), mp_frame_image_Widget, SLOT(enable_area_selection_slot(QSize,QRect)));
     connect(mp_processing_options_Dialog, SIGNAL(cancel_selected_area_signal()), mp_frame_image_Widget, SLOT(cancel_area_selection_slot()));
     connect(mp_frame_image_Widget, SIGNAL(selection_box_complete_signal(bool,QRect)), mp_processing_options_Dialog, SLOT(crop_selection_complete_slot(bool,QRect)));
+    connect(mp_frame_image_Widget, SIGNAL(zoom_changed_signal(int)), mp_playback_controls_widget, SLOT(update_zoom_label_slot(int)));
 
     mp_main_vlayout = new QVBoxLayout;
     mp_main_vlayout->setSpacing(0);
@@ -432,10 +433,10 @@ c_ser_player::c_ser_player(QWidget *parent)
     mp_frame_Timer = new QTimer(this);
     connect(mp_frame_Timer, SIGNAL(timeout()), this, SLOT(frame_timer_timeout_slot()));
 
-    mp_resize_Timer = new QTimer(this);
-    mp_resize_Timer->setSingleShot(true);
+//    mp_resize_Timer = new QTimer(this);
+//    mp_resize_Timer->setSingleShot(true);
 
-    connect(mp_resize_Timer, SIGNAL(timeout()), this, SLOT(resize_timer_timeout_slot()));
+//    connect(mp_resize_Timer, SIGNAL(timeout()), this, SLOT(resize_timer_timeout_slot()));
 
     connect(mp_playback_controls_widget, SIGNAL(slider_value_changed(int)), this, SLOT(frame_slider_changed_slot()));
     connect(mp_playback_controls_widget, SIGNAL(start_playing_signal()), this, SLOT(start_playing_slot()));
@@ -2469,19 +2470,22 @@ void c_ser_player::create_no_file_open_image()
     }
 }
 
-
+/*
 void c_ser_player::resizeEvent(QResizeEvent *e)
 {
     QMainWindow::resizeEvent(e);
     mp_resize_Timer->start(1);
 }
+*/
 
 
+/*
 void c_ser_player::resize_timer_timeout_slot()
 {
     int zoom_level = mp_frame_image_Widget->get_zoom_level();
-    mp_playback_controls_widget->update_zoom_label(zoom_level);
+    mp_playback_controls_widget->update_zoom_label_slot(zoom_level);
 }
+*/
 
 
 void c_ser_player::calculate_display_framerate()

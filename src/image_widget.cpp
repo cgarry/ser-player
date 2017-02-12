@@ -306,7 +306,7 @@ void c_image_Widget::paintEvent(QPaintEvent *p_event)
     QSize pixSize = m_image_Pixmap.size();
     pixSize.scale(p_event->rect().size(), Qt::KeepAspectRatio);
 
-    m_zoom_level = (pixSize.width() * 100) / m_image_Pixmap.size().width();
+//    m_zoom_level = (pixSize.width() * 100) / m_image_Pixmap.size().width();
 
     QPixmap scaled_Pixmap = m_image_Pixmap.scaled(pixSize,
                                      Qt::KeepAspectRatio,
@@ -421,7 +421,6 @@ QSize c_image_Widget::sizeHint() const
         // When zooming is active, return zoomed dimensions rather than original dimensions.
         // This allows adjustSize() to be called on the main window to make it all fit nicely.
         // Note that a new funtion will be required to return the zoom to 100% when required.
-        //wibble
         return m_current_Size;
     }
 }
@@ -431,8 +430,20 @@ void c_image_Widget::resizeEvent(QResizeEvent *e)
 {
     int w = e->size().width();
     int h = heightForWidth(w);
+
+    if (h > e->size().height())
+    {
+        h = e->size().height();
+        w = widthForHeight(h);
+    }
+
     m_current_Size = QSize(w, h);
     updateGeometry();
+    int zoom_level = (w * 100) / m_image_Pixmap.size().width();
+    if (zoom_level != m_zoom_level) {
+        m_zoom_level = zoom_level;
+        emit zoom_changed_signal(zoom_level);
+    }
 }
 
 
@@ -453,7 +464,7 @@ int c_image_Widget::widthForHeight(int height) const
 void c_image_Widget::setPixmap (const QPixmap &pixmap){
     m_image_Pixmap = pixmap;
     m_image_size = pixmap.size();
-    m_current_Size = pixmap.size();
+    //m_current_Size = pixmap.size();
     updateGeometry();
     repaint();
 }

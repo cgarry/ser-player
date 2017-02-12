@@ -39,6 +39,7 @@ public:
 signals:
     void double_click_signal();
     void selection_box_complete_signal(bool accepted, QRect selection_rect);
+    void zoom_changed_signal(int zoom);
 
 public slots:
     void setPixmap(const QPixmap&);

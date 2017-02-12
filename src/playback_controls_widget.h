@@ -49,7 +49,6 @@ public:
     void update_colour_id_label(QString colour_id);
     void update_pixel_depth_label(int depth);
     void update_frame_size_label(int width, int height);
-    void update_zoom_label(int zoom);
     void update_fps_label(int fps);
     void update_timestamp_label(uint64_t timestamp);
 
@@ -72,6 +71,7 @@ public slots:
     void set_end_marker_to_current();
     void set_end_marker_slot(int frame);
     void reset_all_markers_slot();
+    void update_zoom_label_slot(int zoom);
     
 private slots:
     void play_direction_button_pressed_slot();
