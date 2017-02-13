@@ -2138,7 +2138,7 @@ void c_ser_player::open_ser_file(const QString &filename)
         resize_window_100_percent_slot();
 
         // Move the application to the middle of the screen
-        move(QApplication::desktop()->screen()->rect().center() - rect().center());
+        move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
         // Start playback
         mp_playback_controls_widget->start_playback();
