@@ -596,6 +596,12 @@ void c_ser_player::handle_arguments()
             break;
         }
     }
+
+    if (c_persistent_data::m_disconnect_playback_controls)
+    {
+        detach_playback_controls_slot(true);
+        mp_detach_playback_controls_Act->setChecked(true);
+    }
 }
 
 
@@ -618,6 +624,7 @@ void c_ser_player::playback_controls_double_clicked_slot()
 
 void c_ser_player::detach_playback_controls_slot(bool detach)
 {
+    c_persistent_data::m_disconnect_playback_controls = detach;
     int delta_height = mp_playback_controls_widget->height();
     if (detach) {
         mp_main_vlayout->removeWidget(mp_playback_controls_widget);
@@ -2138,7 +2145,14 @@ void c_ser_player::open_ser_file(const QString &filename)
         resize_window_100_percent_slot();
 
         // Move the application to the middle of the screen
-        move(QApplication::desktop()->availableGeometry().center() - rect().center());
+        int x_offset = QApplication::desktop()->availableGeometry().size().width() - frameSize().width();
+        x_offset /= 2;
+        int y_offset = QApplication::desktop()->availableGeometry().size().height() - frameSize().height();
+        y_offset /= 2;
+        QPoint new_window_pos = QApplication::desktop()->availableGeometry().topLeft();
+        new_window_pos.setX(new_window_pos.x() + x_offset);
+        new_window_pos.setY(new_window_pos.y() + y_offset);
+        move(new_window_pos);
 
         // Start playback
         mp_playback_controls_widget->start_playback();
