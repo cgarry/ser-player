@@ -174,6 +174,7 @@ private:
     bool get_and_process_frame(int frame_number, bool conv_to_8_bit, bool do_processing);
     void calculate_display_framerate();
     void resize_window_with_zoom(int zoom);
+    void set_defaut_histogram_position();
 };
 
 #endif // SER_PLAYER_H

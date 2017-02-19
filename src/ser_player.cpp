@@ -667,6 +667,7 @@ void c_ser_player::histogram_viewer_slot(bool checked)
 {
     if (checked) {
         mp_histogram_dialog->show();
+        set_defaut_histogram_position();
         frame_slider_changed_slot();
     } else {
         mp_histogram_dialog->hide();
@@ -2154,9 +2155,22 @@ void c_ser_player::open_ser_file(const QString &filename)
         new_window_pos.setY(new_window_pos.y() + y_offset);
         move(new_window_pos);
 
+        // Move the histogram to the top-right(ish) of the application window
+
+
         // Start playback
         mp_playback_controls_widget->start_playback();
+        set_defaut_histogram_position();
     }
+}
+
+
+void c_ser_player::set_defaut_histogram_position()
+{
+    // Move the histogram to the top-right(ish) of the application window
+    QPoint histogram_pos = geometry().topRight();
+    histogram_pos -= QPoint(mp_histogram_dialog->width(), 0);
+    mp_histogram_dialog->move(histogram_pos);
 }
 
 
