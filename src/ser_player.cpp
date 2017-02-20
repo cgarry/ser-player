@@ -2505,13 +2505,25 @@ void c_ser_player::create_no_file_open_image()
     }
 }
 
+
+void c_ser_player::changeEvent (QEvent *event)
+{
+    if (event->type() == QEvent::WindowStateChange) {
+        mp_histogram_dialog->move_to_default_position();
+        mp_playback_controls_dialog->move_to_default_position();
+    }
+}
+
+
 /*
 void c_ser_player::resizeEvent(QResizeEvent *e)
 {
-    QMainWindow::resizeEvent(e);
-    mp_resize_Timer->start(1);
+    qDebug() << "resizeEvent()";
+    //QMainWindow::resizeEvent(e);
+    //mp_resize_Timer->start(1);
 }
 */
+
 
 
 /*

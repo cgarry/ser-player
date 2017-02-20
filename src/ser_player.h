@@ -163,6 +163,7 @@ public slots:
 
 protected:
 //    virtual void resizeEvent(QResizeEvent *event);
+    virtual void changeEvent (QEvent *event);
 
 private:
     void add_string_to_stringlist(QStringList &string_list, QString string);
