@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QDesktopWidget>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -49,4 +50,19 @@ c_histogram_dialog::c_histogram_dialog(QWidget *parent)
 void c_histogram_dialog::set_pixmap(QPixmap histogram)
 {
     mp_histogram_Label->setPixmap(histogram);
+}
+
+
+void c_histogram_dialog::move_to_default_position()
+{
+    // Move the histogram to the top-right(ish) of the application window
+    QDesktopWidget widget;
+    int screen_right_edge = widget.availableGeometry().right();
+    QPoint histogram_pos = parentWidget()->geometry().topRight();
+    if ((histogram_pos.x() + frameGeometry().width()) > screen_right_edge) {
+        int new_x = screen_right_edge - frameGeometry().width();
+        histogram_pos.setX(new_x);
+    }
+
+    move(histogram_pos);
 }

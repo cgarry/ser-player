@@ -33,6 +33,7 @@ public:
     c_playback_controls_dialog(QWidget *parent = 0);
     void add_controls_widget(QWidget *p_widget);
     void remove_controls_widget(QWidget  *p_widget);
+    void move_to_default_position();
 
     
 signals:

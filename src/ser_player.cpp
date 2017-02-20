@@ -651,14 +651,7 @@ void c_ser_player::detach_playback_controls_slot(bool detach)
         resize(new_size);
     }
 
-    QPoint dialog_pos = pos();
-    if (windowState() != Qt::WindowMaximized) {
-        dialog_pos.setY(dialog_pos.y() + size().height());
-    } else {
-        dialog_pos.setY(dialog_pos.y() + size().height() - mp_playback_controls_widget->height());
-    }
-
-    mp_playback_controls_dialog->move(dialog_pos);
+    mp_playback_controls_dialog->move_to_default_position();
 }
 
 
@@ -667,7 +660,7 @@ void c_ser_player::histogram_viewer_slot(bool checked)
 {
     if (checked) {
         mp_histogram_dialog->show();
-        set_defaut_histogram_position();
+        mp_histogram_dialog->move_to_default_position();
         frame_slider_changed_slot();
     } else {
         mp_histogram_dialog->hide();
@@ -2156,11 +2149,11 @@ void c_ser_player::open_ser_file(const QString &filename)
         move(new_window_pos);
 
         // Move the histogram to the top-right(ish) of the application window
-
+        mp_histogram_dialog->move_to_default_position();
+        mp_playback_controls_dialog->move_to_default_position();
 
         // Start playback
         mp_playback_controls_widget->start_playback();
-        set_defaut_histogram_position();
     }
 }
 
@@ -2168,8 +2161,16 @@ void c_ser_player::open_ser_file(const QString &filename)
 void c_ser_player::set_defaut_histogram_position()
 {
     // Move the histogram to the top-right(ish) of the application window
+    QDesktopWidget widget;
+    int available_width = widget.availableGeometry().size().width();
+    qDebug() << "available_width: " << available_width;
     QPoint histogram_pos = geometry().topRight();
-    histogram_pos -= QPoint(mp_histogram_dialog->width(), 0);
+    if ((histogram_pos.x() + mp_histogram_dialog->frameGeometry().width()) > available_width) {
+        int new_x = available_width - mp_histogram_dialog->frameGeometry().width();
+        histogram_pos.setX(new_x);
+    }
+
+    qDebug() << "histogram_pos: " << histogram_pos;
     mp_histogram_dialog->move(histogram_pos);
 }
 

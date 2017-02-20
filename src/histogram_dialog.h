@@ -31,6 +31,7 @@ class c_histogram_dialog : public QDialog
 public:
     c_histogram_dialog(QWidget *parent = 0);
     void set_pixmap(QPixmap histogram);
+    void move_to_default_position();
 
 
 signals:
