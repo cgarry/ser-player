@@ -63,18 +63,13 @@ void c_playback_controls_dialog::remove_controls_widget(QWidget  *p_widget)
 void c_playback_controls_dialog::move_to_default_position()
 {
     QDesktopWidget widget;
-    int screen_bottom_edge = widget.availableGeometry().bottom();
-    QPoint dialog_pos = parentWidget()->pos();
-    if (parentWidget()->windowState() != Qt::WindowMaximized) {
-        dialog_pos.setY(dialog_pos.y() + parentWidget()->frameGeometry().height());
-        if ((dialog_pos.y() + frameGeometry().height()) > screen_bottom_edge) {
-            int new_y_pos = screen_bottom_edge - frameGeometry().height();
-            dialog_pos.setY(new_y_pos);
-        }
-    } else {
-        dialog_pos.setY(dialog_pos.y() + parentWidget()->frameGeometry().height() - frameGeometry().height());
+    int screen_right_edge = widget.availableGeometry().right();
+    QPoint playback_pos = parentWidget()->geometry().bottomRight();
+    playback_pos.setY(playback_pos.y() - frameGeometry().height());
+    if ((playback_pos.x() + frameGeometry().width()) > screen_right_edge) {
+        int new_x = screen_right_edge - frameGeometry().width();
+        playback_pos.setX(new_x);
     }
 
-    move(dialog_pos);
+    move(playback_pos);
 }
-
