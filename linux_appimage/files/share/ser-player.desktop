@@ -13,4 +13,4 @@ Exec=ser-player %f
 Icon=././/share/app-install/icons/ser-player
 MimeType=video/ser;
 Terminal=false
-Categories=Video;AudioVideo
+Categories=Video;AudioVideo;
