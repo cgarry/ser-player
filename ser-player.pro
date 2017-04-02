@@ -22,7 +22,8 @@ unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
 TRANSLATIONS = translations/ser_player_da.ts \
                translations/ser_player_fr.ts \
                translations/ser_player_de.ts \
-               translations/ser_player_es.ts
+               translations/ser_player_es.ts \
+               translations/ser_player_it.ts
 
 # Make Mac version as backwards compatible with old OS versions as possible
 macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
