@@ -305,6 +305,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 
     // Remaining menu items are from installed language files
     QStringList lang_files = QDir(":/res/translations/").entryList(QStringList("ser_player_*.qm"));
+    QStringList lang_list;
     for (int x = 0; x < lang_files.size(); x++) {
         // get locale extracted by filename
         QString locale = lang_files[x]; // Example: "ser_player_de.qm"
@@ -382,9 +383,25 @@ c_ser_player::c_ser_player(QWidget *parent)
             default: lang = QLocale::languageToString(QLocale(locale).language());  // Handle other languages in English
         }
 
+        lang_list.append(lang + "," + locale);
+/*
         action = new QAction(lang, this);
         action->setCheckable(true);
         action->setData(locale);
+        language_menu->addAction(action);
+        lang_ActGroup->addAction(action);
+        if (c_persistent_data::m_selected_language == action->data().toString()) {
+            action->setChecked(true);
+        }
+*/
+    }
+
+    lang_list.sort();  // Reorder alphabetically
+    foreach (const QString &lang_details, lang_list) {
+        QStringList lang = lang_details.split(',');
+        action = new QAction(lang[0], this);
+        action->setCheckable(true);
+        action->setData(lang[1]);
         language_menu->addAction(action);
         lang_ActGroup->addAction(action);
         if (c_persistent_data::m_selected_language == action->data().toString()) {

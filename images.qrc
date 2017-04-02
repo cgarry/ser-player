@@ -8,9 +8,6 @@
         <file>resources/repeat_button.png</file>
         <file>resources/back_button.png</file>
         <file>resources/forward_button.png</file>
-        <file>translations/ser_player_da.qm</file>
-        <file>translations/qt_da.qm</file>
-        <file>translations/ser_player_fr.qm</file>
         <file>resources/play_forward.png</file>
         <file>resources/play_forward_and_reverse.png</file>
         <file>resources/play_reverse.png</file>
@@ -26,8 +23,12 @@
         <file>resources/down_button.png</file>
         <file>resources/up_button.png</file>
         <file>resources/crop_icon.png</file>
+        <file>resources/main_icon.png</file>
+        <file>translations/qt_da.qm</file>
+        <file>translations/ser_player_da.qm</file>
         <file>translations/ser_player_de.qm</file>
         <file>translations/ser_player_es.qm</file>
-        <file>resources/main_icon.png</file>
+        <file>translations/ser_player_fr.qm</file>
+        <file>translations/ser_player_it.qm</file>
     </qresource>
 </RCC>
