@@ -59,7 +59,7 @@ mkdir -p ser-player.AppDir/usr/bin
 mkdir -p ser-player.AppDir/usr/lib/ser-player/platforms
 mkdir -p ser-player.AppDir/usr/lib/ser-player/plugins/imageformats
 mkdir -p ser-player.AppDir/usr/share/applications
-mkdir -p ser-player.AppDir/usr/share/icons
+mkdir -p ser-player.AppDir/usr/share/icons/default/128x128/apps/
 mkdir -p ser-player.AppDir/usr/share/mime/packages
 
 # Copy ser-player executable file into place and strip it
@@ -74,7 +74,8 @@ cp ../files/ser-player.wrapper ser-player.AppDir/usr/bin/
 
 # Copy files in share directories
 cp ../files/share/ser-player.desktop ser-player.AppDir/usr/share/applications/
-cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/
+#cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/
+#cp ../files/ser-player.png ser-player.AppDir/usr/share/icons/default/128x128/apps/
 cp ../files/share/ser-player.xml ser-player.AppDir/usr/share/mime/packages/
 
 # Copy file into top level of AppDir
@@ -121,5 +122,5 @@ chmod a+x $APPIMAGETOOL_FILE
 #./AppImageKit/build/appimagetool ./ser-player.AppDir/ ../ser-player-x.x.x-glibc${GLIBC_NEEDED}-${SYS_ARCH}.AppImage
 
 cd ..
-rm -rf temp
+#rm -rf temp
 
