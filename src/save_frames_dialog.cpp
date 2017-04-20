@@ -66,7 +66,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_ser_framerate(ser_framerate),
       m_start_frame(1),
       m_end_frame(total_frames),
-      m_spin_boxes_valid(true)
+      m_spin_boxes_valid(true),
+      m_last_save_dir("")
 {
     switch (save_type) {
     case SAVE_IMAGES:
@@ -111,11 +112,13 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_start_Spinbox->setMaximum(total_frames);
     mp_start_Spinbox->setValue(1);
     connect(mp_start_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed_slot()));
+    connect(mp_start_Spinbox, SIGNAL(valueChanged(int)), mp_save_frame_range_RButton, SLOT(click()));
     mp_end_Spinbox = new QSpinBox;
     mp_end_Spinbox->setMinimum(1);
     mp_end_Spinbox->setMaximum(total_frames);
     mp_end_Spinbox->setValue(total_frames);
     connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed_slot()));
+    connect(mp_end_Spinbox, SIGNAL(valueChanged(int)), mp_save_frame_range_RButton, SLOT(click()));
 
     mp_selected_frames_Label = new QLabel;
 
@@ -649,11 +652,12 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     setLayout(dialog_VLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    // Ensure mp_num_frames_Label is set and
+    // Ensure mp_num_frames_Label is set
+    update_num_frames_slot();
     if (save_type == SAVE_IMAGES) {
-        mp_save_current_frame_RButton->click();
+//        mp_save_current_frame_RButton->click();
     } else {
-        mp_save_all_frames_RButton->click();
+//        mp_save_all_frames_RButton->click();
     }
 
     resize_control_handler();
@@ -678,17 +682,46 @@ void c_save_frames_dialog::set_markers(int marker_start_frame,
         mp_save_marked_frames_RButton->setText(tr("Save Frames Selected By Start/End Markers (%1 to %2)", "Save frames dialog")
                                                   .arg(marker_start_frame).arg(marker_end_frame));
         mp_save_marked_frames_RButton->setEnabled(true);
-        mp_save_marked_frames_RButton->click();
+        if (!is_select_radio_button_checked()) {
+            mp_save_marked_frames_RButton->click();
+        } else {
+            update_num_frames_slot();
+        }
     } else {
         // No markers enabled
         mp_save_marked_frames_RButton->setText(tr("Start/End Markers Disabled", "Save frames dialog"));
         mp_save_marked_frames_RButton->setEnabled(false);
-        if (m_save_type == SAVE_IMAGES) {
-            mp_save_current_frame_RButton->click();
+        if (!is_select_radio_button_checked()) {
+            if (m_save_type == SAVE_IMAGES) {
+                mp_save_current_frame_RButton->click();
+            } else {
+                mp_save_all_frames_RButton->click();
+            }
         } else {
-            mp_save_all_frames_RButton->click();
+            update_num_frames_slot();
         }
     }
+}
+
+
+bool c_save_frames_dialog::is_select_radio_button_checked()
+{
+    bool ret = false;
+    if (mp_save_current_frame_RButton->isVisible() &&
+        mp_save_current_frame_RButton->isEnabled() &&
+        mp_save_current_frame_RButton->isChecked()) {
+        ret = true;
+    } else if (mp_save_marked_frames_RButton->isVisible() &&
+               mp_save_marked_frames_RButton->isEnabled() &&
+               mp_save_marked_frames_RButton->isChecked()) {
+        ret = true;
+    } else if (mp_save_all_frames_RButton->isChecked()) {
+        ret = true;
+    } else if (mp_save_frame_range_RButton->isChecked()) {
+        ret = true;
+    }
+
+    return ret;
 }
 
 

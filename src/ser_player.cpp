@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.6.2"
+#define VERSION_STRING "v1.6.3"
 
 #include <Qt>
 #include <QApplication>
@@ -384,16 +384,6 @@ c_ser_player::c_ser_player(QWidget *parent)
         }
 
         lang_list.append(lang + "," + locale);
-/*
-        action = new QAction(lang, this);
-        action->setCheckable(true);
-        action->setData(locale);
-        language_menu->addAction(action);
-        lang_ActGroup->addAction(action);
-        if (c_persistent_data::m_selected_language == action->data().toString()) {
-            action->setChecked(true);
-        }
-*/
     }
 
     lang_list.sort();  // Reorder alphabetically
@@ -801,7 +791,14 @@ void c_ser_player::save_frames_as_ser_slot()
 
         int min_frame = mp_save_frames_as_ser_Dialog->get_start_frame();
         int max_frame = mp_save_frames_as_ser_Dialog->get_end_frame();
-        QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
+
+        QString last_save_directory = mp_save_frames_as_ser_Dialog->get_last_save_directory();
+        QString default_filename = QString::fromStdString(mp_ser_file->get_filename());
+        if (last_save_directory.length() > 0) {
+            default_filename =  QFileInfo(default_filename).fileName();
+            default_filename = QDir(last_save_directory).filePath(default_filename);
+        }
+
         int required_digits_for_number = mp_save_frames_as_ser_Dialog->get_required_digits_for_number();
 
         if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
@@ -815,6 +812,8 @@ void c_ser_player::save_frames_as_ser_slot()
                                     .arg(max_frame, required_digits_for_number, 10, QChar('0')));
             default_filename.append(".ser");
         }
+
+        qDebug() << "default_filename: " << default_filename;
 
         QString selected_filter;
         QFileDialog::Options save_dialog_options = 0;
@@ -835,6 +834,8 @@ void c_ser_player::save_frames_as_ser_slot()
             if (!filename.endsWith(".ser", Qt::CaseInsensitive)) {
                 filename = filename + ".ser";
             }
+
+            mp_save_frames_as_ser_Dialog->set_last_save_directory(QFileInfo(filename).absolutePath());
 
             int frame_active_width = mp_save_frames_as_ser_Dialog->get_active_width();
             int frame_active_height = mp_save_frames_as_ser_Dialog->get_active_height();
@@ -1016,7 +1017,14 @@ void c_ser_player::save_frames_as_avi_slot()
 
         int min_frame = mp_save_frames_as_avi_Dialog->get_start_frame();
         int max_frame = mp_save_frames_as_avi_Dialog->get_end_frame();
-        QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
+
+        QString last_save_directory = mp_save_frames_as_avi_Dialog->get_last_save_directory();
+        QString default_filename = QString::fromStdString(mp_ser_file->get_filename());
+        if (last_save_directory.length() > 0) {
+            default_filename =  QFileInfo(default_filename).fileName();
+            default_filename = QDir(last_save_directory).filePath(default_filename);
+        }
+
         int required_digits_for_number = mp_save_frames_as_avi_Dialog->get_required_digits_for_number();
 
         if (default_filename.endsWith(".avi", Qt::CaseInsensitive)) {
@@ -1050,6 +1058,8 @@ void c_ser_player::save_frames_as_avi_slot()
             if (!filename.endsWith(".avi", Qt::CaseInsensitive)) {
                 filename = filename + ".avi";
             }
+
+            mp_save_frames_as_avi_Dialog->set_last_save_directory(QFileInfo(filename).absolutePath());
 
             int frame_active_width = mp_save_frames_as_avi_Dialog->get_active_width();
             int frame_active_height = mp_save_frames_as_avi_Dialog->get_active_height();
@@ -1255,7 +1265,14 @@ void c_ser_player::save_frames_as_gif_slot()
 
             int min_frame = mp_save_frames_as_gif_Dialog->get_start_frame();
             int max_frame = mp_save_frames_as_gif_Dialog->get_end_frame();
-            QString default_filename =  QString::fromStdString(mp_ser_file->get_filename());
+
+            QString last_save_directory = mp_save_frames_as_gif_Dialog->get_last_save_directory();
+            QString default_filename = QString::fromStdString(mp_ser_file->get_filename());
+            if (last_save_directory.length() > 0) {
+                default_filename =  QFileInfo(default_filename).fileName();
+                default_filename = QDir(last_save_directory).filePath(default_filename);
+            }
+
             int required_digits_for_number = mp_save_frames_as_gif_Dialog->get_required_digits_for_number();
 
             if (default_filename.endsWith(".ser", Qt::CaseInsensitive)) {
@@ -1296,6 +1313,10 @@ void c_ser_player::save_frames_as_gif_slot()
                 // Handle the case on Linux where an extension is not added by the save file dialog
                 if (!gif_filename.endsWith(".gif", Qt::CaseInsensitive)) {
                     gif_filename += ".gif";
+                }
+
+                if (!is_test_run) {
+                    mp_save_frames_as_gif_Dialog->set_last_save_directory(QFileInfo(gif_filename).absolutePath());
                 }
 
                 bool do_frame_processing = mp_save_frames_as_gif_Dialog->get_processing_enable();
@@ -1582,6 +1603,12 @@ void c_ser_player::save_frames_as_images_slot()
         !mp_playback_controls_widget->is_playing()) {
 
         // Get image filename and type to use
+        QString save_directory = mp_save_frames_as_images_Dialog->get_last_save_directory();
+        if (save_directory.length() == 0)
+        {
+            save_directory = m_ser_directory;
+        }
+
         const QString jpg_ext = QString(tr(".jpg"));
         const QString jpg_filter = QString(tr("Joint Picture Expert Group Image (*.jpg)", "Filetype filter"));
         const QString bmp_ext = QString(tr(".bmp"));
@@ -1593,7 +1620,7 @@ void c_ser_player::save_frames_as_images_slot()
         QString selected_filter;
         QString selected_ext;
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Images"),
-                                   m_ser_directory,
+                                   save_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
                                    &selected_filter);
         const char *p_format = nullptr;
@@ -1622,6 +1649,8 @@ void c_ser_player::save_frames_as_images_slot()
             if (!filename.endsWith(selected_ext, Qt::CaseInsensitive)) {
                 filename = filename + selected_ext;
             }
+
+            mp_save_frames_as_images_Dialog->set_last_save_directory(QFileInfo(filename).absolutePath());
 
             int frame_active_width = mp_save_frames_as_images_Dialog->get_active_width();
             int frame_active_height = mp_save_frames_as_images_Dialog->get_active_height();

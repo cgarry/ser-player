@@ -111,6 +111,17 @@ public:
     bool get_avi_old_format();
     int get_avi_max_size();
 
+    // Last save directory
+    void set_last_save_directory(QString dir)
+    {
+        m_last_save_dir = dir;
+    }
+
+    QString get_last_save_directory()
+    {
+        return m_last_save_dir;
+    }
+
 
 signals:
 
@@ -129,6 +140,7 @@ private:
     // Private methods
     void helper_method();
     void colour_updated();
+    bool is_select_radio_button_checked();
     
     // Widgets
     QRadioButton *mp_save_current_frame_RButton;
@@ -209,6 +221,7 @@ private:
     int m_total_selected_frames;
     bool m_spin_boxes_valid;
     bool m_test_run;
+    QString m_last_save_dir;
 };
 
 #endif // SAVE_FRAMES_DIALOG_H

@@ -34,6 +34,7 @@ c_save_frames_progress_dialog::c_save_frames_progress_dialog(QWidget *parent, in
       m_total_frames(max_value - min_value + 1)
 {
     setWindowTitle(tr("Save Frames As Images"));
+    QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     mp_text_label = new QLabel(tr("Saving %1 frames").arg(max_value - min_value + 1));
     mp_text_label->setMinimumWidth(mp_text_label->sizeHint().width() * 3);
