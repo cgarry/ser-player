@@ -813,8 +813,6 @@ void c_ser_player::save_frames_as_ser_slot()
             default_filename.append(".ser");
         }
 
-        qDebug() << "default_filename: " << default_filename;
-
         QString selected_filter;
         QFileDialog::Options save_dialog_options = 0;
         #ifdef __APPLE__
@@ -2209,14 +2207,12 @@ void c_ser_player::set_defaut_histogram_position()
     // Move the histogram to the top-right(ish) of the application window
     QDesktopWidget widget;
     int available_width = widget.availableGeometry().size().width();
-    qDebug() << "available_width: " << available_width;
     QPoint histogram_pos = geometry().topRight();
     if ((histogram_pos.x() + mp_histogram_dialog->frameGeometry().width()) > available_width) {
         int new_x = available_width - mp_histogram_dialog->frameGeometry().width();
         histogram_pos.setX(new_x);
     }
 
-    qDebug() << "histogram_pos: " << histogram_pos;
     mp_histogram_dialog->move(histogram_pos);
 }
 
@@ -2564,7 +2560,6 @@ void c_ser_player::changeEvent (QEvent *event)
 /*
 void c_ser_player::resizeEvent(QResizeEvent *e)
 {
-    qDebug() << "resizeEvent()";
     //QMainWindow::resizeEvent(e);
     //mp_resize_Timer->start(1);
 }

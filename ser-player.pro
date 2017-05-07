@@ -137,8 +137,7 @@ win32:release:QMAKE_POST_LINK = $$quote(windeployqt --force --no-translations \"
 
 # Write a script for Linux AppImage generation that has required details of the Qt installation
 # and the processor architecture
-linux:
-{
+linux {
 #    TEST_FILENAME = linux_appimage/get_qt_details.sh
 #    PATH_TO_QMAKE = $${QMAKE_QMAKE}
 #    QT_BIN_DIR = $$dirname(PATH_TO_QMAKE)

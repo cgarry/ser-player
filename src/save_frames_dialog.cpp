@@ -67,7 +67,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_start_frame(1),
       m_end_frame(total_frames),
       m_spin_boxes_valid(true),
-      m_last_save_dir("")
+      m_last_save_dir(""),
+      m_multiple_files_by_frames(false)
 {
     switch (save_type) {
     case SAVE_IMAGES:
@@ -168,6 +169,70 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //---------------------
 
     //
+    // Save as multiple files
+    //
+    QHBoxLayout *save_multiple_files_HLayout1 = new QHBoxLayout;
+    mp_multiple_files_frames_Spinbox = new QSpinBox;
+    mp_multiple_files_frames_Spinbox->setMinimum(1);
+    mp_multiple_files_frames_Spinbox->setMaximum(total_frames);
+    mp_multiple_files_frames_Spinbox->setValue(total_frames/4);
+
+    mp_multiple_files_files_Spinbox = new QSpinBox;
+    mp_multiple_files_files_Spinbox->setMinimum(1);
+    mp_multiple_files_files_Spinbox->setMaximum(total_frames/2);
+    mp_multiple_files_files_Spinbox->setValue(4);
+
+    connect(mp_multiple_files_frames_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_frames_changed_slot()));
+    connect(mp_multiple_files_files_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_files_changed_slot()));
+
+    save_multiple_files_HLayout1->setMargin(0);
+    save_multiple_files_HLayout1->setSpacing(0);
+    save_multiple_files_HLayout1->addWidget(new QLabel(tr("Frames Per File: ", "Save frames dialog")));
+    save_multiple_files_HLayout1->addWidget(mp_multiple_files_frames_Spinbox);
+    save_multiple_files_HLayout1->addSpacing(15);
+    save_multiple_files_HLayout1->addWidget(new QLabel(tr("Files: ", "Save frames dialog")));
+    save_multiple_files_HLayout1->addWidget(mp_multiple_files_files_Spinbox);
+    save_multiple_files_HLayout1->addStretch(0);
+
+    QHBoxLayout *save_multiple_files_HLayout2 = new QHBoxLayout;
+    mp_multiple_files_overlap_Spinbox = new QSpinBox;
+    mp_multiple_files_overlap_Spinbox->setMinimum(-1000);
+    mp_multiple_files_overlap_Spinbox->setMaximum(1000);
+    mp_multiple_files_overlap_Spinbox->setValue(0);
+    connect(mp_multiple_files_overlap_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_overlap_frames_changed_slot()));
+
+    save_multiple_files_HLayout2->setMargin(0);
+    save_multiple_files_HLayout2->setSpacing(0);
+    save_multiple_files_HLayout2->addWidget(new QLabel(tr("Number Of Frames To Overlap Files By: ", "Save frames dialog")));
+    save_multiple_files_HLayout2->addWidget(mp_multiple_files_overlap_Spinbox);
+    save_multiple_files_HLayout2->addStretch(0);
+
+    QHBoxLayout *save_multiple_files_HLayout3 = new QHBoxLayout;
+    mp_save_multiple_files_Label = new QLabel("3 x 500 frames, 1 x 505 frames");
+    save_multiple_files_HLayout3->setMargin(0);
+    save_multiple_files_HLayout3->setSpacing(0);
+    save_multiple_files_HLayout3->addStretch(0);
+    save_multiple_files_HLayout3->addWidget(mp_save_multiple_files_Label);
+
+
+    QVBoxLayout *save_multiple_files_VLayout = new QVBoxLayout;
+    save_multiple_files_VLayout->setMargin(INSIDE_GBOX_MARGIN);
+    save_multiple_files_VLayout->setSpacing(INSIDE_GBOX_SPACING);
+    save_multiple_files_VLayout->addLayout(save_multiple_files_HLayout1);
+    save_multiple_files_VLayout->addLayout(save_multiple_files_HLayout2);
+    save_multiple_files_VLayout->addLayout(save_multiple_files_HLayout3);
+
+    mp_save_multiple_files_GBox = new QGroupBox(tr("Split Frames Into Multiple Files", "Save frames dialog"));
+    mp_save_multiple_files_GBox->setCheckable(true);
+    mp_save_multiple_files_GBox->setChecked(false);
+    mp_save_multiple_files_GBox->setLayout(save_multiple_files_VLayout);
+    // Hide this groupbox if save_type is images
+    if (save_type == SAVE_IMAGES) {
+        mp_save_multiple_files_GBox->hide();
+        mp_save_multiple_files_GBox->setFixedHeight(0);
+    }
+
+    //
     // Frame Decimation
     //
     QLabel *frame_decimation_Label = new QLabel(tr("Keep 1 frame in every", "Save frames dialog"));
@@ -187,7 +252,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     frame_decimation_HLayout->setSpacing(INSIDE_GBOX_SPACING);
     frame_decimation_HLayout->addWidget(frame_decimation_Label);
     frame_decimation_HLayout->addWidget(mp_frame_decimation_SpinBox);
-    frame_decimation_HLayout->addStretch();
+    frame_decimation_HLayout->addStretch(0);
 
     mp_frame_decimation_GBox = new QGroupBox(tr("Enable Frame Decimation", "Save frames dialog"));
     mp_frame_decimation_GBox->setCheckable(true);
@@ -569,6 +634,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // List of group boxes to be displayed
     QList<QGroupBox *> groupbox_list;
     groupbox_list << save_optionsGBox;
+    groupbox_list << mp_save_multiple_files_GBox;
     groupbox_list << mp_frame_decimation_GBox;
     groupbox_list << mp_sequence_direction_GBox;
     groupbox_list << mp_processing_GBox;
@@ -667,6 +733,92 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 c_save_frames_dialog::~c_save_frames_dialog()
 {
     delete mp_utf8_validator;
+}
+
+
+void c_save_frames_dialog::multiple_files_frames_changed_slot()
+{
+    // Early return
+    if (m_save_type == SAVE_IMAGES) {
+        return;
+    }
+
+    int frames_per_file = mp_multiple_files_frames_Spinbox->value();
+    int overlap = mp_multiple_files_overlap_Spinbox->value();
+    int unique_frames_per_file = frames_per_file - overlap;
+    int files = ((m_total_selected_frames - frames_per_file) / unique_frames_per_file) + 1;
+    int residual_frames = m_total_selected_frames - frames_per_file - (unique_frames_per_file * (files - 1));
+
+    QString text;
+    if (residual_frames != 0) {
+        if (residual_frames < (frames_per_file / 2)) {
+            residual_frames = frames_per_file + residual_frames;
+        } else {
+              // Create a new file for the residual frames
+            residual_frames += overlap;
+            files++;
+        }
+
+        text = tr("%1 x %2 frames, 1 x %3 frames", "Save frames dialog")
+                .arg(files-1)
+                .arg(frames_per_file)
+                .arg(residual_frames);
+    } else {
+        text = tr("%1 x %2 frames", "Save frames dialog")
+                .arg(files)
+                .arg(frames_per_file);
+    }
+
+    mp_multiple_files_files_Spinbox->blockSignals(true);
+    mp_multiple_files_files_Spinbox->setValue(files);
+    mp_multiple_files_files_Spinbox->blockSignals(false);
+    mp_save_multiple_files_Label->setText(text);
+    m_multiple_files_by_frames = true;
+}
+
+
+void c_save_frames_dialog::multiple_files_files_changed_slot()
+{
+    // Early return
+    if (m_save_type == SAVE_IMAGES) {
+        return;
+    }
+
+    int files = mp_multiple_files_files_Spinbox->value();
+    int effective_total_frames = m_total_selected_frames;
+    effective_total_frames += (files - 1) * mp_multiple_files_overlap_Spinbox->value();
+
+    int frames = effective_total_frames / files;
+    mp_multiple_files_frames_Spinbox->blockSignals(true);
+    mp_multiple_files_frames_Spinbox->setValue(frames);
+    mp_multiple_files_frames_Spinbox->blockSignals(false);
+    int final_frames = effective_total_frames % frames;
+    QString text;
+
+    if (final_frames != 0) {
+        final_frames += frames;
+        text = tr("%1 x %2 frames, 1 x %3 frames", "Save frames dialog")
+                .arg(files - 1)
+                .arg(frames)
+                .arg(final_frames);
+    } else {
+        text = tr("%1 x %2 frames", "Save frames dialog")
+                .arg(files)
+                .arg(frames);
+    }
+
+    mp_save_multiple_files_Label->setText(text);
+    m_multiple_files_by_frames = false;
+}
+
+
+void c_save_frames_dialog::multiple_files_overlap_frames_changed_slot()
+{
+    if (m_multiple_files_by_frames) {
+        multiple_files_frames_changed_slot();
+    } else {
+        multiple_files_files_changed_slot();
+    }
 }
 
 
@@ -909,11 +1061,21 @@ void c_save_frames_dialog::update_num_frames_slot()
         mp_include_timestamps_CBox->setEnabled(false);
     }
 
-
     if (get_frames_to_be_saved() == 1) {
         mp_total_frames_to_save_Label->setText(tr("1 frame will be saved"));
     } else {
         mp_total_frames_to_save_Label->setText(tr("%1 frames will be saved").arg(get_frames_to_be_saved()));
+    }
+
+    // Set maximum range for save multiple files number of frames and files spinboxes
+    if (m_spin_boxes_valid) {
+        mp_multiple_files_frames_Spinbox->setMaximum(m_total_selected_frames);
+        mp_multiple_files_files_Spinbox->setMaximum(m_total_selected_frames/2);
+        if (m_multiple_files_by_frames) {
+            multiple_files_frames_changed_slot();
+        } else {
+            multiple_files_files_changed_slot();
+        }
     }
 }
 

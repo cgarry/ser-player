@@ -545,6 +545,7 @@ void c_playback_controls_widget::pause_payback()
         // Pause playing
         m_current_state = STATE_PAUSED;
         mp_play_PushButton->setIcon(m_play_Pixmap);
+        emit stop_playing_signal();
     }
 }
 
