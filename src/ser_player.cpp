@@ -16,7 +16,7 @@
 // ---------------------------------------------------------------------
 
 
-#define VERSION_STRING "v1.6.3"
+#define VERSION_STRING "v1.6.4"
 
 #include <Qt>
 #include <QApplication>
@@ -464,13 +464,13 @@ c_ser_player::c_ser_player(QWidget *parent)
         connect(new_version_checker, SIGNAL(new_version_available_signal(QString)),
                 this, SLOT(new_version_available_slot(QString)));
     }
-#endif
 
     if (QSslSocket::supportsSsl()) {
         qDebug() << "SSL INFO: SSL Support Included";
     } else {
         qDebug() << "SSL INFO: SSL Support Missing";
     }
+#endif
 }
 
 
@@ -2359,9 +2359,7 @@ void c_ser_player::check_for_updates_slot(bool enabled)
 
 void c_ser_player::debayer_enable_slot()
 {
-    if (m_has_bayer_pattern) {
-        frame_slider_changed_slot();
-    }
+    frame_slider_changed_slot();
 }
 
 
