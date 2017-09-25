@@ -228,7 +228,8 @@ private:
     int m_start_frame;
     int m_end_frame;
     int m_total_selected_frames;
-    bool m_spin_boxes_valid;
+    bool m_frame_start_end_spin_boxes_valid;
+    bool m_multiple_files_spin_boxes_valid;
     bool m_test_run;
     QString m_last_save_dir;
     bool m_multiple_files_by_frames;

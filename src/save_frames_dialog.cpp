@@ -66,7 +66,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_ser_framerate(ser_framerate),
       m_start_frame(1),
       m_end_frame(total_frames),
-      m_spin_boxes_valid(true),
+      m_frame_start_end_spin_boxes_valid(true),
+      m_multiple_files_spin_boxes_valid(true),
       m_last_save_dir(""),
       m_multiple_files_by_frames(false)
 {
@@ -196,8 +197,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
 
     QHBoxLayout *save_multiple_files_HLayout2 = new QHBoxLayout;
     mp_multiple_files_overlap_Spinbox = new QSpinBox;
-    mp_multiple_files_overlap_Spinbox->setMinimum(-1000);
-    mp_multiple_files_overlap_Spinbox->setMaximum(1000);
+    mp_multiple_files_overlap_Spinbox->setMinimum(-(total_frames-1));
+    mp_multiple_files_overlap_Spinbox->setMaximum(total_frames-1);
     mp_multiple_files_overlap_Spinbox->setValue(0);
     connect(mp_multiple_files_overlap_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_overlap_frames_changed_slot()));
 
@@ -227,7 +228,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_save_multiple_files_GBox->setChecked(false);
     mp_save_multiple_files_GBox->setLayout(save_multiple_files_VLayout);
     // Hide this groupbox if save_type is images
-    if (save_type == SAVE_IMAGES) {
+    // Completely hide this dialog until functionality is actually implemented
+    if (true || save_type == SAVE_IMAGES) {
         mp_save_multiple_files_GBox->hide();
         mp_save_multiple_files_GBox->setFixedHeight(0);
     }
@@ -749,6 +751,12 @@ void c_save_frames_dialog::multiple_files_frames_changed_slot()
     int files = ((m_total_selected_frames - frames_per_file) / unique_frames_per_file) + 1;
     int residual_frames = m_total_selected_frames - frames_per_file - (unique_frames_per_file * (files - 1));
 
+    if (frames_per_file > m_total_selected_frames) {
+        m_multiple_files_spin_boxes_valid = false;
+    } else {
+        m_multiple_files_spin_boxes_valid = true;
+    }
+
     QString text;
     if (residual_frames != 0) {
         if (residual_frames < (frames_per_file / 2)) {
@@ -769,10 +777,18 @@ void c_save_frames_dialog::multiple_files_frames_changed_slot()
                 .arg(frames_per_file);
     }
 
+    if (!m_multiple_files_spin_boxes_valid) {
+        mp_multiple_files_frames_Spinbox->setStyleSheet("color: red; ");
+        mp_save_multiple_files_Label->setText("<font color='Red'>" + text + "</font>");
+    } else {
+        mp_multiple_files_frames_Spinbox->setStyleSheet("");
+        mp_save_multiple_files_Label->setText(text);
+    }
+
+    mp_multiple_files_files_Spinbox->setStyleSheet("");
     mp_multiple_files_files_Spinbox->blockSignals(true);
     mp_multiple_files_files_Spinbox->setValue(files);
     mp_multiple_files_files_Spinbox->blockSignals(false);
-    mp_save_multiple_files_Label->setText(text);
     m_multiple_files_by_frames = true;
 }
 
@@ -789,10 +805,19 @@ void c_save_frames_dialog::multiple_files_files_changed_slot()
     effective_total_frames += (files - 1) * mp_multiple_files_overlap_Spinbox->value();
 
     int frames = effective_total_frames / files;
+    if (frames == 0) {
+        // No divide by 0 errors!
+        frames = 1;
+        m_multiple_files_spin_boxes_valid = false;
+    } else {
+        m_multiple_files_spin_boxes_valid = true;
+    }
+
     mp_multiple_files_frames_Spinbox->blockSignals(true);
     mp_multiple_files_frames_Spinbox->setValue(frames);
     mp_multiple_files_frames_Spinbox->blockSignals(false);
     int final_frames = effective_total_frames % frames;
+
     QString text;
 
     if (final_frames != 0) {
@@ -807,7 +832,15 @@ void c_save_frames_dialog::multiple_files_files_changed_slot()
                 .arg(frames);
     }
 
-    mp_save_multiple_files_Label->setText(text);
+    if (!m_multiple_files_spin_boxes_valid) {
+        mp_multiple_files_files_Spinbox->setStyleSheet("color: red; ");
+        mp_save_multiple_files_Label->setText("<font color='Red'>" + text + "</font>");
+    } else {
+        mp_multiple_files_files_Spinbox->setStyleSheet("");
+        mp_save_multiple_files_Label->setText(text);
+    }
+
+    mp_multiple_files_frames_Spinbox->setStyleSheet("");
     m_multiple_files_by_frames = false;
 }
 
@@ -921,18 +954,17 @@ void c_save_frames_dialog::colour_updated()
 
 void c_save_frames_dialog::spinbox_changed_slot()
 {
-    QPalette text_Palette;
     if (mp_start_Spinbox->value() > mp_end_Spinbox->value()) {
         // Invalid values
-        text_Palette.setColor(QPalette::Text,Qt::red);
-        m_spin_boxes_valid = false;
+        mp_start_Spinbox->setStyleSheet("color: red; ");
+        mp_end_Spinbox->setStyleSheet("color: red; ");
+        m_frame_start_end_spin_boxes_valid = false;
     } else {
-        text_Palette.setColor(QPalette::Text,Qt::black);
-        m_spin_boxes_valid = true;
+        mp_start_Spinbox->setStyleSheet("");
+        mp_end_Spinbox->setStyleSheet("");
+        m_frame_start_end_spin_boxes_valid = true;
     }
 
-    mp_start_Spinbox->setPalette(text_Palette);
-    mp_end_Spinbox->setPalette(text_Palette);
     update_num_frames_slot();
 }
 
@@ -1028,7 +1060,7 @@ void c_save_frames_dialog::update_num_frames_slot()
         m_total_selected_frames = m_marker_end_frame - m_marker_start_frame + 1;
         mp_selected_frames_Label->setText(tr("%1 frames selected").arg(m_total_selected_frames));
     } else { // mp_save_frame_range_RButton
-        if (m_spin_boxes_valid) {
+        if (m_frame_start_end_spin_boxes_valid) {
             m_total_selected_frames = mp_end_Spinbox->value() - mp_start_Spinbox->value() + 1;
         } else {
             m_total_selected_frames = 0;
@@ -1067,10 +1099,10 @@ void c_save_frames_dialog::update_num_frames_slot()
         mp_total_frames_to_save_Label->setText(tr("%1 frames will be saved").arg(get_frames_to_be_saved()));
     }
 
-    // Set maximum range for save multiple files number of frames and files spinboxes
-    if (m_spin_boxes_valid) {
-        mp_multiple_files_frames_Spinbox->setMaximum(m_total_selected_frames);
-        mp_multiple_files_files_Spinbox->setMaximum(m_total_selected_frames/2);
+    // Check multiple frames values are valid
+    if (m_frame_start_end_spin_boxes_valid) {
+        //mp_multiple_files_frames_Spinbox->setMaximum(m_total_selected_frames);
+        //mp_multiple_files_files_Spinbox->setMaximum(m_total_selected_frames/2);
         if (m_multiple_files_by_frames) {
             multiple_files_frames_changed_slot();
         } else {
