@@ -867,7 +867,7 @@ double c_processing_options_dialog::get_colour_saturation()
 {
     double colour_saturation;
     if (mp_colsat_DSpinbox->isEnabled()) {
-        // Control is anabled
+        // Control is enabled
         colour_saturation = mp_colsat_DSpinbox->value();
     } else {
         // Control is not enabled
