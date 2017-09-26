@@ -12,7 +12,7 @@ BUILD_FOR_LINUX_REPO: DEFINES += DISABLE_NEW_VERSION_CHECK
 QT += core gui
 QT += concurrent
 QT += widgets
-!DISABLE_NEW_VERSION_CHECK: QT += network
+!contains(DEFINES, DISABLE_NEW_VERSION_CHECK): QT += network
 
 DEFINES += QT_BUILD
 
@@ -70,7 +70,7 @@ SOURCES += src/main.cpp\
     src/playback_controls_widget.cpp \
     src/playback_controls_dialog.cpp
 
-!DISABLE_NEW_VERSION_CHECK: SOURCES += src/new_version_checker.cpp
+!contains(DEFINES, DISABLE_NEW_VERSION_CHECK): SOURCES += src/new_version_checker.cpp
 
 macx:SOURCES += src/pipp_utf8_osx.cpp
 bsd:SOURCES += src/pipp_utf8_bsd.cpp
@@ -142,7 +142,7 @@ win32:release:QMAKE_POST_LINK = $$quote(windeployqt --force --no-translations \"
 
 # Write a script for Linux AppImage generation that has required details of the Qt installation
 # and the processor architecture
-!BUILD_FOR_LINUX_REPO {
+!contains(DEFINES, BUILD_FOR_LINUX_REPO) {
     linux {
     #    TEST_FILENAME = linux_appimage/get_qt_details.sh
     #    PATH_TO_QMAKE = $${QMAKE_QMAKE}
@@ -155,7 +155,6 @@ win32:release:QMAKE_POST_LINK = $$quote(windeployqt --force --no-translations \"
         release:QMAKE_POST_LINK = $$PWD/linux_appimage/linuxdeployqt-continuous-x86_64.AppImage $$PWD/bin/ser-player
     }
 }
-
 
 # SSL DLLs
 win32 {
