@@ -190,12 +190,12 @@
     <message>
         <location filename="../src/header_details_dialog.cpp" line="160"/>
         <source> * DateTime: %1 (0x%2)</source>
-        <translation>Date : %1 (0x%2)</translation>
+        <translation> * Temps : %1 (0x%2)</translation>
     </message>
     <message>
         <location filename="../src/header_details_dialog.cpp" line="163"/>
         <source> * DateTime_UTC: %1 (0x%2)</source>
-        <translation>Date UTC : %1 (0x%2)</translation>
+        <translation> * Temps_UTC : %1 (0x%2)</translation>
     </message>
     <message>
         <source> * DateTime: 0x%1</source>
@@ -271,7 +271,7 @@
     <message>
         <location filename="../src/pipp_ser.cpp" line="515"/>
         <source> * Timestamps are all identical</source>
-        <translation>&apos;*&apos; Alle tidsangivelser på billederne er ens</translation>
+        <translation> * L&apos;horodatage est identique partout</translation>
     </message>
     <message>
         <location filename="../src/pipp_ser.cpp" line="517"/>
@@ -453,7 +453,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="226"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Double cliquer pour attcher/détacher les contrôles de lecture</translation>
     </message>
 </context>
 <context>
@@ -567,7 +567,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="147"/>
         <source>Convert To Monochrome Using: </source>
-        <translation>Convertir en niveau de gris en utilisant :</translation>
+        <translation>Convertir en monochrome en utilisant : </translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="150"/>
@@ -771,7 +771,7 @@ Maj-click pour reculer de plusieurs images</translation>
         <location filename="../src/save_frames_dialog.cpp" line="104"/>
         <source>Save Frames From: </source>
         <comment>Save frames dialog</comment>
-        <translation>Enregistrer les images à partir de :</translation>
+        <translation>Enregistrer les images à partir de : </translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="82"/>
@@ -789,7 +789,7 @@ Maj-click pour reculer de plusieurs images</translation>
         <location filename="../src/save_frames_dialog.cpp" line="144"/>
         <source> to </source>
         <comment>Save frames dialog</comment>
-        <translation>jusqu&apos;à</translation>
+        <translation> jusqu&apos;à </translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="163"/>
@@ -1037,17 +1037,17 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="534"/>
         <source>Colour Quantisation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantification de la couleur :</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="536"/>
         <source>Neural-Net Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantification net-neutre</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="537"/>
         <source>Median Cut Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Quantisation de taille médiane</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="539"/>
@@ -1643,27 +1643,27 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1475"/>
         <source>Frame Delay: </source>
-        <translation>Temporisation de l&apos;image :</translation>
+        <translation>Temporisation de l&apos;image : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1476"/>
         <source>Final Frame Delay: </source>
-        <translation>Temporisation de l&apos;image finale :</translation>
+        <translation>Temporisation de l&apos;image finale : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1478"/>
         <source>Colour Quantisation: </source>
-        <translation type="unfinished"></translation>
+        <translation>Quantification de la couleur : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1480"/>
         <source>Unchanged Border Tolerance: </source>
-        <translation>Tolérance des bords inchangée :</translation>
+        <translation>Tolérance des bords inchangée : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1483"/>
         <source>Transperant Pixel Tolerance: </source>
-        <translation>Tolérance de la transparence des pixels :</translation>
+        <translation>Tolérance de la transparence des pixels : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1485"/>
@@ -1673,7 +1673,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1489"/>
         <source>Reduced Pixel Depth: </source>
-        <translation>Profondeur des pixels réduite :</translation>
+        <translation>Profondeur des pixels réduite : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1491"/>
@@ -1683,7 +1683,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1495"/>
         <source>Lossy Compression Level: </source>
-        <translation>Niveau de la compression avec perte :</translation>
+        <translation>Niveau de la compression avec perte : </translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1497"/>
@@ -2053,7 +2053,7 @@ Maj-click pour reculer de plusieurs images</translation>
         <location filename="../src/ser_player.cpp" line="156"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation type="unfinished"></translation>
+        <translation>Détacher les contrôles de lecture</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="164"/>
@@ -2150,7 +2150,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2417"/>
         <source>3rd Party Components:</source>
-        <translation type="unfinished"></translation>
+        <translation>Composants tiers :</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2419"/>
@@ -2160,7 +2160,7 @@ Maj-click pour reculer de plusieurs images</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2420"/>
         <source>Neural-Net image quantization algorithm</source>
-        <translation type="unfinished"></translation>
+        <translation>Algorithme de quantification d&apos;image net-neutre</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2423"/>
