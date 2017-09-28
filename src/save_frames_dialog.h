@@ -134,9 +134,9 @@ private slots:
     void gif_apply_preset_options();
     void gif_unchanged_border_tolerance_changed_slot();
     void gif_test_options_button_pressed_slot();
-    void multiple_files_frames_changed_slot();
-    void multiple_files_files_changed_slot();
-    void multiple_files_overlap_frames_changed_slot();
+//    void multiple_files_frames_changed_slot();
+//    void multiple_files_files_changed_slot();
+//    void multiple_files_overlap_frames_changed_slot();
 
     
 private:
@@ -153,13 +153,13 @@ private:
     QSpinBox *mp_start_Spinbox;
     QSpinBox *mp_end_Spinbox;
     QLabel *mp_selected_frames_Label;
-
+/*
     QSpinBox *mp_multiple_files_frames_Spinbox;
     QSpinBox *mp_multiple_files_files_Spinbox;
     QGroupBox *mp_save_multiple_files_GBox;
     QLabel *mp_save_multiple_files_Label;
     QSpinBox *mp_multiple_files_overlap_Spinbox;
-
+*/
     QGroupBox *mp_frame_decimation_GBox;
     QSpinBox *mp_frame_decimation_SpinBox;
 
@@ -229,10 +229,10 @@ private:
     int m_end_frame;
     int m_total_selected_frames;
     bool m_frame_start_end_spin_boxes_valid;
-    bool m_multiple_files_spin_boxes_valid;
+//    bool m_multiple_files_spin_boxes_valid;
     bool m_test_run;
     QString m_last_save_dir;
-    bool m_multiple_files_by_frames;
+//    bool m_multiple_files_by_frames;
 };
 
 #endif // SAVE_FRAMES_DIALOG_H

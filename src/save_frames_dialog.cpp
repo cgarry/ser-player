@@ -67,9 +67,9 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
       m_start_frame(1),
       m_end_frame(total_frames),
       m_frame_start_end_spin_boxes_valid(true),
-      m_multiple_files_spin_boxes_valid(true),
-      m_last_save_dir(""),
-      m_multiple_files_by_frames(false)
+//      m_multiple_files_spin_boxes_valid(true),
+      m_last_save_dir("")
+//      m__by_frames(false)
 {
     switch (save_type) {
     case SAVE_IMAGES:
@@ -172,6 +172,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     //
     // Save as multiple files
     //
+/*
     QHBoxLayout *save_multiple_files_HLayout1 = new QHBoxLayout;
     mp_multiple_files_frames_Spinbox = new QSpinBox;
     mp_multiple_files_frames_Spinbox->setMinimum(1);
@@ -183,8 +184,8 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     mp_multiple_files_files_Spinbox->setMaximum(total_frames/2);
     mp_multiple_files_files_Spinbox->setValue(4);
 
-    connect(mp_multiple_files_frames_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_frames_changed_slot()));
-    connect(mp_multiple_files_files_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_files_changed_slot()));
+//    connect(mp_multiple_files_frames_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_frames_changed_slot()));
+//    connect(mp_multiple_files_files_Spinbox, SIGNAL(valueChanged(int)), this, SLOT(multiple_files_files_changed_slot()));
 
     save_multiple_files_HLayout1->setMargin(0);
     save_multiple_files_HLayout1->setSpacing(0);
@@ -233,6 +234,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
         mp_save_multiple_files_GBox->hide();
         mp_save_multiple_files_GBox->setFixedHeight(0);
     }
+*/
 
     //
     // Frame Decimation
@@ -636,7 +638,7 @@ c_save_frames_dialog::c_save_frames_dialog(QWidget *parent,
     // List of group boxes to be displayed
     QList<QGroupBox *> groupbox_list;
     groupbox_list << save_optionsGBox;
-    groupbox_list << mp_save_multiple_files_GBox;
+//    groupbox_list << mp_save_multiple_files_GBox;
     groupbox_list << mp_frame_decimation_GBox;
     groupbox_list << mp_sequence_direction_GBox;
     groupbox_list << mp_processing_GBox;
@@ -737,7 +739,7 @@ c_save_frames_dialog::~c_save_frames_dialog()
     delete mp_utf8_validator;
 }
 
-
+/*
 void c_save_frames_dialog::multiple_files_frames_changed_slot()
 {
     // Early return
@@ -791,8 +793,9 @@ void c_save_frames_dialog::multiple_files_frames_changed_slot()
     mp_multiple_files_files_Spinbox->blockSignals(false);
     m_multiple_files_by_frames = true;
 }
+*/
 
-
+/*
 void c_save_frames_dialog::multiple_files_files_changed_slot()
 {
     // Early return
@@ -843,8 +846,9 @@ void c_save_frames_dialog::multiple_files_files_changed_slot()
     mp_multiple_files_frames_Spinbox->setStyleSheet("");
     m_multiple_files_by_frames = false;
 }
+*/
 
-
+/*
 void c_save_frames_dialog::multiple_files_overlap_frames_changed_slot()
 {
     if (m_multiple_files_by_frames) {
@@ -853,7 +857,7 @@ void c_save_frames_dialog::multiple_files_overlap_frames_changed_slot()
         multiple_files_files_changed_slot();
     }
 }
-
+*/
 
 void c_save_frames_dialog::set_markers(int marker_start_frame,
                  int marker_end_frame,
@@ -1099,16 +1103,18 @@ void c_save_frames_dialog::update_num_frames_slot()
         mp_total_frames_to_save_Label->setText(tr("%1 frames will be saved").arg(get_frames_to_be_saved()));
     }
 
+/*
     // Check multiple frames values are valid
     if (m_frame_start_end_spin_boxes_valid) {
-        //mp_multiple_files_frames_Spinbox->setMaximum(m_total_selected_frames);
-        //mp_multiple_files_files_Spinbox->setMaximum(m_total_selected_frames/2);
+        mp_multiple_files_frames_Spinbox->setMaximum(m_total_selected_frames);
+        mp_multiple_files_files_Spinbox->setMaximum(m_total_selected_frames/2);
         if (m_multiple_files_by_frames) {
             multiple_files_frames_changed_slot();
         } else {
             multiple_files_files_changed_slot();
         }
     }
+*/
 }
 
 
