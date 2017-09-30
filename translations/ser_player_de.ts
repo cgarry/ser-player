@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.0" language="de_DE">
 <context>
     <name>QCoreApplication</name>
     <message>
@@ -424,7 +424,7 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="226"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Doppelklick um Wiedergabesteuerung zu (de-)aktivieren</translation>
     </message>
 </context>
 <context>
@@ -994,17 +994,17 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="534"/>
         <source>Colour Quantisation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Farb-Quantisierung:</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="536"/>
         <source>Neural-Net Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Neuronales-Netz-Quantisierung</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="537"/>
         <source>Median Cut Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Median-Schnitt-Quantisierung</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="539"/>
@@ -1291,7 +1291,7 @@ Shift-Click to go back multiple frames</source>
         <location filename="../src/ser_player.cpp" line="156"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Wiedergabesteuerung deaktivieren</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="164"/>
@@ -1596,88 +1596,88 @@ Shift-Click to go back multiple frames</source>
         <source>Click to advance 1 frame
 Shift-Click to advance multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Klick um ein Bild vorwärtszugehen; Umsch+Klick um mehrere Bilder vorwärtszugehen</translation>
+        <translation>Klick um ein Bild vorwärtszugehen; Umsch+Klick um mehrere Bilder vorwärtszugehen</translation>
     </message>
     <message>
         <source>Click to go back 1 frame
 Shift-Click to go back multiple frames</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Klick um ein Bild zurückzugehen; Umsch+Klick um mehrere Bilder zurückzugehen</translation>
+        <translation>Klick um ein Bild zurückzugehen; Umsch+Klick um mehrere Bilder zurückzugehen</translation>
     </message>
     <message>
         <source>Play/Pause</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Start/Pause</translation>
+        <translation>Start/Pause</translation>
     </message>
     <message>
         <source>Stop</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Stopp</translation>
+        <translation>Stopp</translation>
     </message>
     <message>
         <source>Repeat On/Off</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Wiederholung an/aus</translation>
+        <translation>Wiederholung an/aus</translation>
     </message>
     <message>
         <source>Play Direction</source>
         <comment>Button Tool tip</comment>
-        <translation type="vanished">Wiedergaberichtung</translation>
+        <translation>Wiedergaberichtung</translation>
     </message>
     <message>
         <source>Frame number/Total Frames</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Bildanzahl/Gesamtzahl Bilder</translation>
+        <translation>Bildanzahl/Gesamtzahl Bilder</translation>
     </message>
     <message>
         <source>%1 FPS</source>
         <comment>Framerate label</comment>
-        <translation type="vanished">%1 BPS</translation>
+        <translation>%1 BPS</translation>
     </message>
     <message>
         <source>Display Frame rate</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Wiedergabegeschwindigkeit</translation>
+        <translation>Wiedergabegeschwindigkeit</translation>
     </message>
     <message>
         <source>Colour ID</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Farb-Modus</translation>
+        <translation>Farb-Modus</translation>
     </message>
     <message>
         <source>Display Zoom Level</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Vergrößerung</translation>
+        <translation>Vergrößerung</translation>
     </message>
     <message>
         <source>Frame size</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Bildgröße</translation>
+        <translation>Bildgröße</translation>
     </message>
     <message>
         <source>%1-Bit</source>
         <comment>Pixel depth label</comment>
-        <translation type="vanished">%1 Bit</translation>
+        <translation>%1 Bit</translation>
     </message>
     <message>
         <source>Pixel bit depth</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Pixeltiefe</translation>
+        <translation>Pixeltiefe</translation>
     </message>
     <message>
         <source>%3/%2/%1 %4:%5:%6.%7 UT</source>
         <comment>Timestamp label</comment>
-        <translation type="vanished">%1-%2-%3 %4:%5:%6.%7 UT</translation>
+        <translation>%1-%2-%3 %4:%5:%6.%7 UT</translation>
     </message>
     <message>
         <source>No Timestamp</source>
         <comment>Timestamp label for no timestamp</comment>
-        <translation type="vanished">Keine Zeitstempel</translation>
+        <translation>Keine Zeitstempel</translation>
     </message>
     <message>
         <source>Frame timestamp</source>
         <comment>Tool tip</comment>
-        <translation type="vanished">Zeitstempel des Bildes</translation>
+        <translation>Zeitstempel des Bildes</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="536"/>
@@ -1813,7 +1813,7 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/ser_player.cpp" line="1478"/>
         <source>Colour Quantisation: </source>
-        <translation type="unfinished"></translation>
+        <translation>Farb-Quantisierung:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1480"/>
@@ -2096,7 +2096,7 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/ser_player.cpp" line="2417"/>
         <source>3rd Party Components:</source>
-        <translation type="unfinished"></translation>
+        <translation>Komponenten von Drittanbietern:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2419"/>
@@ -2106,7 +2106,7 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/ser_player.cpp" line="2420"/>
         <source>Neural-Net image quantization algorithm</source>
-        <translation type="unfinished"></translation>
+        <translation>Neuronales-Netz Bildquantisierungsalgorithmus</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2423"/>
