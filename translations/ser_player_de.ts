@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="de_DE">
+<TS version="2.1" language="de_DE">
 <context>
     <name>QCoreApplication</name>
     <message>
@@ -424,7 +424,7 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="226"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation type="unfinished">Doppelklick um Wiedergabesteuerung zu (de-)aktivieren</translation>
+        <translation>Doppelklick um Wiedergabesteuerung abzutrennen bzw. anzuhängen</translation>
     </message>
 </context>
 <context>
@@ -1291,7 +1291,7 @@ Shift-Click to go back multiple frames</source>
         <location filename="../src/ser_player.cpp" line="156"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation type="unfinished">Wiedergabesteuerung deaktivieren</translation>
+        <translation>Wiedergabesteuerung abtrennen</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="164"/>
