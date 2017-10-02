@@ -435,7 +435,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="226"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Doble-Clic para Fijar/Soltar Controles de Reproducción</translation>
     </message>
 </context>
 <context>
@@ -1006,17 +1006,18 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="534"/>
         <source>Colour Quantisation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Cuantificación de Color:</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="536"/>
         <source>Neural-Net Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Cuantificación Neural Net</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="537"/>
         <source>Median Cut Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Not translating the technical term</translatorcomment>
+        <translation>Cuantificación Median Cut</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="539"/>
@@ -1304,7 +1305,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <location filename="../src/ser_player.cpp" line="156"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation type="unfinished"></translation>
+        <translation>Soltar Controles de Reproducción</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="164"/>
@@ -1843,7 +1844,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1478"/>
         <source>Colour Quantisation: </source>
-        <translation type="unfinished"></translation>
+        <translation>Cuantificación de Color:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1480"/>
@@ -2127,7 +2128,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2417"/>
         <source>3rd Party Components:</source>
-        <translation type="unfinished"></translation>
+        <translation>Componentes de Terceros:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2419"/>
@@ -2137,7 +2138,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2420"/>
         <source>Neural-Net image quantization algorithm</source>
-        <translation type="unfinished"></translation>
+        <translation>Algoritmo de Cuantificación Neural-Net de imagen</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2423"/>
