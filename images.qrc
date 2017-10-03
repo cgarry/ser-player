@@ -29,6 +29,5 @@
         <file>translations/ser_player_de.qm</file>
         <file>translations/ser_player_es.qm</file>
         <file>translations/ser_player_fr.qm</file>
-        <file>translations/ser_player_it.qm</file>
     </qresource>
 </RCC>
