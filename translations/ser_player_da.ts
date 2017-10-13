@@ -514,7 +514,7 @@ Skift+klik for flere frames tilbage</translation>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="226"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Dobbelt-klik for at vedhæfte/afbryde afspilningskontroller</translation>
     </message>
 </context>
 <context>
@@ -1105,17 +1105,17 @@ Skift+klik for flere frames tilbage</translation>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="534"/>
         <source>Colour Quantisation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Farve reduktion:</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="536"/>
         <source>Neural-Net Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Neural-Net reduktion</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="537"/>
         <source>Median Cut Quantisation</source>
-        <translation type="unfinished"></translation>
+        <translation>Median Cut reduktion</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="539"/>
@@ -1430,7 +1430,7 @@ Skift+klik for flere frames tilbage</translation>
         <location filename="../src/ser_player.cpp" line="156"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation type="unfinished"></translation>
+        <translation>Afslut afspilnings kontrollen</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="164"/>
@@ -1824,7 +1824,7 @@ Skift+klik for flere frames tilbage</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1478"/>
         <source>Colour Quantisation: </source>
-        <translation type="unfinished"></translation>
+        <translation>Farve reduktion:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1480"/>
@@ -2144,7 +2144,7 @@ Skift+klik for flere frames tilbage</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2417"/>
         <source>3rd Party Components:</source>
-        <translation type="unfinished"></translation>
+        <translation>Komponenter fra tredjepart:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2419"/>
@@ -2154,7 +2154,7 @@ Skift+klik for flere frames tilbage</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2420"/>
         <source>Neural-Net image quantization algorithm</source>
-        <translation type="unfinished"></translation>
+        <translation>Neural-Net-billedreduktions algoritme</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2423"/>
