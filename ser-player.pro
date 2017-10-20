@@ -22,6 +22,11 @@ DEFINES += GIF_COMMENT_STRING='"\\\"Created by SER Player\\\""'
 CONFIG += c++11
 CONFIG += warn_on
 unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
+bsd {
+    QMAKE_CXXFLAGS += -DBSD
+    QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE
+    QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
+}
 
 # Internationalisation
 TRANSLATIONS = translations/ser_player_da.ts \
