@@ -22,11 +22,6 @@ DEFINES += GIF_COMMENT_STRING='"\\\"Created by SER Player\\\""'
 CONFIG += c++11
 CONFIG += warn_on
 unix:!macx:QMAKE_CXXFLAGS += -std=gnu++0x
-bsd {
-    QMAKE_CXXFLAGS += -DBSD
-    QMAKE_CXXFLAGS += -D_LARGEFILE_SOURCE
-    QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
-}
 
 # Internationalisation
 TRANSLATIONS = translations/ser_player_da.ts \
@@ -81,6 +76,7 @@ macx:SOURCES += src/pipp_utf8_osx.cpp
 bsd:SOURCES += src/pipp_utf8_bsd.cpp
 linux:SOURCES += src/pipp_utf8_linux.cpp
 win32:SOURCES += src/pipp_utf8.cpp
+contains(DEFINES, __FreeBSD_kernel__): contains(DEFINES, __GLIBC__): SOURCES += src/pipp_utf8_linux.cpp
 
 HEADERS  += src/ser_player.h \
     src/pipp_ser.h \

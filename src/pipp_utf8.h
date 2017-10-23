@@ -59,12 +59,15 @@ const char *pipp_get_filename_from_filepath(
 #ifdef __linux__
 #define fseek64 fseeko64  // Linux
 #define ftell64 ftello64  // Linux
-#elif defined (__APPLE__)  && defined(__MACH__)
+#elif defined (__APPLE__) && defined(__MACH__)
 #define fseek64 fseeko  // OS X
 #define ftell64 ftello  // OS X
 #elif defined(BSD)
 #define fseek64 fseeko  // DragonFly BSD, FreeBSD, OpenBSD, NetBSD
 #define ftell64 ftello  // DragonFly BSD, FreeBSD, OpenBSD, NetBSD
+#elif defined (__FreeBSD_kernel__) && defined (__GLIBC__)
+#define fseek64 fseeko64  // kFreeBSD
+#define ftell64 ftello64  // kFreeBSD
 #else
 #define fseek64 _fseeki64  // Windows
 #define ftell64 _ftelli64  // Windows
