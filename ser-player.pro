@@ -76,7 +76,7 @@ macx:SOURCES += src/pipp_utf8_osx.cpp
 bsd:SOURCES += src/pipp_utf8_bsd.cpp
 linux:SOURCES += src/pipp_utf8_linux.cpp
 win32:SOURCES += src/pipp_utf8.cpp
-contains(DEFINES, __FreeBSD_kernel__): contains(DEFINES, __GLIBC__): SOURCES += src/pipp_utf8_linux.cpp
+gnukfreebsd:SOURCES += src/pipp_utf8_linux.cpp
 
 HEADERS  += src/ser_player.h \
     src/pipp_ser.h \
