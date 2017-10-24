@@ -72,11 +72,20 @@ SOURCES += src/main.cpp\
 
 !contains(DEFINES, DISABLE_NEW_VERSION_CHECK): SOURCES += src/new_version_checker.cpp
 
-macx:SOURCES += src/pipp_utf8_osx.cpp
-bsd:SOURCES += src/pipp_utf8_bsd.cpp
-linux:SOURCES += src/pipp_utf8_linux.cpp
-win32:SOURCES += src/pipp_utf8.cpp
-gnukfreebsd:SOURCES += src/pipp_utf8_linux.cpp
+macx {
+    SOURCES += src/pipp_utf8_osx.cpp
+} else:bsd {
+    SOURCES += src/pipp_utf8_bsd.cpp
+} else:linux {
+    SOURCES += src/pipp_utf8_linux.cpp
+} else:win32 {
+    SOURCES += src/pipp_utf8.cpp
+} else:gnukfreebsd {
+    SOURCES += src/pipp_utf8_linux.cpp
+} else {
+    message("Defaulting to linux version of pipp_utf8_XXX.cpp")
+    SOURCES += src/pipp_utf8_linux.cpp
+}
 
 HEADERS  += src/ser_player.h \
     src/pipp_ser.h \
