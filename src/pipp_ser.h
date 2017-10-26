@@ -56,8 +56,10 @@ class c_pipp_ser {
             char observer[40];  // Name of observer
             char instrument[40];  // Name of camera
             char telescope[40];  // Name of telescope
-            uint32_t date_time[2];  // Date and time
-            uint32_t date_time_utc[2];  // Date and time in UTC
+            uint32_t date_time_lsw;  // Date and time - least significant word
+            uint32_t date_time_msw;  // Date and time - most significant word
+            uint32_t date_time_utc_lsw;  // Date and time in UTC - least significant word
+            uint32_t date_time_utc_msw;  // Date and time in UTC - most significant word
         };
 
 
@@ -277,7 +279,7 @@ class c_pipp_ser {
         // ------------------------------------------
         uint64_t get_data_time()
         {
-            return (uint64_t)m_header.date_time[1] << 32 | m_header.date_time[0];
+            return (uint64_t)m_header.date_time_msw << 32 | m_header.date_time_lsw;
         }
 
 
@@ -286,7 +288,7 @@ class c_pipp_ser {
         // ------------------------------------------
         uint64_t get_data_time_utc()
         {
-            return (uint64_t)m_header.date_time_utc[1] << 32 | m_header.date_time_utc[0];
+            return (uint64_t)m_header.date_time_utc_msw << 32 | m_header.date_time_utc_lsw;
         }
 
 
@@ -380,10 +382,10 @@ class c_pipp_ser {
             p_header->image_height     = swap_endianess(p_header->image_height);
             p_header->pixel_depth      = swap_endianess(p_header->pixel_depth);
             p_header->frame_count      = swap_endianess(p_header->frame_count);
-            p_header->date_time[0]     = swap_endianess(p_header->date_time[1]);
-            p_header->date_time[1]     = swap_endianess(p_header->date_time[0]);
-            p_header->date_time_utc[0] = swap_endianess(p_header->date_time_utc[1]);
-            p_header->date_time_utc[1] = swap_endianess(p_header->date_time_utc[0]);
+            p_header->date_time_lsw     = swap_endianess(p_header->date_time_lsw);
+            p_header->date_time_msw     = swap_endianess(p_header->date_time_msw);
+            p_header->date_time_utc_lsw = swap_endianess(p_header->date_time_utc_lsw);
+            p_header->date_time_utc_msw = swap_endianess(p_header->date_time_utc_msw);
         }
 
         static void swap_timestamps_endianess(uint64_t *p_timestamps, int32_t framecount)

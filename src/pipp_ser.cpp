@@ -202,7 +202,7 @@ int32_t c_pipp_ser::open(
     }
 
     // Check for timestamps
-    if (m_header.date_time[1] != 0 || m_header.date_time[0] != 0) {
+    if (m_header.date_time_msw != 0 || m_header.date_time_lsw != 0) {
         // Timestamps should exist
 
         // Check file is large enough to have timestamps
@@ -223,11 +223,10 @@ int32_t c_pipp_ser::open(
             // Load timestamp data into buffer
             read_ret = fread(mp_timestamp, 1, 8 * m_header.frame_count, mp_ser_file);
 
-            // Debug Start
             if ((int32_t)read_ret != 8 * m_header.frame_count) {
                 // Timestamps did not read correctly
-                m_header.date_time[1] = 0;
-                m_header.date_time[0] = 0;
+                m_header.date_time_msw = 0;
+                m_header.date_time_lsw = 0;
             } else {
                 // Swap endianess of all timestamps on big endian systems
                 if (m_big_endian_processor) {
@@ -238,7 +237,7 @@ int32_t c_pipp_ser::open(
             // Seek back to start of image data
             fseek64(mp_ser_file, start_of_image_data_pos, SEEK_SET);
 
-            if (m_header.date_time[1] != 0 || m_header.date_time[0] != 0) {
+            if (m_header.date_time_msw != 0 || m_header.date_time_lsw != 0) {
                 // Analyse timestamps to ensure that they are all increasing and in order
                 // Plus get earliest ts
                 uint64_t first_ts = *mp_timestamp;
@@ -261,8 +260,8 @@ int32_t c_pipp_ser::open(
                 }
 
                 // Check if timestamps are local time instead as universal time
-                int64_t start_time_uct_minus_min_ts = (uint64_t)(m_header.date_time_utc[1]) << 32 | m_header.date_time_utc[0];
-                int64_t start_time_minus_min_ts = (uint64_t)(m_header.date_time[1]) << 32 | m_header.date_time[0];
+                int64_t start_time_uct_minus_min_ts = (uint64_t)(m_header.date_time_utc_msw) << 32 | m_header.date_time_utc_lsw;
+                int64_t start_time_minus_min_ts = (uint64_t)(m_header.date_time_msw) << 32 | m_header.date_time_lsw;
                 m_utc_to_local_offset = start_time_uct_minus_min_ts - start_time_minus_min_ts;
 
                 start_time_uct_minus_min_ts -= min_ts;
