@@ -54,6 +54,7 @@ class c_pipp_ser_write {
         int32_t m_bytes_per_sample;
         int64_t m_date_time_utc;
         bool m_file_write_error;
+        bool m_big_endian_processor;
 
 
     // ------------------------------------------
@@ -132,6 +133,35 @@ class c_pipp_ser_write {
                 size_t size,
                 size_t count,
                 FILE *p_stream);
+
+
+        template <typename T>
+        static T swap_endianess(T data)
+        {
+            int32_t ret;
+            uint8_t *p_read = (uint8_t *)&data;
+            p_read += sizeof(data) - 1;
+            uint8_t *p_write = (uint8_t *)&ret;
+            for (int x = 0; x < sizeof(data); x++) {
+                *p_write++ = *p_read--;
+            }
+
+            return ret;
+        }
+
+        // Change from little-endian to big-endian on big-endian systems
+        static void swap_header_endianess(s_ser_header *p_header)
+        {
+            p_header->lu_id            = swap_endianess(p_header->lu_id);
+            p_header->colour_id        = swap_endianess(p_header->colour_id);
+            p_header->little_endian    = swap_endianess(p_header->little_endian);
+            p_header->image_width      = swap_endianess(p_header->image_width);
+            p_header->image_height     = swap_endianess(p_header->image_height);
+            p_header->pixel_depth      = swap_endianess(p_header->pixel_depth);
+            p_header->frame_count      = swap_endianess(p_header->frame_count);
+            p_header->date_time        = swap_endianess(p_header->date_time);
+            p_header->date_time_utc    = swap_endianess(p_header->date_time_utc);
+        }
 
 };
 

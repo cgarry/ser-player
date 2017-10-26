@@ -21,6 +21,9 @@ c_pipp_ser_write::c_pipp_ser_write() :
     m_open(false),
     m_file_write_error(false)
 {
+    // Detect endianess of the processor
+    m_big_endian_processor = (*(uint16_t *)"\0\xff" < 0x100);
+
     // Clear header details
     memset(&m_header, 0, sizeof(s_ser_header));
 }
@@ -156,10 +159,15 @@ bool c_pipp_ser_write::write_frame(
         }
     }
 
-    fwrite_error_check(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file );
+    fwrite_error_check(p_buffer.get(), 1, m_width * m_height * m_bytes_per_sample, mp_ser_file);
     p_buffer.reset(nullptr);
 
     if (m_date_time_utc != 0) {
+        if (m_big_endian_processor)
+        {
+            timestamp = swap_endianess(timestamp);  // timestamp must be in little endian format
+        }
+
         // Write timestamp to temp timestamp file
         fwrite_error_check(&timestamp, 8, 1, mp_ser_index_file);
     }
@@ -259,7 +267,16 @@ bool c_pipp_ser_write::close()
         fseek64(mp_ser_file, 14, SEEK_SET);
 
         // Write header to file
+        if (m_big_endian_processor) {
+            m_header.little_endian = 1;  // Note data is in big-endian format on big-endian systems
+            swap_header_endianess(&m_header);  // Header must be in little-endian format
+        }
+
         fwrite_error_check(&m_header, 1, sizeof(s_ser_header), mp_ser_file );
+
+        if (m_big_endian_processor) {
+            swap_header_endianess(&m_header);  // Reverse endianess change - probably not required!
+        }
 
         // Note that the SER file is closed
         m_open = false;
