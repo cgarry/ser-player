@@ -103,7 +103,6 @@ c_ser_player::c_ser_player(QWidget *parent)
     m_crop_width = 10;
     m_crop_height = 10;
 
-
     //
     // File menu
     //

@@ -89,6 +89,11 @@ int32_t c_pipp_ser::open(
     // Read the rest of the header
     read_ret = fread(&m_header, 1, sizeof(m_header), mp_ser_file);
 
+    // Change from little-endian to big-endian on big-endian systems
+    if (m_big_endian_processor) {
+        swap_header_endianess(&m_header);
+    }
+
     if (m_header.little_endian < 0 || m_header.little_endian > 1) {
         // Invalid little endian
         m_error_string += QCoreApplication::tr("Error: File '%1' has an invalid little endian value of %2", "SER File error message")
@@ -98,6 +103,14 @@ int32_t c_pipp_ser::open(
         fclose(mp_ser_file);  // Close file
         mp_ser_file = nullptr;
         return ERROR_INVALID_HEADER_VALUE;
+    }
+
+    // Figure out if we are running on a big-endian processor
+    if (m_big_endian_processor == (m_header.little_endian == 1)) {
+        // Remember that m_header.little_endian == 1 means Big endian for some reason...
+        m_same_data_and_processor_endian = true;
+    } else {
+        m_same_data_and_processor_endian = false;
     }
 
     if (m_header.image_width <= 0) {
@@ -215,6 +228,11 @@ int32_t c_pipp_ser::open(
                 // Timestamps did not read correctly
                 m_header.date_time[1] = 0;
                 m_header.date_time[0] = 0;
+            } else {
+                // Swap endianess of all timestamps on big endian systems
+                if (m_big_endian_processor) {
+                    swap_timestamps_endianess(mp_timestamp, m_header.frame_count);
+                }
             }
 
             // Seek back to start of image data
@@ -331,6 +349,9 @@ int32_t c_pipp_ser::open(
 int32_t c_pipp_ser::fix_broken_ser_file(
     const std::string &filename_utf8)
 {
+    // Detect endianess of the processor
+    bool big_endian_processor = (*(uint16_t *)"\0\xff" < 0x100);
+
     // Open SER file
     FILE *p_broken_ser_file = fopen_utf8(filename_utf8.c_str(), "r+b");
 
@@ -353,6 +374,11 @@ int32_t c_pipp_ser::fix_broken_ser_file(
     s_ser_header ser_header;
     read_ret = fread(&ser_header, 1, sizeof(ser_header), p_broken_ser_file);
 
+    // Change from little-endian to big-endian on big-endian systems
+    if (big_endian_processor) {
+        swap_header_endianess(&ser_header);
+    }
+
     // Calculate the size in bytes of each frame
     int32_t frame_size = ser_header.image_width * ser_header.image_height;
     if (ser_header.colour_id == COLOURID_RGB || ser_header.colour_id == COLOURID_BGR) {
@@ -370,6 +396,11 @@ int32_t c_pipp_ser::fix_broken_ser_file(
 
     // Update the frame_count field in the SER file header
     ser_header.frame_count = frame_count_calculated;
+
+    // Change from big-endian to little-endian on big-endian systems
+    if (big_endian_processor) {
+        swap_header_endianess(&ser_header);
+    }
 
     // Write the FileID back to the broken file
     fseek64(p_broken_ser_file, 0, SEEK_SET);  // Go back to start of file
@@ -705,8 +736,9 @@ int32_t c_pipp_ser::get_frame (
             uint16_t *write_ptr = (uint16_t *)buffer;
 
             if (m_header.pixel_depth == 16) {
-                if (m_header.little_endian == 0) {
-                    // Big endian, 16-bit data
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // 16-bit data with same endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr = temp_buffer_ptr + y * m_header.image_width * 3;
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -720,7 +752,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, 16-bit data
+                    // 16-bit data with different endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -738,8 +770,9 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else {
-                if (m_header.little_endian == 0) {
-                    // Big endian, bits per pixel > 8 but < 16
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // bits per pixel > 8 but < 16 data with same endianess as the processor
                     uint16_t r, g, b;
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
@@ -759,7 +792,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, bits per pixel > 8 but < 16
+                    // bits per pixel > 8 but < 16 data with different endianess as the processor
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
@@ -799,8 +832,9 @@ int32_t c_pipp_ser::get_frame (
             uint16_t *write_ptr = (uint16_t *)buffer;
 
             if (m_header.pixel_depth == 16) {
-                if (m_header.little_endian == 0) {
-                    // Big endian, 16-bit data
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // 16-bit data with same endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr = temp_buffer_ptr + y * m_header.image_width * 3;
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -810,7 +844,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, 16-bit data
+                    // 16-bit data with different endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -828,8 +862,9 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else if (m_header.pixel_depth > 8) {
-                if (m_header.little_endian == 0) {
-                    // Big endian, bits per pixel > 8 but < 16
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // bits per pixel > 8 but < 16 data with same endianess as the processor
                     uint16_t r, g, b;
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
@@ -849,7 +884,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, bits per pixel > 8 but < 16
+                    // bits per pixel > 8 but < 16 data with different endianess as the processor
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
@@ -891,8 +926,9 @@ int32_t c_pipp_ser::get_frame (
             uint16_t *write_ptr = (uint16_t *)buffer;
 
             if (m_header.pixel_depth == 16) {
-                if (m_header.little_endian == 0) {
-                    // Big endian, 16-bit data
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // 16-bit data with same endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr = temp_buffer_ptr + y * m_header.image_width;
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -900,7 +936,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, 16-bit data
+                    // 16-bit data with different endianess as the processor
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                         read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width);
                         for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -911,8 +947,9 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else  {
-                if (m_header.little_endian == 0) {
-                    // Big endian, bits per pixel > 8 but < 16
+                //if (m_header.little_endian == 0) {
+                if (m_same_data_and_processor_endian) {
+                    // bits per pixel > 8 but < 16 data with same endianess as the processor
                     uint16_t value;
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
@@ -925,7 +962,7 @@ int32_t c_pipp_ser::get_frame (
                         }
                     }
                 } else {
-                    // Little endian, bits per pixel > 8 but < 16
+                    // bits per pixel > 8 but < 16 data with different endianess as the processor
                     uint32_t shift1 = 16 - m_header.pixel_depth;
                     uint32_t shift2 = m_header.pixel_depth - shift1;
                     for (int32_t y = m_header.image_height-1; y >= 0; y--) {
@@ -960,7 +997,7 @@ int32_t c_pipp_ser::get_frame (
             uint8_t *write_ptr8 = (uint8_t *)buffer;
 
             if (m_header.little_endian == 0) {
-                // Big endian (16-bit data) but pixel depth is only 8-bits
+                // Little endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                     for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -977,7 +1014,7 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else {
-                // Little endian (16-bit data) but pixel depth is only 8-bits
+                // Big endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                     read_ptr8++;
@@ -1013,7 +1050,7 @@ int32_t c_pipp_ser::get_frame (
             uint8_t *write_ptr8 = (uint8_t *)buffer;
 
             if (m_header.little_endian == 0) {
-                // Big endian (16-bit data) but pixel depth is only 8-bits
+                // Little endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                     for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -1030,7 +1067,7 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else {
-                // Little endian (16-bit data) but pixel depth is only 8-bits
+                // Big endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width * 3);
                     read_ptr8++;
@@ -1066,7 +1103,7 @@ int32_t c_pipp_ser::get_frame (
             uint8_t *write_ptr8 = (uint8_t *)buffer;
 
             if (m_header.little_endian == 0) {
-                // Big endian (16-bit data) but pixel depth is only 8-bits
+                // Little endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width);
                     for (int32_t x = 0; x < m_header.image_width; x++) {
@@ -1077,7 +1114,7 @@ int32_t c_pipp_ser::get_frame (
                     }
                 }
             } else {
-                // Little endian (16-bit data) but pixel depth is only 8-bits
+                // Big endian (16-bit data) but pixel depth is only 8-bits
                 for (int32_t y = m_header.image_height-1; y >= 0; y--) {
                     read_ptr8 = (uint8_t *)(temp_buffer_ptr + y * m_header.image_width);
                     read_ptr8++;

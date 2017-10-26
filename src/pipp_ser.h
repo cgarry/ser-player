@@ -82,6 +82,8 @@ class c_pipp_ser {
         int64_t m_utc_to_local_offset;
         std::string m_error_string;
         std::string m_file_id;
+        bool m_big_endian_processor;
+        bool m_same_data_and_processor_endian;
 
 
     // ------------------------------------------
@@ -106,7 +108,12 @@ class c_pipp_ser {
             m_byte_depth_out(0),
             m_colour(0),
             mp_timestamp(nullptr),
-            m_error_string("") {}
+            m_error_string(""),
+            m_same_data_and_processor_endian(false)
+        {
+            // Detect endianess of the processor
+            m_big_endian_processor = (*(uint16_t *)"\0\xff" < 0x100);
+        }
 
 
         // ------------------------------------------
@@ -348,6 +355,44 @@ class c_pipp_ser {
         //
         int32_t find_pixel_depth(
             uint32_t frame_number);
+
+        template <typename T>
+        static T swap_endianess(T data)
+        {
+            int32_t ret;
+            uint8_t *p_read = (uint8_t *)&data;
+            p_read += sizeof(data) - 1;
+            uint8_t *p_write = (uint8_t *)&ret;
+            for (int x = 0; x < sizeof(data); x++) {
+                *p_write++ = *p_read--;
+            }
+
+            return ret;
+        }
+
+        // Change from little-endian to big-endian on big-endian systems
+        static void swap_header_endianess(s_ser_header *p_header)
+        {
+            p_header->lu_id            = swap_endianess(p_header->lu_id);
+            p_header->colour_id        = swap_endianess(p_header->colour_id);
+            p_header->little_endian    = swap_endianess(p_header->little_endian);
+            p_header->image_width      = swap_endianess(p_header->image_width);
+            p_header->image_height     = swap_endianess(p_header->image_height);
+            p_header->pixel_depth      = swap_endianess(p_header->pixel_depth);
+            p_header->frame_count      = swap_endianess(p_header->frame_count);
+            p_header->date_time[0]     = swap_endianess(p_header->date_time[1]);
+            p_header->date_time[1]     = swap_endianess(p_header->date_time[0]);
+            p_header->date_time_utc[0] = swap_endianess(p_header->date_time_utc[1]);
+            p_header->date_time_utc[1] = swap_endianess(p_header->date_time_utc[0]);
+        }
+
+        static void swap_timestamps_endianess(uint64_t *p_timestamps, int32_t framecount)
+        {
+            for (int x = 0; x < framecount; x++) {
+                *p_timestamps = swap_endianess(*p_timestamps);
+                p_timestamps++;
+            }
+        }
 };
 
     
