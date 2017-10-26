@@ -62,8 +62,7 @@ class c_pipp_ser {
             uint32_t date_time_utc_msw;  // Date and time in UTC - most significant word
         };
 
-        // Check structure is the correct size
-        static_assert (sizeof(s_ser_header) == 7 * 4 + 3 * 40 + 2 * 8, "Structure s_ser_header has not been packed");
+        static_assert (sizeof(s_ser_header) == 7 * 4 + 3 * 40 + 2 * 8, "Unexpected size for structure s_ser_header");
 
         // Member variables
         std::string m_filename;

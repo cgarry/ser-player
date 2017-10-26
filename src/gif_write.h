@@ -161,6 +161,8 @@ class c_gif_write {
             uint8_t m_pixel_aspect_ratio;
         };
 
+        static_assert (sizeof(s_gif_header) == 13, "Unexpected size for structure s_gif_header");
+
         struct s_netscape_extension {
             uint8_t m_extension_label;
             uint8_t app_extension_label;
@@ -173,6 +175,8 @@ class c_gif_write {
             uint8_t m_block_terminator;
         };
 
+        static_assert (sizeof(s_netscape_extension) == 19, "Unexpected size for structure s_netscape_extension");
+
         struct s_graphic_control_extension {
             uint8_t m_extension_label;
             uint8_t m_graphic_control_label;
@@ -183,6 +187,8 @@ class c_gif_write {
             uint8_t m_block_terminator;
         };
 
+        static_assert (sizeof(s_graphic_control_extension) == 8, "Unexpected size for structure s_graphic_control_extension");
+
         struct s_image_descriptor {
             uint8_t m_image_seperator;
             uint8_t m_image_left_position[2];
@@ -192,6 +198,8 @@ class c_gif_write {
             uint8_t m_packed_fields;
         };
 
+        static_assert (sizeof(s_image_descriptor) == 10, "Unexpected size for structure s_image_descriptor");
+
 #ifdef GIF_COMMENT_STRING
         struct s_comment_extension {
             uint8_t m_extension_label;
@@ -200,6 +208,8 @@ class c_gif_write {
             uint8_t m_comment_data[sizeof(GIF_COMMENT_STRING) - 1];
             uint8_t m_block_terminator;
         };
+
+        static_assert (sizeof(s_comment_extension) == 3 + sizeof(GIF_COMMENT_STRING) - 1 + 1, "Unexpected size for structure s_comment_extension");
 #endif
 
         struct s_b_rev_colour_index
@@ -207,15 +217,21 @@ class c_gif_write {
             uint8_t b[1 << 6];
         };
 
+        static_assert (sizeof(s_b_rev_colour_index) == 1 << 6, "Unexpected size for structure s_b_rev_colour_index");
+
         struct s_g_rev_colour_index
         {
             struct s_b_rev_colour_index g[1 << 6];
         };
 
+        static_assert (sizeof(s_g_rev_colour_index) == sizeof(s_b_rev_colour_index) * (1 << 6), "Unexpected size for structure s_g_rev_colour_index");
+
         struct s_rev_colour_index
         {
             struct s_g_rev_colour_index r[1 << 6];
         };
+
+        static_assert (sizeof(s_g_rev_colour_index) == sizeof(s_b_rev_colour_index) * (1 << 6), "Unexpected size for structure s_g_rev_colour_index");
 
 
         //

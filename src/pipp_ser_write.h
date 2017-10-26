@@ -42,8 +42,7 @@ class c_pipp_ser_write {
         };
 #pragma pack (pop)
 
-// Check structure is the correct size
-static_assert (sizeof(s_ser_header) == 7 * 4 + 3 * 40 + 2 * 8, "Structure s_ser_header has not been packed");
+static_assert (sizeof(s_ser_header) == 7 * 4 + 3 * 40 + 2 * 8, "Unexpected size for structure s_ser_header");
 
         // Member variables
         FILE *mp_ser_file;

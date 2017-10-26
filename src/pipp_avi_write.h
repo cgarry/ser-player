@@ -83,6 +83,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             } four_cc;
         };
 
+        static_assert (sizeof(s_list_header) == 4 + 4 + 4, "Unexpected size for structure s_list_header");
+
         struct s_chunk_header {
             union {
                 char chr[4];
@@ -90,6 +92,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             } four_cc;
             uint32_t size;
         };
+
+        static_assert (sizeof(s_chunk_header) == 4 + 4, "Unexpected size for structure s_chunk_header");
 
         struct s_main_avi_header {
             uint32_t micro_sec_per_frame; // frame display rate (or 0)
@@ -104,6 +108,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             int32_t height;
             uint32_t reserved[4];
         };
+
+        static_assert (sizeof(s_main_avi_header) == 10 * 4 + 4 * 4, "Unexpected size for structure s_main_avi_header");
 
         struct s_avi_stream_header {
             union {
@@ -133,6 +139,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             }  frame;
         };
 
+        static_assert (sizeof(s_avi_stream_header) == 3 * 4 + 2 * 2 + 8 * 4 + 4 * 2, "Unexpected size for structure s_avi_stream_header");
+
         struct s_bitmap_info_header {
             uint32_t size;
             int32_t width;
@@ -150,6 +158,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             uint32_t clr_important;
         };
 
+        static_assert (sizeof(s_bitmap_info_header) == 3 * 4 + 2 * 2 + 6 * 4, "Unexpected size for structure s_bitmap_info_header");
+
         struct s_avi_old_index_entry {
             union {
                 char chr[4];
@@ -159,6 +169,8 @@ class c_pipp_avi_write: public c_pipp_video_write {
             uint32_t offset;
             uint32_t size;
         };
+
+        static_assert (sizeof(s_avi_old_index_entry) == 4 * 4, "Unexpected size for structure s_avi_old_index_entry");
 
         struct s_avi_superindex_header {
             int16_t longs_per_entry;
@@ -172,16 +184,22 @@ class c_pipp_avi_write: public c_pipp_video_write {
             uint32_t reserved[3];
         };
 
+        static_assert (sizeof(s_avi_superindex_header) == 2 + 2 * 1 + 2 * 4 + 3 * 4, "Unexpected size for structure s_avi_superindex_header");
+
         struct s_avi_superindex_entry {
             int64_t offset;
             int32_t size;
             int32_t duration;
         };
 
+        static_assert (sizeof(s_avi_superindex_entry) == 1 * 8 + 2 * 4, "Unexpected size for structure s_avi_superindex_entry");
+
         struct s_extended_avi_header {
             int32_t total_frames;
             int32_t reserved[61];  // Hardly documented!
         };
+
+        static_assert (sizeof(s_extended_avi_header) == 1 * 4 + 61 * 4, "Unexpected size for structure s_extended_avi_header");
 
         struct s_avi_stdindex_header {
             int16_t longs_per_entry;
@@ -196,10 +214,14 @@ class c_pipp_avi_write: public c_pipp_video_write {
             int32_t reserved3;
         };
 
+        static_assert (sizeof(s_avi_stdindex_header) == 1 * 2 + 2 * 1 + 5 * 4, "Unexpected size for structure s_avi_stdindex_header");
+
         struct s_avi_stdindex_entry {
             int32_t offset;
             int32_t size;
         };
+
+        static_assert (sizeof(s_avi_stdindex_entry) == 2 * 4, "Unexpected size for structure s_avi_stdindex_entry");
 
         // Member variables
         std::unique_ptr<char[]> mp_filename;
