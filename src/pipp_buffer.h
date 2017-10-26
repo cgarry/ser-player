@@ -45,7 +45,7 @@ class c_pipp_buffer {
         // ------------------------------------------
         c_pipp_buffer() : 
             m_buffer_size(0),
-            mp_buffer(nullptr) {};
+            mp_buffer(nullptr) {}
 
 
         // ------------------------------------------
@@ -53,7 +53,7 @@ class c_pipp_buffer {
         // ------------------------------------------
         ~c_pipp_buffer() {
             delete [] mp_buffer;
-        };
+        }
 
 
         // ------------------------------------------
@@ -61,7 +61,7 @@ class c_pipp_buffer {
         // ------------------------------------------
         inline uint8_t *get_buffer_ptr() {
             return mp_buffer;
-        };
+        }
 
 
         // ------------------------------------------
