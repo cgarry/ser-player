@@ -2020,7 +2020,7 @@ void c_ser_player::open_ser_file(const QString &filename)
                 ser_file_broken = false;  // File is no longer broken!
                 QMessageBox::information(nullptr,
                                          tr("Invalid SER File", "Message box title for invalid SER file"),
-                                         tr("The SER file has succesfully been fixed"));
+                                         tr("The SER file has successfully been fixed"));
                 ser_file_broken = false;  // No longer broken
             } else {
                 QMessageBox::warning(nullptr,
@@ -2449,7 +2449,7 @@ void c_ser_player::about_ser_player()
 
 void c_ser_player::create_no_file_open_image()
 {
-    QString no_file_open_string = QString(tr("No SER File Open", "No SER file message on inital image"));
+    QString no_file_open_string = QString(tr("No SER File Open", "No SER file message on initial image"));
     QImage frame_QImage = QImage(":/res/resources/ser_player_logo.png");
     m_no_file_open_Pixmap = QPixmap::fromImage(frame_QImage);
     int pic_width = m_no_file_open_Pixmap.width();
