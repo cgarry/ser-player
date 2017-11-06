@@ -48,6 +48,9 @@ c_pipp_avi_write::c_pipp_avi_write() :
     m_last_frame_pos(0),
     m_file_write_error(false)
 {
+    // Detect endianess of the processor
+    m_big_endian_processor = (*(uint16_t *)"\0\xff" < 0x100);
+
     // Initialise RIFF AVI header
     m_avi_riff_header.list.u32 = FCC_RIFF;
     m_avi_riff_header.size = 0;
@@ -238,6 +241,21 @@ void c_pipp_avi_write::write_headers()
         return;
     }
 
+    if (m_big_endian_processor)
+    {
+        // Change structures from big-endian to little-endian on big-endian systems
+        swap_structure_endianess(&m_avi_riff_header);
+        swap_structure_endianess(&m_hdrl_list_header);
+        swap_structure_endianess(&m_avih_chunk_header);
+        swap_structure_endianess(&m_main_avih_header);
+        swap_structure_endianess(&m_strl_list_header);
+        swap_structure_endianess(&m_strh_chunk_header);
+        swap_structure_endianess(&m_vids_stream_header);
+        swap_structure_endianess(&m_strf_chunk_header);
+        swap_structure_endianess(&m_bitmap_info_header);
+        swap_structure_endianess(&m_movi_list_header);
+    }
+
     // Write RIF Header to file
     fwrite_error_check(&m_avi_riff_header , 1 , sizeof(m_avi_riff_header) , mp_avi_file);
 
@@ -294,6 +312,16 @@ void c_pipp_avi_write::write_headers()
         }
     } else {
         // These fields are not present with the old AVI format
+        if (m_big_endian_processor)
+        {
+            // Change structures from big-endian to little-endian on big-endian systems
+            swap_structure_endianess(&m_indx_chunk_header);
+            swap_structure_endianess(&m_avi_superindex_header);
+//TODO FIXME            swap_structure_endianess(&m_avi_superindex_entries);
+            swap_structure_endianess(&m_odml_list_header);
+            swap_structure_endianess(&m_dmlh_chunk_header);
+            swap_structure_endianess(&m_extended_avi_header);
+        }
 
         // Write indx chunk header to file
         fwrite_error_check(&m_indx_chunk_header , 1 , sizeof(m_indx_chunk_header) , mp_avi_file);

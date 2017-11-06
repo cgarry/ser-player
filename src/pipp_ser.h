@@ -366,7 +366,7 @@ class c_pipp_ser {
             uint8_t *p_read = (uint8_t *)&data;
             p_read += sizeof(data) - 1;
             uint8_t *p_write = (uint8_t *)&ret;
-            for (int x = 0; x < sizeof(data); x++) {
+            for (size_t x = 0; x < sizeof(data); x++) {
                 *p_write++ = *p_read--;
             }
 

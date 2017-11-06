@@ -244,6 +244,7 @@ class c_pipp_avi_write: public c_pipp_video_write {
         int64_t m_last_frame_pos;
         int64_t m_riff_start_position;
         bool m_file_write_error;
+        bool m_big_endian_processor;
 
         c_pipp_buffer m_temp_buffer;
 
@@ -382,6 +383,130 @@ class c_pipp_avi_write: public c_pipp_video_write {
         // Write header and close AVI file
         // ------------------------------------------
         void split_close();
+
+        template <typename T>
+        static T swap_endianess(T data)
+        {
+            int32_t ret;
+            uint8_t *p_read = (uint8_t *)&data;
+            p_read += sizeof(data) - 1;
+            uint8_t *p_write = (uint8_t *)&ret;
+            for (size_t x = 0; x < sizeof(data); x++) {
+                *p_write++ = *p_read--;
+            }
+
+            return ret;
+        }
+
+        // Change from little-endian to big-endian on big-endian systems
+        static void swap_structure_endianess(s_list_header *p_list_header)
+        {
+            p_list_header->list.u32 = swap_endianess(p_list_header->list.u32);
+            p_list_header->size = swap_endianess(p_list_header->size);
+            p_list_header->four_cc.u32 = swap_endianess(p_list_header->four_cc.u32);
+        }
+
+        static void swap_structure_endianess(s_chunk_header *p_chunk_header)
+        {
+            p_chunk_header->four_cc.u32 = swap_endianess(p_chunk_header->four_cc.u32);
+            p_chunk_header->size = swap_endianess(p_chunk_header->size);
+        }
+
+        static void swap_structure_endianess(s_main_avi_header *p_main_avi_header)
+        {
+            p_main_avi_header->micro_sec_per_frame = swap_endianess(p_main_avi_header->micro_sec_per_frame);
+            p_main_avi_header->max_bytes_per_sec = swap_endianess(p_main_avi_header->max_bytes_per_sec);
+            p_main_avi_header->padding_granularity = swap_endianess(p_main_avi_header->padding_granularity);
+            p_main_avi_header->flags = swap_endianess(p_main_avi_header->flags);
+            p_main_avi_header->total_frames = swap_endianess(p_main_avi_header->total_frames);
+            p_main_avi_header->initial_frames = swap_endianess(p_main_avi_header->initial_frames);
+            p_main_avi_header->streams = swap_endianess(p_main_avi_header->streams);
+            p_main_avi_header->suggested_buffer_size = swap_endianess(p_main_avi_header->suggested_buffer_size);
+            p_main_avi_header->width = swap_endianess(p_main_avi_header->width);
+            p_main_avi_header->height = swap_endianess(p_main_avi_header->height);
+        }
+
+        static void swap_structure_endianess(s_avi_stream_header *p_avi_stream_header)
+        {
+            p_avi_stream_header->type.u32 = swap_endianess(p_avi_stream_header->type.u32);
+            p_avi_stream_header->handler.u32 = swap_endianess(p_avi_stream_header->handler.u32);
+            p_avi_stream_header->flags = swap_endianess(p_avi_stream_header->flags);
+            p_avi_stream_header->priority = swap_endianess(p_avi_stream_header->priority);
+            p_avi_stream_header->language = swap_endianess(p_avi_stream_header->language);
+            p_avi_stream_header->initial_frames = swap_endianess(p_avi_stream_header->initial_frames);
+            p_avi_stream_header->scale = swap_endianess(p_avi_stream_header->scale);
+            p_avi_stream_header->rate = swap_endianess(p_avi_stream_header->rate);
+            p_avi_stream_header->start = swap_endianess(p_avi_stream_header->start);
+            p_avi_stream_header->length = swap_endianess(p_avi_stream_header->length);
+            p_avi_stream_header->suggested_buffer_size = swap_endianess(p_avi_stream_header->suggested_buffer_size);
+            p_avi_stream_header->quality = swap_endianess(p_avi_stream_header->quality);
+            p_avi_stream_header->sample_size = swap_endianess(p_avi_stream_header->sample_size);
+            p_avi_stream_header->frame.left = swap_endianess(p_avi_stream_header->frame.left);
+            p_avi_stream_header->frame.top = swap_endianess(p_avi_stream_header->frame.top);
+            p_avi_stream_header->frame.right = swap_endianess(p_avi_stream_header->frame.right);
+            p_avi_stream_header->frame.bottom = swap_endianess(p_avi_stream_header->frame.bottom);
+        }
+
+        static void swap_structure_endianess(s_bitmap_info_header *p_bitmap_info_header)
+        {
+            p_bitmap_info_header->size = swap_endianess(p_bitmap_info_header->size);
+            p_bitmap_info_header->width = swap_endianess(p_bitmap_info_header->width);
+            p_bitmap_info_header->height = swap_endianess(p_bitmap_info_header->height);
+            p_bitmap_info_header->planes = swap_endianess(p_bitmap_info_header->planes);
+            p_bitmap_info_header->bit_count = swap_endianess(p_bitmap_info_header->bit_count);
+            p_bitmap_info_header->compression.u32 = swap_endianess(p_bitmap_info_header->compression.u32);
+            p_bitmap_info_header->size_image = swap_endianess(p_bitmap_info_header->size_image);
+            p_bitmap_info_header->x_pels_per_meter = swap_endianess(p_bitmap_info_header->x_pels_per_meter);
+            p_bitmap_info_header->y_pels_per_meter = swap_endianess(p_bitmap_info_header->y_pels_per_meter);
+            p_bitmap_info_header->clr_used = swap_endianess(p_bitmap_info_header->clr_used);
+            p_bitmap_info_header->clr_important = swap_endianess(p_bitmap_info_header->clr_important);
+        }
+
+        static void swap_structure_endianess(s_avi_old_index_entry *p_avi_old_index_entry)
+        {
+            p_avi_old_index_entry->chunk_id.u32 = swap_endianess(p_avi_old_index_entry->chunk_id.u32);
+            p_avi_old_index_entry->flags = swap_endianess(p_avi_old_index_entry->flags);
+            p_avi_old_index_entry->offset = swap_endianess(p_avi_old_index_entry->offset);
+            p_avi_old_index_entry->size = swap_endianess(p_avi_old_index_entry->size);
+        }
+
+        static void swap_structure_endianess(s_avi_superindex_header *p_avi_superindex_header)
+        {
+            p_avi_superindex_header->longs_per_entry = swap_endianess(p_avi_superindex_header->longs_per_entry);
+            p_avi_superindex_header->index_sub_type = swap_endianess(p_avi_superindex_header->index_sub_type);
+            p_avi_superindex_header->index_type = swap_endianess(p_avi_superindex_header->index_type);
+            p_avi_superindex_header->entries_in_use = swap_endianess(p_avi_superindex_header->entries_in_use);
+            p_avi_superindex_header->chunk_id.u32 = swap_endianess(p_avi_superindex_header->chunk_id.u32);
+        }
+
+        static void swap_structure_endianess(s_avi_superindex_entry *p_avi_superindex_entry)
+        {
+            p_avi_superindex_entry->offset = swap_endianess(p_avi_superindex_entry->offset);
+            p_avi_superindex_entry->size = swap_endianess(p_avi_superindex_entry->size);
+            p_avi_superindex_entry->duration = swap_endianess(p_avi_superindex_entry->duration);
+        }
+
+        static void swap_structure_endianess(s_extended_avi_header *p_extended_avi_header)
+        {
+            p_extended_avi_header->total_frames = swap_endianess(p_extended_avi_header->total_frames);
+        }
+
+        static void swap_structure_endianess(s_avi_stdindex_header *p_avi_stdindex_header)
+        {
+            p_avi_stdindex_header->longs_per_entry = swap_endianess(p_avi_stdindex_header->longs_per_entry);
+            p_avi_stdindex_header->index_sub_type = swap_endianess(p_avi_stdindex_header->index_sub_type);
+            p_avi_stdindex_header->index_type = swap_endianess(p_avi_stdindex_header->index_type);
+            p_avi_stdindex_header->entries_in_use = swap_endianess(p_avi_stdindex_header->entries_in_use);
+            p_avi_stdindex_header->chunk_id.u32 = swap_endianess(p_avi_stdindex_header->chunk_id.u32);
+            p_avi_stdindex_header->base_offset[0] = swap_endianess(p_avi_stdindex_header->base_offset[0]);
+            p_avi_stdindex_header->base_offset[1] = swap_endianess(p_avi_stdindex_header->base_offset[1]);
+        }
+
+        static void swap_structure_endianess(s_avi_stdindex_entry *p_avi_stdindex_entry)
+        {
+            p_avi_stdindex_entry->offset = swap_endianess(p_avi_stdindex_entry->offset);
+            p_avi_stdindex_entry->size = swap_endianess(p_avi_stdindex_entry->size);
+        }
 };
 
     
