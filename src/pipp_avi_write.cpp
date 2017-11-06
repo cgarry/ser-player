@@ -241,8 +241,7 @@ void c_pipp_avi_write::write_headers()
         return;
     }
 
-    if (m_big_endian_processor)
-    {
+    if (m_big_endian_processor) {
         // Change structures from big-endian to little-endian on big-endian systems
         swap_structure_endianess(&m_avi_riff_header);
         swap_structure_endianess(&m_hdrl_list_header);
@@ -312,12 +311,15 @@ void c_pipp_avi_write::write_headers()
         }
     } else {
         // These fields are not present with the old AVI format
-        if (m_big_endian_processor)
-        {
+        if (m_big_endian_processor) {
             // Change structures from big-endian to little-endian on big-endian systems
             swap_structure_endianess(&m_indx_chunk_header);
             swap_structure_endianess(&m_avi_superindex_header);
-//TODO FIXME            swap_structure_endianess(&m_avi_superindex_entries);
+
+            for (int x = 0; x < NUMBER_SUPERINDEX_ENTRIES; x++) {
+                swap_structure_endianess(&(m_avi_superindex_entries[x]));
+            }
+
             swap_structure_endianess(&m_odml_list_header);
             swap_structure_endianess(&m_dmlh_chunk_header);
             swap_structure_endianess(&m_extended_avi_header);
@@ -340,10 +342,38 @@ void c_pipp_avi_write::write_headers()
 
         // Write extended AVI header to file
         fwrite_error_check(&m_extended_avi_header , 1 , sizeof(m_extended_avi_header) , mp_avi_file);
+
+        if (m_big_endian_processor) {
+            // Change structures back from little-endian to big-endian on big-endian systems
+            swap_structure_endianess(&m_indx_chunk_header);
+            swap_structure_endianess(&m_avi_superindex_header);
+
+            for (int x = 0; x < NUMBER_SUPERINDEX_ENTRIES; x++) {
+                swap_structure_endianess(&(m_avi_superindex_entries[x]));
+            }
+
+            swap_structure_endianess(&m_odml_list_header);
+            swap_structure_endianess(&m_dmlh_chunk_header);
+            swap_structure_endianess(&m_extended_avi_header);
+        }
     }
 
     // Write movi list header
     fwrite_error_check(&m_movi_list_header , 1 , sizeof(m_movi_list_header) , mp_avi_file);
+
+    if (m_big_endian_processor) {
+        // Change structures back from little-endian to big-endian on big-endian systems
+        swap_structure_endianess(&m_avi_riff_header);
+        swap_structure_endianess(&m_hdrl_list_header);
+        swap_structure_endianess(&m_avih_chunk_header);
+        swap_structure_endianess(&m_main_avih_header);
+        swap_structure_endianess(&m_strl_list_header);
+        swap_structure_endianess(&m_strh_chunk_header);
+        swap_structure_endianess(&m_vids_stream_header);
+        swap_structure_endianess(&m_strf_chunk_header);
+        swap_structure_endianess(&m_bitmap_info_header);
+        swap_structure_endianess(&m_movi_list_header);
+    }
 }
 
 
@@ -383,11 +413,23 @@ void c_pipp_avi_write::frame_added()
             // This frame needs to be in a new RIFF
             finish_riff();  // Finish this RIFF
 
+            if (m_big_endian_processor) {
+                // Change structures from big-endian to little-endian on big-endian systems
+                swap_structure_endianess(&m_avix_riff_header);
+                swap_structure_endianess(&m_movi_avix_list_header);
+            }
+
             // Start the next RIFF
             fwrite_error_check(&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
 
             // Start the new movi LIST
             fwrite_error_check(&m_movi_avix_list_header , 1, sizeof(m_movi_avix_list_header), mp_avi_file);
+
+            if (m_big_endian_processor) {
+                // Change structures back from little-endian to big-endian on big-endian systems
+                swap_structure_endianess(&m_avix_riff_header);
+                swap_structure_endianess(&m_movi_avix_list_header);
+            }
 
             // Grab position of first frame in this RIFF for the base offset
             m_avi_superindex_header.entries_in_use++;
@@ -653,19 +695,43 @@ void c_pipp_avi_write::finish_riff()
         m_avi_superindex_entries[m_riff_count].offset = ftell64(mp_avi_file);
         m_avi_superindex_entries[m_riff_count].size = sizeof(m_ix00_chunk_header) + m_ix00_chunk_header.size;
 
+        m_avi_stdindex_header.entries_in_use = m_current_frame_count;
+
+        if (m_big_endian_processor) {
+            // Change structures from big-endian to little-endian on big-endian systems
+            swap_structure_endianess(&m_ix00_chunk_header);
+            swap_structure_endianess(&m_avi_stdindex_header);
+        }
+
         // Write ix00 chunk header to file
         fwrite_error_check(&m_ix00_chunk_header, 1, sizeof(m_ix00_chunk_header), mp_avi_file);
 
         // Write AVI standard header to file
-        m_avi_stdindex_header.entries_in_use = m_current_frame_count;
         fwrite_error_check(&m_avi_stdindex_header, 1, sizeof(m_avi_stdindex_header), mp_avi_file);
+
+        if (m_big_endian_processor) {
+            // Change structures back from little-endian to big-endian on big-endian systems
+            swap_structure_endianess(&m_ix00_chunk_header);
+            swap_structure_endianess(&m_avi_stdindex_header);
+        }
 
         // Write AVI standard indexes to file
         m_avi_stdindex_entry.size = m_frame_size;
         for (int x = 0; x < m_current_frame_count; x++) {
             // Update entry
             m_avi_stdindex_entry.offset = x * (m_frame_size + sizeof(m_00db_chunk_header));
+
+            if (m_big_endian_processor) {
+                // Change structures from big-endian to little-endian on big-endian systems
+                swap_structure_endianess(&m_avi_stdindex_entry);
+            }
+
             fwrite_error_check(&m_avi_stdindex_entry, 1, sizeof(m_avi_stdindex_entry), mp_avi_file);
+
+            if (m_big_endian_processor) {
+                // Change structures back from little-endian to big-endian on big-endian systems
+                swap_structure_endianess(&m_avi_stdindex_entry);
+            }
         }
     }
 
@@ -692,15 +758,36 @@ void c_pipp_avi_write::finish_riff()
                                   + m_ix00_chunk_header.size;
         }
 
+        if (m_big_endian_processor) {
+            // Change structures from big-endian to little-endian on big-endian systems
+            swap_structure_endianess(&m_idx1_chunk_header);
+        }
+
         // Write index chunk header to file
         fwrite_error_check(&m_idx1_chunk_header , 1 , sizeof(m_idx1_chunk_header), mp_avi_file);
+
+        if (m_big_endian_processor) {
+            // Change structures back from little-endian to big-endian on big-endian systems
+            swap_structure_endianess(&m_idx1_chunk_header);
+        }
 
         // Write AVI 1.0 index entries to file
         m_avi_index_entry.offset = 0x4;
 
         // Write all entries
         for (int32_t x = 0; x < m_current_frame_count; x++) {
+            if (m_big_endian_processor) {
+                // Change structures from big-endian to little-endian on big-endian systems
+                swap_structure_endianess(&m_avi_index_entry);
+            }
+
             fwrite_error_check(&m_avi_index_entry , 1 , sizeof(m_avi_index_entry), mp_avi_file);  // Write entry to file
+
+            if (m_big_endian_processor) {
+                // Change structures back from little-endian to big-endian on big-endian systems
+                swap_structure_endianess(&m_avi_index_entry);
+            }
+
             m_avi_index_entry.offset += (sizeof(s_chunk_header) + m_frame_size);  // Increment offset
         }
 
@@ -724,11 +811,33 @@ void c_pipp_avi_write::finish_riff()
 
         // Write RIFF header again with correct length now that we know it
         m_avix_riff_header.size = (int32_t)(riff_end_position - m_riff_start_position) - sizeof(m_avix_riff_header) + sizeof(m_avix_riff_header.four_cc);
+
+        if (m_big_endian_processor) {
+            // Change structures from big-endian to little-endian on big-endian systems
+            swap_structure_endianess(&m_avix_riff_header);
+        }
+
         fwrite_error_check(&m_avix_riff_header , 1, sizeof(m_avix_riff_header), mp_avi_file);
+
+        if (m_big_endian_processor) {
+            // Change structures back from little-endian to big-endian on big-endian systems
+            swap_structure_endianess(&m_avix_riff_header);
+        }
 
         // Write the movi LIST header again with the correct length now that we know it
         m_movi_avix_list_header.size = m_avix_riff_header.size - sizeof(m_movi_avix_list_header);
+
+        if (m_big_endian_processor) {
+            // Change structures from big-endian to little-endian on big-endian systems
+            swap_structure_endianess(&m_movi_avix_list_header);
+        }
+
         fwrite_error_check(&m_movi_avix_list_header , 1 , sizeof(m_movi_avix_list_header) , mp_avi_file);
+
+        if (m_big_endian_processor) {
+            // Change structures back from little-endian to big-endian on big-endian systems
+            swap_structure_endianess(&m_movi_avix_list_header);
+        }
 
         // Go back to the end of this RIFF
         fseek64(mp_avi_file, riff_end_position, SEEK_SET);

@@ -163,8 +163,7 @@ bool c_pipp_ser_write::write_frame(
     p_buffer.reset(nullptr);
 
     if (m_date_time_utc != 0) {
-        if (m_big_endian_processor)
-        {
+        if (m_big_endian_processor) {
             timestamp = swap_endianess(timestamp);  // timestamp must be in little endian format
         }
 

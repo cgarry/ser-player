@@ -372,6 +372,13 @@ class c_pipp_avi_write: public c_pipp_video_write {
         // ------------------------------------------
         virtual int32_t set_codec_values() = 0;
 
+        static void swap_structure_endianess(s_chunk_header *p_chunk_header)
+        {
+            p_chunk_header->four_cc.u32 = swap_endianess(p_chunk_header->four_cc.u32);
+            p_chunk_header->size = swap_endianess(p_chunk_header->size);
+        }
+
+
     private:
         // ------------------------------------------
         // Finish the current RIFF
@@ -404,12 +411,6 @@ class c_pipp_avi_write: public c_pipp_video_write {
             p_list_header->list.u32 = swap_endianess(p_list_header->list.u32);
             p_list_header->size = swap_endianess(p_list_header->size);
             p_list_header->four_cc.u32 = swap_endianess(p_list_header->four_cc.u32);
-        }
-
-        static void swap_structure_endianess(s_chunk_header *p_chunk_header)
-        {
-            p_chunk_header->four_cc.u32 = swap_endianess(p_chunk_header->four_cc.u32);
-            p_chunk_header->size = swap_endianess(p_chunk_header->size);
         }
 
         static void swap_structure_endianess(s_main_avi_header *p_main_avi_header)

@@ -67,7 +67,18 @@ bool c_pipp_avi_write_dib::write_frame(
 
     // Indicate that a frame is about to be added
     frame_added();
+
+    if (m_big_endian_processor) {
+        // Change structures from big-endian to little-endian on big-endian systems
+        swap_structure_endianess(&m_00db_chunk_header);
+    }
+
     fwrite_error_check(&m_00db_chunk_header, 1, sizeof(m_00db_chunk_header), mp_avi_file);
+
+    if (m_big_endian_processor) {
+        // Change structures back from little-endian to big-endian on big-endian systems
+        swap_structure_endianess(&m_00db_chunk_header);
+    }
 
     uint8_t *buffer;
     int32_t line_length = m_width * m_bytes_per_pixel;
