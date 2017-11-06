@@ -68,7 +68,8 @@ SOURCES += src/main.cpp\
     src/selection_box_dialog.cpp \
     src/neuquant.c \
     src/playback_controls_widget.cpp \
-    src/playback_controls_dialog.cpp
+    src/playback_controls_dialog.cpp \
+    src/tiff_write.cpp
 
 !contains(DEFINES, DISABLE_NEW_VERSION_CHECK): SOURCES += src/new_version_checker.cpp
 
@@ -116,7 +117,8 @@ HEADERS  += src/ser_player.h \
     src/selection_box_dialog.h \
     src/neuquant.h \
     src/playback_controls_widget.h \
-    src/playback_controls_dialog.h
+    src/playback_controls_dialog.h \
+    src/tiff_write.h
 
 # Build directories
 contains(QT_ARCH, i386) {

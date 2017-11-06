@@ -50,6 +50,7 @@
 #include "playback_controls_dialog.h"
 #include "playback_controls_widget.h"
 #include "gif_write.h"
+#include "tiff_write.h"
 #include "histogram_thread.h"
 #include "histogram_dialog.h"
 #include "image.h"
@@ -1616,6 +1617,7 @@ void c_ser_player::save_frames_as_images_slot()
         const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
         QString selected_filter;
         QString selected_ext;
+        bool tiff_image = false;
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Images"),
                                    save_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
@@ -1640,6 +1642,7 @@ void c_ser_player::save_frames_as_images_slot()
             if (selected_filter == tif_filter) {
                 p_format = "TIFF";
                 selected_ext = tif_ext;
+                tiff_image = true;
             }
 
             // Handle the case on Linux where an extension is not added by the save file dialog
@@ -1675,22 +1678,32 @@ void c_ser_player::save_frames_as_images_slot()
                 // Save current frame only
                 // Get frame from ser file
                 bool valid_frame = get_and_process_frame(mp_playback_controls_widget->slider_value(),  // frame_number
-                                                       true,  // conv_to_8_bit
-                                                       do_frame_processing);  // do_processing
+                                                         false,  // conv_to_8_bit
+                                                         do_frame_processing);  // do_processing
                 if (valid_frame) {
                     mp_frame_image->resize_image(frame_active_width, frame_active_height);
                     mp_frame_image->add_bars(frame_total_width, frame_total_height);
-                    mp_frame_image->conv_data_ready_for_qimage();
 
-                    QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
-                                                mp_frame_image->get_width(),
-                                                mp_frame_image->get_height(),
-                                                QImage::Format_RGB888);
+                    if (tiff_image) {
+                        save_tiff_file(
+                            filename.toUtf8().constData(),
+                            mp_frame_image->get_p_buffer(),
+                            mp_frame_image->get_width(),
+                            mp_frame_image->get_height(),
+                            mp_frame_image->get_byte_depth(),
+                            mp_frame_image->get_colour());
+                    } else {
+                        mp_frame_image->conv_data_ready_for_qimage();
+                        QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
+                                                    mp_frame_image->get_width(),
+                                                    mp_frame_image->get_height(),
+                                                    QImage::Format_RGB888);
 
-                    QFile file(filename);
-                    file.open(QIODevice::WriteOnly);
-                    QPixmap::fromImage(save_qimage).save(&file, p_format);
-                    file.close();
+                        QFile file(filename);
+                        file.open(QIODevice::WriteOnly);
+                        QPixmap::fromImage(save_qimage).save(&file, p_format);
+                        file.close();
+                    }
                 }
             } else {
                 // Save the range of frames specified by min_frame and max_frame
@@ -1723,17 +1736,11 @@ void c_ser_player::save_frames_as_images_slot()
 
                         // Get frame from SER file
                         bool valid_frame = get_and_process_frame(abs(frame_number),  // frame_number
-                                                               true,  // conv_to_8_bit
+                                                               false,  // conv_to_8_bit
                                                                do_frame_processing);  // do_processing
                         if (valid_frame) {
                             mp_frame_image->resize_image(frame_active_width, frame_active_height);
                             mp_frame_image->add_bars(frame_total_width, frame_total_height);
-                            mp_frame_image->conv_data_ready_for_qimage();
-
-                            QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
-                                                        mp_frame_image->get_width(),
-                                                        mp_frame_image->get_height(),
-                                                        QImage::Format_RGB888);
 
                             // Get timestamp for frame if required
                             if (append_timestamp_to_filename) {
@@ -1775,14 +1782,31 @@ void c_ser_player::save_frames_as_images_slot()
                                                    timestamp_string +
                                                    "." +
                                                    filename_extension;
+                            if (tiff_image) {
+                                // TIFF files are saved using our own code
+                                save_tiff_file(
+                                    new_filename.toUtf8().constData(),
+                                    mp_frame_image->get_p_buffer(),
+                                    mp_frame_image->get_width(),
+                                    mp_frame_image->get_height(),
+                                    mp_frame_image->get_byte_depth(),
+                                    mp_frame_image->get_colour());
+                            } else {
+                                // Other image files are saved using stangard QT QImage methods
+                                mp_frame_image->conv_data_ready_for_qimage();
+                                QImage save_qimage = QImage(mp_frame_image->get_p_buffer(),
+                                                            mp_frame_image->get_width(),
+                                                            mp_frame_image->get_height(),
+                                                            QImage::Format_RGB888);
 
-                            // Open file for writing
-                            QFile file(new_filename);
-                            file.open(QIODevice::WriteOnly);
+                                // Open file for writing
+                                QFile file(new_filename);
+                                file.open(QIODevice::WriteOnly);
 
-                            // Save the frame and close image file
-                            QPixmap::fromImage(save_qimage).save(&file, p_format);
-                            file.close();
+                                // Save the frame and close image file
+                                QPixmap::fromImage(save_qimage).save(&file, p_format);
+                                file.close();
+                            }
                         }
 
                         if (save_progress_dialog.was_cancelled() || !valid_frame) {
