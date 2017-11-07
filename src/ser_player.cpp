@@ -1608,13 +1608,13 @@ void c_ser_player::save_frames_as_images_slot()
         }
 
         const QString jpg_ext = QString(tr(".jpg"));
-        const QString jpg_filter = QString(tr("Joint Picture Expert Group Image (*.jpg)", "Filetype filter"));
+        const QString jpg_filter = QString(tr("JPEG Image (*.jpg *.jpeg)", "Filetype filter"));
         const QString bmp_ext = QString(tr(".bmp"));
-        const QString bmp_filter = QString(tr("Windows Bitmap Image (*.bmp)", "Filetype filter"));
+        const QString bmp_filter = QString(tr("BMP (*.bmp)", "Filetype filter"));
         const QString png_ext = QString(tr(".png"));
-        const QString png_filter = QString(tr("Portable Network Graphics Image (*.png)", "Filetype filter"));
+        const QString png_filter = QString(tr("PNG Image (*.png)", "Filetype filter"));
         const QString tif_ext = QString(tr(".tif"));
-        const QString tif_filter = QString(tr("Tagged Image File Format (*.tif)", "Filetype filter"));
+        const QString tif_filter = QString(tr("TIFF (*.tif *.tiff)", "Filetype filter"));
         QString selected_filter;
         QString selected_ext;
         bool tiff_image = false;
