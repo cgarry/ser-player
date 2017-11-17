@@ -41,6 +41,41 @@ lessThan(QT_MAJOR_VERSION, 5): error("SER Player requires at least Qt5 to build"
 TARGET = "ser-player"
 TEMPLATE = app
 
+# libpng source files
+SOURCES += libpng/png.c \
+    libpng/pngerror.c \
+    libpng/pngget.c \
+    libpng/pngmem.c \
+    libpng/pngpread.c \
+    libpng/pngread.c \
+    libpng/pngrio.c \
+    libpng/pngrtran.c \
+    libpng/pngrutil.c \
+    libpng/pngset.c \
+    libpng/pngtrans.c \
+    libpng/pngwio.c \
+    libpng/pngwrite.c \
+    libpng/pngwtran.c \
+    libpng/pngwutil.c
+
+# zlib source files
+SOURCES += zlib/adler32.c \
+    zlib/compress.c \
+    zlib/crc32.c \
+    zlib/deflate.c \
+    zlib/gzclose.c \
+    zlib/gzlib.c \
+    zlib/gzread.c \
+    zlib/gzwrite.c \
+    zlib/infback.c \
+    zlib/inffast.c \
+    zlib/inflate.c \
+    zlib/inftrees.c \
+    zlib/trees.c \
+    zlib/uncompr.c \
+    zlib/zutil.c
+
+# Main source files
 SOURCES += src/main.cpp\
     src/ser_player.cpp \
     src/pipp_ser.cpp \
@@ -69,7 +104,8 @@ SOURCES += src/main.cpp\
     src/neuquant.c \
     src/playback_controls_widget.cpp \
     src/playback_controls_dialog.cpp \
-    src/tiff_write.cpp
+    src/tiff_write.cpp \
+    src/png_write.cpp
 
 !contains(DEFINES, DISABLE_NEW_VERSION_CHECK): SOURCES += src/new_version_checker.cpp
 
@@ -118,7 +154,13 @@ HEADERS  += src/ser_player.h \
     src/neuquant.h \
     src/playback_controls_widget.h \
     src/playback_controls_dialog.h \
-    src/tiff_write.h
+    src/tiff_write.h \
+    src/png_write.h \
+    src/pnglibconf.h
+
+INCLUDEPATH += src
+INCLUDEPATH += libpng
+INCLUDEPATH += zlib
 
 # Build directories
 contains(QT_ARCH, i386) {
