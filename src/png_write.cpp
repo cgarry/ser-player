@@ -23,6 +23,7 @@ extern "C" {
 }
 
 #include <cstdint>
+#include <cstring>
 #include <memory>
 
 
