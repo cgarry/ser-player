@@ -51,6 +51,7 @@
 #include "playback_controls_widget.h"
 #include "gif_write.h"
 #include "tiff_write.h"
+#include "png_write.h"
 #include "histogram_thread.h"
 #include "histogram_dialog.h"
 #include "image.h"
@@ -1618,6 +1619,7 @@ void c_ser_player::save_frames_as_images_slot()
         QString selected_filter;
         QString selected_ext;
         bool tiff_image = false;
+        bool png_image = false;
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Frames As Images"),
                                    save_directory,
                                    jpg_filter + ";; " + bmp_filter + ";; " + png_filter + ";; " + tif_filter,
@@ -1637,6 +1639,7 @@ void c_ser_player::save_frames_as_images_slot()
             if (selected_filter == png_filter) {
                 p_format = "PNG";
                 selected_ext = png_ext;
+                png_image = true;
             }
 
             if (selected_filter == tif_filter) {
@@ -1768,6 +1771,14 @@ void c_ser_player::save_frames_as_images_slot()
                         if (tiff_image) {
                             // TIFF files are saved using our own code
                             save_tiff_file(
+                                new_filename.toUtf8().constData(),
+                                mp_frame_image->get_p_buffer(),
+                                mp_frame_image->get_width(),
+                                mp_frame_image->get_height(),
+                                mp_frame_image->get_byte_depth(),
+                                mp_frame_image->get_colour());
+                        } else if (png_image) {
+                            save_png_file(
                                 new_filename.toUtf8().constData(),
                                 mp_frame_image->get_p_buffer(),
                                 mp_frame_image->get_width(),
