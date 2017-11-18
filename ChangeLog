@@ -1,0 +1,85 @@
+v1.7.1: In development
+Bug Fixes:
+ * Various updates to allow code to work on big-endian processors.
+Enhancements:
+ * PNG image writing made faster, plus support for 16-bit data and true monochrome added (libpng now used).
+ * TIFF image writing made faster, plus support for 16-bit data and true monochrome added (TIFF code from PIPP used).
+ * Added asserts to help ensure code builds correctly.
+ * Updates for building all targets in Debian repro.
+
+ 
+v1.7.0: 13/10/2017
+Bug Fixes:
+ * Fixed issue with colour balance estimation when non-default bayer pattern is used for debayering.
+Enhancements:
+ * Added support for building version for Linux distros.
+ * Updated About SER Player dialog.
+ * Updated save frames dialog to make it more user friendly.
+ * Added support for NeuQuant neural-net quantisation algorithm for improved colour GIF generation.
+ * Added ability to disconnect playback controls to allow a greater zoom.
+ * Changes to positioning of dialog windows (mainly for detached playback controls). 
+ 
+ 
+v1.6.0: 16/08/2017
+Enhancements:
+  * Added functionality to fix broken (0 framecount) SER files rather than just rejecting them.
+  * Fixed bug in Windows installer that failed to install MSCVP120.dll.
+  * Changed Linux releases to distribution independent AppImage packages instead of .deb packages.
+ 
+ 
+v1.5.2: 04/05/2016
+Bug Fixes:
+ * Fixed dependency issue with Debian packages and Ubuntu 16.04.
+Enhancements:
+ * Added Spanish language translation.
+
+ 
+v1.5.0: 23/03/2016
+Enhancements:
+ * Added support for viewing SER file thumbnails in Explorer (Windows Only).
+ * Added support for resizing frames when saving them.
+ * Added support for aligning RGB channels.
+ * Added support for generating animated GIFs.
+ * Added support for generating raw AVI files.
+ * Added support for frame cropping.
+ * Added support for CYYM, YCMY, YMCY and MYYC bayer patterns.
+ * Added German language translation.
+
+ 
+v1.4.1: 09/11/2015
+Bug Fixes:
+ * Corrections to Danish language translations.
+
+ 
+v1.4.0: 07/11/2015
+Bug Fixes:
+ * Fixed playback of SER files with incorrectly set pixel_depth in header.  Not really a bug in SER Player but lets play nicely!
+Enhancements:
+ * Added controls to modify display colour saturation and colour balance.
+ * Added controls to modify gain and gamma.
+ * Added support for 'reverse' and 'forward + reverse' play.
+ * Added start and end markers to restrict frames that are played.
+ * Added support for saving multiple frames as images, including while playback is active.
+ * Added a histogram viewer.
+ * Added option to open recently used SER files.
+ * Added option to open folders recently used to save frames in.
+ * Added support for saving frames as a new SER file, with or without processing.
+
+ 
+v1.3.0: 19/09/2015
+Bug Fixes:
+ * Fixed issues when zooming larger than screen allows.
+* Enhancements:
+* Added French language translation.
+* Limited Update checks to once per 12 hours.
+* Added auto-playback when loading a SER file.
+
+
+v1.2.0: 27/06/2015
+Bug Fixes:
+ * Corrected initial zoom to 100%.
+Enhancements:
+* Added support for language localisation and a Danish translation.
+* Added updated version check to allow users to keep up to date with the latest version.
+* Added support for generating Debian Linux binary packages (.deb).
+* Slight redesign to the SER Player icons.
