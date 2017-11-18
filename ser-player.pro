@@ -41,22 +41,27 @@ lessThan(QT_MAJOR_VERSION, 5): error("SER Player requires at least Qt5 to build"
 TARGET = "ser-player"
 TEMPLATE = app
 
+contains(DEFINES, BUILD_FOR_LINUX_REPO) {
+    LIBS += -lpng
+}
+
 # libpng source files
-SOURCES += libpng/png.c \
-    libpng/pngerror.c \
-    libpng/pngget.c \
-    libpng/pngmem.c \
-    libpng/pngpread.c \
-    libpng/pngread.c \
-    libpng/pngrio.c \
-    libpng/pngrtran.c \
-    libpng/pngrutil.c \
-    libpng/pngset.c \
-    libpng/pngtrans.c \
-    libpng/pngwio.c \
-    libpng/pngwrite.c \
-    libpng/pngwtran.c \
-    libpng/pngwutil.c
+!contains(DEFINES, BUILD_FOR_LINUX_REPO) {
+    SOURCES += libpng/png.c \
+        libpng/pngerror.c \
+        libpng/pngget.c \
+        libpng/pngmem.c \
+        libpng/pngpread.c \
+        libpng/pngread.c \
+        libpng/pngrio.c \
+        libpng/pngrtran.c \
+        libpng/pngrutil.c \
+        libpng/pngset.c \
+        libpng/pngtrans.c \
+        libpng/pngwio.c \
+        libpng/pngwrite.c \
+        libpng/pngwtran.c \
+        libpng/pngwutil.c
 
 # zlib source files
 SOURCES += zlib/adler32.c \
@@ -74,6 +79,7 @@ SOURCES += zlib/adler32.c \
     zlib/trees.c \
     zlib/uncompr.c \
     zlib/zutil.c
+}
 
 # Main source files
 SOURCES += src/main.cpp\
@@ -155,12 +161,18 @@ HEADERS  += src/ser_player.h \
     src/playback_controls_widget.h \
     src/playback_controls_dialog.h \
     src/tiff_write.h \
-    src/png_write.h \
-    src/pnglibconf.h
+    src/png_write.h
+
+!contains(DEFINES, BUILD_FOR_LINUX_REPO) {
+    HEADERS  += src/pnglibconf.h
+}
 
 INCLUDEPATH += src
-INCLUDEPATH += libpng
-INCLUDEPATH += zlib
+
+!contains(DEFINES, BUILD_FOR_LINUX_REPO) {
+    INCLUDEPATH += libpng
+    INCLUDEPATH += zlib
+}
 
 # Build directories
 contains(QT_ARCH, i386) {
