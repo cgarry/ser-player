@@ -76,6 +76,14 @@
 
 const QString c_ser_player::C_WINDOW_TITLE_QSTRING = QString("SER Player");
 
+// These phrases are not used in the application but are included so that translations are available for the debian appdata XML file
+const QString c_ser_player::C_DEBIAN_XML_TEXT1 = tr("SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.",
+                                                    "Overall description of SER Player");
+const QString c_ser_player::C_DEBIAN_XML_TEXT2 = tr("An easy way to view your SER videos.",
+                                                    "Short description of SER Player");
+const QString c_ser_player::C_DEBIAN_XML_TEXT3 = tr("SER Player at startup.",
+                                                    "Description of an image of SER Player after it has just started up");
+
 
 c_ser_player::c_ser_player(QWidget *parent)
     : QMainWindow(parent),

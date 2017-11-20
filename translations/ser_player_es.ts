@@ -1242,377 +1242,419 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
 <context>
     <name>c_ser_player</name>
     <message>
-        <location filename="../src/ser_player.cpp" line="109"/>
+        <location filename="../src/ser_player.cpp" line="80"/>
+        <source>SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.</source>
+        <comment>Overall description of SER Player</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="119"/>
         <source>File</source>
         <comment>Menu title</comment>
         <translation>Archivo</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="110"/>
+        <location filename="../src/ser_player.cpp" line="120"/>
         <source>Open SER File</source>
         <comment>Menu title</comment>
         <translation>Abrir Archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="114"/>
+        <location filename="../src/ser_player.cpp" line="124"/>
         <source>Open Recent</source>
         <comment>Menu title</comment>
         <translation>Abrir Recientes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="119"/>
+        <location filename="../src/ser_player.cpp" line="129"/>
         <source>Save Frames As SER File...</source>
         <comment>Menu title</comment>
         <translation>Guardar Cuadros como Archivo SER...</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="124"/>
+        <location filename="../src/ser_player.cpp" line="134"/>
         <source>Save Frames As AVI File...</source>
         <comment>Menu title</comment>
         <translation>Guardar Cuadros como Archivo AVI...</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="129"/>
+        <location filename="../src/ser_player.cpp" line="139"/>
         <source>Save Frames As Animated GIF...</source>
         <comment>Menu title</comment>
         <translation>Guardar Cuadros como GIF Animado...</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="134"/>
+        <location filename="../src/ser_player.cpp" line="144"/>
         <source>Save Frames As Images...</source>
         <comment>Menu title</comment>
         <translation>Guardar Cuadros Como Imágenes...</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="140"/>
+        <location filename="../src/ser_player.cpp" line="150"/>
         <source>Recent Save Folders</source>
         <comment>Menu title</comment>
         <translation>Carpetas de Guardado Reciente</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="145"/>
+        <location filename="../src/ser_player.cpp" line="155"/>
         <source>Quit</source>
         <comment>Menu title</comment>
         <translation>Salir</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="153"/>
+        <location filename="../src/ser_player.cpp" line="163"/>
         <source>Playback</source>
         <comment>Menu title</comment>
         <translation>Reproducción</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="155"/>
+        <location filename="../src/ser_player.cpp" line="165"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
         <translation>Soltar Controles de Reproducción</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="163"/>
+        <location filename="../src/ser_player.cpp" line="173"/>
         <source>Zoom</source>
         <comment>Playback menu</comment>
         <translation>Zoom</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="167"/>
+        <location filename="../src/ser_player.cpp" line="177"/>
         <source>%1%</source>
         <comment>Zoom menu</comment>
         <translation>%1%</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="175"/>
+        <location filename="../src/ser_player.cpp" line="185"/>
         <source>Framerate</source>
         <comment>Playback menu</comment>
         <translation>Velocidad de Cuadro</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="181"/>
+        <location filename="../src/ser_player.cpp" line="191"/>
         <source>From Timestamps</source>
         <comment>Framerate menu</comment>
         <translation>Desde Fecha/Hora</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="190"/>
+        <location filename="../src/ser_player.cpp" line="200"/>
         <source>%1 fps</source>
         <comment>Framerate menu</comment>
         <translation>%1 fps</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="203"/>
+        <location filename="../src/ser_player.cpp" line="213"/>
         <source>Tools</source>
         <comment>Menu title</comment>
         <translation>Herramientas</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="206"/>
+        <location filename="../src/ser_player.cpp" line="216"/>
         <source>SER File Details</source>
         <comment>Tools menu</comment>
         <translation>Detalles del Archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="228"/>
+        <location filename="../src/ser_player.cpp" line="238"/>
         <source>Histogram</source>
         <comment>Tools menu</comment>
         <translation>Histograma</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="240"/>
+        <location filename="../src/ser_player.cpp" line="250"/>
         <source>Processing</source>
         <comment>Tools menu</comment>
         <translation>Procesamiento</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="259"/>
+        <location filename="../src/ser_player.cpp" line="269"/>
         <source>Markers</source>
         <comment>Tools menu</comment>
         <translation>Marcadores</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="268"/>
+        <location filename="../src/ser_player.cpp" line="278"/>
         <source>Help</source>
         <comment>Help menu</comment>
         <translation>Ayuda</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="271"/>
+        <location filename="../src/ser_player.cpp" line="281"/>
         <source>Check For Updates On Startup</source>
         <comment>Help menu</comment>
         <translation>Buscar Actualizaciones al Inicio</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="278"/>
+        <location filename="../src/ser_player.cpp" line="288"/>
         <source>Language</source>
         <comment>Help menu</comment>
         <translation>Idioma</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="279"/>
+        <location filename="../src/ser_player.cpp" line="289"/>
         <source>Restart for language change to take effect</source>
         <translation>Reiniciar para que el cambio de Idioma tenga efecto</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="285"/>
+        <location filename="../src/ser_player.cpp" line="295"/>
         <source>Auto</source>
         <translation>Auto</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="296"/>
-        <location filename="../src/ser_player.cpp" line="331"/>
+        <location filename="../src/ser_player.cpp" line="306"/>
+        <location filename="../src/ser_player.cpp" line="341"/>
         <source>English</source>
         <extracomment>Language name</extracomment>
         <translation>Inglés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="317"/>
+        <location filename="../src/ser_player.cpp" line="327"/>
         <source>Arabic</source>
         <extracomment>Language name</extracomment>
         <translation>Árabe</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="319"/>
+        <location filename="../src/ser_player.cpp" line="329"/>
         <source>Bulgarian</source>
         <extracomment>Language name</extracomment>
         <translation>Búlgaro</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="321"/>
+        <location filename="../src/ser_player.cpp" line="331"/>
         <source>Chinese</source>
         <extracomment>Language name</extracomment>
         <translation>Chino</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="323"/>
+        <location filename="../src/ser_player.cpp" line="333"/>
         <source>Croatian</source>
         <extracomment>Language name</extracomment>
         <translation>Croata</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="325"/>
+        <location filename="../src/ser_player.cpp" line="335"/>
         <source>Czech</source>
         <extracomment>Language name</extracomment>
         <translation>Checo</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="327"/>
+        <location filename="../src/ser_player.cpp" line="337"/>
         <source>Danish</source>
         <extracomment>Language name</extracomment>
         <translation>Danés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="329"/>
+        <location filename="../src/ser_player.cpp" line="339"/>
         <source>Dutch</source>
         <extracomment>Language name</extracomment>
         <translation>Holandés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="333"/>
+        <location filename="../src/ser_player.cpp" line="343"/>
         <source>Finnish</source>
         <extracomment>Language name</extracomment>
         <translation>Finlandés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="335"/>
+        <location filename="../src/ser_player.cpp" line="345"/>
         <source>French</source>
         <extracomment>Language name</extracomment>
         <translation>Francés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="337"/>
+        <location filename="../src/ser_player.cpp" line="347"/>
         <source>German</source>
         <extracomment>Language name</extracomment>
         <translation>Alemán</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="339"/>
+        <location filename="../src/ser_player.cpp" line="349"/>
         <source>Greek</source>
         <extracomment>Language name</extracomment>
         <translation>Griego</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="341"/>
+        <location filename="../src/ser_player.cpp" line="351"/>
         <source>Hebrew</source>
         <extracomment>Language name</extracomment>
         <translation>Hebreo</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="343"/>
+        <location filename="../src/ser_player.cpp" line="353"/>
         <source>Hindi</source>
         <extracomment>Language name</extracomment>
         <translation>Hindi</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="345"/>
+        <location filename="../src/ser_player.cpp" line="355"/>
         <source>Indonesian</source>
         <extracomment>Language name</extracomment>
         <translation>Indonesio</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="347"/>
+        <location filename="../src/ser_player.cpp" line="357"/>
         <source>Irish</source>
         <extracomment>Language name</extracomment>
         <translation>Irlandés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="349"/>
+        <location filename="../src/ser_player.cpp" line="359"/>
         <source>Italian</source>
         <extracomment>Language name</extracomment>
         <translation>Italiano</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="351"/>
+        <location filename="../src/ser_player.cpp" line="361"/>
         <source>Japanese</source>
         <extracomment>Language name</extracomment>
         <translation>Japonés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="353"/>
+        <location filename="../src/ser_player.cpp" line="363"/>
         <source>Latvian</source>
         <extracomment>Language name</extracomment>
         <translation>Letón</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="355"/>
+        <location filename="../src/ser_player.cpp" line="365"/>
         <source>Lithuanian</source>
         <extracomment>Language name</extracomment>
         <translation>Lituano</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="357"/>
+        <location filename="../src/ser_player.cpp" line="367"/>
         <source>Norwegian</source>
         <extracomment>Language name</extracomment>
         <translation>Noruego</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="359"/>
+        <location filename="../src/ser_player.cpp" line="369"/>
         <source>Polish</source>
         <extracomment>Language name</extracomment>
         <translation>Polaco</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="361"/>
+        <location filename="../src/ser_player.cpp" line="371"/>
         <source>Portuguese</source>
         <extracomment>Language name</extracomment>
         <translation>Portugués</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="363"/>
+        <location filename="../src/ser_player.cpp" line="373"/>
         <source>Romanian</source>
         <extracomment>Language name</extracomment>
         <translation>Rumano</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="365"/>
+        <location filename="../src/ser_player.cpp" line="375"/>
         <source>Russian</source>
         <extracomment>Language name</extracomment>
         <translation>Ruso</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="367"/>
+        <location filename="../src/ser_player.cpp" line="377"/>
         <source>Serbian</source>
         <extracomment>Language name</extracomment>
         <translation>Serbio</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="369"/>
+        <location filename="../src/ser_player.cpp" line="379"/>
         <source>Slovenian</source>
         <extracomment>Language name</extracomment>
         <translation>Esloveno</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="371"/>
+        <location filename="../src/ser_player.cpp" line="381"/>
         <source>Spanish</source>
         <extracomment>Language name</extracomment>
         <translation>Español</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="373"/>
+        <location filename="../src/ser_player.cpp" line="383"/>
         <source>Swedish</source>
         <extracomment>Language name</extracomment>
         <translation>Sueco</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="375"/>
+        <location filename="../src/ser_player.cpp" line="385"/>
         <source>Thai</source>
         <extracomment>Language name</extracomment>
         <translation>Tailandés</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="377"/>
+        <location filename="../src/ser_player.cpp" line="387"/>
         <source>Ukrainian</source>
         <extracomment>Language name</extracomment>
         <translation>Ucraniano</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="379"/>
+        <location filename="../src/ser_player.cpp" line="389"/>
         <source>Urdu</source>
         <extracomment>Language name</extracomment>
         <translation>Urdu</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="381"/>
+        <location filename="../src/ser_player.cpp" line="391"/>
         <source>Vietnamese</source>
         <extracomment>Language name</extracomment>
         <translation>Vietnamita</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="407"/>
+        <location filename="../src/ser_player.cpp" line="417"/>
         <source>About SER Player</source>
         <comment>Help menu</comment>
         <translation>Sobre SER Player</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="410"/>
+        <location filename="../src/ser_player.cpp" line="420"/>
         <source>About Qt</source>
         <comment>Help menu</comment>
         <translation>Sobre Qt</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2023"/>
+        <location filename="../src/ser_player.cpp" line="1620"/>
+        <source>JPEG Image (*.jpg *.jpeg)</source>
+        <comment>Filetype filter</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="1622"/>
+        <source>BMP Image (*.bmp)</source>
+        <comment>Filetype filter</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="1626"/>
+        <source>TIFF Image (*.tif *.tiff)</source>
+        <comment>Filetype filter</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="1624"/>
+        <source>PNG Image (*.png)</source>
+        <comment>Filetype filter</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="82"/>
+        <source>An easy way to view your SER videos.</source>
+        <comment>Short description of SER Player</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="84"/>
+        <source>SER Player at startup.</source>
+        <comment>Description of an image of SER Player after it has just started up</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="2048"/>
         <source>The SER file has successfully been fixed</source>
         <translation>El archivo SER ha sido arreglado exitosamente</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2452"/>
+        <location filename="../src/ser_player.cpp" line="2477"/>
         <source>No SER File Open</source>
         <comment>No SER file message on initial image</comment>
         <translation>No hay un archivo SER abierto</translation>
@@ -1722,318 +1764,314 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation type="vanished">Fecha/Hora de Cuadro</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="535"/>
-        <location filename="../src/ser_player.cpp" line="583"/>
+        <location filename="../src/ser_player.cpp" line="545"/>
+        <location filename="../src/ser_player.cpp" line="593"/>
         <source>Clear Recent</source>
         <comment>Save Folders menu entry</comment>
         <translation>Borrar recientes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="541"/>
+        <location filename="../src/ser_player.cpp" line="551"/>
         <source>No SER Files In List</source>
         <comment>Recent SER Files menu entry</comment>
         <translation>No hay archivos SER en la Lista</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="589"/>
+        <location filename="../src/ser_player.cpp" line="599"/>
         <source>No Save Folders In List</source>
         <comment>Recent Save Folders menu entry</comment>
         <translation>No hay carpetas de guardado en la Lista</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="618"/>
+        <location filename="../src/ser_player.cpp" line="628"/>
         <source>Display Framerate</source>
         <translation>Velocidad de Visuaización de cuadro</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="823"/>
-        <location filename="../src/ser_player.cpp" line="857"/>
+        <location filename="../src/ser_player.cpp" line="833"/>
+        <location filename="../src/ser_player.cpp" line="867"/>
         <source>Save Frames As SER File</source>
         <translation>Guardar Cuadros Como archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="825"/>
-        <location filename="../src/ser_player.cpp" line="1947"/>
+        <location filename="../src/ser_player.cpp" line="835"/>
+        <location filename="../src/ser_player.cpp" line="1972"/>
         <source>SER Files (*.ser)</source>
         <comment>Filetype filter</comment>
         <translation>Archivos SER (*.ser)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="951"/>
+        <location filename="../src/ser_player.cpp" line="961"/>
         <source>Error: SER File creation failed</source>
         <translation>Error:Fallo en creación de archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="953"/>
+        <location filename="../src/ser_player.cpp" line="963"/>
         <source>Error: SER file writing failed</source>
         <translation>Error:Falló escritura de archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="958"/>
+        <location filename="../src/ser_player.cpp" line="968"/>
         <source>Save Frames As SER File Failed</source>
         <translation>Falló Guardar Cuadros como Archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1047"/>
-        <location filename="../src/ser_player.cpp" line="1097"/>
+        <location filename="../src/ser_player.cpp" line="1057"/>
+        <location filename="../src/ser_player.cpp" line="1107"/>
         <source>Save Frames As AVI File</source>
         <translation>Guardar Cuadros como archivo AVI</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1049"/>
+        <location filename="../src/ser_player.cpp" line="1059"/>
         <source>AVI Files (*.avi)</source>
         <comment>Filetype filter</comment>
         <translation>Archivos AVI (*.avi)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1176"/>
+        <location filename="../src/ser_player.cpp" line="1186"/>
         <source>Error: AVI file creation failed</source>
         <translation>Error: Falló creación de archivo AVI</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1178"/>
+        <location filename="../src/ser_player.cpp" line="1188"/>
         <source>Error: AVI file writing failed</source>
         <translation>Error: Fallo escritura de archivo AVI</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1183"/>
+        <location filename="../src/ser_player.cpp" line="1193"/>
         <source>Save Frames As AVI File Failed</source>
         <translation>Falló Guardar Cuadros Como AVI</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1301"/>
-        <location filename="../src/ser_player.cpp" line="1346"/>
+        <location filename="../src/ser_player.cpp" line="1311"/>
+        <location filename="../src/ser_player.cpp" line="1356"/>
         <source>Save Frames As Animated GIF</source>
         <translation>Guardar cuadros como GIF animado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1303"/>
+        <location filename="../src/ser_player.cpp" line="1313"/>
         <source>GIF Files (*.gif)</source>
         <comment>Filetype filter</comment>
         <translation>Archivos GIF (*.gif)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1349"/>
+        <location filename="../src/ser_player.cpp" line="1359"/>
         <source>Truncate</source>
         <translation>Truncar</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1450"/>
+        <location filename="../src/ser_player.cpp" line="1460"/>
         <source>Error: Animated GIF file creation failed</source>
         <translation>Error: Falló creación de GIF Animado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1452"/>
+        <location filename="../src/ser_player.cpp" line="1462"/>
         <source>Error: Animated GIF file writing failed</source>
         <translation>Error: Falló Escritura de archivo GIF</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1457"/>
+        <location filename="../src/ser_player.cpp" line="1467"/>
         <source>Save Frames As Animated GIF Failed</source>
         <translation>Falló Guardar Cuadros como GIF animado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1471"/>
+        <location filename="../src/ser_player.cpp" line="1481"/>
         <source>SER Player Animated GIF Review</source>
         <translation>Revisión de GIF Animado de SER Player</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1472"/>
+        <location filename="../src/ser_player.cpp" line="1482"/>
         <source>(Close browser when reviewing is complete)</source>
         <translation>(Cierre el navegador cuando se complete la revisión)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1474"/>
+        <location filename="../src/ser_player.cpp" line="1484"/>
         <source>Frame Delay: </source>
         <translation>Retardo de Cuadro:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1475"/>
+        <location filename="../src/ser_player.cpp" line="1485"/>
         <source>Final Frame Delay: </source>
         <translation>Retardo de Cuadro Final:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1477"/>
+        <location filename="../src/ser_player.cpp" line="1487"/>
         <source>Colour Quantisation: </source>
         <translation>Cuantificación de Color:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1479"/>
+        <location filename="../src/ser_player.cpp" line="1489"/>
         <source>Unchanged Border Tolerance: </source>
         <translation>Tolerancia de Borde no cambiado:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1482"/>
+        <location filename="../src/ser_player.cpp" line="1492"/>
         <source>Transperant Pixel Tolerance: </source>
         <translation>Tolerancia de Pixel Transparente:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1484"/>
+        <location filename="../src/ser_player.cpp" line="1494"/>
         <source>Transperant Pixel Tolerance: Disabled</source>
         <translation>Tolerancia de Pixel Transparente:Deshabilitada</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1488"/>
+        <location filename="../src/ser_player.cpp" line="1498"/>
         <source>Reduced Pixel Depth: </source>
         <translation>Profundidad de Pixel Reducida:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1490"/>
+        <location filename="../src/ser_player.cpp" line="1500"/>
         <source>Reduced Pixel Depth: Disabled</source>
         <translation>Profundidad de Pixel Reducida:Deshabilitada</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1494"/>
+        <location filename="../src/ser_player.cpp" line="1504"/>
         <source>Lossy Compression Level: </source>
         <translatorcomment>Keeping the technical term Lossy</translatorcomment>
         <translation>Nivel de Compresión Lossy:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1496"/>
+        <location filename="../src/ser_player.cpp" line="1506"/>
         <source>Lossy Compression Level: Disabled</source>
         <translation>Nivel de Compresión Lossy:Deshabilitado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1500"/>
+        <location filename="../src/ser_player.cpp" line="1510"/>
         <source>Frames Saved: %1 of %2</source>
         <translation>Cuadros Guardados: %1 de %2</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1518"/>
+        <location filename="../src/ser_player.cpp" line="1528"/>
         <source>Estimated Filesize: %1 MB (%2 Bytes)</source>
         <translation>Tamaño de Archivo Estimado: %1 MB (%2 Bytes)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1521"/>
+        <location filename="../src/ser_player.cpp" line="1531"/>
         <source>Filesize: %1 MB (%2 Bytes)</source>
         <translation>Tamaño de Archivo: %1 MB (%2 Bytes)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1527"/>
+        <location filename="../src/ser_player.cpp" line="1537"/>
         <source>Estimated Filesize: %1 KB (%2 Bytes)</source>
         <translation>Tamaño de Archivo Estimado: %1 KB (%2 Bytes)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1529"/>
+        <location filename="../src/ser_player.cpp" line="1539"/>
         <source>Filesize: %1 KB (%2 Bytes)</source>
         <translation>Tamaño de Archivo: %1 KB (%2 Bytes)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1533"/>
+        <location filename="../src/ser_player.cpp" line="1543"/>
         <source>Estimated Filesize: %1 Bytes</source>
         <translation>Tamaño de Archivo Estimado: %1 Bytes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1535"/>
+        <location filename="../src/ser_player.cpp" line="1545"/>
         <source>Filesize: %1 Bytes</source>
         <translation>Tamaño de Archivo: %1 Bytes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1609"/>
+        <location filename="../src/ser_player.cpp" line="1619"/>
         <source>.jpg</source>
         <translation>.jpg</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1610"/>
         <source>Joint Picture Expert Group Image (*.jpg)</source>
         <comment>Filetype filter</comment>
-        <translation>Joint Picture Expert Group Image (*.jpg)</translation>
+        <translation type="vanished">Joint Picture Expert Group Image (*.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1611"/>
+        <location filename="../src/ser_player.cpp" line="1621"/>
         <source>.bmp</source>
         <translation>.bmp</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1612"/>
         <source>Windows Bitmap Image (*.bmp)</source>
         <comment>Filetype filter</comment>
-        <translation>Windows Bitmap Image (*.bmp)</translation>
+        <translation type="vanished">Windows Bitmap Image (*.bmp)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1613"/>
+        <location filename="../src/ser_player.cpp" line="1623"/>
         <source>.png</source>
         <translation>.png</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1614"/>
         <source>Portable Network Graphics Image (*.png)</source>
         <comment>Filetype filter</comment>
-        <translation>Portable Network Graphics Image (*.png)</translation>
+        <translation type="vanished">Portable Network Graphics Image (*.png)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1615"/>
+        <location filename="../src/ser_player.cpp" line="1625"/>
         <source>.tif</source>
         <translation>.tif</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1616"/>
         <source>Tagged Image File Format (*.tif)</source>
         <comment>Filetype filter</comment>
-        <translation>Tagged Image File Format (*.tif)</translation>
+        <translation type="vanished">Tagged Image File Format (*.tif)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1619"/>
+        <location filename="../src/ser_player.cpp" line="1631"/>
         <source>Save Frames As Images</source>
         <translation>Guardar cuadros como Imágenes</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1763"/>
+        <location filename="../src/ser_player.cpp" line="1760"/>
         <source>_no_timestamp</source>
         <comment>Appended to save filename when no timestamp is available</comment>
         <translation>_sin_FechaHora</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1827"/>
+        <location filename="../src/ser_player.cpp" line="1852"/>
         <source>Cannot Open Last Save Folder</source>
         <comment>Message box title for canot open last save folder</comment>
         <translation>No es posible abrir la última carpeta de guardado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1828"/>
+        <location filename="../src/ser_player.cpp" line="1853"/>
         <source>Folder Not Found:</source>
         <comment>Message box title for cannot open last save folder</comment>
         <translation>Carpeta No Encontrada:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1938"/>
+        <location filename="../src/ser_player.cpp" line="1963"/>
         <source>About Qt</source>
         <comment>Message box title</comment>
         <translation>Sobre Qt</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1945"/>
+        <location filename="../src/ser_player.cpp" line="1970"/>
         <source>Open SER File</source>
         <comment>Open file dialog title</comment>
         <translation>Abrir Archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1969"/>
+        <location filename="../src/ser_player.cpp" line="1994"/>
         <source>Cannot Open SER File</source>
         <translation>No es Posible abrir Archivo SER</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="1970"/>
+        <location filename="../src/ser_player.cpp" line="1995"/>
         <source>File Not Found:</source>
         <comment>Message box title for cannot open SER file</comment>
         <translation>Archivo No Encontrado:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2004"/>
+        <location filename="../src/ser_player.cpp" line="2029"/>
         <source>Error: File &apos;%1&apos; has an invalid frame count.  SER Player may be able to fix this file.</source>
         <comment>SER File error message</comment>
         <translation>Error: El Archivo &apos;%1&apos; tiene un conteo inválido de cuadros.  SER Player podría ser capaz de arreglar este archivo.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2007"/>
+        <location filename="../src/ser_player.cpp" line="2032"/>
         <source>Fix this SER file?</source>
         <translation>Arreglar este archivo SER?</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2010"/>
-        <location filename="../src/ser_player.cpp" line="2022"/>
-        <location filename="../src/ser_player.cpp" line="2027"/>
-        <location filename="../src/ser_player.cpp" line="2038"/>
+        <location filename="../src/ser_player.cpp" line="2035"/>
+        <location filename="../src/ser_player.cpp" line="2047"/>
+        <location filename="../src/ser_player.cpp" line="2052"/>
+        <location filename="../src/ser_player.cpp" line="2063"/>
         <source>Invalid SER File</source>
         <comment>Message box title for invalid SER file</comment>
         <translation>Archivo SER inválido</translation>
@@ -2043,136 +2081,136 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation type="vanished">El archivo SER ha sido arreglado exitosamente</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2028"/>
+        <location filename="../src/ser_player.cpp" line="2053"/>
         <source>The SER file could not be fixed</source>
         <translation>El archivo SER no pudo ser arreglado</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2111"/>
+        <location filename="../src/ser_player.cpp" line="2136"/>
         <source>MONO</source>
         <comment>Colour ID label</comment>
         <translation>MONO</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2114"/>
+        <location filename="../src/ser_player.cpp" line="2139"/>
         <source>RGGB</source>
         <comment>Colour ID label</comment>
         <translation>RGGB</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2118"/>
+        <location filename="../src/ser_player.cpp" line="2143"/>
         <source>GRBG</source>
         <comment>Colour ID label</comment>
         <translation>GRBG</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2122"/>
+        <location filename="../src/ser_player.cpp" line="2147"/>
         <source>GBRG</source>
         <comment>Colour ID label</comment>
         <translation>GBRG</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2126"/>
+        <location filename="../src/ser_player.cpp" line="2151"/>
         <source>BGGR</source>
         <comment>Colour ID label</comment>
         <translation>BGGR</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2130"/>
+        <location filename="../src/ser_player.cpp" line="2155"/>
         <source>CYYM</source>
         <comment>Colour ID label</comment>
         <translation>CYYM</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2134"/>
+        <location filename="../src/ser_player.cpp" line="2159"/>
         <source>YCMY</source>
         <comment>Colour ID label</comment>
         <translation>YCMY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2138"/>
+        <location filename="../src/ser_player.cpp" line="2163"/>
         <source>YMCY</source>
         <comment>Colour ID label</comment>
         <translation>YMCY</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2142"/>
+        <location filename="../src/ser_player.cpp" line="2167"/>
         <source>MYYC</source>
         <comment>Colour ID label</comment>
         <translation>MYYC</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2146"/>
+        <location filename="../src/ser_player.cpp" line="2171"/>
         <source>RGB</source>
         <comment>Colour ID label</comment>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2150"/>
+        <location filename="../src/ser_player.cpp" line="2175"/>
         <source>BGR</source>
         <comment>Colour ID label</comment>
         <translation>BGR</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2154"/>
+        <location filename="../src/ser_player.cpp" line="2179"/>
         <source>????</source>
         <comment>Colour ID label for unknown ID</comment>
         <translation>????</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2401"/>
+        <location filename="../src/ser_player.cpp" line="2426"/>
         <source>SER Player</source>
         <translation>SER Player</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2402"/>
+        <location filename="../src/ser_player.cpp" line="2427"/>
         <source>A video player and processing utility for SER files.</source>
         <translation>Un reproductor de Video y utilidad de procesamiento para archivos SER.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2406"/>
+        <location filename="../src/ser_player.cpp" line="2431"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Traducción al Idioma Español por Carlos Valencia (C.A.V.A.)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2416"/>
+        <location filename="../src/ser_player.cpp" line="2441"/>
         <source>3rd Party Components:</source>
         <translation>Componentes de Terceros:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2418"/>
+        <location filename="../src/ser_player.cpp" line="2443"/>
         <source>NeuQuant (c) 1994 Anthony Dekker</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2419"/>
+        <location filename="../src/ser_player.cpp" line="2444"/>
         <source>Neural-Net image quantization algorithm</source>
         <translation>Algoritmo de Cuantificación Neural-Net de imagen</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2422"/>
+        <location filename="../src/ser_player.cpp" line="2447"/>
         <source>Credits:</source>
         <translation>Créditos:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2424"/>
+        <location filename="../src/ser_player.cpp" line="2449"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
         <translation>Sylvain Weiller por todas sus sugerencias, pruebas y retroalimentación.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2427"/>
+        <location filename="../src/ser_player.cpp" line="2452"/>
         <source>License:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2438"/>
+        <location filename="../src/ser_player.cpp" line="2463"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Usted debió recibir una copia del GNU General Public License con éste programa.  Si no, vea &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2444"/>
+        <location filename="../src/ser_player.cpp" line="2469"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>Sobre SER Player</translation>
@@ -2183,7 +2221,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation type="vanished">No hay un archivo SER abierto</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2492"/>
+        <location filename="../src/ser_player.cpp" line="2517"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>Hay una nueva versión de SER Player disponible:%1</translation>

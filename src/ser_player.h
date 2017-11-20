@@ -50,6 +50,9 @@ class c_ser_player : public QMainWindow
 
 private:
     static const QString C_WINDOW_TITLE_QSTRING;
+    static const QString C_DEBIAN_XML_TEXT1;
+    static const QString C_DEBIAN_XML_TEXT2;
+    static const QString C_DEBIAN_XML_TEXT3;
 
     // Menus
     QAction *mp_save_frames_as_images_Act;
