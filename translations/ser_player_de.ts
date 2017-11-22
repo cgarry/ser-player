@@ -1231,19 +1231,19 @@ Shift-Click to go back multiple frames</source>
         <location filename="../src/ser_player.cpp" line="80"/>
         <source>SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.</source>
         <comment>Overall description of SER Player</comment>
-        <translation type="unfinished"></translation>
+        <translation>SER Player ist ein Video-Betrachter für SER-Dateien. Videos im SER-Format werden bei Planeten-, Mond- und Sonnenaufnahmen genutzt und können mit diesem Betrachter genauso einfach angeschaut werden, wie AVI-Dateien mit einem Standard-Video-Player.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="82"/>
         <source>An easy way to view your SER videos.</source>
         <comment>Short description of SER Player</comment>
-        <translation type="unfinished"></translation>
+        <translation>Einfacher Betrachter für SER-Videos.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="84"/>
         <source>SER Player at startup.</source>
         <comment>Description of an image of SER Player after it has just started up</comment>
-        <translation type="unfinished"></translation>
+        <translation>Startansicht des SER-Players.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="119"/>
