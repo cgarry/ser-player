@@ -1377,13 +1377,13 @@ Skift+klik for flere frames tilbage</translation>
         <location filename="../src/ser_player.cpp" line="82"/>
         <source>An easy way to view your SER videos.</source>
         <comment>Short description of SER Player</comment>
-        <translation type="unfinished"></translation>
+        <translation>En nem måde at se dine *.SER videoer på.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="84"/>
         <source>SER Player at startup.</source>
         <comment>Description of an image of SER Player after it has just started up</comment>
-        <translation type="unfinished"></translation>
+        <translation>SER-afspiller ved opstart.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="288"/>
@@ -1430,7 +1430,7 @@ Skift+klik for flere frames tilbage</translation>
         <location filename="../src/ser_player.cpp" line="80"/>
         <source>SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.</source>
         <comment>Overall description of SER Player</comment>
-        <translation type="unfinished"></translation>
+        <translation>SER-afspiller er en videospiller til afspilning af SER-filer. SER-filer bruges til planetariske, månen og sol optagelser. Denne afspiller gør det muligt at se disse optgelser på samme måde som AVI-filer ses med en standard videospiller.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="134"/>
