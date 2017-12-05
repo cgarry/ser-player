@@ -360,7 +360,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/playback_controls_widget.cpp" line="120"/>
         <source>Display Frame rate</source>
         <comment>Tool tip</comment>
-        <translation>Wyświetl informację o liczbie klatek na sekundę</translation>
+        <translation>Prędkość wyświetlania klatek</translation>
     </message>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="124"/>
@@ -433,7 +433,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="46"/>
         <source>Processing</source>
-        <translation>Przetwarzanie</translation>
+        <translation>Przetwarzanie obrazu</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="50"/>
@@ -498,12 +498,12 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="76"/>
         <source>Invert Frames</source>
-        <translation>Odwróć klatki</translation>
+        <translation>Odwróć kolory</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="85"/>
         <source>Frame Inversion</source>
-        <translation>Odwrócenie klatki</translation>
+        <translation>Odwrócenie kolorów</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="117"/>
@@ -526,7 +526,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="139"/>
         <source>Gain and Gamma</source>
-        <translation>Wzmocnienie i gamma</translation>
+        <translation>Wzmocnienie oraz gamma</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="147"/>
@@ -691,7 +691,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="98"/>
         <source>Save All %1 Frames</source>
         <comment>Save frames dialog</comment>
-        <translation>Zapisz wszytkie %1 klatki</translation>
+        <translation>Zapisz wszytkie %1 klatek</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="100"/>
@@ -716,13 +716,13 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="163"/>
         <source>Select frames to save</source>
         <comment>Save frames dialog</comment>
-        <translation>Wybierz klatki do zpisu</translation>
+        <translation>Wybierz klatki do zapisu</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="242"/>
         <source>Keep 1 frame in every</source>
         <comment>Save frames dialog</comment>
-        <translation>Zachowaj 1 klatkę w każdej</translation>
+        <translation>Zachowaj 1 klatkę dla każdych</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="243"/>
@@ -780,7 +780,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="303"/>
         <source>Apply Processing To Frames Before Saving</source>
         <comment>Save frames dialog</comment>
-        <translation>Zastosuj przetwarzanie klatek przed ich zapisaniem</translation>
+        <translation>Zastosuj przetwarzanie obrazu przed zapisaniem klatek</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="312"/>
@@ -846,7 +846,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="385"/>
         <source>Append Frame Timestamp To Filename</source>
         <comment>Save frames dialog</comment>
-        <translation>Dołącz znacznik czasu ramki do nazwy pliku</translation>
+        <translation>Dołącz znacznik czasu klatki do nazwy pliku</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="385"/>
@@ -858,7 +858,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="389"/>
         <source>Append each image filename with its timestamp</source>
         <comment>Save frames dialog</comment>
-        <translation>Dołącz znacznik czasu ramki do nazwy pliku</translation>
+        <translation>Dołącz znacznik czasu klatki do nazwy pliku</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="397"/>
@@ -1081,7 +1081,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="871"/>
         <source>Save Frames Selected By Start/End Markers (%1 to %2)</source>
         <comment>Save frames dialog</comment>
-        <translation>Zapisz klatki wybrane za pomocą znaczników początkowych/końcowych (%1 do%2)</translation>
+        <translation>Zapisz klatki wybrane za pomocą początkowych/końcowych znaczników (%1 do%2)</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="1059"/>
@@ -1334,7 +1334,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/ser_player.cpp" line="191"/>
         <source>From Timestamps</source>
         <comment>Framerate menu</comment>
-        <translation>Od znaczników czasu</translation>
+        <translation>Natywna z pliku SER</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="200"/>
@@ -1364,7 +1364,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/ser_player.cpp" line="250"/>
         <source>Processing</source>
         <comment>Tools menu</comment>
-        <translation>Przetwarzanie</translation>
+        <translation>Przetwarzanie obrazu</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="269"/>
@@ -2043,12 +2043,12 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="2447"/>
         <source>Credits:</source>
-        <translation>Współpracownicy:</translation>
+        <translation>Podziękowania:</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2449"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
-        <translation>Sylvain Weiller za wszystkie sugestie, testy i opinie.</translation>
+        <translation>Sylvain Weiller za wszystkie sugestie, testy oraz opinie.</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="2452"/>
