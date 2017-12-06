@@ -1,4 +1,4 @@
-v1.7.1: In development
+v1.7.1: 06/12/2017
 Bug Fixes:
  * Various updates to allow code to work on big-endian processors.
 Enhancements:
@@ -6,6 +6,7 @@ Enhancements:
  * TIFF image writing made faster, plus support for 16-bit data and true monochrome added (TIFF code from PIPP used).
  * Added asserts to help ensure code builds correctly.
  * Updates for building all targets in Debian repro.
+ * Added Polish language translation.
 
  
 v1.7.0: 13/10/2017
