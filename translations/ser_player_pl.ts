@@ -576,12 +576,12 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="247"/>
         <source>Red Channel</source>
-        <translation>Kanał R</translation>
+        <translation>Kanał czerwony</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="302"/>
         <source>Blue Channel</source>
-        <translation>Niebieski kanał</translation>
+        <translation>Kanał niebieski</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="318"/>
@@ -1010,7 +1010,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="539"/>
         <source>Review Animated GIF In Browser</source>
-        <translation>Przeglądnięcie animowanego pliku GIF w przeglądarce</translation>
+        <translation>Podgląd animowanego pliku GIF w przeglądarce</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="548"/>
@@ -1057,7 +1057,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/save_frames_dialog.cpp" line="628"/>
         <source>Animated GIF Options</source>
         <comment>Save frames dialog</comment>
-        <translation>Opcje animowanegi pliku GIF</translation>
+        <translation>Opcje animowanego pliku GIF</translation>
     </message>
     <message>
         <location filename="../src/save_frames_dialog.cpp" line="655"/>
@@ -1310,7 +1310,7 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/ser_player.cpp" line="165"/>
         <source>Detach Playback Controls</source>
         <comment>Playback menu</comment>
-        <translation>Odłącz panel sterowanie odtwarzaniem</translation>
+        <translation>Odłącz panel sterowania odtwarzaniem</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="173"/>
@@ -1725,12 +1725,12 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
     <message>
         <location filename="../src/ser_player.cpp" line="1481"/>
         <source>SER Player Animated GIF Review</source>
-        <translation>Odtwarzacz SER przeglądnięcie animowanego pliku GIF</translation>
+        <translation>Odtwarzacz SER podgląd animowanego pliku GIF</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1482"/>
         <source>(Close browser when reviewing is complete)</source>
-        <translation>(Zamknij przeglądarkę po zakończeniu przeglądania)</translation>
+        <translation>(Zamknij przeglądarkę po zakończeniu podglądu)</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="1484"/>
