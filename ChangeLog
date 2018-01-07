@@ -1,3 +1,11 @@
+v1.7.2: In Development
+Bug Fixes:
+ * Corrections to Polish translations.
+Enhancements:
+ * Updated rendering of frame details text to remove jitter due to changing width.
+ * Changed image background to dark grey.
+
+
 v1.7.1: 06/12/2017
 Bug Fixes:
  * Various updates to allow code to work on big-endian processors.
