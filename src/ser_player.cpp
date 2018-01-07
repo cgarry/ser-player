@@ -2179,6 +2179,8 @@ void c_ser_player::open_ser_file(const QString &filename)
             mp_playback_controls_widget->update_colour_id_label(tr("????", "Colour ID label for unknown ID"));
         }
 
+        mp_playback_controls_widget->reset_labels();
+
         // Inform processing dialog whether this data has a bayer pattern or not
         mp_processing_options_Dialog->set_frame_size(mp_ser_file->get_width(), mp_ser_file->get_height());
         mp_processing_options_Dialog->set_data_has_bayer_pattern(m_has_bayer_pattern);

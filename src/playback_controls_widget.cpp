@@ -36,6 +36,7 @@
 c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     : QWidget(parent),
       m_framecount_label_min_width(0),
+      m_datestamp_label_min_width(0),
       m_timestamp_label_min_width(0)
 {
     //setWindowTitle(tr("Playback"));
@@ -240,6 +241,16 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     setToolTip(tr("Double-Click to Attach/Detach Playback Controls"));
 }
 
+
+void c_playback_controls_widget::reset_labels()
+{
+    m_framecount_label_min_width = 0;
+    m_datestamp_label_min_width = 0;
+    m_timestamp_label_min_width = 0;
+    mp_framecount_Label->setMinimumSize(0, 0);
+    mp_datestamp_Label->setMinimumSize(0, 0);
+    mp_timestamp_Label->setMinimumSize(0, 0);
+}
 
 void c_playback_controls_widget::slider_value_changed_slot(int value)
 {

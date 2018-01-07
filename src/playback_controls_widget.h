@@ -45,6 +45,7 @@ public:
     int get_start_frame();
     int get_end_frame();
     bool is_playing();
+    void reset_labels();
     void update_framecount_label(int count, int maxcount);
     void update_colour_id_label(QString colour_id);
     void update_pixel_depth_label(int depth);
