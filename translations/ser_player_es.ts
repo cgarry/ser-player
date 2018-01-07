@@ -309,7 +309,7 @@
 <context>
     <name>c_playback_controls_widget</name>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="61"/>
+        <location filename="../src/playback_controls_widget.cpp" line="65"/>
         <source>Click to advance 1 frame
 Shift-Click to advance multiple frames</source>
         <comment>Button Tool tip</comment>
@@ -317,7 +317,7 @@ Shift-Click to advance multiple frames</source>
 Tecla Mayúsculas-Click para avanzar multiples cuadros</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="68"/>
+        <location filename="../src/playback_controls_widget.cpp" line="72"/>
         <source>Click to go back 1 frame
 Shift-Click to go back multiple frames</source>
         <comment>Button Tool tip</comment>
@@ -325,115 +325,127 @@ Shift-Click to go back multiple frames</source>
 Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="74"/>
+        <location filename="../src/playback_controls_widget.cpp" line="78"/>
         <source>Play/Pause</source>
         <comment>Button Tool tip</comment>
         <translation>Reproducir/Pausar</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="81"/>
+        <location filename="../src/playback_controls_widget.cpp" line="85"/>
         <source>Stop</source>
         <comment>Button Tool tip</comment>
         <translation>Parar</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="90"/>
+        <location filename="../src/playback_controls_widget.cpp" line="94"/>
         <source>Repeat On/Off</source>
         <comment>Button Tool tip</comment>
         <translation>Repetición On/Off</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="109"/>
+        <location filename="../src/playback_controls_widget.cpp" line="113"/>
         <source>Play Direction</source>
         <comment>Button Tool tip</comment>
         <translation>Dirección de Reproducción</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="112"/>
+        <location filename="../src/playback_controls_widget.cpp" line="116"/>
         <source>%1/%2</source>
         <comment>Frame number/Frame count label</comment>
         <translation>%1/%2</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="115"/>
+        <location filename="../src/playback_controls_widget.cpp" line="119"/>
         <source>Frame number/Total Frames</source>
         <comment>Tool tip</comment>
         <translation>Número de Cuadri/Total de Cuadros</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="118"/>
+        <location filename="../src/playback_controls_widget.cpp" line="123"/>
         <source>%1 FPS</source>
         <comment>Framerate label</comment>
         <translation>%1 FPS</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="120"/>
+        <location filename="../src/playback_controls_widget.cpp" line="125"/>
         <source>Display Frame rate</source>
         <comment>Tool tip</comment>
         <translation>Velocidad de Visualización de Cuadros</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="124"/>
+        <location filename="../src/playback_controls_widget.cpp" line="129"/>
         <source>Colour ID</source>
         <comment>Tool tip</comment>
         <translation>ID de Color</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="126"/>
+        <location filename="../src/playback_controls_widget.cpp" line="131"/>
         <source>%1%</source>
         <comment>Zoom level label</comment>
         <translation>%1%</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="129"/>
+        <location filename="../src/playback_controls_widget.cpp" line="134"/>
         <source>Display Zoom Level</source>
         <comment>Tool tip</comment>
         <translation>Nivel de Zoom</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="131"/>
+        <location filename="../src/playback_controls_widget.cpp" line="136"/>
         <source>%1x%2</source>
         <comment>Frame size label</comment>
         <translation>%1x%2</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="134"/>
+        <location filename="../src/playback_controls_widget.cpp" line="139"/>
         <source>Frame size</source>
         <comment>Tool tip</comment>
         <translation>Tamaño del Cuadro</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="136"/>
+        <location filename="../src/playback_controls_widget.cpp" line="141"/>
         <source>%1-Bit</source>
         <comment>Pixel depth label</comment>
         <translation>%1-Bit</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="139"/>
+        <location filename="../src/playback_controls_widget.cpp" line="144"/>
         <source>Pixel bit depth</source>
         <comment>Tool tip</comment>
         <translation>Profundidad de bit del Pixel</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="141"/>
-        <source>%3/%2/%1 %4:%5:%6.%7 UT</source>
+        <location filename="../src/playback_controls_widget.cpp" line="146"/>
+        <source>%3/%2/%1</source>
         <comment>Timestamp label</comment>
-        <translation>%3/%2/%1 %4:%5:%6.%7 UT</translation>
+        <translation type="unfinished">%1% {3/%2/%1?}</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="142"/>
+        <location filename="../src/playback_controls_widget.cpp" line="147"/>
+        <source>%4:%5:%6.%7 UT</source>
+        <comment>Timestamp label</comment>
+        <translation type="unfinished">%3/%2/%1 %4:%5:%6.%7 UT {4:%5:%6.%7 ?}</translation>
+    </message>
+    <message>
+        <source>%3/%2/%1 %4:%5:%6.%7 UT</source>
+        <comment>Timestamp label</comment>
+        <translation type="vanished">%3/%2/%1 %4:%5:%6.%7 UT</translation>
+    </message>
+    <message>
+        <location filename="../src/playback_controls_widget.cpp" line="148"/>
         <source>No Timestamp</source>
         <comment>Timestamp label for no timestamp</comment>
         <translation>Sin Fecha/Hora</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="145"/>
+        <location filename="../src/playback_controls_widget.cpp" line="152"/>
+        <location filename="../src/playback_controls_widget.cpp" line="157"/>
         <source>Frame timestamp</source>
         <comment>Tool tip</comment>
         <translation>Fecha/Hora de Cuadro</translation>
     </message>
     <message>
-        <location filename="../src/playback_controls_widget.cpp" line="226"/>
+        <location filename="../src/playback_controls_widget.cpp" line="241"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
         <translation>Doble-Clic para Fijar/Soltar Controles de Reproducción</translation>
     </message>
@@ -1654,7 +1666,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation>El archivo SER ha sido arreglado exitosamente</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2477"/>
+        <location filename="../src/ser_player.cpp" line="2479"/>
         <source>No SER File Open</source>
         <comment>No SER file message on initial image</comment>
         <translation>No hay un archivo SER abierto</translation>
@@ -2158,59 +2170,59 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation>????</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2426"/>
+        <location filename="../src/ser_player.cpp" line="2428"/>
         <source>SER Player</source>
         <translation>SER Player</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2427"/>
+        <location filename="../src/ser_player.cpp" line="2429"/>
         <source>A video player and processing utility for SER files.</source>
         <translation>Un reproductor de Video y utilidad de procesamiento para archivos SER.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2431"/>
+        <location filename="../src/ser_player.cpp" line="2433"/>
         <source>English language translation by Chris Garry</source>
         <comment>Translator credit - Replace language and translator names when translating</comment>
         <translation>Traducción al Idioma Español por Carlos Valencia (C.A.V.A.)</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2441"/>
+        <location filename="../src/ser_player.cpp" line="2443"/>
         <source>3rd Party Components:</source>
         <translation>Componentes de Terceros:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2443"/>
+        <location filename="../src/ser_player.cpp" line="2445"/>
         <source>NeuQuant (c) 1994 Anthony Dekker</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2444"/>
+        <location filename="../src/ser_player.cpp" line="2446"/>
         <source>Neural-Net image quantization algorithm</source>
         <translation>Algoritmo de Cuantificación Neural-Net de imagen</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2447"/>
+        <location filename="../src/ser_player.cpp" line="2449"/>
         <source>Credits:</source>
         <translation>Créditos:</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2449"/>
+        <location filename="../src/ser_player.cpp" line="2451"/>
         <source>Sylvain Weiller for all his suggestions, testing and feedback.</source>
         <translation>Sylvain Weiller por todas sus sugerencias, pruebas y retroalimentación.</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2452"/>
+        <location filename="../src/ser_player.cpp" line="2454"/>
         <source>License:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2463"/>
+        <location filename="../src/ser_player.cpp" line="2465"/>
         <source>You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</source>
         <comment>About box text</comment>
         <translation>Usted debió recibir una copia del GNU General Public License con éste programa.  Si no, vea &lt;a href=&quot;http://www.gnu.org/licenses/&quot;&gt;http://www.gnu.org/licenses/&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2469"/>
+        <location filename="../src/ser_player.cpp" line="2471"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
         <translation>Sobre SER Player</translation>
@@ -2221,7 +2233,7 @@ Tecla Mayúsculas-Click para retroceder multiples cuadros</translation>
         <translation type="vanished">No hay un archivo SER abierto</translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2517"/>
+        <location filename="../src/ser_player.cpp" line="2519"/>
         <source>New version of SER Player available: %1</source>
         <extracomment>New version notification message</extracomment>
         <translation>Hay una nueva versión de SER Player disponible:%1</translation>

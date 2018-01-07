@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="it_IT">
+<TS version="2.1" language="ru_RU">
 <context>
     <name>QCoreApplication</name>
     <message>
@@ -1234,6 +1234,12 @@ Shift-Click to go back multiple frames</source>
 <context>
     <name>c_ser_player</name>
     <message>
+        <location filename="../src/ser_player.cpp" line="80"/>
+        <source>SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.</source>
+        <comment>Overall description of SER Player</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ser_player.cpp" line="82"/>
         <source>An easy way to view your SER videos.</source>
         <comment>Short description of SER Player</comment>
@@ -1822,6 +1828,12 @@ Shift-Click to go back multiple frames</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/ser_player.cpp" line="1620"/>
+        <source>JPEG Image (*.jpg *.jpeg)</source>
+        <comment>Filetype filter</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ser_player.cpp" line="1621"/>
         <source>.bmp</source>
         <translation type="unfinished"></translation>
@@ -1835,6 +1847,12 @@ Shift-Click to go back multiple frames</source>
     <message>
         <location filename="../src/ser_player.cpp" line="1623"/>
         <source>.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="1624"/>
+        <source>PNG Image (*.png)</source>
+        <comment>Filetype filter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1920,32 +1938,8 @@ Shift-Click to go back multiple frames</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ser_player.cpp" line="2479"/>
-        <source>No SER File Open</source>
-        <comment>No SER file message on initial image</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/ser_player.cpp" line="2053"/>
         <source>The SER file could not be fixed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ser_player.cpp" line="80"/>
-        <source>SER Player is a video player for playing SER files. SER files are used for planetary, lunar and solar captures and this player allows these captures to be viewed in the same way AVI files are viewed with a standard video player.</source>
-        <comment>Overall description of SER Player</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ser_player.cpp" line="1620"/>
-        <source>JPEG Image (*.jpg *.jpeg)</source>
-        <comment>Filetype filter</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ser_player.cpp" line="1624"/>
-        <source>PNG Image (*.png)</source>
-        <comment>Filetype filter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2076,6 +2070,12 @@ Shift-Click to go back multiple frames</source>
         <location filename="../src/ser_player.cpp" line="2471"/>
         <source>About SER Player</source>
         <comment>About box title</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ser_player.cpp" line="2479"/>
+        <source>No SER File Open</source>
+        <comment>No SER file message on initial image</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>

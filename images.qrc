@@ -30,5 +30,6 @@
         <file>translations/ser_player_es.qm</file>
         <file>translations/ser_player_fr.qm</file>
         <file>translations/ser_player_pl.qm</file>
+        <file>translations/ser_player_ru.qm</file>
     </qresource>
 </RCC>
