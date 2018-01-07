@@ -142,8 +142,15 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     mp_pixel_depth_Label->setText(m_pixel_depth_label_String.arg("-"));
     mp_pixel_depth_Label->setToolTip(tr("Pixel bit depth", "Tool tip"));
 
-    m_timestamp_label_String = tr("%3/%2/%1 %4:%5:%6.%7 UT", "Timestamp label");
+    m_datestamp_label_String = tr("%3/%2/%1", "Timestamp label");
+    m_timestamp_label_String = tr("%4:%5:%6.%7 UT", "Timestamp label");
     m_no_timestamp_label_String = tr("No Timestamp", "Timestamp label for no timestamp");
+
+    mp_datestamp_Label = new QLabel;
+    mp_datestamp_Label->setText("");
+    mp_datestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
+    mp_datestamp_Label->setAlignment(Qt::AlignRight);
+
     mp_timestamp_Label = new QLabel;
     mp_timestamp_Label->setText(m_no_timestamp_label_String);
     mp_timestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
@@ -182,6 +189,8 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     controls_h_layout2->setMargin(0);
     controls_h_layout2->addStretch();
     controls_h_layout2->addWidget(mp_fps_Label, 0, Qt::AlignRight);
+    controls_h_layout2->addSpacing(8);
+    controls_h_layout2->addWidget(mp_datestamp_Label, 0, Qt::AlignRight);
     controls_h_layout2->addSpacing(8);
     controls_h_layout2->addWidget(mp_timestamp_Label, 0, Qt::AlignRight);
 
@@ -620,6 +629,12 @@ void c_playback_controls_widget::update_fps_label(int fps)
 void c_playback_controls_widget::update_timestamp_label(uint64_t timestamp)
 {
     if (timestamp > 0) {
+        if (m_datestamp_label_min_width < mp_datestamp_Label->width())
+        {
+            m_datestamp_label_min_width = mp_datestamp_Label->width();
+            mp_datestamp_Label->setMinimumSize(m_datestamp_label_min_width, 0);
+        }
+
         if (m_timestamp_label_min_width < mp_timestamp_Label->width())
         {
             m_timestamp_label_min_width = mp_timestamp_Label->width();
@@ -638,15 +653,20 @@ void c_playback_controls_widget::update_timestamp_label(uint64_t timestamp)
             &ts_microsec);
 
         int32_t ts_millisec = ts_microsec / 1000;
+        mp_datestamp_Label->setText(m_datestamp_label_String
+                                    .arg(ts_year, 4, 10, QLatin1Char( '0' ))
+                                    .arg(ts_month, 2, 10, QLatin1Char( '0' ))
+                                    .arg(ts_day, 2, 10, QLatin1Char( '0' )));
+
         mp_timestamp_Label->setText(m_timestamp_label_String
-                                 .arg(ts_year, 4, 10, QLatin1Char( '0' ))
-                                 .arg(ts_month, 2, 10, QLatin1Char( '0' ))
-                                 .arg(ts_day, 2, 10, QLatin1Char( '0' ))
                                  .arg(ts_hour, 2, 10, QLatin1Char( '0' ))
                                  .arg(ts_minute, 2, 10, QLatin1Char( '0' ))
                                  .arg(ts_second, 2, 10, QLatin1Char( '0' ))
                                  .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
     } else {
+        m_datestamp_label_min_width = 0;
+        mp_datestamp_Label->setMinimumSize(0, 0);
+        mp_datestamp_Label->setText("");
         m_timestamp_label_min_width = 0;
         mp_timestamp_Label->setMinimumSize(0, 0);
         mp_timestamp_Label->setText(m_no_timestamp_label_String);
