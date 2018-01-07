@@ -51,6 +51,11 @@ c_image_Widget::c_image_Widget(QWidget *parent) :
     p.setWidthForHeight(true);
     setSizePolicy(p);
 
+    QPalette pal = palette();
+    pal.setColor(QPalette::Background, Qt::darkGray);
+    setAutoFillBackground(true);
+    setPalette(pal);
+
     mp_selection_box_dialog = new c_selection_box_dialog(this);
     m_image_size  = QSize(1, 1);
     m_current_Size = QSize(1, 1);

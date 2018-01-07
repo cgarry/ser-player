@@ -34,10 +34,13 @@
 
 
 c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      m_framecount_label_min_width(0),
+      m_timestamp_label_min_width(0)
 {
     //setWindowTitle(tr("Playback"));
     //QDialog::setWindowFlags(QDialog::windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     m_play_direction = c_persistent_data::m_play_direction;
     m_back_button_held = false;
     m_forward_button_held = false;
@@ -113,6 +116,7 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     mp_framecount_Label = new QLabel;
     mp_framecount_Label->setText(m_framecount_label_String.arg("-").arg("----"));
     mp_framecount_Label->setToolTip(tr("Frame number/Total Frames", "Tool tip"));
+    mp_framecount_Label->setAlignment(Qt::AlignRight);
 
     mp_fps_Label = new QLabel;
     m_fps_label_String = tr("%1 FPS", "Framerate label");
@@ -143,6 +147,7 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     mp_timestamp_Label = new QLabel;
     mp_timestamp_Label->setText(m_no_timestamp_label_String);
     mp_timestamp_Label->setToolTip(tr("Frame timestamp", "Tool tip"));
+    mp_timestamp_Label->setAlignment(Qt::AlignRight);
 
     QHBoxLayout *slider_h_layout = new QHBoxLayout;
     slider_h_layout->setSpacing(0);
@@ -164,7 +169,7 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     QHBoxLayout *controls_h_layout1 = new QHBoxLayout;
     controls_h_layout1->setSpacing(8);
     controls_h_layout1->setMargin(0);
-    controls_h_layout1->addStretch();
+    controls_h_layout1->addStretch(1);
     controls_h_layout1->addWidget(mp_zoom_Label, 0, Qt::AlignTop | Qt::AlignRight);
     controls_h_layout1->addWidget(mp_frame_size_Label, 0, Qt::AlignTop | Qt::AlignRight);
     controls_h_layout1->addWidget(mp_pixel_depth_Label, 0, Qt::AlignTop | Qt::AlignRight);
@@ -229,7 +234,8 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
 
 void c_playback_controls_widget::slider_value_changed_slot(int value)
 {
-    mp_framecount_Label->setText(m_framecount_label_String.arg(value).arg(mp_frame_Slider->maximum()));
+    update_framecount_label(value, mp_frame_Slider->maximum());
+    //mp_framecount_Label->setText(m_framecount_label_String.arg(value).arg(mp_frame_Slider->maximum()));
     emit slider_value_changed(value);
 }
 
@@ -572,6 +578,12 @@ bool c_playback_controls_widget::is_playing()
 
 void c_playback_controls_widget::update_framecount_label(int count, int maxcount)
 {
+    if (m_framecount_label_min_width < mp_framecount_Label->width())
+    {
+        m_framecount_label_min_width = mp_framecount_Label->width();
+        mp_framecount_Label->setMinimumSize(m_framecount_label_min_width, 0);
+    }
+
     mp_framecount_Label->setText(m_framecount_label_String.arg(count).arg(maxcount));
 }
 
@@ -608,6 +620,12 @@ void c_playback_controls_widget::update_fps_label(int fps)
 void c_playback_controls_widget::update_timestamp_label(uint64_t timestamp)
 {
     if (timestamp > 0) {
+        if (m_timestamp_label_min_width < mp_timestamp_Label->width())
+        {
+            m_timestamp_label_min_width = mp_timestamp_Label->width();
+            mp_timestamp_Label->setMinimumSize(m_timestamp_label_min_width, 0);
+        }
+
         int32_t ts_year, ts_month, ts_day, ts_hour, ts_minute, ts_second, ts_microsec;
         c_pipp_timestamp::timestamp_to_date(
             timestamp,
@@ -629,6 +647,8 @@ void c_playback_controls_widget::update_timestamp_label(uint64_t timestamp)
                                  .arg(ts_second, 2, 10, QLatin1Char( '0' ))
                                  .arg(ts_millisec, 3, 10, QLatin1Char( '0' )));
     } else {
+        m_timestamp_label_min_width = 0;
+        mp_timestamp_Label->setMinimumSize(0, 0);
         mp_timestamp_Label->setText(m_no_timestamp_label_String);
     }
 }

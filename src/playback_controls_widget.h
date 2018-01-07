@@ -119,9 +119,11 @@ private:
     QLabel *mp_fps_Label;
     QString m_framecount_label_String;
     QLabel *mp_framecount_Label;
+    int m_framecount_label_min_width;
     QString m_timestamp_label_String;
     QString m_no_timestamp_label_String;
     QLabel *mp_timestamp_Label;
+    int m_timestamp_label_min_width;
     QTimer *mp_resize_Timer;
 
     int m_play_direction;
