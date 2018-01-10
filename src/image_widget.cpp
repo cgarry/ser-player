@@ -52,7 +52,7 @@ c_image_Widget::c_image_Widget(QWidget *parent) :
     setSizePolicy(p);
 
     QPalette pal = palette();
-    pal.setColor(QPalette::Background, Qt::darkGray);
+    pal.setColor(QPalette::Background, QColor(0x20, 0x20, 0x20));
     setAutoFillBackground(true);
     setPalette(pal);
 
