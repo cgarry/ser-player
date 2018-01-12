@@ -7,7 +7,9 @@
 # Uncomment line below when building for linux repository
 #DEFINES += BUILD_FOR_LINUX_REPO
 
-BUILD_FOR_LINUX_REPO: DEFINES += DISABLE_NEW_VERSION_CHECK
+contains(DEFINES, BUILD_FOR_LINUX_REPO) {
+    DEFINES += DISABLE_NEW_VERSION_CHECK
+}
 
 QT += core gui
 QT += concurrent
