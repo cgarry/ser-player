@@ -436,13 +436,18 @@ Maj-click pour reculer de plusieurs images</translation>
         <location filename="../src/playback_controls_widget.cpp" line="146"/>
         <source>%3/%2/%1</source>
         <comment>Timestamp label</comment>
-        <translation type="unfinished">%1% {3/%2/%1?}</translation>
+        <translation>%3/%2/%1</translation>
     </message>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="147"/>
+        <source>%1:%2:%3.%4 UT</source>
+        <comment>Timestamp label</comment>
+        <translation type="unfinished">%1:%2:%3.%4 TU</translation>
+    </message>
+    <message>
         <source>%4:%5:%6.%7 UT</source>
         <comment>Timestamp label</comment>
-        <translation type="unfinished">%3/%2/%1 %4:%5:%6.%7 TU {4:%5:%6.%7 ?}</translation>
+        <translation type="vanished">%4:%5:%6.%7 TU</translation>
     </message>
     <message>
         <source>%3/%2/%1 %4:%5:%6.%7 UT</source>

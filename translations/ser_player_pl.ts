@@ -408,13 +408,13 @@ Shift-Kliknij, aby przewinąć kilka klatek do tyłu</translation>
         <location filename="../src/playback_controls_widget.cpp" line="146"/>
         <source>%3/%2/%1</source>
         <comment>Timestamp label</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="147"/>
-        <source>%4:%5:%6.%7 UT</source>
+        <source>%1:%2:%3.%4 UT</source>
         <comment>Timestamp label</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="148"/>

@@ -144,7 +144,7 @@ c_playback_controls_widget::c_playback_controls_widget(QWidget *parent)
     mp_pixel_depth_Label->setToolTip(tr("Pixel bit depth", "Tool tip"));
 
     m_datestamp_label_String = tr("%3/%2/%1", "Timestamp label");
-    m_timestamp_label_String = tr("%4:%5:%6.%7 UT", "Timestamp label");
+    m_timestamp_label_String = tr("%1:%2:%3.%4 UT", "Timestamp label");
     m_no_timestamp_label_String = tr("No Timestamp", "Timestamp label for no timestamp");
 
     mp_datestamp_Label = new QLabel;
