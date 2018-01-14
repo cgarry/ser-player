@@ -67,22 +67,22 @@ contains(DEFINES, BUILD_FOR_LINUX_REPO) {
         libpng/pngwtran.c \
         libpng/pngwutil.c
 
-# zlib source files
-SOURCES += zlib/adler32.c \
-    zlib/compress.c \
-    zlib/crc32.c \
-    zlib/deflate.c \
-    zlib/gzclose.c \
-    zlib/gzlib.c \
-    zlib/gzread.c \
-    zlib/gzwrite.c \
-    zlib/infback.c \
-    zlib/inffast.c \
-    zlib/inflate.c \
-    zlib/inftrees.c \
-    zlib/trees.c \
-    zlib/uncompr.c \
-    zlib/zutil.c
+    # zlib source files
+    SOURCES += zlib/adler32.c \
+        zlib/compress.c \
+        zlib/crc32.c \
+        zlib/deflate.c \
+        zlib/gzclose.c \
+        zlib/gzlib.c \
+        zlib/gzread.c \
+        zlib/gzwrite.c \
+        zlib/infback.c \
+        zlib/inffast.c \
+        zlib/inflate.c \
+        zlib/inftrees.c \
+        zlib/trees.c \
+        zlib/uncompr.c \
+        zlib/zutil.c
 }
 
 # Main source files
