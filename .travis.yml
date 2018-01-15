@@ -12,4 +12,4 @@ script:
   - source /opt/qt55/bin/qt55-env.sh
   - /opt/qt55/bin/qmake CONFIG+=release
   - make
-  - bin/ser-player
+  - ldd bin/ser-player
