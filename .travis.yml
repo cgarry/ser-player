@@ -1,11 +1,13 @@
 sudo: required
 dist: trusty
+language: c++
 
 install:
-sudo apt-get -y install qt5-qmake
-sudo apt-get -y qtbase5-dev
+  - sudo apt-get -y install qt5-qmake
+  - sudo apt-get -y qtbase5-dev
 
 script:
-expoert QT_SELECT=5
-qmake CONFIG+=release
-make
+  - cd ser-player
+  - export QT_SELECT=5
+  - qmake CONFIG+=release
+  - make
