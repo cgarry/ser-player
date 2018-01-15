@@ -10,7 +10,6 @@ install:
   - sudo apt-get -y install qt55[QTPACKAGE]
 
 script:
-  - cd ser-player
-  - export QT_SELECT=5
-  - qmake CONFIG+=release
+  - source /opt/qt55/bin/qt55-env.sh
+  - /opt/qt55/bin/qmake CONFIG+=release
   - make
