@@ -3,8 +3,8 @@ dist: trusty
 language: c++
 
 install:
-  - sudo apt-get -y install qt5-qmake
-  - sudo apt-get -y qtbase5-dev
+  - sudo apt-get install qt5-qmake
+  - sudo apt-get qtbase5-dev
 
 script:
   - cd ser-player
