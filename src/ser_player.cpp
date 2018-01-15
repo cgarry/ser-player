@@ -2633,7 +2633,6 @@ void c_ser_player::calculate_display_framerate()
 
 bool c_ser_player::get_and_process_frame(int frame_number, bool conv_to_8_bit, bool do_processing)
 {
-    wibble
     bool is_colour = false;
     if (mp_ser_file->get_colour_id() == COLOURID_RGB || mp_ser_file->get_colour_id() == COLOURID_BGR) {
         is_colour = true;
