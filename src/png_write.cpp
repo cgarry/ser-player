@@ -26,11 +26,8 @@ extern "C" {
 #include <cstring>
 #include <memory>
 
-// Throw a build error if an unsupported version of libpng is used.
-#if PNG_LIBPNG_VER_MAJOR!=1 || PNG_LIBPNG_VER_MINOR!=6
-    #error "Unsuported libpng version"
-#endif
-
+// Support as many libpng versions as required
+#if PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==6
 
 // ------------------------------------------
 // Save PNG image (colour)
@@ -114,6 +111,18 @@ static int32_t save_mono_file(
 
     return ret;
 }
+
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==5
+    #error "libpng 1.5.x is not supported"
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==4
+    #error "libpng 1.4.x is not supported"
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==3
+    #error "libpng 1.3.x is not supported"
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==2
+    #error "libpng 1.2.x is not supported"
+#else
+    #error "Unsuported libpng version"
+#endif
 
 
 int32_t save_png_file(
