@@ -26,6 +26,11 @@ extern "C" {
 #include <cstring>
 #include <memory>
 
+// Throw a build error if an unsupported version of libpng is used.
+#if PNG_LIBPNG_VER_MAJOR!=1 || PNG_LIBPNG_VER_MINOR!=6
+    #error "Unsuported libpng version"
+#endif
+
 
 // ------------------------------------------
 // Save PNG image (colour)
