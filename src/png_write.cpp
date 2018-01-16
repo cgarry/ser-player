@@ -27,7 +27,11 @@ extern "C" {
 #include <memory>
 
 // Support as many libpng versions as required
-#if PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==6
+#if PNG_LIBPNG_VER_MAJOR==2
+    #error "libpng 2.x.x is not supported"
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==7
+    #error "libpng 1.7.x is not supported"
+#elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==6
 
 // ------------------------------------------
 // Save PNG image (colour)
@@ -119,7 +123,39 @@ static int32_t save_mono_file(
 #elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==3
     #error "libpng 1.3.x is not supported"
 #elif PNG_LIBPNG_VER_MAJOR==1 && PNG_LIBPNG_VER_MINOR==2
-    #error "libpng 1.2.x is not supported"
+
+// ------------------------------------------
+// Save PNG image (colour)
+// ------------------------------------------
+static int32_t save_colour_file(
+    const char *filename,
+    const uint8_t *p_image_data,
+    uint32_t width,
+    uint32_t height,
+    uint32_t bytes_per_sample)
+{
+    int32_t ret = -1;
+
+
+    return ret;
+}
+
+// ------------------------------------------
+// Save PNG image (mono B, G or R)
+// ------------------------------------------
+static int32_t save_mono_file(
+    const char *filename,
+    const uint8_t *p_image_data,
+    uint32_t width,
+    uint32_t height,
+    uint32_t bytes_per_sample)
+{
+    int32_t ret = -1;
+
+
+    return ret;
+}
+
 #else
     #error "Unsuported libpng version"
 #endif
