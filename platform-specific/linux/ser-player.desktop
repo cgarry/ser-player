@@ -1,0 +1,20 @@
+[Desktop Entry]
+Version=1.7.2
+Type=Application
+Name=SER Player
+Name[da]=SER Afspiller
+Name[fr]=Lecteur SER
+Comment=A video player and processing utility for SER files
+Comment[da]=En video afspiller og billedprocessing utility for SER format
+Comment[de]=Video Player und Verarbeitungswerkzeug für SER-Dateien
+Comment[es]=Un reproductor de Video y utilidad de procesamiento para archivos SER
+Comment[fr]=Un utilitaire de lecture et de traitement de vidéos SER
+Comment[pl]=Odtwarzacz wideo i narzędzie do przetwarzania plików SER
+Comment[ru]=Видео плеер и утилита обработки SER-файлов
+Keywords=science;astronomy;video;
+Keywords[fr]=science;astronomie;vidéo;
+Exec=ser-player %F
+Icon=ser-player
+MimeType=video/ser;
+Terminal=false
+Categories=Video;AudioVideo;
