@@ -7,6 +7,10 @@
 # Uncomment line below when building for linux repository
 #DEFINES += DISABLE_NEW_VERSION_CHECK
 
+contains(DEFINES, DISABLE_NEW_VERSION_CHECK) {
+    message("New app version checking disabled")
+}
+
 !macx:!win32 {
     # If not a MAC or Windows machine use the system version of libpng
     message("Using system version of libpng")
@@ -104,7 +108,6 @@ HEADERS  += src/ser_player.h \
     src/pipp_timestamp.h \
     src/image_widget.h \
     src/application.h \
-    src/new_version_checker.h \
     src/frame_slider.h \
     src/save_frames_dialog.h \
     src/save_frames_progress_dialog.h \
@@ -128,6 +131,8 @@ HEADERS  += src/ser_player.h \
     src/playback_controls_dialog.h \
     src/tiff_write.h \
     src/png_write.h
+
+!contains(DEFINES, DISABLE_NEW_VERSION_CHECK): HEADERS += src/new_version_checker.h
 
 INCLUDEPATH += src
 
