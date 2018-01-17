@@ -1,28 +1,28 @@
-sudo: required
+language: cpp
+compiler: gcc
+sudo: require
 dist: trusty
 
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt55[QTPACKAGE]
-
-before_script:
-  - source /opt/qt55/bin/qt55-env.sh
+  - sudo apt-get -y install qt59base
+  - source /opt/qt*/bin/qt*-env.sh
   
 script:
   # Build SER-Player with version checking disabled (aimed at Linux repositories)
-  - /opt/qt55/bin/qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release
+  - qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release
   - make
   - ls -l bin/
   - ldd bin/ser-player
   
   # Cleanup between builds
-  - make clean
+  #- make clean
   
   # Build SER-Player with version checking enabled
-  - /opt/qt55/bin/qmake CONFIG+=release
-  - make
-  - ls -l bin/
-  - ldd bin/ser-player
+  #- qmake CONFIG+=release
+  #- make
+  #- ls -l bin/
+  #- ldd bin/ser-player
