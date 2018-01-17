@@ -215,29 +215,59 @@ win32:release:QMAKE_POST_LINK = $$quote(windeployqt --force --no-translations \"
 
 # SSL DLLs
 win32 {
-contains(QT_ARCH, i386) {
-    EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win32/libeay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win32/ssleay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt
-    EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
-    EXTRA_BINFILES_WIN ~= s,/,\\,g
-        DESTDIR_WIN = $${DESTDIR}
-    DESTDIR_WIN ~= s,/,\\,g
-    for(FILE,EXTRA_BINFILES_WIN){
-                QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
+    contains(QT_ARCH, i386) {
+        EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win32/libeay32.dll \
+                          $$PWD/platform-specific/windows/openssl/win32/ssleay32.dll \
+                          $$PWD/platform-specific/windows/openssl/win32/OpenSSL_License.txt
+        EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
+        EXTRA_BINFILES_WIN ~= s,/,\\,g
+            DESTDIR_WIN = $${DESTDIR}
+        DESTDIR_WIN ~= s,/,\\,g
+        for(FILE,EXTRA_BINFILES_WIN){
+                    QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
+        }
+    } else {
+        EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win64/libeay32.dll \
+                          $$PWD/platform-specific/windows/openssl/win64/ssleay32.dll \
+                          $$PWD/platform-specific/windows/openssl/win64/OpenSSL_License.txt
+        EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
+        EXTRA_BINFILES_WIN ~= s,/,\\,g
+            DESTDIR_WIN = $${DESTDIR}
+        DESTDIR_WIN ~= s,/,\\,g
+        for(FILE,EXTRA_BINFILES_WIN){
+                    QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
+        }
     }
-} else {
-    EXTRA_BINFILES += $$PWD/platform-specific/windows/openssl/win64/libeay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win64/ssleay32.dll \
-                      $$PWD/platform-specific/windows/openssl/win64/OpenSSL_License.txt
-    EXTRA_BINFILES_WIN = $${EXTRA_BINFILES}
-    EXTRA_BINFILES_WIN ~= s,/,\\,g
-        DESTDIR_WIN = $${DESTDIR}
-    DESTDIR_WIN ~= s,/,\\,g
-    for(FILE,EXTRA_BINFILES_WIN){
-                QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${DESTDIR_WIN}$$escape_expand(\n\t))
-    }
-}
 }
 
+unix:!macx {
+    isEmpty(PREFIX) {
+        PREFIX = /usr/local
+    }
+
+    target.path = $$PREFIX/bin
+
+    desktop.path = $$PREFIX/share/applications/
+    desktop.files = platform-specific/linux/ser-player.desktop
+
+    icon128.path = $$PREFIX/share/icons/hicolor/128x128/apps
+    icon128.files = platform-specific/linux/icons/128x128/ser-player.png
+
+    icon48.path = $$PREFIX/share/icons/hicolor/48x48/apps
+    icon48.files = platform-specific/linux/icons/48x48/ser-player.png
+
+    icon32.path = $$PREFIX/share/icons/hicolor/32x32/apps
+    icon32.files = platform-specific/linux/icons/32x32/ser-player.png
+
+    icon24.path = $$PREFIX/share/icons/hicolor/24x24/apps
+    icon24.files = platform-specific/linux/icons/24x24/ser-player.png
+
+    icon16.path = $$PREFIX/share/icons/hicolor/16x16/apps
+    icon16.files = platform-specific/linux/icons/16x16/ser-player.png
+
+    mimexml.path = $$PREFIX/share/mime/packages
+    mimexml.files = platform-specific/linux/ser-player.xml
+
+    INSTALLS = target desktop icon128 icon48 icon32 icon24 icon16 mimexml
+}
 
