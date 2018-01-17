@@ -19,10 +19,10 @@ script:
   - ldd bin/ser-player
   
   # Cleanup between builds
-  #- make clean
+  - make clean
   
   # Build SER-Player with version checking enabled
-  #- qmake CONFIG+=release
-  #- make
-  #- ls -l bin/
-  #- ldd bin/ser-player
+  - qmake CONFIG+=release
+  - make
+  - ls -l bin/
+  - ldd bin/ser-player
