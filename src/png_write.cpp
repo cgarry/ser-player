@@ -185,7 +185,7 @@ int32_t save_png_file(
     }
 
     for (uint32_t i = 0; i < height; i++) {
-        // Yuck!  Casting away the const from the pointer as this version of libpng is sloppyly written!
+        // Yuck!  Casting away the const from the pointer as this version of libpng is sloppily written!
         row_pointers[i] = (uint8_t *)p_image_data + (height - 1 - i) * width * bytes_per_sample * samples_per_pixel;
     }
 
