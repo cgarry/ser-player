@@ -1684,7 +1684,7 @@ void c_ser_player::save_frames_as_images_slot()
             update_recent_save_folders_menu();
 
             QString save_folder = QFileInfo(filename).absolutePath();
-            
+
             bool save_current_frame_only = false;
             if (min_frame == -1) {
                 // Save current frame only
