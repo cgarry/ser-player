@@ -250,6 +250,9 @@ unix:!macx {
     desktop.path = $$PREFIX/share/applications/
     desktop.files = platform-specific/linux/ser-player.desktop
 
+    icon256.path = $$PREFIX/share/icons/hicolor/256x256/apps
+    icon256.files = platform-specific/linux/icons/256x256/ser-player.png
+    
     icon128.path = $$PREFIX/share/icons/hicolor/128x128/apps
     icon128.files = platform-specific/linux/icons/128x128/ser-player.png
 
@@ -268,6 +271,6 @@ unix:!macx {
     mimexml.path = $$PREFIX/share/mime/packages
     mimexml.files = platform-specific/linux/ser-player.xml
 
-    INSTALLS = target desktop icon128 icon48 icon32 icon24 icon16 mimexml
+    INSTALLS = target desktop icon256 icon128 icon48 icon32 icon24 icon16 mimexml
 }
 
