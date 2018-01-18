@@ -248,7 +248,7 @@ unix:!macx {
     target.path = $$PREFIX/bin
 
     desktop.path = $$PREFIX/share/applications/
-    desktop.files = platform-specific/linux/ser-player.desktop
+    desktop.files = platform-specific/linux/com.google.sites.ser-player.desktop
 
     icon256.path = $$PREFIX/share/icons/hicolor/256x256/apps
     icon256.files = platform-specific/linux/icons/256x256/ser-player.png
