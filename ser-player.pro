@@ -247,9 +247,6 @@ unix:!macx {
 
     target.path = $$PREFIX/bin
 
-    desktop.path = $$PREFIX/share/applications/
-    desktop.files = platform-specific/linux/com.google.sites.ser-player.desktop
-
     icon256.path = $$PREFIX/share/icons/hicolor/256x256/apps
     icon256.files = platform-specific/linux/icons/256x256/ser-player.png
     
@@ -270,6 +267,10 @@ unix:!macx {
 
     mimexml.path = $$PREFIX/share/mime/packages
     mimexml.files = platform-specific/linux/ser-player.xml
+
+    desktop.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Attempting to reset icon cache"
+    desktop.path = $$PREFIX/share/applications/
+    desktop.files = platform-specific/linux/com.google.sites.ser-player.desktop
 
     INSTALLS = target  icon256 icon128 icon48 icon32 icon24 icon16 mimexml desktop
 }
