@@ -91,7 +91,6 @@ int number_of_colours;
 {
 	register int i;
 	register int *p;
-    printf("initnet: number_of_colours=%d\n", number_of_colours);
 	
 	thepicture = thepic;
 	lengthcount = len;
