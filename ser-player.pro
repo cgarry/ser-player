@@ -242,7 +242,7 @@ win32 {
 
 unix:!macx {
     isEmpty(PREFIX) {
-        PREFIX = /usr/local
+        PREFIX = /usr
     }
 
     target.path = $$PREFIX/bin
