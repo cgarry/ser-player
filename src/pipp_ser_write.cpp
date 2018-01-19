@@ -244,18 +244,21 @@ bool c_pipp_ser_write::close()
 
             // Get file size
             fseek64(mp_ser_index_file, 0, SEEK_END);
-            uint64_t filesize = ftell64(mp_ser_index_file);
+            size_t filesize = ftell64(mp_ser_index_file);
             fseek64(mp_ser_index_file, 0, SEEK_SET);
 
             // Get buffer to store index in
             std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[(uint32_t)filesize]);
 
             // Read data into buffer
-            fread(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_index_file);
+            size_t read_size = fread(p_buffer.get(), filesize, 1, mp_ser_index_file);
             fclose(mp_ser_index_file);
 
             // Write index data to output file
-            fwrite_error_check(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_file);
+            if (read_size == filesize) {
+                fwrite_error_check(p_buffer.get(), 1, (uint32_t)filesize, mp_ser_file);
+            }
+
             p_buffer.reset(nullptr);
         }
 
