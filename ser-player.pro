@@ -271,6 +271,6 @@ unix:!macx {
     mimexml.path = $$PREFIX/share/mime/packages
     mimexml.files = platform-specific/linux/ser-player.xml
 
-    INSTALLS = target desktop icon256 icon128 icon48 icon32 icon24 icon16 mimexml
+    INSTALLS = target  icon256 icon128 icon48 icon32 icon24 icon16 mimexml desktop
 }
 
