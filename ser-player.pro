@@ -8,7 +8,6 @@
 #DEFINES += DISABLE_NEW_VERSION_CHECK
 
 # Get the version of the App from the last git tag and a few other things
-system(git fetch --unshallow)
 GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
 GIT_VERSION=$$system(git describe --always --dirty)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
