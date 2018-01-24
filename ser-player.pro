@@ -8,8 +8,8 @@
 #DEFINES += DISABLE_NEW_VERSION_CHECK
 
 # Get the version of the App from the last git tag and a few other things
-GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
-GIT_VERSION=$$system(git describe --always --dirty)
+GIT_LAST_TAG=$$system(git describe --always --abbrev=0 --tags)
+GIT_VERSION=$$system(git describe --always --dirty --tags)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
 GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
 GIT_DIRTY_BUILD=$$member(GIT_VERSION_SPLIT, 3)
