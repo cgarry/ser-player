@@ -297,15 +297,21 @@ unix:!macx {
     desktop.path = $$PREFIX/share/applications/
     desktop.files = platform-specific/linux/com.google.sites.ser-player.desktop
 
-    reset_icons.path = $$PREFIX/share/icons/hicolor/
-    reset_icons.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Resetting icon cache"
+    INSTALLS = target  icon256 icon128 icon48 icon32 icon24 icon16 mimexml desktop
 
-    reg_mime_types.path = $$PREFIX/share/mime/packages
-    reg_mime_types.extra = which update-mime-database && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
+    !defined(APPIMAGE, var) {
+        # Add extra targets to reset icon cache and register .ser mime type with system databases
+        # This should not be done when making AppImages
+        reset_icons.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Resetting icon cache"
 
-    reg_mime_apps.path = $$PREFIX/share/applications/
-    reg_mime_apps.extra = which update-desktop-database && update-desktop-database $$PREFIX/share/applications/; echo "Updating mime to application database"
+        reg_mime_types.path = $$PREFIX/share/mime/packages
+        reg_mime_types.extra = which update-mime-database && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
 
-    INSTALLS = target  icon256 icon128 icon48 icon32 icon24 icon16 mimexml desktop reset_icons reg_mime_types reg_mime_apps
+        reg_mime_apps.path = $$PREFIX/share/applications/
+        reg_mime_apps.extra = which update-desktop-database && update-desktop-database $$PREFIX/share/applications/; echo "Updating mime to application database"
+        INSTALLS += reset_icons reg_mime_types reg_mime_apps
+    } else {
+        message("Not generating targets to register icons and mime type as this is an AppImage build")
+    }
 }
 

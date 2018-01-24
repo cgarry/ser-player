@@ -8,7 +8,7 @@ rm -rf bin build appdir
 rm *.AppImage
 
 export QT_SELECT=5
-qmake CONFIG+=release PREFIX=/usr
+qmake CONFIG+=release APPIMAGE=
 make -j$(nproc)
 ls -l bin/
 ldd bin/ser-player
