@@ -302,9 +302,10 @@ unix:!macx {
     !defined(APPIMAGE, var) {
         # Add extra targets to reset icon cache and register .ser mime type with system databases
         # This should not be done when making AppImages
+        reset_icons.path = $$PREFIX/share/icons/
         reset_icons.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Resetting icon cache"
 
-        reg_mime_types.path = $$PREFIX/share/mime/packages
+        reg_mime_types.path = $$PREFIX/share/mime/packages/
         reg_mime_types.extra = which update-mime-database && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
 
         reg_mime_apps.path = $$PREFIX/share/applications/
