@@ -18,8 +18,4 @@ chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
 source export_app_version.sh
 ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -no-translations
-echo "* * * * * *"
-echo "* * * * * *"
-echo "* * * * * *"
 ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
-ls -l SER_Player-*.AppImage
