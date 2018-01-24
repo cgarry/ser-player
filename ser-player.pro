@@ -13,6 +13,7 @@ GIT_VERSION=$$system(git describe --always --dirty)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
 GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
 GIT_DIRTY_BUILD=$$member(GIT_VERSION_SPLIT, 3)
+message("git describe --always --dirty: $${GIT_VERSION}");
 
 APP_VERSION=$${GIT_LAST_TAG}
 !equals(GIT_COMMITS_SINCE_TAG, "0") | equals(GIT_DIRTY_BUILD, "dirty") {
