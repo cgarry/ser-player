@@ -4,7 +4,7 @@
 # From ser-player.pro folder enter this on the command line:
 # source appimage/make_appimage.sh
 
-rm -rm bin build appdir
+rm -rf bin build appdir
 rm *.AppImage
 
 export QT_SELECT=5
