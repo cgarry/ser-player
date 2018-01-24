@@ -15,9 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 
-
-#define VERSION_STRING "v1.7.2"
-
 #include <Qt>
 #include <QApplication>
 #include <QCoreApplication>
@@ -468,7 +465,7 @@ c_ser_player::c_ser_player(QWidget *parent)
 #ifndef DISABLE_NEW_VERSION_CHECK
     c_new_version_checker *new_version_checker;
     if (c_persistent_data::m_check_for_updates) {
-        new_version_checker = new c_new_version_checker(this, VERSION_STRING);
+        new_version_checker = new c_new_version_checker(this, APP_VERSION_STRING);
         new_version_checker->check();  // Check for vewer SER Player version
         connect(new_version_checker, SIGNAL(new_version_available_signal(QString)),
                 this, SLOT(new_version_available_slot(QString)));
@@ -2425,7 +2422,7 @@ void c_ser_player::about_ser_player()
     QString build_type_string = "x86";
 #endif
 
-    msgBox.setText("<b><big>" + tr("SER Player") + "</big> " VERSION_STRING " (" + build_type_string + ")</b>");
+    msgBox.setText("<b><big>" + tr("SER Player") + "</big> " APP_VERSION_STRING " (" + build_type_string + ")</b>");
     QString informative_text = tr("A video player and processing utility for SER files.");
     informative_text += "<qt><a href=\"http://sites.google.com/site/astropipp/\">http://sites.google.com/site/astropipp/</a><br>";
     informative_text += "Copyright (c) 2015-2018 Chris Garry";
@@ -2511,7 +2508,7 @@ void c_ser_player::create_no_file_open_image()
 
     bool is_newer = false;
 #ifndef DISABLE_NEW_VERSION_CHECK
-    is_newer = c_new_version_checker::compare_version_strings(VERSION_STRING, c_persistent_data::m_new_version);
+    is_newer = c_new_version_checker::compare_version_strings(APP_VERSION_STRING, c_persistent_data::m_new_version);
 #endif
 
     if (is_newer && c_persistent_data::m_check_for_updates) {

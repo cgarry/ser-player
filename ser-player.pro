@@ -7,6 +7,26 @@
 # Uncomment line below when building for linux repository
 #DEFINES += DISABLE_NEW_VERSION_CHECK
 
+# Get the version of the App from the last git tag and a few other things
+GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
+GIT_VERSION=$$system(git describe --always --dirty)
+GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
+GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
+GIT_DIRTY_BUILD=$$member(GIT_VERSION_SPLIT, 3)
+
+APP_VERSION=$${GIT_LAST_TAG}
+!equals(GIT_COMMITS_SINCE_TAG, "0") | equals(GIT_DIRTY_BUILD, "dirty") {
+    # There have been commits since the last tag and/or this is a dirty build
+    APP_VERSION=$${APP_VERSION}.$$GIT_COMMITS_SINCE_TAG
+    equals(GIT_DIRTY_BUILD, "dirty") {
+        message("Warning: Building a dirty build")
+        APP_VERSION=$${APP_VERSION}."dirty"
+    }
+}
+
+message("Version: $${APP_VERSION}")
+DEFINES += APP_VERSION_STRING=\\\"$${APP_VERSION}\\\"
+
 contains(DEFINES, DISABLE_NEW_VERSION_CHECK) {
     message("New app version checking disabled")
 }

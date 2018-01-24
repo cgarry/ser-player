@@ -42,7 +42,7 @@ private:
     QString m_version;
     QNetworkAccessManager *net_access_manager;
     QString rstrip(const QString& str);
-    static QList<int> get_version_from_string(const QString &ver_string, bool* dev_build);
+    static QList<int> get_version_from_string(const QString &ver_string);
 
 };
 

@@ -81,16 +81,14 @@ void c_new_version_checker::finished(QNetworkReply *reply)
 bool c_new_version_checker::compare_version_strings(QString current_version, QString new_version)
 {
     // Extract new version number
-    bool new_dev_build;
-    QList<int> new_ver = get_version_from_string(new_version, &new_dev_build);
+    QList<int> new_ver = get_version_from_string(new_version);
     if (new_ver.size() < 3) {
         // Not a valid version file - give up
         return false;
     }
 
     // Extract current version number
-    bool cur_dev_build;
-    QList<int> cur_ver = get_version_from_string(current_version, &cur_dev_build);
+    QList<int> cur_ver = get_version_from_string(current_version);
     if (cur_ver.size() < 3) {
         // Not a valid version file - give up
         return false;
@@ -110,11 +108,6 @@ bool c_new_version_checker::compare_version_strings(QString current_version, QSt
         new_version_is_newer = true;
     }
 
-    if (new_ver[0] == cur_ver[0] && new_ver[1] == cur_ver[1] && new_ver[2] == cur_ver[2] && cur_dev_build) {
-        // Current version is a dev build of released version
-        new_version_is_newer = true;
-    }
-
     return new_version_is_newer;
 }
 
@@ -131,9 +124,8 @@ QString c_new_version_checker::rstrip(const QString& str)
     return "";
 }
 
-QList<int> c_new_version_checker::get_version_from_string(const QString &ver_string, bool* dev_build) {
+QList<int> c_new_version_checker::get_version_from_string(const QString &ver_string) {
     QList<int> ret;  // Empty list
-    *dev_build = false;
 
     // Extract new version number
     QStringList version = ver_string.split(".");
@@ -163,9 +155,6 @@ QList<int> c_new_version_checker::get_version_from_string(const QString &ver_str
     ret.append(new_ver[0]);
     ret.append(new_ver[1]);
     ret.append(new_ver[2]);
-    if (version.size()> 3) {
-        *dev_build = true;
-    }
 
     return ret;
 }
