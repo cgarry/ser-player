@@ -14,8 +14,6 @@ GIT_VERSION=$$system(git describe --always --dirty)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
 GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
 GIT_DIRTY_BUILD=$$member(GIT_VERSION_SPLIT, 3)
-message("GIT_VERSION: $${GIT_VERSION}");
-message("GIT_LAST_TAG: $${GIT_LAST_TAG}");
 
 APP_VERSION=$${GIT_LAST_TAG}
 !equals(GIT_COMMITS_SINCE_TAG, "0") | equals(GIT_DIRTY_BUILD, "dirty") {
@@ -29,6 +27,12 @@ APP_VERSION=$${GIT_LAST_TAG}
 
 message("Version: $${APP_VERSION}")
 DEFINES += APP_VERSION_STRING=\\\"$${APP_VERSION}\\\"
+
+!macx:!win32 {
+    # On linux write out the application version to a file
+    TEMP="export VERSION=$${APP_VERSION}"
+    write_file("export_app_version.sh", TEMP);
+}
 
 contains(DEFINES, DISABLE_NEW_VERSION_CHECK) {
     message("New app version checking disabled")
