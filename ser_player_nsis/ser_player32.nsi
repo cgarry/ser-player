@@ -3,7 +3,6 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "SER Player"
-!define PRODUCT_VERSION "1.7.2"
 !define PRODUCT_PUBLISHER "Chris Garry"
 !define PRODUCT_WEB_SITE "https://sites.google.com/site/astropipp/ser-player"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\ser-player.exe"
@@ -14,6 +13,7 @@
 !include "MUI.nsh"
 !include WinVer.nsh
 !include x64.nsh
+!include version.nsh
 
 ; File association
 !include "FileAssociation.nsh"
@@ -44,7 +44,7 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} v${PRODUCT_VERSION}"
-OutFile "ser_player_install_x86.exe"
+OutFile "SER_Player_Windows_x86_${PRODUCT_VERSION}.exe"
 RequestExecutionLevel admin
 InstallDir "$PROGRAMFILES\SER Player"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
