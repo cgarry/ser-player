@@ -43,7 +43,7 @@
 
 ; MUI end ------
 
-Name "${PRODUCT_NAME} v${PRODUCT_VERSION}"
+Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "SER_Player_Windows_x86_${PRODUCT_VERSION}.exe"
 RequestExecutionLevel admin
 InstallDir "$PROGRAMFILES\SER Player"

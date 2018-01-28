@@ -44,7 +44,7 @@
 
 ; MUI end ------
 
-Name "${PRODUCT_NAME} v${PRODUCT_VERSION} (64-bit)"
+Name "${PRODUCT_NAME} ${PRODUCT_VERSION} (64-bit)"
 OutFile "SER_Player_Windows_x64_${PRODUCT_VERSION}.exe"
 RequestExecutionLevel admin
 InstallDir "$PROGRAMFILES\SER Player"
