@@ -1,4 +1,4 @@
-##SER Player
+#SER Player
 A simple video player for playing SER files used for solar, lunar and planetary astronomy-imaging.
 
 SER Player is a C++ application using the Qt cross-platform framework so that it can be built for Windows, OS X and Linux.
