@@ -45,8 +45,7 @@ With the application built we next need to build an installer.  This is done usi
 * Start NSIS and click on **Compile NSI scripts**.
 * This will open a **MakeNSISW** window.
 * Open file **ser-player\ser_player_nsis\ser_player64.nsi** with the **MakeNSISW** window.  The simplest way is to drag the file and drop it in the window.  This is for the 64-bit version of SER Player.  Use the ser_player32.nsi file for the 32-bit version.
-* This will run the NSIS installer creator and generate the installer file of this form:
-  **ser-player\ser_player_nsis\SER_Player_Windows_x64_v1.7.1.79**
+* This will run the NSIS installer creator and generate the installer file of this form: **ser-player\ser_player_nsis\SER_Player_Windows_x64_v1.7.1.79.exe**
 
 This installer file can now be use to install SER Player on your system.
 
