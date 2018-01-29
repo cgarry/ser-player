@@ -1,11 +1,11 @@
-#SER Player
+# SER Player
 A simple video player for playing SER files used for solar, lunar and planetary astronomy-imaging.
 
 SER Player is a C++ application using the Qt cross-platform framework so that it can be built for Windows, OS X and Linux.
 
 SER File Format Specification: [http://www.grischa-hahn.homepage.t-online.de/astro/ser/SER%20Doc%20V3b.pdf](http://www.grischa-hahn.homepage.t-online.de/astro/ser/SER%20Doc%20V3b.pdf)
 
-###Project Goals
+### Project Goals
 Some simple goals that hopefully get accross my intentions for this project.
 * Produce a lightweight and intuative video player application for .ser files.
 * ~~Avoid feature creep and over complication in order to keep SER Player distinct from [PIPP](https://sites.google.com/site/astropipp/).  New features may be added if they are not duplicating PIPP's functionality.~~
@@ -30,7 +30,7 @@ After this SER Player should be fully installed to the desktop and associated wi
 
 Terminal $ **sudo make uninstall**
 
-##Building SER Player for Windows
+## Building SER Player for Windows
 
 This section has some basic notes on building the application for Windows.  These notes assume a Windows PC is being used to build the application.
 * Install Qt v5.4.1 or later and Qt Creator
@@ -51,7 +51,7 @@ With the application built we next need to build an installer.  This is done usi
 This installer file can now be use to install SER Player on your system.
 
 
-##Building SER Player for macOS
+## Building SER Player for macOS
 This section has some basic notes on building the application for macOS.  These notes assume a Mac running macOS is being used to build the application.
 * Install Qt v5.4.1 or later and Qt Creator
 * Open Qt project file **ser-player\ser_player.pro** with Qt Creator
