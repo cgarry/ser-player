@@ -23,17 +23,31 @@
 GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
 GIT_VERSION=$$system(git describe --always --dirty)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
-GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
-GIT_DIRTY_BUILD=$$member(GIT_VERSION_SPLIT, 3)
+GIT_DESCRIBE_ELEMENT1=$$member(GIT_VERSION_SPLIT, 1)
+GIT_DESCRIBE_ELEMENT2=$$member(GIT_VERSION_SPLIT, 2)
+GIT_DESCRIBE_ELEMENT3=$$member(GIT_VERSION_SPLIT, 3)
+GIT_DESCRIBE_ELEMENTS=1
+isEmpty(GIT_DESCRIBE_ELEMENT1) {
+    GIT_DESCRIBE_ELEMENTS=1
+} else:isEmpty(GIT_DESCRIBE_ELEMENT2) {
+    GIT_DESCRIBE_ELEMENTS=2
+} else:isEmpty(GIT_DESCRIBE_ELEMENT3) {
+    GIT_DESCRIBE_ELEMENTS=3
+} else {
+    GIT_DESCRIBE_ELEMENTS=4
+}
+
 
 APP_VERSION=$${GIT_LAST_TAG}
-!equals(GIT_COMMITS_SINCE_TAG, "0") | equals(GIT_DIRTY_BUILD, "dirty") {
-    # There have been commits since the last tag and/or this is a dirty build
+greaterThan(GIT_DESCRIBE_ELEMENTS, 2) {
+    # There have been commits since the last tag
+    GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
     APP_VERSION=$${APP_VERSION}.$$GIT_COMMITS_SINCE_TAG
-    equals(GIT_DIRTY_BUILD, "dirty") {
-        message("Warning: Building a dirty build")
-        APP_VERSION=$${APP_VERSION}."dirty"
-    }
+}
+
+isEqual(GIT_DESCRIBE_ELEMENTS, 2) | isEqual(GIT_DESCRIBE_ELEMENTS, 4) {
+    message("Warning: Building a dirty build")
+    APP_VERSION=$${APP_VERSION}."dirty"
 }
 
 message("Version: $${APP_VERSION}")
