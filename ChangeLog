@@ -1,10 +1,11 @@
-v1.7.2: In Development
+v1.7.2: In 12/02/2018
 Bug Fixes:
  * Corrections to Polish translations.
  * Fixed error where new version check was included in Linux repository builds.
 Enhancements:
  * Updated rendering of frame details text to remove jitter due to changing width.
  * Changed image background to very dark grey.
+ * Added Russian language translation.
 
 
 v1.7.1: 06/12/2017
