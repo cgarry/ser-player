@@ -23,11 +23,14 @@
 GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
 GIT_VERSION=$$system(git describe --always --dirty)
 GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
+GIT_DESCRIBE_ELEMENT0=$$member(GIT_VERSION_SPLIT, 0)
 GIT_DESCRIBE_ELEMENT1=$$member(GIT_VERSION_SPLIT, 1)
 GIT_DESCRIBE_ELEMENT2=$$member(GIT_VERSION_SPLIT, 2)
 GIT_DESCRIBE_ELEMENT3=$$member(GIT_VERSION_SPLIT, 3)
 GIT_DESCRIBE_ELEMENTS=1
-isEmpty(GIT_DESCRIBE_ELEMENT1) {
+isEmpty(GIT_DESCRIBE_ELEMENT0) {
+    error("Could not get SER Player version using git describe")
+} else:isEmpty(GIT_DESCRIBE_ELEMENT1) {
     GIT_DESCRIBE_ELEMENTS=1
 } else:isEmpty(GIT_DESCRIBE_ELEMENT2) {
     GIT_DESCRIBE_ELEMENTS=2
