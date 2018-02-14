@@ -19,39 +19,48 @@
 # Uncomment line below when building for linux repository
 #DEFINES += DISABLE_NEW_VERSION_CHECK
 
-# Get the version of the App from the last git tag and a few other things
-GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
-GIT_VERSION=$$system(git describe --always --dirty)
-GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
-GIT_DESCRIBE_ELEMENT0=$$member(GIT_VERSION_SPLIT, 0)
-GIT_DESCRIBE_ELEMENT1=$$member(GIT_VERSION_SPLIT, 1)
-GIT_DESCRIBE_ELEMENT2=$$member(GIT_VERSION_SPLIT, 2)
-GIT_DESCRIBE_ELEMENT3=$$member(GIT_VERSION_SPLIT, 3)
-GIT_DESCRIBE_ELEMENTS=1
-isEmpty(GIT_DESCRIBE_ELEMENT0) {
-    error("Could not get SER Player version using git describe")
-} else:isEmpty(GIT_DESCRIBE_ELEMENT1) {
+# Uncomment line below to override getting version from git
+#APP_VERSION="v1.7.2"
+
+!defined(APP_VERSION, var) {
+    # The app version has not been explicitly defined
+    # Get the version of the App from the last git tag and a few other things
+    GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
+    GIT_VERSION=$$system(git describe --always --dirty)
+    GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
+    GIT_DESCRIBE_ELEMENT0=$$member(GIT_VERSION_SPLIT, 0)
+    GIT_DESCRIBE_ELEMENT1=$$member(GIT_VERSION_SPLIT, 1)
+    GIT_DESCRIBE_ELEMENT2=$$member(GIT_VERSION_SPLIT, 2)
+    GIT_DESCRIBE_ELEMENT3=$$member(GIT_VERSION_SPLIT, 3)
     GIT_DESCRIBE_ELEMENTS=1
-} else:isEmpty(GIT_DESCRIBE_ELEMENT2) {
-    GIT_DESCRIBE_ELEMENTS=2
-} else:isEmpty(GIT_DESCRIBE_ELEMENT3) {
-    GIT_DESCRIBE_ELEMENTS=3
-} else {
-    GIT_DESCRIBE_ELEMENTS=4
+    isEmpty(GIT_DESCRIBE_ELEMENT0) {
+        error("Could not get SER Player version using git describe")
+    } else:isEmpty(GIT_DESCRIBE_ELEMENT1) {
+        GIT_DESCRIBE_ELEMENTS=1
+    } else:isEmpty(GIT_DESCRIBE_ELEMENT2) {
+        GIT_DESCRIBE_ELEMENTS=2
+    } else:isEmpty(GIT_DESCRIBE_ELEMENT3) {
+        GIT_DESCRIBE_ELEMENTS=3
+    } else {
+        GIT_DESCRIBE_ELEMENTS=4
+    }
+
+    APP_VERSION=$${GIT_LAST_TAG}
+
+    greaterThan(GIT_DESCRIBE_ELEMENTS, 2) {
+        # There have been commits since the last tag
+        GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
+        APP_VERSION=$${APP_VERSION}.$$GIT_COMMITS_SINCE_TAG
+    }
+
+    isEqual(GIT_DESCRIBE_ELEMENTS, 2) | isEqual(GIT_DESCRIBE_ELEMENTS, 4) {
+        message("Warning: Building a dirty build")
+        APP_VERSION=$${APP_VERSION}."dirty"
+    }
+
+    export(APP_VERSION)
 }
 
-
-APP_VERSION=$${GIT_LAST_TAG}
-greaterThan(GIT_DESCRIBE_ELEMENTS, 2) {
-    # There have been commits since the last tag
-    GIT_COMMITS_SINCE_TAG=$$member(GIT_VERSION_SPLIT, 1)
-    APP_VERSION=$${APP_VERSION}.$$GIT_COMMITS_SINCE_TAG
-}
-
-isEqual(GIT_DESCRIBE_ELEMENTS, 2) | isEqual(GIT_DESCRIBE_ELEMENTS, 4) {
-    message("Warning: Building a dirty build")
-    APP_VERSION=$${APP_VERSION}."dirty"
-}
 
 message("Version: $${APP_VERSION}")
 DEFINES += APP_VERSION_STRING=\\\"$${APP_VERSION}\\\"
