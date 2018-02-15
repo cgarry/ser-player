@@ -34,13 +34,19 @@ tions
 rm appdir/AppRun
 
 # Create a script to replace the deleted AppRun link
-echo '#!/bin/bash' > appdir/AppRun
-echo 'echo from AppRun!' >> appdir/AppRun
-echo 'pwd' >> appdir/AppRun
-echo 'ls -l' >> appdir/AppRun
-echo 'echo APPDIR: "$APPDIR"' >> appdir/AppRun
-echo 'ls -l "$APPDIR"' >> appdir/AppRun
-echo 'exec "$APPDIR/usr/bin/ser-player" "$@"' >> appdir/AppRun
+cat > appdir/AppRun <<EOL
+#!/bin/bash
+
+if [[ \$1 == --install ]]; then
+    echo "Called with install"
+elif [[ \$1 == --uninstall ]]; then
+    echo "Called with uninstall"
+else
+    echo APPDIR: \$APPDIR
+    ls -l "\$APPDIR"
+    exec "\$APPDIR/usr/bin/ser-player" "\$@"
+fi
+EOL
 chmod a+x appdir/AppRun
 
 # Use appimagetool to create the final AppImage from the appdir
