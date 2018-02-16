@@ -27,8 +27,7 @@ chmod a+x appimagetool-x86_64.AppImage
 # Use linuxdeployqt to generate a populated appdir
 unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
 source export_app_version.sh
-./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -no-transla1
-tions
+./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -no-translations
 
 # Remove AppRun symbolic link created by appimagetool
 rm appdir/AppRun
@@ -91,4 +90,5 @@ EOL
 chmod a+x appdir/AppRun
 
 # Use appimagetool to create the final AppImage from the appdir
-./appimagetool-x86_64.AppImage appdir
+./appimagetool-x86_64.AppImage -v appdir
+
