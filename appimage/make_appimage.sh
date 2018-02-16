@@ -38,9 +38,50 @@ cat > appdir/AppRun <<EOL
 #!/bin/bash
 
 if [[ \$1 == --install ]]; then
-    echo "Called with install"
+    echo "Installing SER Player ($VERSION) to desktop"
+    # Copy desktop file, icon files and mime file to the system
+    cp -r "\$APPDIR/usr/share/" "\$HOME/.local/"
+    
+    # Modify desktop file to point to AppImage
+    rm -f "\$HOME/.local/share/applications/com.google.sites.ser-player.desktop"
+    cat "\$APPDIR/usr/share/applications/com.google.sites.ser-player.desktop" | sed -e "s:Exec=ser-player \%F:Exec=\$HOME/.local/bin/ser-player \%F:" > "\$HOME/.local/share/applications/com.google.sites.ser-player.desktop"
+
+    # Copy the actual AppImage into $HOME/.local/bin/
+    mkdir -p "$HOME/.local/bin/"
+    cp \$APPIMAGE "\$HOME/.local/bin/ser-player"
+
+    # Update icon cache
+    which gtk-update-icon-cache && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
+    # Update mime to filetype database
+    which update-mime-database && update-mime-database "\$HOME/.local/share/mime/"
+    # Update mime to application database
+    which update-desktop-database && update-desktop-database "\$HOME/.local/share/applications/"
+
 elif [[ \$1 == --uninstall ]]; then
-    echo "Called with uninstall"
+    echo "Uninstalling SER Player from desktop"
+    # Delete icon files
+    find "\$HOME/.local/share/icons/hicolor/" -name "ser-player.*" -exec rm -f {} \;
+    # Delete mime file
+    rm -f "\$HOME/.local/share/mime/packages/ser-player.xml"
+    # Delete desktop file
+    rm -f "\$HOME/.local/share/applications/com.google.sites.ser-player.desktop"
+    # Delete the application binary
+    rm -f "\$HOME/.local/bin/ser-player"
+
+    # Update icon cache
+    which gtk-update-icon-cache && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
+    # Update mime to filetype database
+    which update-mime-database && update-mime-database "\$HOME/.local/share/mime/"
+    # Update mime to application database
+    which update-desktop-database && update-desktop-database "\$HOME/.local/share/applications/"
+
+elif [[ \$1 == --help ]]; then
+    echo "SER Player ($VERSION) AppImage Command Line Arguments"
+    echo "  --help       Display this help."
+    echo "  --install    Install SER Player to desktop and associate with .ser files."
+    echo "  --uninstall  Uninstall SER Player from Desktop and remove associations."
+    echo
+
 else
     echo APPDIR: \$APPDIR
     ls -l "\$APPDIR"
