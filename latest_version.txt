@@ -1,5 +1,13 @@
-v1.6.0
+v1.7.2
+Bug Fixes:
+ * Fixed issue with colour balance estimation when non-default bayer pattern is used for debayering.
 Enhancements:
-  * Added functionality to fix broken (0 framecount) SER files rather than just rejecting them.
-  * Fixed bug in Windows installer that failed to install MSCVP120.dll.
-  * Changed Linux releases to distribution independent AppImage packages instead of .deb packages.
+ * Added ability to disconnect playback controls to allow a greater zoom.
+ * Added support for NeuQuant neural-net quantisation algorithm for improved colour GIF generation.
+ * Updated save frames dialog to make it more user friendly.
+ * Added Polish language translation.
+ * TIFF image writing made faster, plus support for 16-bit data and true monochrome added (TIFF code from PIPP used).
+ * PNG image writing made faster, plus support for 16-bit data and true monochrome added (libpng now used).
+ * Changed image background to very dark grey.
+ * Added Polish language translation.
+ * Added Russian language translation.
