@@ -9,10 +9,16 @@ rm -rf bin build appdir linuxdeployqt patchelf-0.9
 rm *.AppImage
 rm patchelf-0.9.*
 
+# Ensure the system is up to date
+sudo apt-get update -qq
+sudo apt-get upgrade
+
+# Install some required packages
+sudo apt-get -y install build-essential libgl1-mesa-dev libpng-dev
+
 # Get the correct version of Qt
 sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
 sudo apt-get update -qq
-sudo apt-get upgrade
 sudo apt-get -y install qt59base
 source /opt/qt*/bin/qt*-env.sh
 
