@@ -4,33 +4,62 @@
 # From ser-player.pro folder enter this on the command line:
 # source appimage/make_appimage.sh
 
+MACHINE_ARCH=`uname -m`
+if [ ${MACHINE_ARCH} != 'x86_64' ]; then
+  # 32-bit
+  MACHINE_ARCH='i686'
+fi
+
 # Clean up any previous attempts to build an AppImage
-rm -rf bin build appdir
+rm -rf bin build appdir linuxdeployqt patchelf-0.9
 rm *.AppImage
+rm patchelf-0.9.*
+
+# Ensure the system is up to date
+sudo apt-get update -qq
+sudo apt-get upgrade
+
+# Install some required packages
+sudo apt-get -y install build-essential libgl1-mesa-dev libpng-dev
+
+# Get the correct version of Qt
+sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
+sudo apt-get update -qq
+sudo apt-get -y install qt59base
+source /opt/qt*/bin/qt*-env.sh
 
 # Build the SER Player binary
-export QT_SELECT=5
 qmake CONFIG+=release APPIMAGE=
 make -j$(nproc)
 ls -l bin/
 ldd bin/ser-player
 make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
 
-# Get linuxdeployqt AppImage
-wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+# Checkout and build linuxdeployqt if required
+type linuxdeployqt >/dev/null 2>&1 || {
+  git clone https://github.com/probonopd/linuxdeployqt.git
+  ( cd linuxdeployqt/ && qmake && make && sudo make install )
+}
+
+# Get and build patchelf if required
+type patchelf >/dev/null 2>&1 || {
+  wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
+  tar xf patchelf-0.9.tar.bz2
+  ( cd patchelf-0.9/ && ./configure  && make && sudo make install )
+}
 
 # Get appimagetool AppImage
-wget -c -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-chmod a+x appimagetool-x86_64.AppImage
+wget -c -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$MACHINE_ARCH.AppImage"
+chmod a+x "appimagetool-$MACHINE_ARCH.AppImage"
 
 # Use linuxdeployqt to generate a populated appdir
 unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
 source export_app_version.sh
-./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -no-translations
 
-# Remove AppRun symbolic link created by appimagetool
-rm appdir/AppRun
+linuxdeployqt appdir/usr/share/applications/*.desktop -bundle-non-qt-libs -no-translations
+
+# Remove AppRun symbolic link created by appimagetool in appdir
+rm -f appdir/AppRun
 
 # Create a script to replace the deleted AppRun link
 cat > appdir/AppRun <<EOL
@@ -90,5 +119,4 @@ EOL
 chmod a+x appdir/AppRun
 
 # Use appimagetool to create the final AppImage from the appdir
-./appimagetool-x86_64.AppImage -v appdir
-
+./appimagetool-$MACHINE_ARCH.AppImage -v appdir
