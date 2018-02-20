@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# Helper file for generating a Linux AppImage
+# Helper file for generating a SER Player Linux AppImage
+# ------------------------------------------------------
+# This file is designed for to be used on Ubuntu 14.04
+# Either 64-bit or 32-bit depending on the version of
+# AppImage required.
+#
 # From ser-player.pro folder enter this on the command line:
 # source appimage/make_appimage.sh
+#
 
 MACHINE_ARCH=`uname -m`
 if [ ${MACHINE_ARCH} != 'x86_64' ]; then
@@ -11,9 +17,8 @@ if [ ${MACHINE_ARCH} != 'x86_64' ]; then
 fi
 
 # Clean up any previous attempts to build an AppImage
-rm -rf bin build appdir linuxdeployqt patchelf-0.9
+rm -rf bin build appdir
 rm *.AppImage
-rm patchelf-0.9.*
 
 # Ensure the system is up to date
 sudo apt-get update -qq
@@ -39,6 +44,9 @@ make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
 type linuxdeployqt >/dev/null 2>&1 || {
   git clone https://github.com/probonopd/linuxdeployqt.git
   ( cd linuxdeployqt/ && qmake && make && sudo make install )
+  
+  # Clean up
+  rm -rf linuxdeployqt
 }
 
 # Get and build patchelf if required
@@ -46,6 +54,10 @@ type patchelf >/dev/null 2>&1 || {
   wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
   tar xf patchelf-0.9.tar.bz2
   ( cd patchelf-0.9/ && ./configure  && make && sudo make install )
+  
+  # Clean up
+  rm -rf patchelf-0.9
+  rm patchelf-0.9.*
 }
 
 # Get appimagetool AppImage
@@ -79,11 +91,11 @@ if [[ \$1 == --install ]]; then
     cp \$APPIMAGE "\$HOME/.local/bin/ser-player"
 
     # Update icon cache
-    which gtk-update-icon-cache && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
+    type gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
     # Update mime to filetype database
-    which update-mime-database && update-mime-database "\$HOME/.local/share/mime/"
+    type update-mime-database >/dev/null 2>&1 && update-mime-database "\$HOME/.local/share/mime/"
     # Update mime to application database
-    which update-desktop-database && update-desktop-database "\$HOME/.local/share/applications/"
+    type update-desktop-database >/dev/null 2>&1 && update-desktop-database "\$HOME/.local/share/applications/"
 
 elif [[ \$1 == --uninstall ]]; then
     echo "Uninstalling SER Player from desktop"
@@ -97,11 +109,11 @@ elif [[ \$1 == --uninstall ]]; then
     rm -f "\$HOME/.local/bin/ser-player"
 
     # Update icon cache
-    which gtk-update-icon-cache && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
+    type gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache "\$HOME/.local/share/icons/hicolor/" -t
     # Update mime to filetype database
-    which update-mime-database && update-mime-database "\$HOME/.local/share/mime/"
+    type update-mime-database >/dev/null 2>&1 && update-mime-database "\$HOME/.local/share/mime/"
     # Update mime to application database
-    which update-desktop-database && update-desktop-database "\$HOME/.local/share/applications/"
+    type update-desktop-database >/dev/null 2>&1 && update-desktop-database "\$HOME/.local/share/applications/"
 
 elif [[ \$1 == --help ]]; then
     echo "SER Player ($VERSION) AppImage Command Line Arguments"
