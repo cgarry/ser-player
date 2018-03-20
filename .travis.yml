@@ -15,16 +15,27 @@ install:
   - source /opt/qt*/bin/qt*-env.sh
   
 script:
-  # Build SER-Player with version checking disabled (aimed at Linux repositories)
-  - qmake DEFINES+=DISABLE_NEW_VERSION_CHECK CONFIG+=release
+  # Build SER-Player with default options as would be build by a user to install on her own system
+  - qmake CONFIG+=release
   - make
   - ls -l bin/
   - ldd bin/ser-player
   
   # Cleanup between builds
   - make clean
+  - rm -rf bin build
   
-  # Build SER-Player with version checking enabled ready to make an AppImage
+  # Build SER-Player with version checking disabled (aimed at Linux repositories)
+  - qmake CONFIG+=release BUILD_FOR_REPOSITORY=
+  - make
+  - ls -l bin/
+  - ldd bin/ser-player
+  
+  # Cleanup between builds
+  - make clean
+  - rm -rf bin build
+  
+  # Build AppImage version of SER Player.
   - source appimage/make_appimage.sh
   - ls -l SER_Player-*.AppImage
 

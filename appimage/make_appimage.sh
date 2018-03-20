@@ -34,7 +34,7 @@ sudo apt-get -y install qt59base
 source /opt/qt*/bin/qt*-env.sh
 
 # Build the SER Player binary
-qmake CONFIG+=release APPIMAGE=
+qmake CONFIG+=release BUILD_FOR_APPIMAGE=
 make -j$(nproc)
 ls -l bin/
 ldd bin/ser-player

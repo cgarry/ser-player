@@ -15,16 +15,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 # ---------------------------------------------------------------------
 
+# ---------------------------------------------------------------------
+# Variables that can be passed at qmake stage:
+#
+# BUILD_FOR_REPOSITORY
+# Example: qmake CONFIG+=release BUILD_FOR_REPOSITORY=
+# This sets options required when building for a repository.
+# * Application version fixed rather than generated from GIT commands.
+# * New version checking is disabled in the application.
+# * 'make install' does not call display manager cache update commands.
+#
+# BUILD_FOR_APPIMAGE
+# Example: qmake CONFIG+=release BUILD_FOR_APPIMAGE=
+# This sets options required when building for a Linux AppImage
+# * 'make install' does not call display manager cache update commands.
+# ---------------------------------------------------------------------
 
-# Uncomment line below when building for linux repository
-#DEFINES += DISABLE_NEW_VERSION_CHECK
 
-# Uncomment line below to override getting version from git
-#APP_VERSION="v1.7.2"
+defined(BUILD_FOR_REPOSITORY, var) {
+    APP_VERSION="v1.7.2"
+    export(APP_VERSION)
+}
+
+defined(BUILD_FOR_REPOSITORY, var) {
+    DEFINES += DISABLE_NEW_VERSION_CHECK
+}
 
 !defined(APP_VERSION, var) {
     # The app version has not been explicitly defined
-    # Get the version of the App from the last git tag and a few other things
+    # Get the version of the app from the last git tag and a few other things
     GIT_LAST_TAG=$$system(git describe --always --abbrev=0)
     GIT_VERSION=$$system(git describe --always --dirty)
     GIT_VERSION_SPLIT=$$split(GIT_VERSION, -)
@@ -343,20 +362,25 @@ unix:!macx {
 
     INSTALLS = target  icon256 icon128 icon48 icon32 icon24 icon16 mimexml desktop
 
-    !defined(APPIMAGE, var) {
+    defined(BUILD_FOR_REPOSITORY, var) {
+        message("Not generating targets to register icons and mime type because building for Repository")
+    } else : defined(BUILD_FOR_APPIMAGE, var) {
+        message("Not generating targets to register icons and mime type because building for AppImage")
+    } else {
         # Add extra targets to reset icon cache and register .ser mime type with system databases
         # This should not be done when making AppImages
         reset_icons.path = $$PREFIX/share/icons/
-        reset_icons.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Resetting icon cache"
+#        reset_icons.extra = which gtk-update-icon-cache && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/; echo "Resetting icon cache"
+        reset_icons.extra = type gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache $$PREFIX/share/icons/hicolor/ -t; echo "Resetting icon cache"
 
         reg_mime_types.path = $$PREFIX/share/mime/packages/
-        reg_mime_types.extra = which update-mime-database && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
+#        reg_mime_types.extra = which update-mime-database && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
+        reg_mime_types.extra = type update-mime-database >/dev/null 2>&1 && update-mime-database $$PREFIX/share/mime/; echo "Updating mime to filetype database"
 
         reg_mime_apps.path = $$PREFIX/share/applications/
-        reg_mime_apps.extra = which update-desktop-database && update-desktop-database $$PREFIX/share/applications/; echo "Updating mime to application database"
+#        reg_mime_apps.extra = which update-desktop-database && update-desktop-database $$PREFIX/share/applications/; echo "Updating mime to application database"
+        reg_mime_apps.extra = type update-desktop-database >/dev/null 2>&1 && update-desktop-database $$PREFIX/share/applications/; echo "Updating mime to application database"
         INSTALLS += reset_icons reg_mime_types reg_mime_apps
-    } else {
-        message("Not generating targets to register icons and mime type as this is an AppImage build")
     }
 }
 
