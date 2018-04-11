@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QApplication>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -117,7 +118,7 @@ void c_markers_dialog::marker_changed_slot()
         mp_start_marker_SpinBox->setPalette(text_Palette);
         mp_end_marker_SpinBox->setPalette(text_Palette);
     } else {
-        text_Palette.setColor(QPalette::Text,Qt::black);
+        text_Palette.setColor(QPalette::Text,QApplication::palette().text().color());
         mp_start_marker_SpinBox->setPalette(text_Palette);
         mp_end_marker_SpinBox->setPalette(text_Palette);
         emit start_marker_changed(mp_start_marker_SpinBox->value());

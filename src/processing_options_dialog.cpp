@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include <Qt>
+#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
@@ -548,7 +549,7 @@ void c_processing_options_dialog::crop_changed_slot()
         mp_crop_x_start_Spinbox->setPalette(text_Palette);
         mp_crop_width_Spinbox->setPalette(text_Palette);
     } else {
-        text_Palette.setColor(QPalette::Text,Qt::black);
+        text_Palette.setColor(QPalette::Text,QApplication::palette().text().color());
         mp_crop_x_start_Spinbox->setPalette(text_Palette);
         mp_crop_width_Spinbox->setPalette(text_Palette);
     }
@@ -556,11 +557,12 @@ void c_processing_options_dialog::crop_changed_slot()
     if (mp_crop_y_start_Spinbox->value() + mp_crop_height_Spinbox->value() > m_frame_height) {
         // Value is not currently valid
         crop_spinbox_values_valid = false;
+
         text_Palette.setColor(QPalette::Text,Qt::red);
         mp_crop_y_start_Spinbox->setPalette(text_Palette);
         mp_crop_height_Spinbox->setPalette(text_Palette);
     } else {
-        text_Palette.setColor(QPalette::Text,Qt::black);
+        text_Palette.setColor(QPalette::Text,QApplication::palette().text().color());
         mp_crop_y_start_Spinbox->setPalette(text_Palette);
         mp_crop_height_Spinbox->setPalette(text_Palette);
     }
