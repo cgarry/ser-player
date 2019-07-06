@@ -30,7 +30,6 @@ sudo apt-get -y install build-essential libgl1-mesa-dev libpng-dev
 # Get the correct version of Qt
 
 sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
-sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
 sudo apt-get update -qq
 sudo apt-get -y install qt510base
 source /opt/qt*/bin/qt*-env.sh
