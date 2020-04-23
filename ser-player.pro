@@ -32,8 +32,9 @@
 # ---------------------------------------------------------------------
 
 
+#BUILD_FOR_REPOSITORY=1
 defined(BUILD_FOR_REPOSITORY, var) {
-    APP_VERSION="v1.7.2"
+    APP_VERSION="v1.7.3"
     export(APP_VERSION)
 }
 
@@ -127,7 +128,8 @@ TRANSLATIONS = translations/ser_player_da.ts \
                translations/ser_player_es.ts \
                translations/ser_player_it.ts \
                translations/ser_player_pl.ts \
-               translations/ser_player_ru.ts
+               translations/ser_player_ru.ts \
+               translations/ser_player_ja.ts
 
 # Make Mac version as backwards compatible with old OS versions as possible
 macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
