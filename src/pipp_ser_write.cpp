@@ -251,7 +251,7 @@ bool c_pipp_ser_write::close()
             std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[(uint32_t)filesize]);
 
             // Read data into buffer
-            size_t read_size = fread(p_buffer.get(), filesize, 1, mp_ser_index_file);
+            size_t read_size = fread(p_buffer.get(), 1, filesize, mp_ser_index_file);
             fclose(mp_ser_index_file);
 
             // Write index data to output file
