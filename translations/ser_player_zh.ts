@@ -69,17 +69,17 @@
 <context>
     <name>c_frame_slider</name>
     <message>
-        <location filename="../src/frame_slider.cpp" line="326"/>
+        <location filename="../src/frame_slider.cpp" line="327"/>
         <source>Move Start Marker To Current Frame</source>
         <translation>移动起始标记至当前帧</translation>
     </message>
     <message>
-        <location filename="../src/frame_slider.cpp" line="327"/>
+        <location filename="../src/frame_slider.cpp" line="328"/>
         <source>Move End Marker To Current Frame</source>
         <translation>移动末尾标记至当前帧</translation>
     </message>
     <message>
-        <location filename="../src/frame_slider.cpp" line="328"/>
+        <location filename="../src/frame_slider.cpp" line="329"/>
         <source>Reset Markers</source>
         <translation>重置标记</translation>
     </message>
@@ -432,7 +432,7 @@ Shift+单击后退多帧</translation>
     <message>
         <location filename="../src/playback_controls_widget.cpp" line="241"/>
         <source>Double-Click to Attach/Detach Playback Controls</source>
-        <translation>双击以吸附/脱离播放控制</translation>
+        <translation>双击以吸附/解离播放控制</translation>
     </message>
 </context>
 <context>
@@ -440,7 +440,7 @@ Shift+单击后退多帧</translation>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="47"/>
         <source>Processing</source>
-        <translation>处理中</translation>
+        <translation>处理</translation>
     </message>
     <message>
         <location filename="../src/processing_options_dialog.cpp" line="51"/>
@@ -1371,7 +1371,7 @@ Shift+单击后退多帧</translation>
         <location filename="../src/ser_player.cpp" line="247"/>
         <source>Processing</source>
         <comment>Tools menu</comment>
-        <translation>处理中</translation>
+        <translation>处理</translation>
     </message>
     <message>
         <location filename="../src/ser_player.cpp" line="266"/>
