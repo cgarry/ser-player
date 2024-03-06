@@ -129,7 +129,8 @@ TRANSLATIONS = translations/ser_player_da.ts \
                translations/ser_player_it.ts \
                translations/ser_player_pl.ts \
                translations/ser_player_ru.ts \
-               translations/ser_player_ja.ts
+               translations/ser_player_ja.ts \
+               translations/ser_player_zh.ts
 
 # Make Mac version as backwards compatible with old OS versions as possible
 macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
